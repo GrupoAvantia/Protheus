@@ -1,0 +1,84 @@
+#include 'rwmake.ch'
+#include 'topconn.ch'
+
+/*
+Autor:     Diogenes Marinho
+Data:      12/12/05
+Descricao: Soma o total do Trailler do arquivo para o PAGFOR
+
+Alterado:  Grayson B. Tavares
+Data:      11/04/06
+Motivo:    Calculo do total via comando SQL
+*/
+
+User Function PAGTOTAL
+
+Private nTotal :=0
+
+//Private nJuros := 0
+//Private dBaixa := CriaVar("E2_BAIXA")
+/*
+dbSelectArea("SE2")  
+dbSetOrder(1)
+SE2->(dbGotop())
+
+dbSelectArea("SEA") 
+SEA->(DBGOTOP())
+dbSetOrder(2) //EA_FILIAL+EA_NUMBOR+EA_CART+EA_PREFIXO+EA_NUM+EA_PARCELA+EA_TIPO+EA_FORNECE+EA_LOJA
+//dbGoTop()
+SEA->(dbSeek(xFilial("SEA")+mv_par01+"P"))
+
+dbSelectArea("SEA")
+while SEA->(!EOF())
+	If SEA->EA_NUMBOR >= mv_par01 .and. SEA->EA_NUMBOR <= mv_par02
+		cPref:= SEA->EA_PREFIXO
+		cNum := SEA->EA_NUM
+		cParc:= SEA->EA_PARCELA
+		cTipo:= SEA->EA_TIPO
+		cFor := SEA->EA_FORNECE
+		cLoja:= SEA->EA_LOJA
+		
+		//dbSelectArea("SE2")
+		//dbSetOrder(1)
+		//SE2->(dbSeek(xFilial("SE2")+cPref+cNum+cParc+cTipo+cFor+cLoja))
+				
+		nValor  := SE2->E2_VALOR
+		nAcresc := SE2->E2_ACRESC
+		dVenc   := SE2->E2_VENCREA //VENC. REAL
+		
+	  	dbSelectArea("SEA")
+	    
+	    //nJuros := 0
+		
+		//If dDataBase > dVenc			
+		//	fa080juros()			
+		//	dbSelectArea("SE2")			
+		//	nJuros:= SE2->E2_VALJUR			
+		//EndIf
+	    		
+		nTotal +=  nAcresc + nValor  // + njuros 
+		
+		DbSelectArea("XE2")
+		dbCloseArea()
+	EndIf
+	
+	dbSelectArea("SEA")
+	SEA->(dbSkip())
+Enddo
+*/       
+//Return(STRZERO(INT(nTotal*100),17))
+
+cQuery:="SELECT SUM(E2_VALOR+E2_ACRESC) TOTAL "
+cQuery+="FROM "+RetSqlName("SE2")+" SE2 "
+cQuery+="WHERE E2_NUMBOR BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' "
+
+TCQUERY cQuery NEW ALIAS "XE2"
+DbSelectArea("XE2")
+dbGotop()
+
+nTotal:=XE2->TOTAL
+
+DbSelectArea("XE2")
+dbCloseArea()
+
+Return(STRZERO(INT(ROUND(nTotal*100,2)),17))

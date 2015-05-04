@@ -1,0 +1,219 @@
+#include "protheus.ch"
+#include "topconn.ch"
+#Include "fileio.ch"
+#include "topconn.ch"
+
+#define true .t.                                                               	
+#define false .f.
+#define __FIELD 4
+#define __CONNECT 'TOPCONN'  
+#define __ENTER__ CHR( 13 ) + CHR( 10 )
+   
+/*                                                                                  
+  +-----------------------------------------------------------------------------------------------------------------+  
+  | CLASSE    | GPEI004.prw        | AUTOR | JOSE TEIXEIRA              | DATA | 18/04/13                           |
+  +-----------------------------------------------------------------------------------------------------------------+    
+  | DESCRICAO | CADASTRO DE POSTO TICKET					                                                        |  
+  |           |                                                                                                     |  
+  |           |                                                                                                     |
+  |           |                                                                                                     |
+  +-----------------------------------------------------------------------------------------------------------------+    
+  | MANUTENCAO DESDE SUA CRIACAO                                                				                    |   
+  +-----------------------------------------------------------------------------------------------------------------+    
+  | DATA     | AUTOR                | DESCRICAO                                 				                    |  
+  +-----------------------------------------------------------------------------------------------------------------+    
+*/
+ 
+
+User Function GPEI004
+private aIndex := {} 
+private cCadastro := "Extrato Ticket "
+private aRotina := { 	{"Pesquisar","AxPesqui",0,1}  ,;
+             			{"Visualizar","AxVisual",0,2} ,;
+             			{"Incluir","AxInclui",0,3}    ,;
+             			{"Alterar","AxAltera",0,4}    ,;
+             			{"Excel","U_doPrt",0,5}       ,;             			
+             			{"Excluir","AxDeleta",0,6} }
+
+private cDelFunc := ".T." 
+private cString := "SZK"
+
+
+
+dbSelectArea("SZK")
+dbSetOrder(1)
+
+
+dbSelectArea(cString)
+
+ 
+mBrowse( 6,1,22,75,cString)
+
+
+
+Return
+
+User Function FTICKET( cMat ) 
+local cAlias := GetNextAlias()      
+local nValor := 0
+local aArea := GetArea()
+cQuery := " SELECT A.*, B.* FROM " + RETSQLNAME("SZK") + " A WHERE ZK_MES ='" + M->ZK_MES + "' AND D_E_L_E_T_ = '' "
+cQuery += "  INNER JOIN " + RETSQLNAME("CTT") + " B "
+cQuery += "  ON "
+cQuery += " "
+cQuery += "	 B.CTT_CUSTO = A.ZK_CC "
+cQuery += " WHERE A.ZK_CODMAT = '" + cMat + "' "  
+
+cQuery := ChangeQuery( cQuery )
+dbUseArea(.T.,__CONNECT,TcGenQry(,,cQuery),cAlias,.F.,.T.)
+
+IF !(cAlias)->(Eof())
+	nValor := (cAlias)->ZK_VALOR
+EndIF
+                             	
+(cAlias)->(DBCloseArea())
+
+RestArea(aArea)
+ 
+Return nValor
+                           
+
+User Function doPrt()
+local cHtml := ""
+local cFile := "C:\gpeticket\Extrato\"+GetNextAlias()+".xls"
+local nHandle
+local cHtmTab := ""    
+local cQuery := ""
+local cAlias := GetNextAlias()
+local cCusto := ""
+
+msgTimer(NIL,'Aguarde...listando',2000,'Ticket') 
+
+
+nHandle := FCREATE( UPPER(cFile), FC_NORMAL )
+
+
+cHtml += ' <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> ' + __ENTER__
+cHtml += ' <html> '+ __ENTER__
+cHtml += ' <head> '+ __ENTER__
+cHtml += ' <title>AVANTIA|TECNOLOGIA</title> '+ __ENTER__
+cHtml += ' <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> '+ __ENTER__
+cHtml += ' </head> '+ __ENTER__
+cHtml += ' '+ __ENTER__
+cHtml += ' <body> '+ __ENTER__
+cHtml += ' <table border="0" CELLSPACING=0 CELLPADDING=6 > '+ __ENTER__
+cHtml += ' <tr> '+ __ENTER__
+cHtml += ' <td colspan="11" align="center"><p>&nbsp;</p> '
+cHtml += ' <p><font size="6" face="Arial, Helvetica, sans-serif">AVANTIA|Ticket</font></p> '+ __ENTER__
+cHtml += '  <p>&nbsp;</p></td> '+ __ENTER__
+cHtml += ' </tr> '+ __ENTER__
+cHtml += ' <tr bgcolor="#19443b"> '+ __ENTER__
+cHtml += ' <td width="23"><strong><font color="#FFFFFF" size="1" face="Geneva, Arial, Helvetica, sans-serif">Filial</font></strong></td> '+ __ENTER__
+cHtml += ' <td width="41"><strong><font color="#FFFFFF" size="1" face="Geneva, Arial, Helvetica, sans-serif">Matricula</font></strong></td>'+ __ENTER__ 
+cHtml += ' <td width="125"><strong><font color="#FFFFFF" size="1" face="Geneva, Arial, Helvetica, sans-serif">Nome</font></strong></td>  '+ __ENTER__
+cHtml += ' <td width="88"><strong><font color="#FFFFFF" size="1" face="Geneva, Arial, Helvetica, sans-serif">Função</font></strong></td> '+ __ENTER__
+cHtml += ' <td width="29"><strong><font color="#FFFFFF" size="1" face="Geneva, Arial, Helvetica, sans-serif">Escala</font></strong></td> '+ __ENTER__
+cHtml += ' <td width="75"><strong><font color="#FFFFFF" size="1" face="Geneva, Arial, Helvetica, sans-serif">Centro de Custo</font></strong></td> '+ __ENTER__
+cHtml += ' <td width="37"><strong><font color="#FFFFFF" size="1" face="Geneva, Arial, Helvetica, sans-serif">Valor</font></strong></td>'+ __ENTER__
+cHtml += ' <td width="29"><strong><font color="#FFFFFF" size="1" face="Geneva, Arial, Helvetica, sans-serif">Tipo</font></strong></td>'+ __ENTER__
+cHtml += ' <td width="48"><strong><font color="#FFFFFF" size="1" face="Geneva, Arial, Helvetica, sans-serif">Referência</font></strong></td>'+ __ENTER__
+cHtml += ' <td width="85"><strong><font color="#FFFFFF" size="1" face="Geneva, Arial, Helvetica, sans-serif">Data Geração</font></strong></td> '+ __ENTER__
+cHtml += ' </tr> '+ __ENTER__
+
+FWRITE( nHandle, cHtml  )
+      
+
+cQuery := " SELECT * FROM " + RETSQLNAME("SZK") + " WHERE ZK_MES ='" + SZK->ZK_MES + "' AND D_E_L_E_T_ = '' "
+cQuery += " AND ZK_TIPO = '" + SZK->ZK_TIPO + "' "  
+
+
+cQuery := ChangeQuery( cQuery )
+dbUseArea(.T.,__CONNECT,TcGenQry(,,cQuery),cAlias,.F.,.T.)
+(cAlias)->(DbGoTop())
+
+IF !(cAlias)->(Eof())
+	msgTimer(NIL,'Exportando dados...',2000,'Ticket') 
+Else
+	msgTimer(NIL,'Sem dados a exibir',1000,'Ticket') 
+EndIF                               
+
+While !(cAlias)->(Eof())
+  
+    cHtmTab := ""
+
+
+	cCusto := Posicione("CTT",1,xFilial("CTT")+(cAlias)->ZK_CC,"CTT_DESC01")
+	  
+	cHtmTab += '<tr>' + __ENTER__
+	cHtmTab += '<td><strong><font size="1" face="Geneva, Arial, Helvetica, sans-serif">'+(cAlias)->ZK_FILMAT+'</font></strong></td>' + __ENTER__
+	cHtmTab += '<td><strong><font size="1" face="Geneva, Arial, Helvetica, sans-serif">'+(cAlias)->ZK_CODMAT+'</font></strong></td>'+ __ENTER__
+	cHtmTab += '<td><font size="1"><strong>'+Posicione("SRA",1,xFilial("SRA")+(cAlias)->ZK_CODMAT,"RA_NOME")+'</strong></font></td>'+ __ENTER__     
+	cHtmTab += '<td><strong><font size="1" face="Geneva, Arial, Helvetica, sans-serif">'+(cAlias)->ZK_FUNCAO+'</font></strong></td>'+ __ENTER__
+	cHtmTab += '<td><strong><font size="1" face="Geneva, Arial, Helvetica, sans-serif">'+(cAlias)->ZK_ESCALA+'</font></strong></td>'+ __ENTER__
+	cHtmTab += '<td><strong><font size="1" face="Geneva, Arial, Helvetica, sans-serif">'+ cCusto +'</font></strong></td>'+ __ENTER__
+	cHtmTab += '<td><strong><font size="1" face="Geneva, Arial, Helvetica, sans-serif">'+Transform( (cAlias)->ZK_VALOR,  "@E 999999.99" )+'</font></strong></td>'+ __ENTER__
+	cHtmTab += '<td><strong><font size="1" face="Geneva, Arial, Helvetica, sans-serif">'+IIF( (cAlias)->ZK_TIPO=='1','TAE','TRE')+'</font></strong></td>'+ __ENTER__
+	cHtmTab += '<td><strong><font size="1" face="Geneva, Arial, Helvetica, sans-serif">'+(cAlias)->ZK_MES+'</font></strong></td>'+ __ENTER__
+	cHtmTab += '<td><strong><font size="1" face="Geneva, Arial, Helvetica, sans-serif">'+Subs((cAlias)->ZK_DATA,7,2)+'/'+Subs((cAlias)->ZK_DATA,5,2)+'/'+Subs((cAlias)->ZK_DATA,1,4)+'</font></strong></td>'+ __ENTER__
+	cHtmTab += '</tr>'+ __ENTER__
+ 
+   
+    
+	FWRITE( nHandle, cHtmTab  )
+
+(cAlias)->(DBSkip())
+End
+cHtmTab := ""
+
+cHtmTab += '</table>'
+cHtmTab += '</body>'
+cHtmTab += '</html>'
+	
+FWRITE( nHandle, cHtmTab  )
+	
+IF !FCLOSE(nHandle)
+	ConOut( "Erro ao fechar arquivo, erro numero: ", FERROR() )
+EndIF   
+
+IF !ApOleClient("MsExcel")
+     MsgStop("Microsoft Excel nao instalado.")
+     Return
+EndIF
+                            
+msgTimer(NIL,'Aguarde...abrindo excel',3000,'Ticket') 
+
+oExcelApp := MsExcel():New()
+//Em alguns casos para exibir na tela é necessário habilitar o código abaixo:
+//oExcelApp:WorkBooks:Open()
+oExcelApp:WorkBooks:Open( cFile ) 
+oExcelApp:SetVisible(.T.)
+
+
+
+Return
+
+
+
+
+
+Static Function msgTimer(obj,msg,segundos,titulo) 
+local cStyle := "Q3Frame{ background-color:qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop: 0 #de100b, stop: 1 #f42e19) }"
+local oPanel
+local bEnd    := {||oDlg:End() }
+
+   
+DEFINE FONT oFont NAME "Arial"  BOLD 
+DEFINE DIALOG oDlg FROM  80,102 TO 100,473 TITLE oemtoansi(titulo) STYLE nOR( WS_VISIBLE, WS_POPUP ) PIXEL FONT oFont 
+oPanel := TPanelCss():New(00,00,"",oDlg,,.F.,.F.,,,190,74,.T.,.F.)
+oPanel:setCSS( cStyle )
+DEFINE TIMER oTimer INTERVAL (segundos) ACTION ( Eval( bEnd )) OF oDlg
+
+@ 10, 29 SAY oemtoansi(msg) SIZE 121, 20 PIXEL COLOR CLR_WHITE FONT oFont OF oPanel
+
+                                                          
+ACTIVATE MSDIALOG oDlg ON INIT ( oTimer:Activate()) CENTERED
+			                               
+Return
+
+
+

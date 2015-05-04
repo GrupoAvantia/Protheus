@@ -1,0 +1,905 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Matrgu1.ch"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matrgu1.prw"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "PROTHEUS.CH"
+#line 4 "d:\totvs 11\microsiga\protheus\my projects\materiais\matrgu1.prw"
+STATIC aMeses
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function U_MatrGU1()
+
+
+
+
+Local cDesc1   := If( cPaisLoc $ "ANG|PTG", "Este programa tem como objectivo imprimir relatório", "Este programa tem como objetivo imprimir relatorio" )
+Local cDesc2   := If( cPaisLoc $ "ANG|PTG", "De acordo com os parâmetro s informados pelo utilizador.", "de acordo com os parámetros informados pelo usuario." )
+Local cDesc3   := "Livro Fiscal"
+Local cPict    := ""
+Local titulo   := "Livro Fiscal"
+Local imprime  := .T. 
+Local aOrd     := {}
+Local cPerg    := "MTRGU1"
+Local aAreaSF3 := {}
+Local aAreaAtu := GetArea()
+
+Private li          := 80
+Private lEnd        := .F. 
+Private lAbortPrint := .F. 
+Private limite      := 220
+Private tamanho     := "G"
+Private nomeprog    := "MATRGU1"
+Private nTipo       := 15
+Private aReturn     := {If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ), 1, If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 2, 1, nomeprog, "", 2}
+Private nLastKey    := 0
+Private cbtxt       := Space(10)
+Private cbcont      := 00
+Private CONTFL      := 01
+Private m_pag       := 01
+Private wnrel       := "MATRGU1"
+Private cAliasSF3   := "SF3"
+Private lQuery      := .F. 
+
+
+
+	If TCSrvType() <> "AS/400"
+		lQuery := .T. 
+	EndIf
+
+
+
+AjustaSx1(cPerg)
+
+
+Pergunte(cPerg, .F. )
+
+
+
+
+
+
+
+
+
+dbSelectArea("SF3")
+aAreaSF3 := GetArea()
+dbSetOrder(1)
+
+
+
+wnrel := SetPrint(cAliasSF3,NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3, .F. ,aOrd, .F. ,Tamanho,, .F. )
+
+If nLastKey == 27
+	Return
+Endif
+
+SetDefault(aReturn,cAliasSF3)
+
+If nLastKey == 27
+   Return
+Endif
+
+nTipo := If(aReturn[4]==1,15,18)
+
+
+
+
+RptStatus({|| RunReport()},Titulo)
+
+
+RestArea(aAreaSF3)
+
+
+RestArea(aAreaAtu)
+
+Return( Nil )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function RunReport()
+
+Local dDataIni   := Ctod("01/"+StrZero(Val(mv_par01),2)+"/"+mv_par02,"ddmmyyyy")
+Local dDataFim   := LastDay(dDataIni)
+Local cFiltro    := ""
+Local cChave     := ""
+Local cIndexSF3  := ""
+Local cFilAtu    := ""
+Local cCpoBAS    := ""
+Local cCpoVAL    := ""
+Local cNumeroUlt := Space(TamSX3("F3_NFISCAL")[1])
+Local cSerieUlt  := Space(TamSX3("F3_SERIE")[1])
+Local cTipoNFAtu := ""
+Local cTipoNCCAtu:= ""
+Local cPictVal   := "9,999,999,999.99"
+Local cPictZero  := "9.99"
+Local cCposSF3   := ""
+Local cTipoNF    := ""
+Local cTipoNCC   := ""
+Local cFilialAtu := ""
+Local dDataAtu   := ""
+Local aTES       := {}
+Local aInfTES    := {}
+Local aStruSF3   := {}
+Local aNFS       := {}
+Local aNCC       := {}
+Local nPosTES    := 0
+Local nPosNF     := 0
+Local nPosNCC    := 0
+Local nI
+Local nX         := 0
+Local nQuantFilial:= 0
+Local lNovaFilial := .F. 
+
+Private nTotBaseCon := 0
+Private nTotVlrCon  := 0
+Private nTotBaseCre := 0
+Private nTotVlrCre  := 0
+Private nTotIseCon  := 0
+Private nTotIseCre  := 0
+Private nTotNCBsCon := 0
+Private nTotNCVlCon := 0
+Private nTotNCBsCre := 0
+Private nTotNCVlCre := 0
+Private nTotNCIsCon := 0
+Private nTotNCIsCre := 0
+
+Private nGerBaseCon := 0
+Private nGerVlrCon  := 0
+Private nGerBaseCre := 0
+Private nGerVlrCre  := 0
+Private nGerIseCon  := 0
+Private nGerIseCre  := 0
+Private nGerNCBsCon := 0
+Private nGerNCVlCon := 0
+Private nGerNCBsCre := 0
+Private nGerNCVlCre := 0
+Private nGerNCIsCon := 0
+Private nGerNCIsCre := 0
+
+
+If !lQuery
+	cFiltro := "(F3_FILIAL >= '"+mv_par03+"' .And. F3_FILIAL <= '"+mv_par04+"')"
+   	cFiltro += " .And. (DTOS(F3_ENTRADA) >= '"+DTOS(dDataIni)+"' .And. DTOS(F3_ENTRADA) <= '"+DTOS(dDataFim)+"')"
+   	cFiltro += " .And. Empty(F3_DTCANC)"
+    cFiltro += " .And. F3_TIPOMOV == 'V'"
+    cFiltro += " .And. F3_MANUAL <> 'S'"
+
+   	cChave    := "F3_FILIAL+DTOS(F3_ENTRADA)+F3_CORRENT+F3_ESPECIE+F3_NFISCAL"
+   	cIndexSF3 := CriaTrab(NIL, .F. )
+
+   	IndRegua(cAliasSF3,cIndexSF3,cChave,,cFiltro,If( cPaisLoc $ "ANG|PTG", "A seleccionar registos...", "Selecionando registros..." ))
+	nIndex	:=	RetIndex()
+   	dbSetIndex(cIndexSF3+OrdBagExt())
+	dbSetOrder(nIndex+1)
+Else
+	cAliasSF3 := "SF3TMP"
+    aStruSF3  := dbStruct()
+
+	cCposSF3  := "F3_FILIAL,F3_ENTRADA,F3_NFISCAL,F3_SERIE,F3_CLIEFOR,F3_LOJA,"
+    cCposSF3  += "F3_VALCONT,F3_TIPOMOV,F3_DTCANC,F3_TES,F3_EXENTAS,F3_ESPECIE,"
+    cCposSF3  += "F3_CORRENT"
+    For nX := 1 To Len(aStruSF3)
+    	If "F3_BASIMP"$AllTrim(aStruSF3[nX][1]) .Or.  "F3_VALIMP"$AllTrim(aStruSF3[nX][1])
+    		cCposSF3 += ","+AllTrim(aStruSF3[nX][1])
+    	EndIf
+    next
+
+    cQuery := "SELECT "+cCposSF3
+    cQuery += "FROM "+RetSqlName("SF3")+" "
+    cQuery += "WHERE "
+    cQuery += "F3_FILIAL BETWEEN '"+MV_PAR03+"' AND '"+MV_PAR04+"' AND "
+    cQuery += "F3_ENTRADA BETWEEN '"+DTOS(dDataIni)+"' AND '"+DTOS(dDataFim)+"' AND "
+    cQuery += "F3_DTCANC = '' AND "
+    cQuery += "F3_TIPOMOV = 'V' AND "
+    cQuery += "F3_MANUAL <> 'S' AND "
+
+    cQuery += "D_E_L_E_T_<>'*' "
+    cQuery += "ORDER BY F3_FILIAL,F3_ENTRADA,F3_CORRENT,F3_ESPECIE,F3_NFISCAL"
+
+	cQuery := ChangeQuery(cQuery)
+ 	dbUseArea( .T. ,"TOPCONN",TcGenQry(,,cQuery),cAliasSF3, .T. , .T. )
+	For nX := 1 To Len(aStruSF3)
+ 		If AllTrim(aStruSF3[nX,1])$cCposSF3 .And.  aStruSF3[nX,2] <> "C"
+	 		TcSetField(cAliasSF3,aStruSF3[nX,1],aStruSF3[nX,2],aStruSF3[nX,3],aStruSF3[nX,4])
+	   	EndIf
+	next
+EndIf
+
+
+
+
+SetRegua(RecCount())
+
+DbSelectArea(cAliasSF3)
+dbGoTop()
+
+If !Eof()
+   cFilAtu  := F3_FILIAL
+   dDataAtu := F3_ENTRADA
+EndIf
+
+While !Eof()
+
+
+
+   	If lAbortPrint
+    	PrintOut(li,00,If(cPaisLoc$"ANG|PTG","*** cancelado pelo operador ***","*** CANCELADO PELO OPERADOR ***"),,)
+    	Exit
+   	Endif
+
+	While !Eof() .And.  F3_FILIAL == cFilAtu
+
+       While !Eof() .And.  F3_ENTRADA == dDataAtu
+
+
+          cTipoNFAtu  := IIf(Empty(F3_CORRENT),"N",F3_CORRENT)
+
+
+	      If (nPosTES := aScan(aTES,{|x| Trim(x[1])==Trim(F3_TES)})) > 0
+		     cCpoBas := aTES[nPosTES][2]
+		     cCpoVal := aTES[nPosTES][3]
+	      Else
+		     aInfTES := TesImpInf(F3_TES)
+		     If !Empty(aInfTES)
+			    AAdd(aTES,{F3_TES,"F3"+SubStr(aInfTES[1][8],3),"F3"+SubStr(aInfTES[1][6],3)})
+			    cCpoBas := "F3"+SubStr(aInfTES[1][8],3)
+			    cCpoVal := "F3"+SubStr(aInfTES[1][6],3)
+		     Else
+			    AAdd(aTES,{F3_TES,"F3_BASIMP1","F3_VALIMP1"})
+			    cCpoBas := "F3_BASIMP1"
+			    cCpoVal := "F3_VALIMP1"
+		     EndIf
+		  EndIf
+
+		  If AllTrim(F3_ESPECIE) $ "NF|NDC"
+
+		     If cTipoNFAtu == "N"
+		        nPosNF  := aScan(aNFS,{|x| x[01] == cFilAtu .And.  x[02] == dDataAtu .And.  x[3] == "1"})
+		        If nPosNF == 0
+
+	   		       AAdd(aNFS,{F3_FILIAL,F3_ENTRADA,"1",F3_NFISCAL,F3_SERIE,Space(TamSX3("F3_NFISCAL")[1]), Space(TamSX3("F3_SERIE")[1]),F3_VALCONT,FieldGet(FieldPos(cCpoBAS)),FieldGet(FieldPos(cCpoVAL)),F3_EXENTAS})
+                Else
+                   aNFS[nPosNF][8] += F3_VALCONT
+                   aNFS[nPosNF][9] += FieldGet(FieldPos(cCpoBAS))
+                   aNFS[nPosNF][10] += FieldGet(FieldPos(cCpoVAL))
+                   aNFS[nPosNF][11] += F3_EXENTAS
+                EndIf
+
+		     Else
+		        nPosNF  := aScan(aNFS,{|x| x[01] == cFilAtu .And.  x[02] == dDataAtu .And.  x[3] == "2"})
+		        If nPosNF == 0
+
+	   		       AAdd(aNFS,{F3_FILIAL,F3_ENTRADA,"2",F3_NFISCAL,F3_SERIE,Space(TamSX3("F3_NFISCAL")[1]), Space(TamSX3("F3_SERIE")[1]),F3_VALCONT,FieldGet(FieldPos(cCpoBAS)),FieldGet(FieldPos(cCpoVAL)),F3_EXENTAS})
+                Else
+                   aNFS[nPosNF][8]  += F3_VALCONT
+                   aNFS[nPosNF][9]  += FieldGet(FieldPos(cCpoBAS))
+                   aNFS[nPosNF][10] += FieldGet(FieldPos(cCpoVAL))
+                   aNFS[nPosNF][11] += F3_EXENTAS
+                EndIf
+		     EndIf
+		     cNumeroUlt  := F3_NFISCAL
+		     cSerieUlt   := F3_SERIE
+		     cTipoNF     := cTipoNFAtu
+		     cFilAtu     := F3_FILIAL
+
+		     DbSkip()
+
+		     cTipoNFAtu  := IIf(Empty(F3_CORRENT),"N",F3_CORRENT)
+		     lNovaFilial := cFilAtu <> F3_FILIAL
+
+		     If Eof() .Or.  F3_ENTRADA > dDataAtu .Or.  cTipoNFAtu <> cTipoNF .Or.  lNovaFilial .Or.  AllTrim(F3_ESPECIE) == "NCC"
+		        aNFS[len(aNFS)][6]  := cNumeroUlt
+		        aNFS[len(aNFS)][7]  := cSerieUlt
+		     EndIf
+		  ElseIf AllTrim(F3_ESPECIE) == "NCC"
+
+		     If cTipoNFAtu == "N"
+		        nPosNCC  := aScan(aNCC,{|x| x[01] == cFilAtu .And.  x[02] == dDataAtu .And.  x[3] == "1"})
+		        If nPosNCC == 0
+
+	   		       AAdd(aNCC,{F3_FILIAL,F3_ENTRADA,"1",F3_NFISCAL,F3_SERIE,Space(TamSX3("F3_NFISCAL")[1]), Space(TamSX3("F3_SERIE")[1]),F3_VALCONT,FieldGet(FieldPos(cCpoBAS)),FieldGet(FieldPos(cCpoVAL)),F3_EXENTAS})
+                Else
+                   aNCC[nPosNCC][08] += F3_VALCONT
+                   aNCC[nPosNCC][09] += FieldGet(FieldPos(cCpoBAS))
+                   aNCC[nPosNCC][10] += FieldGet(FieldPos(cCpoVAL))
+                   aNCC[nPosNCC][11] += F3_EXENTAS
+                EndIf
+
+		     Else
+		        nPosNCC  := aScan(aNCC,{|x| x[01] == cFilAtu .And.  x[02] == dDataAtu .And.  x[3] == "2"})
+		        If nPosNCC == 0
+
+	   		       AAdd(aNCC,{F3_FILIAL,F3_ENTRADA,"2",F3_NFISCAL,F3_SERIE,Space(TamSX3("F3_NFISCAL")[1]), Space(TamSX3("F3_SERIE")[1]),F3_VALCONT,FieldGet(FieldPos(cCpoBAS)),FieldGet(FieldPos(cCpoVAL)),F3_EXENTAS})
+                Else
+                   aNCC[nPosNCC][08] += F3_VALCONT
+                   aNCC[nPosNCC][09] += FieldGet(FieldPos(cCpoBAS))
+                   aNCC[nPosNCC][10] += FieldGet(FieldPos(cCpoVAL))
+                   aNCC[nPosNCC][11] += F3_EXENTAS
+                EndIf
+		     EndIf
+		     cNumeroUlt  := F3_NFISCAL
+		     cSerieUlt   := F3_SERIE
+		     cTipoNCC    := cTipoNCCAtu
+		     cFilAtu     := F3_FILIAL
+
+		     DbSkip()
+
+		     cTipoNCCAtu  := IIf(Empty(F3_CORRENT),"N",F3_CORRENT)
+		     lNovaFilial  := cFilAtu <> F3_FILIAL
+
+		     If Eof() .Or.  F3_ENTRADA > dDataAtu .Or.  cTipoNCCAtu <> cTipoNCC .Or.  lNovaFilial .Or.  AllTrim(F3_ESPECIE) $ "NF|NDC"
+		        aNCC[len(aNCC)][6]  := cNumeroUlt
+		        aNCC[len(aNCC)][7]  := cSerieUlt
+		     EndIf
+		  EndIf
+	   EndDo
+       dDataAtu  := F3_ENTRADA
+	EndDo
+    cFilAtu  := F3_FILIAL
+EndDo
+
+If Len(aNFS) > 0
+   If li > 60
+      LibrCab(dDataFim,aNFS[1][1],"V")
+      cFilAtu  := aNFS[1][1]
+   EndIf
+   nQuantFilial  := 1
+   For nI := 1 To Len(aNFS)
+      If lAbortPrint
+         PrintOut(li,00,If(cPaisLoc$"ANG|PTG","*** cancelado pelo operador ***","*** CANCELADO PELO OPERADOR ***"),,)
+         Exit
+      EndIf
+
+      lNovaFilial  := cFilAtu <> aNFS[nI][1]
+      If li > 60 .Or.  lNovaFilial
+         If lNovaFilial
+            nQuantFilial++
+            ImprTotais()
+
+            ImprNCC(aNCC,cFilAtu,dDataFim)
+         EndIf
+         LibrCab(dDataFim,aNFS[nI][1],"V")
+      EndIf
+      PrintOut(li,000,aNFS[nI][2],,)
+      PrintOut(li,011,aNFS[nI][3],,)
+      PrintOut(li,014,aNFS[nI][4],,)
+      PrintOut(li,027,aNFS[nI][6],,)
+      PrintOut(li,040,If(cPaisLoc$"ANG|PTG","Materiais E Impressos","MATERIAIS E IMPRESSOS"),,)
+      PrintOut(li,063,aNFS[nI][9],cPictVal,)
+      PrintOut(li,080,aNFS[nI][11],cPictVal,)
+      PrintOut(li,099,aNFS[nI][9],cPictVal,)
+      PrintOut(li,122,0,cPictZero,)
+      PrintOut(li,134,0,cPictZero,)
+      PrintOut(li,152,0,cPictZero,)
+      PrintOut(li,160,aNFS[nI][9],cPictVal,)
+      PrintOut(li,177,aNFS[nI][10],cPictVal,)
+
+      If aNFS[nI][3] == "1"
+         nTotBaseCon   += aNFS[nI][9]
+         nTotIseCon    += aNFS[nI][11]
+         nTotVlrCon    += aNFS[nI][10]
+         nGerBaseCon   += aNFS[nI][9]
+         nGerIseCon    += aNFS[nI][11]
+         nGerVlrCon    += aNFS[nI][10]
+
+      ElseIf aNFS[nI][3] == "2"
+         nTotBaseCre   += aNFS[nI][9]
+         nTotIseCre    += aNFS[nI][11]
+         nTotVlrCre    += aNFS[nI][10]
+         nGerBaseCre   += aNFS[nI][9]
+         nGerIseCre    += aNFS[nI][11]
+         nGerVlrCre    += aNFS[nI][10]
+      EndIf
+      cFilAtu := aNFS[nI][1]
+      li++
+   next
+
+   If nQuantFilial == 1
+      ImprTotais()
+
+      ImprNCC(aNCC,cFilAtu,dDataFim)
+   Else
+      ImprTotais()
+   EndIf
+EndIf
+
+If Len(aNFS) > 0 .Or.  Len(aNCC) > 0
+   ImprGeral()
+EndIf
+
+
+
+
+Set( 20, "SCREEN" )
+
+
+
+
+If aReturn[5]==1
+   dbCommitAll()
+   Set( 24, "" )
+   OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+
+dbSelectArea(cAliasSF3)
+If !lQuery
+	dbClearFilter()
+	RetIndex("SF3")
+	Ferase(cIndexSF3+OrdBagExt())
+Else
+	dbCloseArea()
+	dbSelectArea("SF3")
+EndIf
+
+Return( Nil )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSX1(cPerg)
+
+Local aHelpPor	:= {}
+Local aHelpEng	:= {}
+Local aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe o mes para a impressao" )
+Aadd( aHelpPor, "dos dados                     " )
+Aadd( aHelpEng, "Informe o mes para a impressao" )
+Aadd( aHelpEng, "dos dados                     " )
+Aadd( aHelpSpa, "Indique el mes para la impresion" )
+Aadd( aHelpSpa, "de los datos                  " )
+
+PutSx1(cPerg,"01","Mes                ?","Mes                ?","Month              ?","mv_ch1","C",2,0,0,"G","NaoVazio() .And. LibGVldMes(MV_PAR01)","","","","mv_par01","","","","01","","","","","","","","","","","","")
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe o ano para a impressao" )
+Aadd( aHelpPor, "dos dados                     " )
+Aadd( aHelpEng, "Informe o ano para a impressao" )
+Aadd( aHelpEng, "dos dados                     " )
+Aadd( aHelpSpa, "Indique el ano para la impresion" )
+Aadd( aHelpSpa, "de los datos                  " )
+
+PutSx1(cPerg,"02","Ano                ?","Ano                ?","Year               ?","mv_ch2","C",4,0,0,"G","NaoVazio() .And. LibGVldAno(MV_PAR02)","","","","mv_par02","","","","2004","","","","","","","","","","","","")
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe a filial inicial   " )
+Aadd( aHelpEng, "Enter the initial branch   " )
+Aadd( aHelpSpa, "Indique la sucursal inicial" )
+
+PutSx1(cPerg,"03","Filial de          ?","Sucursal De        ?","From Branch        ?","mv_ch3","C",2,0,0,"G","","","","","mv_par03","","","","","","","","","","","","","","","","")
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe a filial final    " )
+Aadd( aHelpEng, "Enter the final branch    " )
+Aadd( aHelpSpa, "Indique la sucursal final " )
+
+PutSx1(cPerg,"04","Filial Ate         ?","Sucursal Hasta     ?","To Branch          ?","mv_ch4","C",2,0,0,"G","","","","","mv_par04","","","","ZZ","","","","","","","","","","","","")
+
+Return( Nil )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function LibGVldMes(cMes)
+
+Local lRet := .T. 
+
+lRet := Val(cMes) > 0 .And.  Val(cMes) < 13
+
+Return( lRet )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function LibGVldAno(cAno)
+
+Local lRet := .T. 
+
+lRet := Val(cAno) > 1900 .And.  Val(cAno) <= Year(dDataBase)
+
+Return( lRet )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function LibrCab(dDataFim,cFilialAtu,cTipoOper)
+
+Local cTitulo   := ""
+Local Cabec1    := ""
+Local Cabec2    := ""
+Local Titulo    := ""
+Local nMes
+Local nRecnoSM0
+
+
+
+
+If aMeses == NIL
+    aMeses  := {}
+	AADD(aMeses,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Janeiro ", "JANEIRO " )))
+	AADD(aMeses,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Fevereiro ", "FEVEREIRO " )))
+	AADD(aMeses,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Março ", "MARCO " )))
+	AADD(aMeses,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Abril ", "ABRIL " )))
+	AADD(aMeses,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Maio ", "MAIO " )))
+	AADD(aMeses,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Junho ", "JUNHO " )))
+	AADD(aMeses,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Julho ", "JULHO " )))
+	AADD(aMeses,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Agosto ", "AGOSTO " )))
+	AADD(aMeses,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Setembro ", "SETEMBRO " )))
+	AADD(aMeses,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Outubro ", "OUTUBRO " )))
+	AADD(aMeses,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Novembro ", "NOVEMBRO " )))
+	AADD(aMeses,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Dezembro ", "DEZEMBRO " )))
+EndIf
+
+cTitulo     := If( cPaisLoc $ "ANG|PTG", "L i v r o   d e   v e n d a s   e   s e r v i ç o s   p r e s t a d o s   d o   m ê s   d e ", "L I V R O   D E   V E N D A S   E   S E R V I C O S   P R E S T A D O S   D O   M E S   D E " )
+
+nMes := Month(dDataFim)
+
+Titulo   := cTitulo+aMeses[nMes]+If( cPaisLoc $ "ANG|PTG", "De ", "DE " )+StrZero(Year(dDataFim),4)
+Cabec1   := If( cPaisLoc $ "ANG|PTG", "                    documento                                        vda. local       vda. local       total vendas    vendas     descontos        vdas. líqs.       vdas. líqs.          s/vendas ", "                    DOCUMENTO                                        VDA. LOCAL       VDA. LOCAL       TOTAL VENDAS    VENDAS     DESCONTOS        VDAS. LIQS.       VDAS. LIQS.          S/VENDAS " )
+Cabec2   := If( cPaisLoc $ "ANG|PTG", " data    cond    do n.º      ao n.º     desc. de mercadorias          gravadas          isentas            diárias   exportação    s/vendas           isentas          gravadas           gravadas ", " DATA    COND    DO No.      AO No.     DESC. DE MERCADORIAS          GRAVADAS          ISENTAS            DIARIAS   EXPORTACAO    S/VENDAS           ISENTAS          GRAVADAS           GRAVADAS " )
+
+Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,GetMv("MV_COMP"))
+
+
+
+
+
+
+PrintOut(li,000,If(cPaisLoc$"ANG|PTG","1 = Vendas A Pagamento","1 = VENDAS A VISTA"),,)
+li++
+PrintOut(li,000,If(cPaisLoc$"ANG|PTG","2 = Vendas A Crédito","2 = VENDAS A CREDITO"),,)
+li++
+PrintOut(li,000,Replicate("-",220),,)
+li++
+
+SM0->(dbSetOrder(1))
+nRecnoSM0 := SM0->(Recno())
+If SM0->(DbSeek(Substr(cNumEmp,1,2)+cFilialAtu))
+   PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Loja: ","LOJA: ")+AllTrim(SM0->M0_NOMECOM)+If(cPaisLoc$"ANG|PTG","     nit: ","     NIT: ")+TRANSFORM(SM0->M0_CGC,PesqPict("SA1","A1_CGC")),,)
+   li  := li + 2
+EndIf
+
+SM0->(DbGoto(nRecnoSM0))
+
+If cTipoOper == "D"
+   PrintOut(li,000,If(cPaisLoc$"ANG|PTG","***notas De Crédito***","***NOTAS DE CREDITO***"),,)
+   li  := li + 2
+EndIf
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ImprTotais()
+
+Local cPictTot   := "99,999,999,999.99"
+Local cPictZero  := "9.99"
+
+li++
+PrintOut(li,007,If(cPaisLoc$"ANG|PTG","Total Loja(factura)........                 Pagamento","TOTAL LOJA(NOTA FISCAL)........                 A VISTA"),,)
+PrintOut(li,062,nTotBaseCon,cPictTot,)
+PrintOut(li,079,nTotIseCon,cPictTot,)
+PrintOut(li,098,nTotBaseCon,cPictTot,)
+PrintOut(li,122,0,cPictZero,)
+PrintOut(li,134,0,cPictZero,)
+PrintOut(li,152,0,cPictZero,)
+PrintOut(li,159,nTotBaseCon,cPictTot,)
+PrintOut(li,175,nTotVlrCon,cPictTot,)
+li++
+PrintOut(li,007,If(cPaisLoc$"ANG|PTG","Total Loja(factura)........                 Crédito","TOTAL LOJA(NOTA FISCAL)........                 CREDITO"),,)
+PrintOut(li,062,nTotBaseCre,cPictTot,)
+PrintOut(li,079,nTotIseCre,cPictTot,)
+PrintOut(li,098,nTotBaseCre,cPictTot,)
+PrintOut(li,122,0,cPictZero,)
+PrintOut(li,134,0,cPictZero,)
+PrintOut(li,152,0,cPictZero,)
+PrintOut(li,159,nTotBaseCre,cPictTot,)
+PrintOut(li,175,nTotVlrCre,cPictTot,)
+
+nTotBaseCon   := 0
+nTotIseCon    := 0
+nTotVlrCon    := 0
+nTotBaseCre   := 0
+nTotIseCre    := 0
+nTotVlrCre    := 0
+
+Return .T. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ImprNCCTotais()
+
+Local cPictTot   := "99,999,999,999.99"
+Local cPictZero  := "9.99"
+
+li++
+PrintOut(li,007,If(cPaisLoc$"ANG|PTG","Total Loja(nota De Crédito)........             Pagamento","TOTAL LOJA(NOTA DE CREDITO)........             A VISTA"),,)
+PrintOut(li,062,nTotNCBsCon,cPictTot,)
+PrintOut(li,079,nTotNCIsCon,cPictTot,)
+PrintOut(li,098,nTotNCBsCon,cPictTot,)
+PrintOut(li,122,0,cPictZero,)
+PrintOut(li,134,0,cPictZero,)
+PrintOut(li,152,0,cPictZero,)
+PrintOut(li,159,nTotNCBsCon,cPictTot,)
+PrintOut(li,175,nTotNCVlCon,cPictTot,)
+li++
+PrintOut(li,007,If(cPaisLoc$"ANG|PTG","Total Loja(nota De Crédito)........             Crédito","TOTAL LOJA(NOTA DE CREDITO)........             CREDITO"),,)
+PrintOut(li,062,nTotNCBsCre,cPictTot,)
+PrintOut(li,079,nTotNCIsCre,cPictTot,)
+PrintOut(li,098,nTotNCBsCre,cPictTot,)
+PrintOut(li,122,0,cPictZero,)
+PrintOut(li,134,0,cPictZero,)
+PrintOut(li,152,0,cPictZero,)
+PrintOut(li,159,nTotNCBsCre,cPictTot,)
+PrintOut(li,175,nTotNCVlCre,cPictTot,)
+
+nTotNCBsCon    := 0
+nTotNCIsCon    := 0
+nTotNCVlCon    := 0
+nTotNCBsCre    := 0
+nTotNCIsCre    := 0
+nTotNCVlCre    := 0
+
+Return .T. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ImprGeral()
+
+Local cPictTot   := "99,999,999,999.99"
+Local cPictZero  := "9.99"
+Local nGerBase   := nGerBaseCon + nGerBaseCre
+Local nGerIse    := nGerIseCon  + nGerIseCre
+Local nGerVlr    := nGerVlrCon  + nGerVlrCre
+
+li := li + 3
+PrintOut(li,007,If(cPaisLoc$"ANG|PTG","Total Companhia....                             Pagamento","TOTAL COMPANHIA....                             A VISTA"),,)
+PrintOut(li,062,nGerBaseCon,cPictTot,)
+PrintOut(li,079,nGerIseCon,cPictTot,)
+PrintOut(li,098,nGerBaseCon,cPictTot,)
+PrintOut(li,122,0,cPictZero,)
+PrintOut(li,134,0,cPictZero,)
+PrintOut(li,152,0,cPictZero,)
+PrintOut(li,159,nGerBaseCon,cPictTot,)
+PrintOut(li,175,nGerVlrCon,cPictTot,)
+li++
+PrintOut(li,007,If(cPaisLoc$"ANG|PTG","Total Companhia....                             Crédito","TOTAL COMPANHIA....                             CREDITO"),,)
+PrintOut(li,062,nGerBaseCre,cPictTot,)
+PrintOut(li,079,nGerIseCre,cPictTot,)
+PrintOut(li,098,nGerBaseCre,cPictTot,)
+PrintOut(li,122,0,cPictZero,)
+PrintOut(li,134,0,cPictZero,)
+PrintOut(li,152,0,cPictZero,)
+PrintOut(li,159,nGerBaseCre,cPictTot,)
+PrintOut(li,175,nGerVlrCre,cPictTot,)
+li := li + 2
+PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Total Companhia....","TOTAL COMPANHIA...."),,)
+PrintOut(li,062,nGerBase,cPictTot,)
+PrintOut(li,079,nGerIse,cPictTot,)
+PrintOut(li,098,nGerBase,cPictTot,)
+PrintOut(li,122,0,cPictZero,)
+PrintOut(li,134,0,cPictZero,)
+PrintOut(li,152,0,cPictZero,)
+PrintOut(li,159,nGerBase,cPictTot,)
+PrintOut(li,175,nGerVlr,cPictTot,)
+
+Return .T. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ImprNCC(aNCC,cFilialAtu,dDataFim)
+
+Local nPosFilial  := 0
+Local nI
+Local lNovaFilial := .F. 
+Local cPictVal    := "9,999,999,999.99"
+Local cPictZero   := "9.99"
+
+If Len(aNCC) > 0
+   nPosFilial  := aScan(aNCC,{|x| x[01] == cFilialAtu})
+
+   If nPosFilial > 0
+      If li < 60
+         li  := li + 3
+         PrintOut(li,000,If(cPaisLoc$"ANG|PTG","***notas De Crédito***","***NOTAS DE CREDITO***"),,)
+         li  := li + 2
+      EndIf
+
+      For nI := nPosFilial To Len(aNCC)
+         If lAbortPrint
+            PrintOut(li,00,If(cPaisLoc$"ANG|PTG","*** cancelado pelo operador ***","*** CANCELADO PELO OPERADOR ***"),,)
+            Exit
+         EndIf
+
+         lNovaFilial  := cFilialAtu <> aNCC[nI][1]
+         If li > 60 .Or.  lNovaFilial
+            If lNovaFilial
+               Exit
+            EndIf
+            LibrCab(dDataFim,aNCC[nI][1],"D")
+         EndIf
+         PrintOut(li,000,aNCC[nI][2],,)
+         PrintOut(li,011,aNCC[nI][3],,)
+         PrintOut(li,014,aNCC[nI][4],,)
+         PrintOut(li,027,aNCC[nI][6],,)
+         PrintOut(li,040,If(cPaisLoc$"ANG|PTG","Materiais E Impressos","MATERIAIS E IMPRESSOS"),,)
+         PrintOut(li,063,aNCC[nI][9],cPictVal,)
+         PrintOut(li,080,aNCC[nI][11],cPictVal,)
+         PrintOut(li,099,aNCC[nI][9],cPictVal,)
+         PrintOut(li,122,0,cPictZero,)
+         PrintOut(li,134,0,cPictZero,)
+         PrintOut(li,152,0,cPictZero,)
+         PrintOut(li,160,aNCC[nI][9],cPictVal,)
+         PrintOut(li,177,aNCC[nI][10],cPictVal,)
+
+         If aNCC[nI][3] == "1"
+            nTotNCBsCon   += aNCC[nI][9]
+            nTotNCIsCon   += aNCC[nI][11]
+            nTotNCVlCon   += aNCC[nI][10]
+            nGerNCBsCon   += aNCC[nI][9]
+            nGerNCIsCon   += aNCC[nI][11]
+            nGerNCVlCon   += aNCC[nI][10]
+            nGerBaseCon   -= aNCC[nI][9]
+            nGerVlrCon    -= aNCC[nI][10]
+            nGerIseCon    -= aNCC[nI][11]
+
+         ElseIf aNCC[nI][3] == "2"
+            nTotNCBsCre    += aNCC[nI][9]
+            nTotNCIsCre    += aNCC[nI][11]
+            nTotNCVlCre    += aNCC[nI][10]
+            nGerNCBsCre    += aNCC[nI][9]
+            nGerNCIsCre    += aNCC[nI][11]
+            nGerNCVlCre    += aNCC[nI][10]
+            nGerBaseCre    -= aNCC[nI][9]
+            nGerVlrCre     -= aNCC[nI][10]
+            nGerIseCre     -= aNCC[nI][11]
+         EndIf
+         li++
+      next
+      ImprNCCTotais()
+   EndIf
+EndIf

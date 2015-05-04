@@ -1,0 +1,805 @@
+#include "protheus.ch"
+#Include "fileio.ch"
+#include "topconn.ch"
+
+#define __LOG "*"          
+#define __FILE "C:\GPETICKET\GPETICKET"
+#define __FILELOG "C:\GPETICKET\GPETICKET_LOG.TXT"
+#define true .t.
+#define false .f.
+#define __FIELD 4
+#define __CONNECT 'TOPCONN'  
+#define __ENTER__ CHR( 13 ) + CHR( 10 )
+   
+ 
+/*                                                                                  
+  +-----------------------------------------------------------------------------------------------------------------+  
+  | CLASSE    | GPE002.prw        | AUTOR | JOSE TEIXEIRA              | DATA | 13/04/12                            |
+  +-----------------------------------------------------------------------------------------------------------------+    
+  | DESCRICAO | RESPONSÁVEL  GERAÇÃO DO ARQUIVO TICKET                                                              |  
+  |           |                                                                                                     |  
+  |           | CLIENTE : G R U P O    A V  A N T I A                                                               |  
+  |           |                                                                                                     |
+  |           |                                                                                                     |
+  +-----------------------------------------------------------------------------------------------------------------+    
+  | MANUTENCAO DESDE SUA CRIACAO                                                				                    |   
+  +-----------------------------------------------------------------------------------------------------------------+    
+  | DATA     | AUTOR                | DESCRICAO                                 				                    |  
+  +-----------------------------------------------------------------------------------------------------------------+    
+ */  
+
+
+User Function GPEI002
+private cEmpresa := ""
+private cUnidade := ""
+
+private aFunc := {}
+private __DIAS := 0
+private __DAF := 0
+private __dtMov := ""
+private cFile
+private cNewPathArq
+private nHandle
+private nHnd
+private cBuffer := ""
+private cQuery := ""
+private cAlias 
+private cAlias2 
+private cAlias3
+private cAlias4
+private cAlias5
+private cAlias6
+private cAlias7
+private cAlias8
+private cAlias9                                  	
+private tblSZK
+private cHeader
+private cTrailler
+private nLinT0:=0
+private nLinT1A:=0
+private nLinT1R:=0
+private nCntFunc:=0
+private nLinT2:=0
+private nLinT3:=0
+private nLinFun := 2
+private nVlrTot := 0
+private cTipo := ""
+private lHeader := .F.
+private nSequence := 0
+private nTotReg := 0   
+private nFor := 0
+private cStatement     
+private nVlrTicket := 0
+private __VALOR := ""
+private __SALDO := 0
+private __DIAS := 0
+private lVlrFixo := .F.
+private nVlrFixo := 0
+private nVlrVar := 0
+private nVlrT77 := 0
+private nVlrT79 := 0
+
+private nSeq := GetNewPar("MV_SEQTCK", "1")
+private cUnidade := Subs(AllTrim(SM0->M0_NOMECOM),1,26)
+private aTicket := {}
+private nVTicket := 0
+private nVTTicket := 0
+private nLin := 0
+private oProcess             
+private lEnd := .F.
+
+private __VL_MES_D := 0
+private __VL_MES_P := 0  
+private __VL_DIA_D := 0
+private __VL_DIA_P := 0
+private cCodPosto := ""            
+
+IF !Pergunte("GPETICKET", .T.)
+	Return
+EndIF
+ 
+
+
+cAlias := GetNextAlias()
+
+/*                              
+
+
+
+-------- TABLES NAME ------------
+
+SZM - TABELA DE CADASTRO EMPRESAS CONTRATO
+SZH - LOGRADOURO
+SZE - ESCOLARIDADE. AMARRACAO COM A SRA/SZE  ( RA_GRINRAI COM ZE_RAESC ) VALIDACAO DO CAMPO EXISTCPO("SX5","26"+M->ZE_RAESC)| ESCOLARIDADE ( RAIS )
+SZK - EXTRATO TICKET 
+
+
+-------- TABLES NAME ------------
+
+
+ 
+-------- PARAM NAME ------------
+
+   MV_PAR01	- FILIAL DE
+   MV_PAR02 - FILIAL ATE  
+   MV_PAR03 - MATRICULA DE 
+   MV_PAR04 - MATRICULA ATE
+   MV_PAR05 - CATEGORIA
+   MV_PAR06 - SITUAÇÃO   
+   MV_PAR07 - COMPETENCIA
+   MV_PAR08 - DATA PAGAMENTO      
+   MV_PAR09 - ID CALCULO           | Dias úteis para pagamento
+   MV_PAR10 - ALIMENTAÇÃO/REFEICAO | 1=Alimentacao;2=Refeicao
+   
+-------- PARAM NAME ------------
+
+*/
+
+IF MV_PAR10 == 1
+	cFile := __FILE+"_TAE_"+AllTrim(SM0->M0_CODIGO)+".txt"
+Else
+	cFile := __FILE+"_TRE_"+AllTrim(SM0->M0_CODIGO)+".txt"
+EndIF	                  
+
+
+__DIAS := MV_PAR09
+/*
+IF !ExistDir("D:\GPETICKET") 
+	IF MsgNoYes(" Deseja criar diretório em : C:\GPETICKET ? ", "Ticket" )
+		IF !MakeDir( "D:\GPETICKET" )
+           MsgAlert("Impossível criar diretório. Contacte Administrador. " + FError() ,"I/O")
+		   Return 
+		EndIF 
+	Else
+		Return
+	EndIF	
+EndIF
+*/ 
+
+
+nHandle := FCREATE( UPPER(cFile), FC_NORMAL )
+
+nHnd := FCREATE( __FILELOG, FC_NORMAL )
+        
+/* REGISTRO TRE / HEADER ARQUIVO DE PEDIDO */
+
+/*
+Nome do Campo 				Início Fim 		Tama 	Tipo 	Conteúdo
+Tipo de registro 			1 		5 		5 		X 		LSUP5
+Usuário do sistema 			6 		13 		8 		X 		Nome do usuário que gerou o arquivo de Pedidos
+Reservado 					14 		24 		11 		X 		Preencher com espaços “ “
+Data da geração do pedido 	25 		32 		8 		N 		Data no formato “AAAAMMDD”
+Hora geração do pedido 		33 		40 		8 		X 		Hora no formato “HH.MM.SS”
+Reservado 					41 		57 		17 		X	 	Fixo “LAYOUT-05/05/2008”
+Espaço reservado 			58 		164 	106 	X 		Preencher com espaços “ “
+
+
+*/
+
+//AADD( aTicket, { 'LSUP5TEIXEIRA'+Space(11)+Dtos(DDATABASE)+AllTrim(StrTran( Time(), ':','.'))+'LAYOUT-05/05/2008'+Space(106), 'T0'} )
+                  
+cHeader := 'LSUP9AVANTIA'+Space(12)+Dtos(DDATABASE)+AllTrim(StrTran( Time(), ':','.'))+'LAYOUT-05/05/2008'+Space(106)
+FWRITE( nHandle, cHeader + __ENTER__ )
+
+
+
+
+
+/*
+
+-------- PARAM NAME ------------
+
+   MV_PAR01	- FILIAL DE
+   MV_PAR02 - FILIAL ATE  
+   MV_PAR03 - MATRICULA DE 
+   MV_PAR04 - MATRICULA ATE
+   MV_PAR05 - CATEGORIA
+   MV_PAR06 - SITUAÇÃO   
+   MV_PAR07 - COMPETENCIA
+   MV_PAR08 - DATA PAGAMENTO      
+   MV_PAR09 - ID CALCULO           | Dias úteis para pagamento
+   MV_PAR10 - ALIMENTAÇÃO/REFEICAO | 1=Alimentacao;2=Refeicao
+   
+-------- PARAM NAME ------------
+
+*/
+cQuery := "  SELECT  A.*, B.*, C.*, D.* FROM " + RETSQLNAME("SRA")+ " A  " 
+cQuery += "  INNER JOIN " + RETSQLNAME("SZE")+ " B  " 
+cQuery += "  	ON "
+cQuery += "  B.ZE_RAESC = A.RA_GRINRAI"
+cQuery += " "
+cQuery += "  INNER JOIN " + RETSQLNAME("SRJ")+ " C  " 
+cQuery += "  ON "
+cQuery += "  A.RA_CODFUNC = C.RJ_FUNCAO"
+cQuery += " "
+cQuery += "  INNER JOIN " + RETSQLNAME("CTT") + " D "
+cQuery += "  ON "
+cQuery += " "
+cQuery += "	 D.CTT_CUSTO = A.RA_CC "
+cQuery += "  WHERE A.RA_FILIAL BETWEEN '" + AllTrim(MV_PAR01) + "' AND '" +  AllTrim(MV_PAR02) + "' AND A.RA_SITFOLH IN " + AllTrim(FormatIn( MV_PAR06,'*')) + " AND  A.RA_SITFOLH <> 'A'"
+cQuery += "  AND A.RA_CATFUNC IN " + FormatIn( MV_PAR05,'*')  
+cQuery += "  AND A.RA_MAT BETWEEN '" + AllTrim(MV_PAR03) + "' AND '" + AllTrim(MV_PAR04) + "' 
+cQuery += "  AND B.ZE_MSBLQL = '2'
+cQuery += "  AND A.RA_YTICKET = '" + AllTrim(Str(MV_PAR10)) + "' "
+cQuery += "	 AND D.CTT_FILIAL = A.RA_FILIAL "
+cQuery += "  AND A.D_E_L_E_T_ = '' AND B.D_E_L_E_T_ = ''  AND C.D_E_L_E_T_ = '' AND D.D_E_L_E_T_ = '' "
+
+
+//	cQuery += " AND RA_MAT IN " +  FormatIn( MV_PAR14,';') 
+ 
+
+/* 
+	RA_YTICKET
+	1=Alimentacao;2=Refeicao;3=Nenhum
+*/ 
+
+//MemoWrite(  "C:\sql.txt", cQuery )
+cQuery += " ORDER BY A.RA_NOME "
+
+ 
+cQuery := ChangeQuery( cQuery )
+dbUseArea(.T.,__CONNECT,TcGenQry(,,cQuery),cAlias,.F.,.T.)
+(cAlias)->(DbGoTop())
+
+
+
+	cStatement := " DELETE FROM " + RETSQLNAME("SZK") 
+	cStatement += " WHERE ZK_MES = '" + SUBSTRING(DTOS(DDATABASE),1,6 ) + "' AND ZK_TIPO = '" + AllTrim(cValToChar(MV_PAR10)) + "' " 
+	cStatement += " AND ZK_FILMAT BETWEEN '" + MV_PAR01 + "' AND '" + MV_PAR02 + "' "
+	
+//	MemoWrite(  "D:\sql_del.txt", cStatement )
+	
+	IF (TCSQLExec(cStatement) < 0)
+	    Return MsgStop("TCSQLError() " + TCSQLError() )
+	Else
+	    TCRefresh(RETSQLNAME("SZK"))    
+	EndIF
+	
+
+
+//nCount := (cAlias)->(RecCount())
+//oProcess:SetRegua1(nCount)
+
+
+IF (cAlias)->(Eof())
+   MsgInfo( "Não existe(m) funcionário(s) para esse tipo de lançamento","AVANTIA|Ticket")
+   (cAlias)->(DBCloseArea())   
+   Return
+EndIF
+
+msgTimer(nil,"Por Favor Aguarde. Gerando...",3000,"Ticket") 
+
+While !(cAlias)->(Eof())
+           
+
+			cAlias2 := GetNextAlias()
+			                             
+			
+			cTipo := IIF( (cAlias)->RA_YTICKET == '1','A','R' )			
+
+			
+			cQuery:= " SELECT * FROM " + RETSQLNAME("SZM") + " WHERE LEFT(ZM_EMPRESA,2) = '" + AllTrim(AllTrim(SM0->M0_CODIGO)) + "' "
+			cQuery+= " AND ZM_TIPO = '" + cTipo + "' AND D_E_L_E_T_ = '' "
+			
+//			MemoWrite(  "D:\sql.txt", cQuery )
+			
+			cQuery := ChangeQuery( cQuery )
+			dbUseArea(.T.,__CONNECT,TcGenQry(,,cQuery),cAlias2,.F.,.T.)
+			(cAlias2)->(DbGoTop())
+			
+			IF (cAlias2)->(Eof())
+			   Final("Não foi possível gerar arquivo. Cadastre a empresa referente a filial")
+			EndIF                                                                            
+			
+
+			
+			
+			/* Sequencial de acordo com o tipo ... */     
+			IF cTipo == 'A'
+				nLinT1A += 1
+			Else
+				nLinT1R += 1
+			EndIF				
+			
+			    
+			    
+			IF !lHeader
+				
+				
+				/*  
+					
+					Nome do Campo 					Início Fim Tamanho Tipo Descrição
+					Tipo de Produto / Seqüência 	001 001 001 X Fixo “T”
+					Produto 						002 002 001 X A = Alimentação R = Restaurante
+					Fixo 							003 004 002 X Fixo “02”
+					Tipo de Registro 				005 005 001 X “0”
+					Produto 						006 006 001 X A = Alimentação R = Restaurante
+					Código de contrato 				007 016 010 9 Código de contrato do cliente Informação fornecida pela Ticket, no formato “9999999999”. Completar com zeros à esquerda.
+					Nome da Empresa 				017 040 024 X Nome da empresa
+					Reservado 						041 046 006 X Preencher com espaços “ “
+					Data do Pedido 					047 054 008 9 Formato AAAAMMDD
+					Data da Liberação do Beneficio 	055 062 008 9 Formato AAAAMMDD
+					Tipo do Pedido 					063 063 001 X Preencher com “C”
+					Reservado 						064 079 016 X Preencher com espaços “ “
+					Mês de Referência 				080 081 002 9 Mês de referencia do pedido
+					Reservado 						082 100 019 X Preencher com espaços “ “
+					Tipo de Layout 					101 102 002 X Preencher com “04”
+					Tipo do Cartão 					103 104 002 X 33 = Magnético (TAE) 34 = Magnético (TRE)
+					Reservado 						105 152 048 X Preencher com espaços “ “
+					Origem 							153 158 006 X Preencher com “SUP”
+					Seqüência 						159 164 006 9 Número seqüencial para cada linha do arquivo. Formato “999999”, iniciando em ex.: 1ª linha = 000001 2ª linha = 000002 e assim por diante.
+					
+					*/
+
+                                                      
+                cEmpresa := SubStr( AllTrim((cAlias2)->ZM_NOME),1,24)
+                cEmpresa :=  cEmpresa + Space (24 - Len(AllTrim(cEmpresa)))
+
+
+				// 11250062  ( usar 8 primeiras posições )  
+				// 11250062121 ( esse é numero do contrato )
+                                
+//				Alert( left(cValToChar((cAlias2)->ZM_CONTRAT),8) )
+				
+				cHeader := 'T'+IIF( cTipo=='A','A','R' )+'02'+'0'+IIF( cTipo=='A','A','R' );
+				+StrZero( Val(Left( cValToChar((cAlias2)->ZM_CONTRAT),8)) ,10 )+cEmpresa;
+				+Space(6)+Dtos(DDATABASE)+DTOS(MV_PAR08)+"C"+Space(16)+SUBSTRING(DTOS(MV_PAR08),5,2);
+				+Space(19)+"04"+IIF(cTipo=='A','33','34' );
+				+Space(48)+"SUP"+Space(3)+IIF(cTipo=='A',StrZero(nLinT1A,6),StrZero(nLinT1R,6) )
+				
+				FWRITE( nHandle, cHeader + __ENTER__ )
+
+				
+				IF cTipo == 'A'
+					nLinT1A += 1
+				Else
+					nLinT1R += 1
+				EndIF				
+                         
+
+
+				/*
+				
+				Tipo de Produto / Seqüência 001 001 001 X Fixo “T” 
+				Produto 					002 002 001 X “A” = Alimentação “R” = Restaurante 
+				Fixo						003 004 002 X Fixo “02” 
+				Tipo de Registro 			005 005 001 X “2” 
+				Nome da Unidade 			006 031 026 X Nome da Unidade 
+				Tipo de logradouro 			032 035 004 X Tipo de logradouro
+				Logradouro 					036 065 030 X Logradouro 
+				Número 						066 071 006 X Número 
+				Complemento 				072 081 010 X Complemento 
+				Município 					082 106 025 X Município 
+				Bairro 						107 121 015 X Bairro 
+				CEP 						122 126 005 9 CEP 
+				Estado 						127 128 002 X Estado 
+				Interlocutor 				129 148 020 X Responsável pelo recebimento do pedido na unidade 
+				Complemento do CEP 			149 151 003 9 Complemento do CEP
+				Reservado 					152 158 007 X Preencher com espaços “ “ 
+				Seqüencial 					159 164 006 9 Número seqüencial para cada linha do arquivo. Formato “999999”, dar continuidade ao registro anterior
+				
+				*/				       
+                cEmpresa := AllTrim(SubStr( (cAlias2)->ZM_NOME,1,26))
+                cEmpresa :=  cEmpresa + Space (26 - Len(AllTrim(cEmpresa)))
+                
+				cHeader := 'T'+IIF( cTipo=='A','A','R' )+'02'+'2'+Subs((cAlias2)->ZM_NOME,1,26 );
+				+AllTrim((cAlias2)->ZM_TPLOGRA)+Space( 4- ( Len(AllTrim((cAlias2)->ZM_TPLOGRA)) ) );
+				+AllTrim((cAlias2)->ZM_LOGRA)+Space( 30- ( Len(AllTrim((cAlias2)->ZM_LOGRA)) ) );
+				+StrZero(Val((cAlias2)->ZM_NUMERO),6)+Space(10);
+				+AllTrim((cAlias2)->ZM_CIDADE)+Space( 25- ( Len(AllTrim((cAlias2)->ZM_CIDADE)) ) );
+				+AllTrim((cAlias2)->ZM_BAIRRO)+Space( 15- ( Len(AllTrim((cAlias2)->ZM_BAIRRO)) ) );
+				+Subs(AllTrim(cValToChar((cAlias2)->ZM_CEP)),1,5)+(cAlias2)->ZM_UF;
+				+AllTrim((cAlias2)->ZM_USRRSP)+Space( 20- ( Len(AllTrim((cAlias2)->ZM_USRRSP)) ) );
+				+Right(AllTrim(cValToChar((cAlias2)->ZM_CEP)),3)+Space(7)+IF(cTipo=='A',StrZero(nLinT1A,6),StrZero(nLinT1R,6) )
+				
+
+				
+				nSequence += 1
+				
+				FWRITE( nHandle, cHeader + __ENTER__ )
+				
+							
+					
+				
+				lHeader := .T.
+				
+            EndIF
+
+		  /*
+			
+			LSUP5TICKET             2010012013.30.39LAYOUT-24/12/2007                                                                                                           
+			TA020A1234567890NOME DE SUA EMPRESA           2010012020100130C                1                    0433                                                SUP   000001
+			TA022MATRIZ                    AV  PAULISTA                      0011981 ANDAR   SÃO PAULO                BELA VISTA     64019SPADRIANA             630       000002
+			TA023ADM                       02077920831507061962                  MATRIZ                    00101000023000AEGESIEL DE SOUSA RIBEIRO                        000003
+						
+			
+			*/
+           
+            
+
+                        
+			
+	            IF AllTrim((cAlias)->RA_SITFOLH) == 'F' .OR. AllTrim((cAlias)->RA_SITFOLH) == 'A'
+					__DIAS := getAfast()
+				EndIF       
+
+
+				IF __DIAS != 0
+				                                               
+					cAlias3 := GETNEXTALIAS()
+				                                            
+				     Alert( "dias : " + cValToChar( __DIAS )
+				                                                    
+					__dtMov := AllTrim(Str(Year(DDATABASE)))+StrZero( (Month(DDATABASE)-1), 2 )
+					 
+					Alert( "__dtMov : " +__dtMov )	
+				     
+				     
+					cQuery := " SELECT * FROM " + RETSQLNAME("SZK")
+					cQuery += " WHERE ZK_MES = '" + AllTrim(__dtMov) + "' AND ZK_TIPO = '" + AllTrim(cValToChar(MV_PAR10)) + "' " 
+					cQuery += " AND ZK_FILMAT BETWEEN '" + MV_PAR01 + "' AND '" + MV_PAR02 + "' "
+				    
+//					MemoWrite(  "C:\sqlSZK.txt", cQuery )
+
+
+					cQuery := ChangeQuery( cQuery )
+					dbUseArea(.T.,__CONNECT,TcGenQry(,,cQuery),cAlias3,.F.,.T.)
+					
+					IF !(cAlias3)->(Eof())         
+						(cAlias3)->(DBCloseArea())
+						Alert("ERRO")
+						(cAlias)->(DBSkip())
+						Loop						
+					Else
+						(cAlias3)->(DBCloseArea())	
+					EndIF
+					
+					
+				EndIF            
+
+    	   		nLinFun += 1	
+	       		nCntFunc += 1	
+			                                                     
+			
+				nVlrTicket := ROUND( ((cAlias)->ZE_VALOR * __DIAS ),2 )
+				nVlrTot += nVlrTicket
+            	__VALOR := StrZero(Val( StrTran( Transform( nVlrTicket,  "@E 999999.99" ), ",","")  )  ,9)     
+            	__SALDO := nVlrTicket
+				
+
+		
+				/*
+				
+				Tipo de Produto / Seqüência 		001 001 001 X Fixo “T” 
+				Produto 							002 002 001 X A = Alimentação R = Restaurante 
+				Fixo 								003 004 002 X Fixo “02” 
+				Tipo de Registro 					005 005 001 X “3”
+				Departamento 						006 031 026 X Código do departamento 
+				Matrícula 							032 043 012 9 Identificação do funcionário na Ticket. Esse campo é chave para geração de cartões e nunca poderá ser utilizado para outro funcionário no mesmo CNPJ. Recomendamos utilização do CPF, pois este número é único para cada individuo.Ponto de atenção: caso sua empresa já possua cartões emitidos e esteja mudando de tecnologia (E-ticket,SUP, etc.), verificar qual informação foi enviada nesse campo nos pedidos anteriores, a informação deve ser igual para não ocorrer emissão de novos cartões. 
+				Data de Nascimento do Funcionário 	044 051 008 X Formato DDMMAAAA 
+				Reservado 							052 069 018 X Preencher com espaços “ “ 
+				Nome da Unidade 					070 095 026 X Nome da Unidade do funcionário 
+				Fixo 								096 100 005 9 Preencher com “00101” 
+				Valor 								101 109 009 9 
+				
+				Valor Unitário do Ticket, no formato 
+				“999999999” (Sete inteiros e Dois 
+				decimais. Não Utilizar Ponto ou 
+				vírgula)                                                             
+				
+				Produto								 110 110 001 X “A” = Alimentação “R” = Restaurante 
+				Fixo 								 111 111 001 X “E” = Eletrônico 
+				Nome do Funcionário 			     112 134 023 X Nome do funcionário 
+				Reservado 							 135 158 024 X Preencher com espaços “ “ 
+				Seqüencial 							 159 164 006 9 
+				
+				Número seqüencial para cada linha 
+				do arquivo. Formato “999999”, dar 
+				continuidade ao registro anterior
+				
+				*/
+
+
+                cUnidade := AllTrim(SubStr( AllTrim((cAlias)->CTT_DESC01),1,26))
+				cUnidade :=  cUnidade + Space (26 - Len(AllTrim(cUnidade)))
+
+                cEmpresa := AllTrim(SubStr( (cAlias2)->ZM_NOME,1,26))
+                cEmpresa :=  cEmpresa + Space (26 - Len(AllTrim(cEmpresa)))
+ 				                
+               
+                
+			    cTrailler := 'T'+IIF(cTipo=='A','A','R' )+"02"+"3";
+			    +cUnidade;
+			    +StrZero(Val((cAlias)->RA_CIC),12)+Subs((cAlias)->RA_NASC,7,2)+Subs((cAlias)->RA_NASC,5,2)+Subs((cAlias)->RA_NASC,1,4);
+				+Space(18)+cEmpresa;
+				+"00101"+__VALOR+IIF(cTipo=='A','A','R');
+				+"E"+Subs((cAlias)->RA_NOME,1,23 );
+				+Space(24)+StrZero(nLinFun,6)
+				
+
+				FWRITE( nHnd , __VALOR + ";"  + __ENTER__ ) 
+
+		   		FWRITE( nHandle, cTrailler + __ENTER__ )
+		   		
+                DBSelectArea("SZK")
+		   		RecLock("SZK",.T.)
+		   		    
+		   		    SZK->ZK_FILIAL := xFilial("SZK")
+		   		    SZK->ZK_FILMAT := (cAlias)->RA_FILIAL
+   		   		    SZK->ZK_CODMAT := (cAlias)->RA_MAT
+		   		    SZK->ZK_VALOR  := __SALDO
+		   		    SZK->ZK_FUNCAO := Posicione("SRJ",1,xFilial("SRJ")+(cAlias)->RA_CODFUNC,"RJ_DESC")
+		   		    SZK->ZK_FUNMAT := (cAlias)->RA_CODFUNC
+					SZK->ZK_ESCALA := (cAlias)->RA_TNOTRAB		   		    
+					SZK->ZK_CC := (cAlias)->RA_CC
+					SZK->ZK_MES := SUBSTRING(DTOS(DDATABASE),1,6 )
+					SZK->ZK_DATA := DDATABASE
+					SZK->ZK_TIPO := AllTrim(cValToChar(MV_PAR10))
+
+					
+		   		SZK->(MSUnLock())
+                SZK->(DBCloseArea())
+                               
+
+				nTotReg += 1
+
+
+				(cAlias2)->(DBCloseArea())
+
+						
+(cAlias)->(DBSkip())
+End
+(cAlias)->(DBCloseArea())
+
+				
+				/* TRE/TAE - REGISTRO TRAILLER */					
+				
+				
+				/*
+				
+				
+				Tipo de Produto / Seqüência 001 001 001 X Fixo “T”
+				Produto 					002 002 001 X A = Alimentação R = Restaurante
+				Fixo						003 004 002 X Fixo “02”
+				Tipo de Registro 			005 005 001 X “9”
+				Total de Funcionários 		006 013 008 9 Quantidade de registros tipo 3 (Funcionários)
+				Valor Total 				014 027 014 9 Somatória do valor do pedido, com 2	casas decimais (Não Utilizar Ponto ou vírgula)
+				Reservado 					028 158 131 X Preencher com espaços “ “
+				Seqüência 					159 164 006 9 Número seqüencial para cada linha	do arquivo. Formato “999999”, dar continuidade ao registro anterior				
+				
+				
+				*/		
+	            
+	          
+	          
+	            __VALOR := StrZero(Val( StrTran( Transform( nVlrTot,  "@E 99999999999.99" ), ",","")  )  ,14)
+	          	          
+	            cTrailler := 'T'+IIF( MV_PAR10 == 1,'A','R' )+"02"+"9"+StrZero(nCntFunc,8)+__VALOR+Space(131)+StrZero(nLinFun+1,6)
+			
+				FWRITE( nHandle, cTrailler + __ENTER__ )
+				
+
+
+
+				cTrailler := 'LSUP9'+StrZero( nSequence, 8)+StrZero( nSequence, 8)+StrZero(nTotReg,8)+Space(134)
+				
+				FWRITE( nHandle, cTrailler + __ENTER__ )
+					
+
+IF !FCLOSE(nHandle)
+	ConOut( "Erro ao fechar arquivo, erro numero: ", FERROR() )
+EndIF   
+
+
+aFunc := {}
+__VALOR:= "" 
+nCntFunc:=0
+
+
+MsgInfo(" Arquivo : " + cFile + " gerado com sucesso! " )
+
+IF !Empty(aFunc)
+	onLog( aFunc )
+EndIF
+
+
+IF !FCLOSE(nHnd)
+EndIF
+Return
+        
+
+Static Function doPutSX6( ParamName )
+IF  SX6->( DbSeek("  "+ParamName) )
+
+   RecLock("SX6", .F.)
+
+	   SX6->X6_VAR     := "MV_SEQTCK"
+	   SX6->X6_TIPO    := "N"
+	   SX6->X6_DESCRIC := SX6->X6_DSCSPA  := SX6->X6_DSCENG  := "Sequencia de Registros Ticket"
+	   SX6->X6_DESC1   := SX6->X6_DSCSPA1 := SX6->X6_DSCENG1 := "Sequencia de Registros Ticket"
+	   SX6->X6_DESC2   := SX6->X6_DSCSPA2 := SX6->X6_DSCENG2 := "Sequencia de Registros Ticket"
+	   SX6->X6_CONTEUD := SX6->X6_CONTSPA := SX6->X6_CONTENG := SX6->X6_CONTEUD+1
+	   SX6->X6_PROPRI  := 'U'
+   
+   SX6->(MsUnlock())
+
+EndIF
+
+Static Function getAfast( )
+local cQuery := ""
+local nDias := 0
+local nFor := 0 
+local nLoop := 0
+local dDataF := DDATABASE
+local dDataI := DTOC("01/"+(Month(DDATABASE)-1)+"/"+Year(DDATABASE) )
+
+
+
+cAlias8 := GetNextAlias()
+			
+cQuery := " SELECT * FROM " + RETSQLNAME("SR8") + " WHERE R8_FILIAL = '" + (cAlias)->RA_FILIAL + "' "
+cQuery += " AND R8_MAT = '" + (cAlias)->RA_MAT  + "' "
+cQuery += " AND D_E_L_E_T_ = '' AND R8_DURACAO != 0  AND R8_DATAFIM LIKE '%" + Left(Dtos(DDATABASE),4) + "%'" 
+cQuery += " AND  R_E_C_N_O_ =  ( SELECT MAX(R_E_C_N_O_) FROM  " + RETSQLNAME("SR8")
+cQuery += " WHERE R8_FILIAL = '" + (cAlias)->RA_FILIAL + "' "
+cQuery += " AND R8_MAT = '" + (cAlias)->RA_MAT  + "' "
+cQuery += " AND D_E_L_E_T_ = '' AND R8_DURACAO != 0  AND R8_DATAFIM LIKE '%" + Left(Dtos(DDATABASE),4) + "%') " 
+						
+cQuery := ChangeQuery( cQuery )
+dbUseArea(.T.,__CONNECT,TcGenQry(,,cQuery),cAlias8,.F.,.T.)
+
+
+IF !(cAlias8)->(Eof())
+	nDias := DateDiff( (cAlias8)->R8_DATAFIM , MV_PAR08 )
+	dData := CTod(Stod((cAlias8)->R8_DATAFIM))+1
+
+	nLoop := 0
+
+	For nFor := 1 To nDias
+	   IF Dow( dData ) == 6;   // SABADO...
+	    	.OR.;
+			Dow( dData ) == 7   // DOMINGO...	    	
+
+	 	    nLoop +=1
+
+       EndIF
+        dData += 1  
+
+	Next	
+EndIF
+
+nLoop := nDias - nLoop // DIFERENÇA DE DIAS - SAB/DOM
+(cAlias8)->(DBCloseArea())
+
+Return nLoop
+
+
+
+Static Function Stod( dData )
+
+local cData := ""
+IF ValType(dData) == "D"
+	cData := AllTrim( Dtos( dData ) )
+Else
+    cData := dData	
+EndIF
+	
+cData := SubString( cData, 7,2 )+'/'+SubString( cData, 5,2 )+'/'+SubString( cData, 1,4 )
+
+Return cData
+
+
+Static Function DateDiff(dDataIni, dDataFim )
+local nDias := CTod(Stod(dDataFim))-CTod(Stod(dDataIni))
+Return nDias
+
+
+Static Function msgTimer(obj,msg,segundos,titulo) 
+local cStyle := "Q3Frame{ background-color:qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop: 0 #de100b, stop: 1 #f42e19) }"
+local oPanel
+local bEnd    := {||oDlg:End() }
+
+   
+DEFINE FONT oFont NAME "Arial"  BOLD 
+DEFINE DIALOG oDlg FROM  80,102 TO 100,473 TITLE oemtoansi(titulo) STYLE nOR( WS_VISIBLE, WS_POPUP ) PIXEL FONT oFont 
+oPanel := TPanelCss():New(00,00,"",oDlg,,.F.,.F.,,,190,74,.T.,.F.)
+oPanel:setCSS( cStyle )
+DEFINE TIMER oTimer INTERVAL (segundos) ACTION ( Eval( bEnd )) OF oDlg
+
+@ 10, 29 SAY oemtoansi(msg) SIZE 121, 20 PIXEL COLOR CLR_WHITE FONT oFont OF oPanel
+
+                                                          
+ACTIVATE MSDIALOG oDlg ON INIT ( oTimer:Activate()) CENTERED
+			                               
+Return
+
+
+Static Function onLog( aFunc )
+local aBrowse  := aFunc
+
+	DEFINE DIALOG oDlg TITLE "Warning | Processo Ticket" FROM 180,180 TO 550,700 PIXEL
+
+
+		oBrowse := TCBrowse():New( 01 , 01, 260, 156,,;
+									{'Filial','Funcionario','Funcao','Erro'},{50,100,50,150},;
+									oDlg,,,,,{||},,,,,,,.F.,,.T.,,.F.,,, )
+
+		oBrowse:SetArray(aBrowse)
+	    
+
+		oBrowse:bLine := {||{ 	aBrowse[oBrowse:nAt,01],;
+								aBrowse[oBrowse:nAt,02],;
+								aBrowse[oBrowse:nAt,03],;
+								aBrowse[oBrowse:nAt,04] } }
+
+
+//		oBrowse:bHeaderClick := {|| alert('bHeaderClick') } 
+//		oBrowse:bLDblClick   := {|| alert('bLDblClick') }
+
+	    
+	ACTIVATE DIALOG oDlg CENTERED 
+Return
+
+
+
+Static Function getPosto( cAlias )
+local cQuery := ""
+local cAlias
+local lRet := .F.
+
+TBSZK := GetNextAlias()
+			
+cQuery := " SELECT * FROM " + RETSQLNAME("SZK") + " WHERE ZK_CODMAT = '" +  (cAlias)->RA_MAT + "' "
+cQuery += " AND ZK_FILMAT = '" + (cAlias)->RA_FILIAL + "' "
+cQuery += " AND ZK_CODPOS = '" + cCodPosto + "' "
+cQuery += " AND ZK_MES = '" + MV_PAR03 + "' "
+
+cQuery := ChangeQuery( cQuery )
+dbUseArea(.T.,__CONNECT,TcGenQry(,,cQuery),TBSZK,.F.,.T.)
+				
+IF !(TBSZK)->(Eof())
+   lRet := .T.
+EndIF   
+
+(TBSZK)->(DBCloseArea())					
+
+Return lRet
+
+
+Static Function FM_Direct( cPath, lDrive, lMSg )
+Local aDir
+Local lRet:=.T.
+Default lMSg := .T.
+
+IF Empty(cPath)
+	Return lRet
+EndIf
+
+lDrive := If(lDrive == Nil, .T., lDrive)
+
+cPath := Alltrim(cPath)
+IF Subst(cPath,2,2) <> ":\" .AND. lDrive
+	MsgInfo("Unidade de drive nao especificada") 
+	lRet:=.F.
+Else
+	cPath := If(Right(cPath,1) == "\", Left(cPath,Len(cPath)-1), cPath)
+	aDir  := Directory(cPath,"D")
+	IF Len(aDir) = 0
+		IF lMSg
+			If MsgYesNo("Diretorio - "+cPath+" - nao encontrado, deseja cria-lo" )  
+				IF MakeDir(cPath) <> 0
+					Help(" ",1,"NOMAKEDIR")
+					lRet := .F.
+				EndIF
+			EndIF
+		Else
+			IF MakeDir(cPath) <> 0
+				Help(" ",1,"NOMAKEDIR")
+				lRet := .F.
+			EndIF
+		EndIF
+	EndIF
+EndIF
+
+Return lRet
+

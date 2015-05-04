@@ -1,0 +1,1332 @@
+#INCLUDE "matrar2b.ch"
+#INCLUDE "PROTHEUS.CH"
+/*/                                                                                                       
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ                       
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±                            
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³MATRAR2B  ³ Autor ³ Wagner Montenegro   ³ Data ³ 05.02.2010 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³Livro Fiscal de Vendas  c/ Resumo DDJJ-IVA                  ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±            
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³Argentina                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Function MatrAr2B()
+                          
+Local I:=0
+Local   lError  :=.T.
+Local   aAreaSm0 := {}
+Private cPerg := PadR( "MTRAR2B" , Len( SX1->X1_GRUPO ))
+Private cPictVr := PesqPict("SF3","F3_VALCONT",TamSX3("F3_VALCONT")[1])
+Private cPictNF	:= PesqPict("SF3","F3_NFISCAL" ,TamSX3("F3_NFISCAL")[1])
+Private cPictAlq:= PesqPict("SF3","F3_ALQIMP1",TamSX3("F3_ALQIMP1")[1])
+Private cPictDt := PesqPict("SF3","F3_ENTRADA",20)
+Private cPictTP := PesqPict("SF2","F2_TIPO",TamSX3("F2_TIPO")[1])
+Private nTam	:= TamSX3("F3_VALCONT")[1]
+Private nTamNF	:= TamSX3("F3_NFISCAL")[1] +1
+Private nTamTP  := TamSX3("F2_TIPO")[1]
+Private cQuebraTipo:=""
+// Variaveis de armazenamento dinamico dos campos para uso nas celulas do objeto
+Private cF3VrIB  :=""
+Private cF3AlqIVA:=""
+Private cF3BaseIVA:=""
+Private cF3VrIVA :=""
+Private cF3VrIVAP:=""
+Private cF3VrEXCL:=""
+
+// Variaveis de armazenamento dinamico dos cmapos para uso na query
+Private cSF3VrIB  :=""
+Private cSF3AlqIVA:=""
+Private cSF3BaseIVA:=""
+Private cSF3VrIVA :=""
+Private cSF3VrIVAP:=""
+Private cSF3VrEXCL:=""
+
+// Variaves de armazenamento dinamico do Alias da Query com os campos para uso na funçoes de totalização
+Private cTF3VrIB  :=""
+Private cTF3AlqIVA:=""
+Private cTF3BaseIVA:=""
+Private cTF3VrIVA :=""
+Private cTF3VrIVAP:=""
+Private cTF3VrEXCL:=""
+
+Private nTotOtros:=0 
+Private nContab:=0 
+Private nTotEXEN:=0 
+Private cA2COD:=""
+Private cA2NOME:=""
+Private cA2CGC:=""
+Private cA2TIPO:=""
+Private aTipo:={}
+Private aTMP:={}  
+
+Private cAliasA := GetNextAlias()
+Private nLinRI:=1, nLinRNI:=2, nLinE:=3, nLinNR:=4, nLinCF:=5, nLinRM:=6 //Linhas de aTotales
+Private nColTot:=1, nColGra:=2, nColExen:=3, nColIVA:=4, nColIVAP:=5, nColIBP:=6, nColOtros:=7, nColExcl:=8 ,nColAliq:=9  //Colunas de Posições das Totalizações
+Private aTotales:={}  //Array para totalização dos tipos de Fornecedores (Resp.Insc./Resp.No Inscr./Exentos/No Responsables/Monotributista)
+Private aSTipos  :={   0.00,   0.00,      0.00,    0.00,     0.00,    0.00,      0.00,     0.00}
+Private aSTotales:={   0.00,   0.00,      0.00,    0.00,     0.00,    0.00,      0.00,     0.00} //Array para totalização de aTotales p/ reltorio em modo Sintetico
+Private aResumoIVA:={} //Totalizador do RESUMO DDJJ-IVA
+Private aColIVA :={} //Armazena o nro das colunas IVA no SF3 conforme cadastro no SFB
+Private aColIVAP:={} //Armazena o nro das colunas IVAp no SF3 conforme cadastro no SFB
+Private aColIB  :={} //Armazena o nro das colunas IB no SF3 conforme cadastro no SFB
+Private aColEXCL:={} //Armazena o nro das colunas Impostos INTERNOS no SF3 conforme cadastro no SFB
+Private aImpostos:={} //Totalização para Outros Impostos diferentes de IVA IVAP IB
+Private aTLocalIVA  :={} //Totalização Fornecedores Interno para Totales Generales del IVA
+Private aTVariosIVA :={} //Totalização Fornecedores Extrangeiros para Totales Generales del IVA
+Private cExpCampos:="" //Composição dinamica dos Campos necessários para Query
+Private cExpC1:=""
+Private cExpC2:=""
+Private cExpC3:=""
+Private cExpC4:=""
+Private cExpC5:=""
+Private cColIVA :=""
+Private cColIVAP:=""
+Private cColIB  :=""
+Private cColEXCL:=""
+
+AjustaSX1()
+
+Pergunte(cPerg,.T.)
+
+	//IVAN
+	aAreaSm0 := SM0->(GetArea())
+	cFilAnt  := MV_PAR05
+	
+	dbSelectArea("SM0")                    
+	SM0->(dbGoTop())
+	SM0->(dbSeek(cEmpAnt+cFilAnt,.T.))
+
+   //Montagem do array aTotales com (Identificador e Descrição) dos tipos existentes de Clientes conforme SX3
+   aSx3Box := RetSx3Box( Posicione("SX3", 2, "A1_TIPO", "X3CBox()" ),,, 1 )
+   FOR I=1 TO LEN(aSx3Box)
+       IF aSx3Box[I][2]<>" "
+          AADD(aTotales  ,{0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,aSx3Box[I][2],aSx3Box[I][3] } )                  
+       ENDIF
+   NEXT
+   If Len(aTotales)=0
+      Alert(STR0043)
+    Else  
+      If SFB->(FieldPos("FB_TIPO")) > 0 .and. SFB->(FieldPos("FB_CLASSE")) > 0 .and. SFB->(FieldPos("FB_CLASSIF")) > 0
+         *///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*
+         //Busca posicionamento dos Impostos no SFB  FB_CLASSIF(1=IB 3=IVA Classe) FB_CLASSIF("I"=Imposto  "P"=Percepcion) FB_CLASSE("R"=Retencion)
+         //Alimenta os Arrays de Posicionamento das Colunas em SF3 
+         DbSelectArea("SFB")
+         SFB->(DBGOTOP())
+         While !SFB->(EOF())
+            If SFB->FB_FILIAL+SFB->FB_CLASSIF+SFB->FB_CLASSE==xFilial("SFB")+"1P"  //IB
+               If SFB->FB_CLASSE<>"R"
+                  cColIB    :=SFB->FB_CPOLVRO
+                  IF(LEN(SFB->FB_CPOLVRO)<>0,lError:=lError,lError:=.F.)
+                  If Len(aColIB)<>0
+                     If ASCAN(aColIB,SFB->FB_CPOLVRO)=0
+                        AADD(aColIB,SFB->FB_CPOLVRO)
+                     Endif
+                   Else 
+                     AADD(aColIB,SFB->FB_CPOLVRO)
+                  Endif  
+               Endif
+            Endif
+            SFB->(DBSkip())
+         Enddo
+         SFB->(DBGOTOP())
+         While !SFB->(EOF())
+            If SFB->FB_FILIAL+SFB->FB_CLASSIF+SFB->FB_CLASSE==xFilial("SFB")+"3I"  //IVA
+               If SFB->FB_CLASSE=="I"
+                  cColIVA   :=SFB->FB_CPOLVRO
+                  IF(LEN(SFB->FB_CPOLVRO)<>0,lError:=lError,lError:=.F.)         
+                  If Len(aColIVA)<>0
+                     If ASCAN(aColIVA,SFB->FB_CPOLVRO)=0
+                        AADD(aColIVA,SFB->FB_CPOLVRO)
+                     Endif
+                    Else 
+                     AADD(aColIVA,SFB->FB_CPOLVRO)
+                  Endif              
+               Endif
+            Endif
+            SFB->(DBSkip())
+         Enddo
+         SFB->(DBGOTOP())
+         While !SFB->(EOF())
+            If SFB->FB_FILIAL+SFB->FB_CLASSIF+SFB->FB_CLASSE==xFilial("SFB")+"3P"  //IVAP
+               If SFB->FB_CLASSE=="P"
+                  cColIVAP  :=SFB->FB_CPOLVRO
+                  IF(LEN(SFB->FB_CPOLVRO)<>0,lError:=lError,lError:=.F.)         
+                  If Len(aColIVAP)<>0
+                     If ASCAN(aColIVAP,SFB->FB_CPOLVRO)=0
+                        AADD(aColIVAP,SFB->FB_CPOLVRO)
+                     Endif
+                    Else 
+                     AADD(aColIVAP,SFB->FB_CPOLVRO)
+                  Endif              
+               Endif
+            Endif                              
+            SFB->(DBSkip())
+         Enddo   
+         SFB->(DBGOTOP())
+         While !SFB->(EOF())
+            If SFB->FB_FILIAL+SFB->FB_CLASSIF+SFB->FB_CLASSE==xFilial("SFB")+"2I"  //INTERNOS
+               If SFB->FB_CLASSE=="I"
+                  cColEXCL  :=SFB->FB_CPOLVRO
+                  IF(LEN(SFB->FB_CPOLVRO)<>0,lError:=lError,lError:=.F.)         
+                  If Len(aColEXCL)<>0
+                     If ASCAN(aColEXCL,SFB->FB_CPOLVRO)=0
+                        AADD(aColEXCL,SFB->FB_CPOLVRO)
+                     Endif
+                    Else 
+                     AADD(aColEXCL,SFB->FB_CPOLVRO)
+                  Endif              
+               Endif
+            Endif      
+            SFB->(DBSkip())
+         Enddo
+         IF !lError
+            Alert(STR0044)
+         ENDIF
+         *///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*
+         //Busca posicionamento para Outros Impostos 
+         //Alimenta o Array de Posicionamento das Colunas em SF3 para outros impostos adicionando as colunas não utilizadas para IVA IVAP e IB
+         SFB->(DbGoTop())                        
+         While !SFB->(EOF())
+            If SFB->FB_CLASSE="R"  
+               SFB->(DBSkip())
+               LOOP
+            Endif
+            If ASCAN(aColEXCL,SFB->FB_CPOLVRO)<>0 .or. ASCAN(aColIVA ,SFB->FB_CPOLVRO)<>0 .or. ASCAN(aColIVAP,SFB->FB_CPOLVRO)<>0 .or. ASCAN(aColIB  ,SFB->FB_CPOLVRO)<>0
+               SFB->(DBSkip())
+               LOOP   
+            Endif   
+            IF ASCAN(aImpostos,SFB->FB_CPOLVRO)=0
+               AADD(aImpostos,SFB->FB_CPOLVRO)
+            Endif
+            SFB->(DBSkip())
+         Enddo   
+  
+         *///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*
+         //Montagem dos campos necessarios para uso na query 
+         For i = 1 to Len(aColIB)
+             cLerCampo="SF3.F3_VALIMP"+aColIB[i]
+             cExpC1+=cLerCampo
+             if i<Len(aColIB)
+                cExpC1=cExpC1+","
+             Endif
+         Next
+         For i = 1 to Len(aColIVA)
+             cLerCampo="SF3.F3_VALIMP"+aColIVA[i]
+             cExpC2+=cLerCampo+","
+             cLerCampo="SF3.F3_ALQIMP"+aColIVA[i]
+             cExpC2+=cLerCampo+","    
+             cLerCampo="SF3.F3_BASIMP"+aColIVA[i]
+             cExpC2+=cLerCampo
+             if i<Len(aColIVA)
+                cExpC2=cExpC2+","
+             Endif
+         Next
+         For i = 1 to Len(aColIVAP)
+             cLerCampo="SF3.F3_VALIMP"+aColIVAP[i]
+             cExpC3+=cLerCampo
+             if i<Len(aColIVAP)
+                cExpC3=cExpC3+","
+             Endif
+         Next
+         For i = 1 to Len(aColEXCL)
+             cLerCampo="SF3.F3_VALIMP"+aColEXCL[i]
+             cExpC4+=cLerCampo
+             if i<Len(aColEXCL)
+                cExpC4=cExpC4+","
+             Endif
+         Next 
+         For i = 1 to Len(aImpostos)
+             cLerCampo="SF3.F3_VALIMP"+aImpostos[i]
+             cExpC5+=cLerCampo
+             if i<Len(aImpostos)
+                cExpC5=cExpC5+","
+             Endif
+         Next
+         If Len(cExpC1)<>0
+            cExpCampos=cExpC1
+         Endif
+         If Len(cExpC2)<>0
+            If Len(cExpCampos)<>0
+               cExpCampos+=","+cExpC2
+              else
+               cExpCampos=cExpC2
+            Endif   
+         Endif
+         If Len(cExpC3)<>0
+            If Len(cExpCampos)<>0
+               cExpCampos+=","+cExpC3
+              Else
+               cExpCampos=cExpC3
+            Endif   
+         Endif
+         If Len(cExpC4)<>0
+            If Len(cExpCampos)<>0
+               cExpCampos+=","+cExpC4
+              Else
+               cExpCampos=cExpC4
+            Endif 
+         Endif
+         If Len(cExpC5)<>0
+            If Len(cExpCampos)<>0
+               cExpCampos+=","+cExpC5
+              Else
+               cExpCampos=cExpC5
+            Endif   
+         Endif
+         IF LEN(aColIVA)=0
+            Alert(STR0045)
+            lError:=.F.
+         ENDIF   
+         IF LEN(aColIVAP)=0
+            Alert(STR0046)
+            lError:=.F.
+         ENDIF   
+         IF LEN(aColIB)=0
+            Alert(STR0047)
+            lError:=.F.
+         ENDIF   
+   //    IF LEN(aColEXCL)=0
+   //       Alert("Impostos Internos não configurado!")
+   //       lError:=.F.
+   //    ENDIF
+       Else
+         lError:=.F.
+         Alert(STR0048)
+      Endif      
+      IF lError
+         oReport := ReportDef()
+         oReport:PrintDialog()
+      ENDIF
+   Endif
+   
+	RestArea(aAreaSm0)
+    cFilAnt	:=	FWCodFil()
+   
+Return
+
+Static Function ReportDef()
+Local oReport
+Local oSection
+Local oTotal1
+Local oTotal2
+Local oTotal3
+Local oTotal4
+Local oTotal5
+Local oTotal6
+Local oTotal7
+Local oTotal8
+Local cReport := "MATRAR2B"
+Local cTitulo	:= STR0001 //"Emissao do Livro Fiscal de Vendas"
+Local cDesc		:= STR0004 //"El objetivo de este programa es imprimir el Libro Fiscal de Vendas."
+Local cDesc2    := STR0005 //"Libros Fiscales "
+Local i
+
+//Para uso no objeto TReport
+cF3VrIB  :="F3_VALIMP"+cColIB  
+cF3AlqIVA:="F3_ALQIMP"+cColIVA 
+cF3BaseIVA:="F3_BASIMP"+cColIVA 
+cF3VrIVA :="F3_VALIMP"+cColIVA 
+cF3VrIVAP:="F3_VALIMP"+cColIVAP
+cF3VrEXCL:="F3_VALIMP"+cColEXCL
+//Para uso na Query
+cSF3VrIB  :="SF3.F3_VALIMP"+cColIB
+cSF3AlqIVA:="SF3.F3_ALQIMP"+cColIVA
+cSF3BaseIVA:="SF3.F3_BASIMP"+cColIVA
+cSF3VrIVA :="SF3.F3_VALIMP"+cColIVA
+cSF3VrIVAP:="SF3.F3_VALIMP"+cColIVAP
+cSF3VrEXCL:="SF3.F3_VALIMP"+cColEXCL
+//Para uso na funções totalizadoras
+cTF3VrIB  :="(cAliasA)->F3_VALIMP"+cColIB
+cTF3AlqIVA:="(cAliasA)->F3_ALQIMP"+cColIVA
+cTF3BaseIVA:="(cAliasA)->F3_BASIMP"+cColIVA
+cTF3VrIVA :="(cAliasA)->F3_VALIMP"+cColIVA
+cTF3VrIVAP:="(cAliasA)->F3_VALIMP"+cColIVAP
+cTF3VrEXCL:="(cAliasA)->F3_VALIMP"+cColEXCL
+
+*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*
+//Tratamento dos objetos TREPORT
+oReport  := TReport():New(cReport,cTitulo,cPerg,{|oReport| PrintReport(oReport,cAliasA,oSection,oTotal1,oTotal2,oTotal3,oTotal4,oTotal5,oTotal6,oTotal7,oTotal8)},cDesc)
+oReport:SetTotalInLine(.F.)
+oReport:SetLandscape(.T.)
+
+oSection := TRSection():New(oReport,cDesc2,{cAliasA})
+oSection:lReadOnly := .T.
+oSection:SetTotalInLine(.F.)
+
+TRCell():New(oSection,"A1_COD"     ,cAliasA,"CODIGO"          ,/*Picture*/       ,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,)
+TRCell():New(oSection,"A1_NOME"    ,cAliasA,STR0006    ,/*Picture*/       ,20         ,/*lPixel*/,/*{|| code-block de impressao }*/,,,) //"DENOMINACION"
+TRCell():New(oSection,"A1_CGC"     ,cAliasA,STR0007   ,/*Picture*/       ,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,) //"NRO DOCUMENTO"
+TRCell():New(oSection,"A1_TIPO"    ,cAliasA,STR0008             ,cPictTP           ,nTamTP     ,/*lPixel*/,/*{|| code-block de impressao }*/,,,) //"IVA"
+TRCell():New(oSection,"F3_ENTRADA" ,cAliasA,STR0009           ,cPictDt           ,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,) //"FECHA"
+TRCell():New(oSection,"F3_ESPECIE" ,cAliasa,STR0010         ,/*Picture*/       ,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,) //"ESPECIE"
+TRCell():New(oSection,"F3_SERIE"   ,cAliasA,STR0011           ,/*Picture*/       ,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,) //"SERIE"
+TRCell():New(oSection,"F3_NFISCAL" ,cAliasA,STR0012          ,cPictNF           ,nTamNF     ,/*lPixel*/,/*{|| code-block de impressao }*/,,,) //"NUMERO"
+TRCell():New(oSection,cF3AlqIVA    ,cAliasA,STR0013           ,cPictAlq          ,TamSX3("F3_ALQIMP1")[1],/*lPixel*/,/*{|| code-block de impressao }*/,,,"CENTER") //"% IVA"
+TRCell():New(oSection,"F3_VALCONT" ,cAliasA,STR0014   ,/*Picture*/       ,15       ,/*lPixel*/,/*{|| code-block de impressao }*/,,,"CENTER") //"    TOTAL    "
+TRCell():New(oSection,cF3BaseIVA   ,cAliasA,STR0015   ,/*Picture*/       ,15       ,/*lPixel*/,/*{|| code-block de impressao }*/,,,"CENTER") //"   GRAVADO   "
+TRCell():New(oSection,"nExenNoGrav",       ,STR0016   ,cPictVr           ,nTam       ,/*lPixel*/,/*{|| code-block de impressao }*/,,,"CENTER")   //"EXEN/NO GRAV "
+TRCell():New(oSection,cF3VrIVA     ,cAliasA,STR0017   ,cPictVr           ,nTam       ,/*lPixel*/,/*{|| code-block de impressao }*/,,,"CENTER")   //"     IVA     "
+TRCell():New(oSection,cF3VrIVAP    ,cAliasA,STR0018   ,cPictVr           ,nTam       ,/*lPixel*/,/*{|| code-block de impressao }*/,,,"CENTER")   //"  IVA Percep "
+TRCell():New(oSection,cF3VrIB      ,cAliasA,STR0019   ,cPictVr           ,nTam       ,/*lPixel*/,/*{|| code-block de impressao }*/,,,"CENTER")   //" IIBB Percep "
+TRCell():New(oSection,"nOTROS"     ,       ,STR0020   ,cPictVr           ,nTam       ,/*lPixel*/,/*{|| code-block de impressao }*/,,,"CENTER")   //"    OTROS    "
+IF cF3VrEXCL<>""
+   TRCell():New(oSection,cF3VrEXCL    ,cAliasA,STR0023   ,cPictVr           ,nTam       ,/*lPixel*/,/*{|| code-block de impressao }*/,,,"CENTER")   //"EXCL.NET.GRAV"
+ ELSE  
+   TRCell():New(oSection,cF3VrEXCL    ,       ,STR0023   ,cPictVr           ,nTam       ,/*lPixel*/,/*{|| code-block de impressao }*/,,,"CENTER")   //"EXCL.NET.GRAV"
+ENDIF
+
+TRFunction():New(oSection:Cell("nExenNoGrav"),NIL,NIL,NIL,NIL,NIL,NIL,.F.,.F.)
+TRFunction():New(oSection:Cell("nOtros")     ,NIL,NIL,NIL,NIL,NIL,NIL,.F.,.F.)
+
+oTotal1:= TRFunction():New(oSection:Cell("F3_VALCONT"  ),"F3CONT" ,"SUM",/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal2:= TRFunction():New(oSection:Cell(cF3BaseIVA    ),"F3BIVA" ,"SUM",/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal3:= TRFunction():New(oSection:Cell("nExenNoGrav" ),"F3Exen" ,"SUM",/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal4:= TRFunction():New(oSection:Cell(cF3VrIVA      ),"F3VIVA" ,"SUM",/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal5:= TRFunction():New(oSection:Cell(cF3VrIVAP     ),"F3VIVAP","SUM",/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal6:= TRFunction():New(oSection:Cell(cF3VrIB       ),"F3VIB"  ,"SUM",/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal7:= TRFunction():New(oSection:Cell("nOTROS"      ),"F3OTROS","SUM",/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal8:= TRFunction():New(oSection:Cell(cF3VrEXCL     ),"F3VEXCL","SUM",/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+
+Return oReport
+
+
+Static Function PrintReport(oReport,cAliasA,oSection,oTotal1,oTotal2,oTotal3,oTotal4,oTotal5,oTotal6,oTotal7,oTotal8)
+Local i:=0,y:=0
+
+oReport:SetTitle(STR0001+STR0002+Transform(mv_par01,"@D")+STR0003+Transform(mv_par02,"@D")+"]")	//"Emissao do Livro Fiscal de Vendas" //"Emision del Libro Fiscal de Vendas"###" de ["###" até "
+oReport:SetPageNumber(MV_PAR08)
+
+If MV_PAR04<>2 //Tipo do relatorio = analitico
+   oBreak := TRBreak():New(oReport,oSection:Cell("F3_ESPECIE"),"",.F.)
+   oTotal1:SetBreak(oBreak)
+   oTotal2:SetBreak(oBreak)
+   oTotal3:SetBreak(oBreak)
+   oTotal4:SetBreak(oBreak)
+   oTotal5:SetBreak(oBreak)
+   oTotal6:SetBreak(oBreak)
+   oTotal7:SetBreak(oBreak)
+   oTotal8:SetBreak(oBreak)   
+Endif
+
+oSection:Cell("nExenNoGrav"):SetBlock({|| sfVlrExenNG(sfAliqIVA(),(cAliasA)->F3_VALCONT,sfBaseIVA(),sfVrIVA(),sfVrIVAP(),sfVrEXCL(),sfVrIB())})
+oSection:Cell("nOtros")     :SetBlock({|| nTotOtros })  
+
+*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*
+//Montagem da Query
+If mv_par03 == 1
+   cQry  := "SELECT SA1.A1_COD,SA1.A1_NOME,SA1.A1_CGC,SA1.A1_TIPO,SF3.F3_DTCANC,SF3.F3_CLIEFOR,SF3.F3_LOJA,SF3.F3_ENTRADA,SF3.F3_ESPECIE,SF3.F3_SERIE,SF3.F3_NFISCAL,SF3.F3_CFO,"
+   cQry+=cSF3AlqIVA+",SF3.F3_VALCONT,"+cSF3BaseIVA+","+cSF3VrIVA+","+cSF3VrIVAP+","+cSF3VrIB+","+cSF3VrEXCL+","+cExpCampos
+   cQry+=" FROM "+RetSqlName("SF3")+" SF3,"+RetSqlName("SA1")+" SA1 WHERE SF3.F3_CLIEFOR=SA1.A1_COD AND SF3.F3_LOJA=SA1.A1_LOJA AND SF3.F3_FILIAL='"
+   cQry+=xFilial("SF3")+"' AND SA1.D_E_L_E_T_=' ' AND SF3.D_E_L_E_T_=' ' AND SF3.F3_ENTRADA >='"+DTOS(MV_PAR01)+"' AND SF3.F3_ENTRADA<='"+DTOS(MV_PAR02)+"' AND SA1.A1_FILIAL='"+xFilial("SA1")
+   cQry+="' AND SF3.F3_DTCANC =  ' ' AND SF3.F3_TIPOMOV = 'V' AND  SF3.F3_ESPECIE IN('NF','NDC','NCC','NCE','NDE','CF') "
+  ElseIf mv_par03 == 2
+   cQry  := "SELECT SA1.A1_COD,SA1.A1_NOME,SA1.A1_CGC,SA1.A1_TIPO,SF3.F3_DTCANC,SF3.F3_CLIEFOR,SF3.F3_LOJA,SF3.F3_ENTRADA,SF3.F3_ESPECIE,SF3.F3_SERIE,SF3.F3_NFISCAL,SF3.F3_CFO,"
+   cQry+=cSF3AlqIVA+",SF3.F3_VALCONT,"+cSF3BaseIVA+","+cSF3VrIVA+","+cSF3VrIVAP+","+cSF3VrIB+","+cSF3VrEXCL+","+cExpCampos
+   cQry+=" FROM "+RetSqlName("SF3")+" SF3,"+RetSqlName("SA1")+" SA1 WHERE SF3.F3_CLIEFOR=SA1.A1_COD AND SF3.F3_LOJA=SA1.A1_LOJA AND SF3.F3_FILIAL='"
+   cQry+=xFilial("SF3")+"' AND SA1.D_E_L_E_T_=' '  AND SF3.D_E_L_E_T_=' ' AND SF3.F3_ENTRADA >='"+DTOS(MV_PAR01)+"' AND SF3.F3_ENTRADA<='"+DTOS(MV_PAR02)+"' AND SA1.A1_FILIAL='"+xFilial("SA1")
+   cQry+="' AND SF3.F3_DTCANC <> ' ' AND SF3.F3_TIPOMOV = 'V' AND  SF3.F3_ESPECIE IN('NF','NDC','NCC','NCE','NDE','CF') "
+  ElseIf mv_par03 == 3
+   cQry  := "SELECT SA1.A1_COD,SA1.A1_NOME,SA1.A1_CGC,SA1.A1_TIPO,SF3.F3_DTCANC,SF3.F3_CLIEFOR,SF3.F3_LOJA,SF3.F3_ENTRADA,SF3.F3_ESPECIE,SF3.F3_SERIE,SF3.F3_NFISCAL,SF3.F3_CFO,"
+   cQry+=cSF3AlqIVA+",SF3.F3_VALCONT,"+cSF3BaseIVA+","+cSF3VrIVA+","+cSF3VrIVAP+","+cSF3VrIB+","+cSF3VrEXCL+","+cExpCampos
+   cQry+=" FROM "+RetSqlName("SF3")+" SF3,"+RetSqlName("SA1")+" SA1 WHERE SF3.F3_CLIEFOR=SA1.A1_COD AND SF3.F3_LOJA=SA1.A1_LOJA AND SF3.F3_FILIAL='"
+   cQry+=xFilial("SF3")+"' AND SA1.D_E_L_E_T_=' ' AND SF3.D_E_L_E_T_=' ' AND SF3.F3_ENTRADA >='"+DTOS(MV_PAR01)+"' AND SF3.F3_ENTRADA<='"+DTOS(MV_PAR02)+"' AND SA1.A1_FILIAL='"+xFilial("SA1")
+   cQry+="' AND SF3.F3_TIPOMOV = 'V'  AND  SF3.F3_ESPECIE IN('NF','NDC','NCC','NCE','NDE','CF') "
+Endif  
+If mv_par09==1
+   cQry+="ORDER BY F3_ESPECIE,F3_ENTRADA,F3_SERIE,F3_NFISCAL,F3_CFO"
+  else 
+   cQry+="ORDER BY F3_ESPECIE,F3_EMISSAO,F3_SERIE,F3_NFISCAL,F3_CFO"
+Endif
+cQry := ChangeQuery(cQry)
+If Select( cAliasA ) > 0
+   dbSelectArea( cAliasA )
+   dbCloseArea()
+EndIf
+
+//// *** Abre Tabelas *** //
+dbUseArea( .T., 'TOPCONN', TCGENQRY(,,cQry), cAliasA , .F., .T.)
+dbSelectArea(cAliasA) 
+
+oReport:SetMeter((cAliasA)->(Reccount()))  
+
+*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*
+//Impressao
+(cAliasA)->(DbGotop())
+While !( cAliasA )->(Eof())
+    oReport:Section(1):Init() 
+    oReport:Section(1):Cell("A1_COD")    :SetValue(IIF(!Empty((cAliasA)->F3_DTCANC),"Anul",( cAliasA )->A1_COD))  
+    oReport:Section(1):Cell("A1_NOME")   :SetValue(IIF(!Empty((cAliasA)->F3_DTCANC),"Anulada",( cAliasA )->A1_NOME))  
+    oReport:Section(1):Cell(cF3AlqIVA     ):SetValue(sfAliqIVA())
+    oReport:Section(1):Cell("F3_ENTRADA"  ):SetValue(Transform(STOD(( cAliasA )->F3_ENTRADA),"@D"))
+    oSection:Cell("F3_VALCONT"  ):SetBlock ({||nContab})
+    oReport:Section(1):Cell(cF3BaseIVA    ):SetValue(sfBaseIVA())
+    oReport:Section(1):Cell("IVA"         ):SetValue((cAliasA)->A1_TIPO)
+    oReport:Section(1):Cell(cF3VrIVA      ):SetValue(sfVrIVA()  )
+    oReport:Section(1):Cell(cF3VrIVAP     ):SetValue(sfVrIVAP() )
+    oReport:Section(1):Cell(cF3VrIB       ):SetValue(sfVrIB())
+    oReport:Section(1):Cell(cF3VrEXCL     ):SetValue(sfVrEXCL() )	
+    If MV_PAR04=1 //Relatorio Analitico
+       oReport:Section(1):PrintLine()
+       cQuebraTipo:=( cAliasA )->F3_ESPECIE
+      Else
+       oReport:Section(1):Hide()     
+       oReport:Section(1):PrintLine()
+    Endif
+	( cAliasA )->(DbSkip())
+	If MV_PAR04=1 //Relatorio Analitico
+       if( cAliasA )->F3_ESPECIE <> cQuebraTipo
+          oReport:SkipLine(1)
+          oReport:PrintText( STR0025+cQuebraTipo+"]")
+       Endif
+    Endif   
+EndDo      
+*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*
+//Ordena Resumo DDJJ-IVA por CFO
+aSortRes := ASORT(aResumoIVA,,, { |x, y| x[19] < y[19] })
+
+If MV_PAR04=2 
+   oReport:Section(1):Show()
+Endif                         
+
+oReport:Section(1):Finish()    
+
+*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*
+//IMPRESSAO DE TOTALES   
+oReport:Section(1):Cell("A1_COD"      ):SetTitle(Space(Len(oSection:ACELL[1]:GETTEXT())))
+oReport:Section(1):Cell("A1_NOME"     ):SetTitle(Space(Len(oSection:ACELL[2]:GETTEXT())))
+oReport:Section(1):Cell("A1_CGC"      ):SetTitle(Space(Len(oSection:ACELL[3]:GETTEXT())))
+oReport:Section(1):Cell("A1_TIPO"     ):SetTitle(Space(Len(oSection:ACELL[4]:GETTEXT())))
+oReport:Section(1):Cell("F3_ENTRADA"  ):SetTitle(Space(Len(oSection:ACELL[5]:GETTEXT())))
+oReport:Section(1):Cell("F3_ESPECIE"  ):SetTitle(Space(Len(oSection:ACELL[6]:GETTEXT())))
+oReport:Section(1):Cell("F3_SERIE"    ):SetTitle(Space(Len(oSection:ACELL[7]:GETTEXT())))
+oReport:Section(1):Cell("F3_NFISCAL"  ):SetTitle(Space(Len(oSection:ACELL[8]:GETTEXT())))
+oReport:Section(1):Cell(cF3AlqIVA     ):SetTitle(Space(Len(oSection:ACELL[9]:GETTEXT())))
+oReport:Section(1):Cell("A1_TIPO"     ):Hide()
+oReport:Section(1):Cell("F3_ENTRADA"  ):Hide()
+
+oReport:Section(1):Cell("F3_ESPECIE"  ):SetValue("T01") 
+
+oReport:Section(1):Init()     
+
+For i:= 1 to Len(aTotales) 
+    nSomaTot:=0
+    For y:=1 to 8
+        nSomaTot+=aTotales[i][y]
+    Next
+    If nSomaTot<>0 //IMPRIME SE DIFERENTE DE ZERO
+       oReport:Section(1):Cell("A1_COD"      ):SetValue(STR0026)
+       oReport:Section(1):Cell("A1_NOME"     ):SetValue(aTotales[i][10]) 
+       oReport:Section(1):Cell("F3_ESPECIE"  ):SetValue("") 
+   	   oReport:Section(1):Cell(cF3AlqIVA     ):SetValue("") 	    
+   	   oReport:Section(1):Cell("F3_VALCONT"  ):SetValue(aTotales[i][1])
+   	   oReport:Section(1):Cell(cF3BaseIVA    ):SetValue(aTotales[i][2])
+   	   oReport:Section(1):Cell("nExenNoGrav" ):SetValue(aTotales[i][3])
+   	   oReport:Section(1):Cell(cF3VrIVA      ):SetValue(aTotales[i][4])
+   	   oReport:Section(1):Cell(cF3VrIVAP     ):SetValue(aTotales[i][5])
+   	   oReport:Section(1):Cell(cF3VrIB       ):SetValue(aTotales[i][6])
+  	   oReport:Section(1):Cell("nOTROS"      ):SetValue(aTotales[i][7])
+       oReport:Section(1):Cell(cF3VrEXCL     ):SetValue(aTotales[i][8])	
+       oReport:Section(1):PrintLine()
+    Endif
+Next
+If MV_PAR04=2 //IMPRISSAO DOS TOTAIS DE ATOTALES CASO RELATORIO FOR SINTETICO
+   oReport:Section(1):Init()
+   oReport:ThinLine()
+   oReport:Section(1):Cell("A1_COD"      ):SetValue("")
+   oReport:Section(1):Cell("A1_NOME"     ):SetValue("") 
+   oReport:Section(1):Cell(cF3AlqIVA     ):SetValue("") 	    
+   oReport:Section(1):Cell("F3_VALCONT"  ):SetValue(aSTotales[1])
+   oReport:Section(1):Cell(cF3BaseIVA    ):SetValue(aSTotales[2])
+   oReport:Section(1):Cell("nExenNoGrav" ):SetValue(aSTotales[3])
+   oReport:Section(1):Cell(cF3VrIVA      ):SetValue(aSTotales[4])
+   oReport:Section(1):Cell(cF3VrIVAP     ):SetValue(aSTotales[5])
+   oReport:Section(1):Cell(cF3VrIB       ):SetValue(aSTotales[6])
+   oReport:Section(1):Cell("nOTROS"      ):SetValue(aSTotales[7])
+   oReport:Section(1):Cell(cF3VrEXCL     ):SetValue(aSTotales[8])	
+   oReport:Section(1):PrintLine()                          
+   oReport:Section(1):Finish()
+ ELSE
+   IF MV_PAR06=2 //IMPRESSAO DE TOTAIS DE ATOTALES CASO TOTALES GENERALES NAO SEJA SELECIONADO PARA IMPRESSAO
+      oReport:Section(1):Init()
+      oReport:Section(1):Cell(cF3AlqIVA     ):SetValue(0)
+      oReport:Section(1):Cell("F3_VALCONT"  ):SetValue(0)
+      oReport:Section(1):Cell(cF3BaseIVA    ):SetValue(0)
+      oReport:Section(1):Cell("nExenNoGrav" ):SetValue(0)
+      oReport:Section(1):Cell(cF3VrIVA      ):SetValue(0)
+      oReport:Section(1):Cell(cF3VrIVAP     ):SetValue(0)
+      oReport:Section(1):Cell(cF3VrIB       ):SetValue(0)
+      oReport:Section(1):Cell("nOTROS"      ):SetValue(0)
+      oReport:Section(1):Cell(cF3VrEXCL     ):SetValue(0)	
+      oReport:Section(1):Cell("F3_ESPECIE"  ):SetValue(Iif(Len(aSortRes)>=1,SUBSTR(aSortRes[1][19],1,2),""))       
+
+      oReport:Section(1):Cell("A1_COD"      ):Disable()
+      oReport:Section(1):Cell("A1_NOME"     ):Disable()
+      oReport:Section(1):Cell("A1_CGC"      ):Disable()
+      oReport:Section(1):Cell("A1_TIPO"     ):Disable()
+      oReport:Section(1):Cell("F3_ENTRADA"  ):Disable()
+      oReport:Section(1):Cell("F3_ESPECIE"  ):Disable()
+      oReport:Section(1):Cell("F3_SERIE"    ):Disable()
+      oReport:Section(1):Cell("F3_NFISCAL"  ):Disable()
+      oReport:Section(1):Cell(cF3AlqIVA     ):Disable()
+      oReport:Section(1):Cell("F3_VALCONT"  ):Disable()
+      oReport:Section(1):Cell(cF3BaseIVA    ):Disable()
+      oReport:Section(1):Cell("nExenNoGrav" ):Disable()
+      oReport:Section(1):Cell(cF3VrIVA      ):Disable()
+      oReport:Section(1):Cell(cF3VrIVAP     ):Disable()
+      oReport:Section(1):Cell(cF3VrIB       ):Disable()
+      oReport:Section(1):Cell("nOTROS"      ):Disable()
+      oReport:Section(1):Cell(cF3VrEXCL     ):Disable()
+      oReport:PrintText( STR0026)
+      IF MV_PAR07=1
+         oReport:Section(1):PrintLine()
+      ENDIF
+      oReport:Section(1):Cell("A1_COD"      ):Enable()
+      oReport:Section(1):Cell("A1_NOME"     ):Enable()
+      oReport:Section(1):Cell("A1_CGC"      ):Enable()
+      oReport:Section(1):Cell("A1_TIPO"     ):Enable()
+      oReport:Section(1):Cell("F3_ENTRADA"  ):Enable()
+      oReport:Section(1):Cell("F3_ESPECIE"  ):Enable()
+      oReport:Section(1):Cell("F3_SERIE"    ):Enable()
+      oReport:Section(1):Cell("F3_NFISCAL"  ):Enable()
+      oReport:Section(1):Cell(cF3AlqIVA     ):Enable()
+      oReport:Section(1):Cell("F3_VALCONT"  ):Enable()
+      oReport:Section(1):Cell(cF3BaseIVA    ):Enable()
+      oReport:Section(1):Cell("nExenNoGrav" ):Enable()
+      oReport:Section(1):Cell(cF3VrIVA      ):Enable()
+      oReport:Section(1):Cell(cF3VrIVAP     ):Enable()
+      oReport:Section(1):Finish()
+    ELSE
+      oReport:Section(1):Cell("F3_ESPECIE"  ):SetValue("T02") 
+      oReport:PrintText( STR0026)
+      oReport:Section(1):Finish()    	
+   ENDIF   
+Endif
+
+*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*
+//IMPRESSAO DE TOTALES GENERALES DEL IVA
+If MV_PAR06=1 //IMPRIME TOTALES GENERALES PARA CONTROL GLOBAL DEL IVA
+   oReport:Section(1):Cell("A1_COD"      ):SetTitle(Space(Len(oSection:ACELL[1]:GETTEXT())))
+   oReport:Section(1):Cell("A1_NOME"     ):SetTitle(Space(Len(oSection:ACELL[2]:GETTEXT())))
+   oReport:Section(1):Cell("F3_ESPECIE"  ):HIDE()
+   oReport:Section(1):Cell(cF3AlqIVA     ):SetTitle("%IVA")
+   oReport:Section(1):Init()
+   IF Len(aTLocalIVA)>0
+      For i=1 to Len(aTLocalIVA)
+          oReport:Section(1):Cell("A1_COD"      ):SetValue(STR0028)  	    
+          oReport:Section(1):Cell("A1_NOME"     ):SetValue(aTLocalIVA[i][10])  	    
+          oReport:Section(1):Cell(cF3AlqIVA     ):SetValue(aTLocalIVA[i][9])
+          oReport:Section(1):Cell("F3_VALCONT"  ):SetValue(aTLocalIVA[i][1])
+          oReport:Section(1):Cell(cF3BaseIVA    ):SetValue(aTLocalIVA[i][2])
+          oReport:Section(1):Cell("nExenNoGrav" ):SetValue(aTLocalIVA[i][3])
+          oReport:Section(1):Cell(cF3VrIVA      ):SetValue(aTLocalIVA[i][4])
+          oReport:Section(1):Cell(cF3VrIVAP     ):SetValue(aTLocalIVA[i][5])
+          oReport:Section(1):Cell(cF3VrIB       ):SetValue(aTLocalIVA[i][6])
+          oReport:Section(1):Cell("nOTROS"      ):SetValue(aTLocalIVA[i][7])
+          oReport:Section(1):Cell(cF3VrEXCL     ):SetValue(aTLocalIVA[i][8])	
+          IF i<>Len(aTLocalIVA)
+             oReport:Section(1):PrintLine()
+          ENDIF   
+      Next
+      IF Len(aTVariosIVA)>0
+         oReport:Section(1):PrintLine()
+       ELSE
+         oReport:Section(1):PrintLine()
+         oReport:Section(1):Cell(cF3AlqIVA     ):SetValue(0)
+         oReport:Section(1):Cell("F3_VALCONT"  ):SetValue(0)
+         oReport:Section(1):Cell(cF3BaseIVA    ):SetValue(0)
+         oReport:Section(1):Cell("nExenNoGrav" ):SetValue(0)
+         oReport:Section(1):Cell(cF3VrIVA      ):SetValue(0)
+         oReport:Section(1):Cell(cF3VrIVAP     ):SetValue(0)
+         oReport:Section(1):Cell(cF3VrIB       ):SetValue(0)
+         oReport:Section(1):Cell("nOTROS"      ):SetValue(0)
+         oReport:Section(1):Cell(cF3VrEXCL     ):SetValue(0)	
+         oReport:Section(1):Cell("F3_ESPECIE"  ):SetValue(Iif(Len(aSortRes)>=1,SUBSTR(aSortRes[1][19],1,2),""))       
+
+         oReport:Section(1):Cell("A1_COD"      ):Disable()
+         oReport:Section(1):Cell("A1_NOME"     ):Disable()
+         oReport:Section(1):Cell("A1_CGC"      ):Disable()
+         oReport:Section(1):Cell("A1_TIPO"     ):Disable()
+         oReport:Section(1):Cell("F3_ENTRADA"  ):Disable()
+         oReport:Section(1):Cell("F3_ESPECIE"  ):Disable()
+         oReport:Section(1):Cell("F3_SERIE"    ):Disable()
+         oReport:Section(1):Cell("F3_NFISCAL"  ):Disable()
+         oReport:Section(1):Cell(cF3AlqIVA     ):Disable()
+         oReport:Section(1):Cell("F3_VALCONT"  ):Disable()
+         oReport:Section(1):Cell(cF3BaseIVA    ):Disable()
+         oReport:Section(1):Cell("nExenNoGrav" ):Disable()
+         oReport:Section(1):Cell(cF3VrIVA      ):Disable()
+         oReport:Section(1):Cell(cF3VrIVAP     ):Disable()
+
+         oReport:Section(1):Cell(cF3VrIB       ):HIDE()
+         oReport:Section(1):Cell("nOTROS"      ):HIDE()
+         oReport:Section(1):Cell(cF3VrEXCL     ):HIDE()
+    	       
+         oReport:Section(1):Cell(cF3VrIB       ):Disable()
+         oReport:Section(1):Cell("nOTROS"      ):Disable()
+         oReport:Section(1):Cell(cF3VrEXCL     ):Disable()
+  
+         oReport:PrintText( STR0024)               
+         oReport:Section(1):PrintLine()
+         oReport:Section(1):Cell("A1_COD"      ):Enable()
+         oReport:Section(1):Cell("A1_NOME"     ):Enable()
+         oReport:Section(1):Cell("A1_CGC"      ):Enable()
+         oReport:Section(1):Cell("A1_TIPO"     ):Enable()
+         oReport:Section(1):Cell("F3_ENTRADA"  ):Enable()
+         oReport:Section(1):Cell("F3_ESPECIE"  ):Enable()
+         oReport:Section(1):Cell("F3_SERIE"    ):Enable()
+         oReport:Section(1):Cell("F3_NFISCAL"  ):Enable()
+         oReport:Section(1):Cell(cF3AlqIVA     ):Enable()
+         oReport:Section(1):Cell("F3_VALCONT"  ):Enable()
+         oReport:Section(1):Cell(cF3BaseIVA    ):Enable()
+         oReport:Section(1):Cell("nExenNoGrav" ):Enable()
+         oReport:Section(1):Cell(cF3VrIVA      ):Enable()
+         oReport:Section(1):Cell(cF3VrIVAP     ):Enable()
+      ENDIF
+   ENDIF    
+   IF Len(aTVariosIVA)>0
+      For i=1 to Len(aTVariosIVA)
+      	  oReport:Section(1):Cell("A1_COD"      ):SetValue(STR0028)
+          oReport:Section(1):Cell("A1_NOME"     ):SetValue(aTVariosIVA[i][10])
+          oReport:Section(1):Cell(cF3AlqIVA     ):SetValue(aTVariosIVA[i][9])
+          oReport:Section(1):Cell("F3_VALCONT"  ):SetValue(aTVariosIVA[i][1])
+          oReport:Section(1):Cell(cF3BaseIVA    ):SetValue(aTVariosIVA[i][2])
+          oReport:Section(1):Cell("nExenNoGrav" ):SetValue(aTVariosIVA[i][3])
+          oReport:Section(1):Cell(cF3VrIVA      ):SetValue(aTVariosIVA[i][4])
+          oReport:Section(1):Cell(cF3VrIVAP     ):SetValue(aTVariosIVA[i][5])
+          oReport:Section(1):Cell(cF3VrIB       ):SetValue(aTVariosIVA[i][6])
+          oReport:Section(1):Cell("nOTROS"      ):SetValue(aTVariosIVA[i][7])
+          oReport:Section(1):Cell(cF3VrEXCL     ):SetValue(aTVariosIVA[i][8])	
+          IF i<>Len(aTVariosIVA)
+             oReport:Section(1):PrintLine()
+          ENDIF
+      Next
+      oReport:Section(1):PrintLine()
+      oReport:Section(1):Cell(cF3AlqIVA     ):SetValue(0)
+      oReport:Section(1):Cell("F3_VALCONT"  ):SetValue(0)
+      oReport:Section(1):Cell(cF3BaseIVA    ):SetValue(0)
+      oReport:Section(1):Cell("nExenNoGrav" ):SetValue(0)
+      oReport:Section(1):Cell(cF3VrIVA      ):SetValue(0)
+      oReport:Section(1):Cell(cF3VrIVAP     ):SetValue(0)
+      oReport:Section(1):Cell(cF3VrIB       ):SetValue(0)
+      oReport:Section(1):Cell("nOTROS"      ):SetValue(0)
+      oReport:Section(1):Cell(cF3VrEXCL     ):SetValue(0)	
+
+      oReport:Section(1):Cell("F3_ESPECIE"  ):SetValue(Iif(Len(aSortRes)>=1,SUBSTR(aSortRes[1][19],1,2),""))       
+
+      oReport:Section(1):Cell("A1_COD"      ):Disable()
+      oReport:Section(1):Cell("A1_NOME"     ):Disable()
+      oReport:Section(1):Cell("A1_CGC"      ):Disable()
+      oReport:Section(1):Cell("A1_TIPO"     ):Disable()
+      oReport:Section(1):Cell("F3_ENTRADA"  ):Disable()
+      oReport:Section(1):Cell("F3_ESPECIE"  ):Disable()
+      oReport:Section(1):Cell("F3_SERIE"    ):Disable()
+      oReport:Section(1):Cell("F3_NFISCAL"  ):Disable()
+      oReport:Section(1):Cell(cF3AlqIVA     ):Disable()
+      oReport:Section(1):Cell("F3_VALCONT"  ):Disable()
+      oReport:Section(1):Cell(cF3BaseIVA    ):Disable()
+      oReport:Section(1):Cell("nExenNoGrav" ):Disable()
+      oReport:Section(1):Cell(cF3VrIVA      ):Disable()
+      oReport:Section(1):Cell(cF3VrIVAP     ):Disable()
+      oReport:Section(1):Cell(cF3VrIB       ):HIDE()
+      oReport:Section(1):Cell("nOTROS"      ):HIDE()
+      oReport:Section(1):Cell(cF3VrEXCL     ):HIDE()
+   	       
+      oReport:Section(1):Cell(cF3VrIB       ):Disable()
+      oReport:Section(1):Cell("nOTROS"      ):Disable()
+      oReport:Section(1):Cell(cF3VrEXCL     ):Disable()
+      oReport:PrintText( STR0024)               
+      IF MV_PAR07=1 //CASO RESUMO DDJJ-IVA SEJA HABILITADO PARA IMPRESSAO
+         oReport:Section(1):PrintLine()
+         oReport:Section(1):Cell("A1_COD"      ):Enable()
+         oReport:Section(1):Cell("A1_NOME"     ):Enable()
+         oReport:Section(1):Cell("A1_CGC"      ):Enable()
+         oReport:Section(1):Cell("A1_TIPO"     ):Enable()
+         oReport:Section(1):Cell("F3_ENTRADA"  ):Enable()
+         oReport:Section(1):Cell("F3_ESPECIE"  ):Enable()
+         oReport:Section(1):Cell("F3_SERIE"    ):Enable()
+         oReport:Section(1):Cell("F3_NFISCAL"  ):Enable()
+         oReport:Section(1):Cell(cF3AlqIVA     ):Enable()
+         oReport:Section(1):Cell("F3_VALCONT"  ):Enable()
+         oReport:Section(1):Cell(cF3BaseIVA    ):Enable()
+         oReport:Section(1):Cell("nExenNoGrav" ):Enable()
+         oReport:Section(1):Cell(cF3VrIVA      ):Enable()
+         oReport:Section(1):Cell(cF3VrIVAP     ):Enable()
+      ENDIF
+   ENDIF
+   IF MV_PAR07=2 //CASO RESUMO DDJJ-IVA NAO SEJA HABILITADO PARA IMPRESSAO
+      oReport:Section(1):Cell("A1_COD"      ):Hide()
+      oReport:Section(1):Cell("A1_NOME"     ):Hide()
+      oReport:Section(1):Cell("A1_CGC"      ):Hide()
+      oReport:Section(1):Cell("A1_TIPO"     ):Hide()
+      oReport:Section(1):Cell("F3_ENTRADA"  ):Hide()
+      oReport:Section(1):Cell("F3_ESPECIE"  ):Hide()
+      oReport:Section(1):Cell("F3_SERIE"    ):Hide()
+      oReport:Section(1):Cell("F3_NFISCAL"  ):Hide()
+      oReport:Section(1):Cell(cF3AlqIVA     ):Hide()
+      oReport:Section(1):Cell("F3_VALCONT"  ):Hide()
+      oReport:Section(1):Cell(cF3BaseIVA    ):Hide()
+      oReport:Section(1):Cell("nExenNoGrav" ):Hide()
+      oReport:Section(1):Cell(cF3VrIVA      ):Hide()
+      oReport:Section(1):Cell(cF3VrIVAP     ):Hide()
+      oReport:Section(1):Cell(cF3VrIB       ):HIDE()
+      oReport:Section(1):Cell("nOTROS"      ):HIDE()
+      oReport:Section(1):Cell(cF3VrEXCL     ):HIDE()  
+   ENDIF
+   oReport:Section(1):Finish() 
+Endif
+
+*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*
+//IMPRESSAO DE RESUMO DDJJ-IVA
+If MV_PAR07=1 //HABILITADO PARA IMPRESSAO
+   oReport:Section(1):Init()
+   //oReport:EndPage()
+   aTFiscal:={{"F1",0.00,0.00,0.00,0.00,0.00},{"F2",0.00,0.00,0.00,0.00,0.00}} //SUBTOTAIS
+   
+   oReport:Section(1):Cell("A1_COD"      ):SetTitle(Space(Len(oSection:ACELL[1]:GETTEXT())))
+   oReport:Section(1):Cell("A1_NOME"     ):SetTitle(Space(Len(oSection:ACELL[2]:GETTEXT())))
+   oReport:Section(1):Cell("A1_COD"      ):SetValue("")
+   oReport:Section(1):Cell("A1_CGC"      ):Hide()
+   oReport:Section(1):Cell("A1_TIPO"     ):Hide()
+   oReport:Section(1):Cell("F3_ENTRADA"  ):Hide()    	
+   oReport:Section(1):Cell("F3_ESPECIE"  ):Hide()
+    	
+   oReport:Section(1):Cell("F3_SERIE"    ):SetTitle(Space(Len(oSection:ACELL[7]:GETTEXT())))
+   oReport:Section(1):Cell("F3_SERIE"    ):Hide()
+   oReport:Section(1):Cell("F3_NFISCAL"  ):SetTitle(Space(Len(oSection:ACELL[8]:GETTEXT())))
+   oReport:Section(1):Cell("F3_NFISCAL"  ):Hide()
+   oReport:Section(1):Cell(cF3AlqIVA     ):SetTitle(STR0029 ) 
+   oReport:Section(1):Cell("F3_VALCONT"  ):SetTitle(STR0030 )  
+   
+   oReport:Section(1):Cell(cF3BaseIVA    ):SetTitle(STR0031 )   
+   oReport:Section(1):Cell(cF3BaseIVA    ):Disable()
+   oReport:Section(1):Cell("nExenNoGrav" ):SetTitle(STR0032 )
+   oReport:Section(1):Cell(cF3VrIVA      ):SetTitle(STR0033 )
+   oReport:Section(1):Cell(cF3VrIVAP     ):SetTitle(STR0034 )
+   oReport:Section(1):Cell(cF3VrIB       ):SetTitle(Space(Len(oSection:ACELL[15]:GETTEXT())))
+   oReport:Section(1):Cell("nOTROS"      ):SetTitle(Space(Len(oSection:ACELL[16]:GETTEXT())))
+   oReport:Section(1):Cell(cF3VrEXCL     ):SetTitle(Space(Len(oSection:ACELL[17]:GETTEXT())))
+   cCFO := Iif(Len(aSortRes)>=1,aSortRes[1][19]," ")
+   nAliq:=Iif(Len(aSortRes)>=1,aSortRes[1][17]," ")
+   IF MV_PAR04=2
+      oReport:SkipLine()
+   ENDIF
+   oReport:PrintText(STR0035)
+   oReport:SkipLine()
+   For i=1 to Len(aSortRes)
+       oReport:Section(1):Cell("F3_ESPECIE"  ):SetValue(SUBSTR(aSortRes[i][19],1,2))
+       y:=ASCAN(aTFiscal,{|x| x[1]==SUBSTR(aSortRes[i][19],1,2)})
+       aTFiscal[Y][2]+= aSortRes[i][ 1]+aSortRes[i][ 2]+aSortRes[i][ 3]
+       aTFiscal[Y][3]+= aSortRes[i][ 4]+aSortRes[i][ 5]+aSortRes[i][ 6]
+       aTFiscal[Y][4]+= aSortRes[i][ 7]+aSortRes[i][ 8]+aSortRes[i][ 9]
+       aTFiscal[Y][5]+= aSortRes[i][10]+aSortRes[i][11]+aSortRes[i][12]
+       aTFiscal[Y][6]+= aSortRes[i][13]+aSortRes[i][14]+aSortRes[i][15]
+
+       oReport:Section(1):Cell("A1_NOME"     ):SetValue(STR0036)
+       oReport:Section(1):Cell("A1_COD"      ):SetValue(aSortRes[i][16])
+       oReport:Section(1):Cell(cF3AlqIVA     ):SetValue(aSortRes[i][17]) 
+       oReport:Section(1):Cell("F3_VALCONT"  ):SetValue(aSortRes[i][ 1])
+       oReport:Section(1):Cell(cF3BaseIVA    ):SetValue(aSortRes[i][ 4])
+       oReport:Section(1):Cell(cF3BaseIVA    ):Disable()
+       oReport:Section(1):Cell("nExenNoGrav" ):SetValue(aSortRes[i][ 7])
+       oReport:Section(1):Cell(cF3VrIVA      ):SetValue(aSortRes[i][10])
+       oReport:Section(1):Cell(cF3VrIVAP     ):SetValue(aSortRes[i][13])
+       //oReport:Section(1):Cell(cF3VrIB       ):SetValue(aSortRes[i][16]) //RETIRAR
+       oReport:Section(1):PrintLine()
+       oReport:Section(1):Cell("A1_NOME"     ):SetValue(STR0037)
+       oReport:Section(1):Cell(cF3AlqIVA     ):SetValue(aSortRes[i][17]) 
+       oReport:Section(1):Cell("F3_VALCONT"  ):SetValue(aSortRes[i][ 2])
+       oReport:Section(1):Cell(cF3BaseIVA    ):Disable()
+       oReport:Section(1):Cell(cF3BaseIVA    ):SetValue(aSortRes[i][ 5])
+       oReport:Section(1):Cell("nExenNoGrav" ):SetValue(aSortRes[i][ 8])
+       oReport:Section(1):Cell(cF3VrIVA      ):SetValue(aSortRes[i][11])
+       oReport:Section(1):Cell(cF3VrIVAP     ):SetValue(aSortRes[i][14])
+       //oReport:Section(1):Cell(cF3VrIB       ):SetValue(aSortRes[i][16]) //RETIRAR
+       oReport:Section(1):PrintLine()
+       oReport:Section(1):Cell("A1_NOME"     ):SetValue(STR0038)
+       oReport:Section(1):Cell(cF3AlqIVA     ):SetValue(aSortRes[i][17]) 
+       oReport:Section(1):Cell("F3_VALCONT"  ):SetValue(aSortRes[i][ 3])
+       oReport:Section(1):Cell(cF3BaseIVA    ):Disable()
+       oReport:Section(1):Cell(cF3BaseIVA    ):SetValue(aSortRes[i][ 6])
+       oReport:Section(1):Cell("nExenNoGrav" ):SetValue(aSortRes[i][ 9])
+       oReport:Section(1):Cell(cF3VrIVA      ):SetValue(aSortRes[i][12])
+       oReport:Section(1):Cell(cF3VrIVAP     ):SetValue(aSortRes[i][15])
+       oReport:Section(1):PrintLine()
+       IF SX5->(MSSeek(XFILIAL("SX5")+"13"+aSortRes[i][16]))
+          oReport:PrintText(aSortRes[i][16]+"-"+x5Descri())
+       ENDIF
+       oReport:ThinLine()
+       cCFO :=aSortRes[i][19]          
+       nALIQ := aSortRes[i][17]
+       IF (i+1)<Len(aSortRes)
+          IF SUBSTR(aSortRes[i][19],1,2)="F1"
+             IF SUBSTR(aSortRes[(i+1)][19],1,2)="F2"
+                IF MV_PAR04=2
+                   oReport:PrintText(STR0039)
+                   oReport:ThinLine()
+                   oReport:Section(1):Cell("A1_COD"      ):SetValue(" ")
+                   oReport:Section(1):Cell("A1_NOME"     ):SetValue(" ")
+                   oReport:Section(1):Cell(cF3AlqIVA     ):Hide()
+                   oReport:Section(1):Cell("F3_VALCONT"  ):SetValue(aTFiscal[1][ 2])
+                   oReport:Section(1):Cell(cF3BaseIVA    ):SetValue(aTFiscal[1][ 3])
+                   oReport:Section(1):Cell("nExenNoGrav" ):SetValue(aTFiscal[1][ 4])
+                   oReport:Section(1):Cell(cF3VrIVA      ):SetValue(aTFiscal[1][ 5])
+                   oReport:Section(1):Cell(cF3VrIVAP     ):SetValue(aTFiscal[1][ 6])
+                   oReport:Section(1):PrintLine()
+                   oReport:SkipLine()                   
+                 Else
+                   oReport:PrintText( STR0039)
+                Endif
+             ENDIF
+          ENDIF          
+       ENDIF
+   NEXT
+   IF MV_PAR04=1
+      oReport:Section(1):Cell("F3_ESPECIE"  ):SetValue("TS2")
+      oReport:PrintText( STR0040) 
+      oReport:Section(1):Cell("A1_COD"      ):SetValue(" ")
+
+      oReport:Section(1):Cell("A1_COD"      ):Hide()
+      oReport:Section(1):Cell("A1_NOME"     ):Hide()
+      oReport:Section(1):Cell("A1_CGC"      ):Hide()
+      oReport:Section(1):Cell("A1_TIPO"     ):Hide()
+      oReport:Section(1):Cell("F3_ENTRADA"  ):Hide()
+      oReport:Section(1):Cell("F3_ESPECIE"  ):Hide()
+      oReport:Section(1):Cell("F3_SERIE"    ):Hide()
+      oReport:Section(1):Cell("F3_NFISCAL"  ):Hide()
+      oReport:Section(1):Cell(cF3AlqIVA     ):Hide()
+      oReport:Section(1):Cell("F3_VALCONT"  ):Hide()
+      oReport:Section(1):Cell(cF3BaseIVA    ):Hide()
+      oReport:Section(1):Cell("nExenNoGrav" ):Hide()
+      oReport:Section(1):Cell(cF3VrIVA      ):Hide()
+      oReport:Section(1):Cell(cF3VrIVAP     ):Hide()
+      oReport:Section(1):Cell(cF3VrIB       ):HIDE()
+      oReport:Section(1):Cell("nOTROS"      ):HIDE()
+      oReport:Section(1):Cell(cF3VrEXCL     ):HIDE()
+   	       
+      oReport:Section(1):Cell(cF3VrIB       ):Disable()
+      oReport:Section(1):Cell("nOTROS"      ):Disable()
+      oReport:Section(1):Cell(cF3VrEXCL     ):Disable()
+
+      oReport:Section(1):PrintLine()
+      
+      oReport:Section(1):Init()
+
+      oReport:Section(1):Cell("A1_COD"      ):Show()
+      oReport:Section(1):Cell("A1_NOME"     ):Show()                      
+      oReport:Section(1):Cell("A1_COD"      ):SetValue(STR0041)
+      oReport:Section(1):Cell("A1_NOME"     ):SetValue(STR0042)
+
+      oReport:Section(1):Cell(cF3AlqIVA     ):Hide()                       
+      oReport:Section(1):Cell("F3_VALCONT"  ):SetValue((aTFiscal[1][ 2]+aTFiscal[2][ 2]))
+      oReport:Section(1):Cell(cF3BaseIVA    ):SetValue((aTFiscal[1][ 3]+aTFiscal[2][ 3]))
+      oReport:Section(1):Cell("nExenNoGrav" ):SetValue((aTFiscal[1][ 4]+aTFiscal[2][ 4]))
+      oReport:Section(1):Cell(cF3VrIVA      ):SetValue((aTFiscal[1][ 5]+aTFiscal[2][ 5]))
+      oReport:Section(1):Cell(cF3VrIVAP     ):SetValue((aTFiscal[1][ 6]+aTFiscal[2][ 6]))
+      oReport:Section(1):PrintLine()
+      oReport:Section(1):Finish()
+    ELSE
+      IF MV_PAR04=2
+         oReport:PrintText(STR0040) 
+         oReport:Section(1):Cell("A1_COD"      ):SetValue(" ")
+         oReport:Section(1):Cell("A1_NOME"     ):SetValue(" ")
+         oReport:Section(1):Cell(cF3AlqIVA     ):Hide()
+         oReport:Section(1):Cell("F3_VALCONT"  ):SetValue(aTFiscal[2][ 2])
+         oReport:Section(1):Cell(cF3BaseIVA    ):SetValue(aTFiscal[2][ 3])
+         oReport:Section(1):Cell("nExenNoGrav" ):SetValue(aTFiscal[2][ 4])
+         oReport:Section(1):Cell(cF3VrIVA      ):SetValue(aTFiscal[2][ 5])
+         oReport:Section(1):Cell(cF3VrIVAP     ):SetValue(aTFiscal[2][ 6])
+         oReport:ThinLine()
+         oReport:Section(1):PrintLine()
+     
+         oReport:SkipLine()
+         oReport:PrintText(STR0041+" " + STR0042)               
+         oReport:ThinLine()
+         oReport:Section(1):Cell("A1_COD"      ):SetValue(" ")
+         oReport:Section(1):Cell("A1_NOME"     ):SetValue(" ")
+         oReport:Section(1):Cell(cF3AlqIVA     ):Hide()
+         oReport:Section(1):Cell("F3_VALCONT"  ):SetValue((aTFiscal[1][ 2]+aTFiscal[2][ 2]))
+         oReport:Section(1):Cell(cF3BaseIVA    ):SetValue((aTFiscal[1][ 3]+aTFiscal[2][ 3]))
+         oReport:Section(1):Cell("nExenNoGrav" ):SetValue((aTFiscal[1][ 4]+aTFiscal[2][ 4]))
+         oReport:Section(1):Cell(cF3VrIVA      ):SetValue((aTFiscal[1][ 5]+aTFiscal[2][ 5]))
+         oReport:Section(1):Cell(cF3VrIVAP     ):SetValue((aTFiscal[1][ 6]+aTFiscal[2][ 6]))
+         oReport:Section(1):PrintLine()
+         oReport:Section(1):Finish()
+      ENDIF    
+   ENDIF
+Endif
+Return
+
+/*****************************************************************************************/
+//FUNÇOÃO UTILIZADA NA CELULA "oSection:Cell("nExenNoGrav"):SetBlock({|| })"//
+/*****************************************************************************************/
+Static Function sfVlrExenNG(nALiqIVA,nContabil,nBIVA,nIVA,nIVAP,nEXCL,nIBP)//,cCLIEFOR)
+Local nSomaVarios:=0
+//Local cCampoIMP:="SF3->F3_VALIMP"
+Local cCampoIMP:="(cAliasA)->F3_VALIMP"
+Local cLerCampo  
+Local i
+Local nSinal:=1
+cQuebraTipo:=( cAliasA )->F3_ESPECIE      
+For i = 1 to Len(aImpostos)
+    cLerCampo=cCampoIMP+aImpostos[i]
+    nSomaVarios+=&cLerCampo
+Next
+//OTROS=VALORCONTABIL - (SOMA IVA+IVA P+IB+IMPOSTOS INTERNOS+BASE)
+If Alltrim(( cAliasA )->F3_ESPECIE) $ "NCC|NDE"
+	nSinal:=-1
+EndIf
+IF !Empty((cAliasA)->F3_DTCANC) .And. MV_PAR03 == 3 
+    nContabil:= 0
+EndIf
+nTotOtros=nSomaVarios*nSinal
+nTotEXEN:=(nContabil*nSinal)-(nIVA+nIVAP+nIBP+nEXCL+nBIVA)
+nContabil:=nContabil*nSinal
+
+////TOTALES 
+i:=ASCAN(aTotales,{|x| x[9]==(cAliasA)->A1_TIPO})
+If i<>0
+	aTotales[i,nColTot  ]+=nContabil
+	aTotales[i,nColGra  ]+=nBIVA
+	aTotales[i,nColExen ]+=nTotEXEN
+	aTotales[i,nColIVA  ]+=nIVA
+	aTotales[i,nColIVAP ]+=nIVAP
+	aTotales[i,nColIBP  ]+=nIBP
+	aTotales[i,nColOtros]+=nTotOtros
+	aTotales[i,nColExcl ]+=nEXCL
+	aSTotales[1]+=nContabil
+	aSTotales[2]+=nBIVA
+	aSTotales[3]+=nTotEXEN
+	aSTotales[4]+=nIVA
+	aSTotales[5]+=nIVAP
+	aSTotales[6]+=nIBP
+	aSTotales[7]+=nTotOtros
+	aSTotales[8]+=nEXCL	
+	X:=&cTF3AlqIVA
+
+	If Len(aResumoIVA)=0
+	   IF (cAliasA)->A1_TIPO="I"
+          AADD(aResumoIVA,{nBIVA,nIVA,nIVAP,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,(cAliasA)->F3_CFO,nALiqIVA,(cAliasA)->A1_TIPO,(IF(F3_ESPECIE<>"NCE" .AND.F3_ESPECIE<>"NDE","F1","F2")+((cAliasA)->F3_CFO+ALLTRIM(STR(nALiqIVA))))})
+         ELSEIF (cAliasA)->A1_TIPO="N"
+          AADD(aResumoIVA,{0.00 ,0.00,0.00 ,nBIVA,nIVA,nIVAP,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,(cAliasA)->F3_CFO,nALiqIVA,(cAliasA)->A1_TIPO,(IF(F3_ESPECIE<>"NCE" .AND.F3_ESPECIE<>"NDE","F1","F2")+((cAliasA)->F3_CFO+ALLTRIM(STR(nALiqIVA))))})
+         ELSEIF (cAliasA)->A1_TIPO$"X|F" .OR. (cAliasA)->A1_TIPO="S"
+          AADD(aResumoIVA,{0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,nBIVA,nIVA,nIVAP,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,(cAliasA)->F3_CFO,nALiqIVA,(cAliasA)->A1_TIPO,(IF(F3_ESPECIE<>"NCE" .AND.F3_ESPECIE<>"NDE","F1","F2")+((cAliasA)->F3_CFO+ALLTRIM(STR(nALiqIVA))))})
+         ELSEIF (cAliasA)->A1_TIPO="M"
+          AADD(aResumoIVA,{0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,nBIVA,nIVA,nIVAP,0.00 ,0.00,0.00 ,(cAliasA)->F3_CFO,nALiqIVA,(cAliasA)->A1_TIPO,(IF(F3_ESPECIE<>"NCE" .AND.F3_ESPECIE<>"NDE","F1","F2")+((cAliasA)->F3_CFO+ALLTRIM(STR(nALiqIVA))))})
+         ELSEIF (cAliasA)->A1_TIPO="E"
+          AADD(aResumoIVA,{0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,nBIVA,nIVA,nIVAP,(cAliasA)->F3_CFO,nALiqIVA,(cAliasA)->A1_TIPO,(IF(F3_ESPECIE<>"NCE" .AND.F3_ESPECIE<>"NDE","F1","F2")+((cAliasA)->F3_CFO+ALLTRIM(STR(nALiqIVA))))})
+       ENDIF
+     ELSE
+       IF(F3_ESPECIE<>"NCE" .AND.F3_ESPECIE<>"NDE",y:=ASCAN(aResumoIVA,{|x| x[19]==("F1"+(cAliasA)->F3_CFO+ALLTRIM(STR(nALiqIVA)))}),y:=ASCAN(aResumoIVA,{|x| x[19]==("F2"+(cAliasA)->F3_CFO+ALLTRIM(STR(nALiqIVA)))}))
+       IF Y<>0 
+  	      IF (cAliasA)->A1_TIPO="I"
+             aResumoIVA[Y][1]+=nBIVA
+             aResumoIVA[Y][2]+=nIVA
+             aResumoIVA[Y][3]+=nIVAP
+            ELSEIF (cAliasA)->A1_TIPO="N"
+             aResumoIVA[Y][4]+=nBIVA
+             aResumoIVA[Y][5]+=nIVA
+             aResumoIVA[Y][6]+=nIVAP
+            ELSEIF (cAliasA)->A1_TIPO$"X|F" .OR. (cAliasA)->A1_TIPO="S"
+             aResumoIVA[Y][7]+=nBIVA
+             aResumoIVA[Y][8]+=nIVA
+             aResumoIVA[Y][9]+=nIVAP
+            ELSEIF (cAliasA)->A1_TIPO="M"
+             aResumoIVA[Y][10]+=nBIVA
+             aResumoIVA[Y][11]+=nIVA
+             aResumoIVA[Y][12]+=nIVAP
+            ELSEIF (cAliasA)->A1_TIPO="E"
+             aResumoIVA[Y][13]+=nBIVA
+             aResumoIVA[Y][14]+=nIVA
+             aResumoIVA[Y][15]+=nIVAP
+          ENDIF         
+         ELSE 
+  	      IF (cAliasA)->A1_TIPO="I"
+             AADD(aResumoIVA,{nBIVA,nIVA,nIVAP,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,(cAliasA)->F3_CFO,nALiqIVA,(cAliasA)->A1_TIPO,(IF(F3_ESPECIE<>"NCE" .AND.F3_ESPECIE<>"NDE","F1","F2")+((cAliasA)->F3_CFO+ALLTRIM(STR(nALiqIVA))))})
+            ELSEIF (cAliasA)->A1_TIPO="N"
+             AADD(aResumoIVA,{0.00 ,0.00,0.00 ,nBIVA,nIVA,nIVAP,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,(cAliasA)->F3_CFO,nALiqIVA,(cAliasA)->A1_TIPO,(IF(F3_ESPECIE<>"NCE" .AND.F3_ESPECIE<>"NDE","F1","F2")+((cAliasA)->F3_CFO+ALLTRIM(STR(nALiqIVA))))})
+            ELSEIF (cAliasA)->A1_TIPO$"X|F" .OR. (cAliasA)->A1_TIPO="S"
+             AADD(aResumoIVA,{0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,nBIVA,nIVA,nIVAP,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,(cAliasA)->F3_CFO,nALiqIVA,(cAliasA)->A1_TIPO,(IF(F3_ESPECIE<>"NCE" .AND.F3_ESPECIE<>"NDE","F1","F2")+((cAliasA)->F3_CFO+ALLTRIM(STR(nALiqIVA))))})
+            ELSEIF (cAliasA)->A1_TIPO="M"
+             AADD(aResumoIVA,{0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,nBIVA,nIVA,nIVAP,0.00 ,0.00,0.00 ,(cAliasA)->F3_CFO,nALiqIVA,(cAliasA)->A1_TIPO,(IF(F3_ESPECIE<>"NCE" .AND.F3_ESPECIE<>"NDE","F1","F2")+((cAliasA)->F3_CFO+ALLTRIM(STR(nALiqIVA))))})
+            ELSEIF (cAliasA)->A1_TIPO="E"
+             AADD(aResumoIVA,{0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,0.00 ,0.00,0.00 ,nBIVA,nIVA,nIVAP,(cAliasA)->F3_CFO,nALiqIVA,(cAliasA)->A1_TIPO,(IF(F3_ESPECIE<>"NCE" .AND.F3_ESPECIE<>"NDE","F1","F2")+((cAliasA)->F3_CFO+ALLTRIM(STR(nALiqIVA))))})
+          ENDIF         
+       ENDIF
+    ENDIF
+Endif
+
+//TOTALES GENERALES PARA CONTROL GLOBAL DEL IVA
+IF (cAliasA)->A1_TIPO="E"
+   IF Len(aTVariosIVA)=0
+      AADD(aTVariosIVA,{nContabil,nBIVA,nTotEXEN,nIVA,nIVAP,nIBP,nTotOtros,nEXCL,nAliqIVA,STR0021}) //"Estrangeiros"
+      aSTipos[1]+=nContabil
+	  aSTipos[2]+=nBIVA
+	  aSTipos[3]+=nTotEXEN
+	  aSTipos[4]+=nIVA
+	  aSTipos[5]+=nIVAP
+	  aSTipos[6]+=nIBP
+	  aSTipos[7]+=nTotOtros
+	  aSTipos[8]+=nEXCL	
+	 Else
+      nPosiASCAN:=ASCAN(aTVariosIVA,{|x| x[9]==nALiqIVA})
+      If nPosiASCAN#0
+	     aTVariosIVA[nPosiASCAN,ncolTot  ]+=nContabil
+	 	 aTVariosIVA[nPosiASCAN,nColGra  ]+=nBIVA
+	  	 aTVariosIVA[nPosiASCAN,nColExen ]+=nTotEXEN
+	  	 aTVariosIVA[nPosiASCAN,nColIVA  ]+=nIVA
+	  	 aTVariosIVA[nPosiASCAN,nColIVAP ]+=nIVAP
+	  	 aTVariosIVA[nPosiASCAN,nColIBP  ]+=nIBP
+	  	 aTVariosIVA[nPosiASCAN,nColOtros]+=nTotOtros
+	  	 aTVariosIVA[nPosiASCAN,nColExcl ]+=nEXCL
+         aSTipos[1]+=nContabil
+	     aSTipos[2]+=nBIVA
+	     aSTipos[3]+=nTotEXEN
+	     aSTipos[4]+=nIVA
+	     aSTipos[5]+=nIVAP
+	     aSTipos[6]+=nIBP
+	     aSTipos[7]+=nTotOtros
+	     aSTipos[8]+=nEXCL		  	 
+	  	Else
+	  	 AADD(aTVariosIVA,{nContabil,nBIVA,nTotEXEN,nIVA,nIVAP,nIBP,nTotOtros,nEXCL,nAliqIVA,STR0021}) //"Estrangeiros"
+         aSTipos[1]+=nContabil
+	     aSTipos[2]+=nBIVA
+	     aSTipos[3]+=nTotEXEN
+	     aSTipos[4]+=nIVA
+	     aSTipos[5]+=nIVAP
+	     aSTipos[6]+=nIBP
+	     aSTipos[7]+=nTotOtros
+	     aSTipos[8]+=nEXCL		  	 	  	 
+	  Endif
+   Endif	  
+  Else
+   IF Len(aTLocalIVA)=0
+      AADD(aTLocalIVA,{nContabil,nBIVA,nTotEXEN,nIVA,nIVAP,nIBP,nTotOtros,nEXCL,nAliqIVA,STR0022}) //"Nacionais"
+      aSTipos[1]+=nContabil
+      aSTipos[2]+=nBIVA
+      aSTipos[3]+=nTotEXEN
+      aSTipos[4]+=nIVA
+      aSTipos[5]+=nIVAP
+      aSTipos[6]+=nIBP
+      aSTipos[7]+=nTotOtros
+      aSTipos[8]+=nEXCL		  	       
+	 Else
+      nPosiASCAN:=ASCAN(aTLocalIVA,{|x| x[9]==nALiqIVA})
+      If nPosiASCAN#0
+	     aTLocalIVA[nPosiASCAN,ncolTot  ]+=nContabil
+	 	 aTLocalIVA[nPosiASCAN,nColGra  ]+=nBIVA
+	  	 aTLocalIVA[nPosiASCAN,nColExen ]+=nTotEXEN
+	  	 aTLocalIVA[nPosiASCAN,nColIVA  ]+=nIVA
+	  	 aTLocalIVA[nPosiASCAN,nColIVAP ]+=nIVAP
+	  	 aTLocalIVA[nPosiASCAN,nColIBP  ]+=nIBP
+	  	 aTLocalIVA[nPosiASCAN,nColOtros]+=nTotOtros
+	  	 aTLocalIVA[nPosiASCAN,nColExcl ]+=nEXCL
+         aSTipos[1]+=nContabil
+	     aSTipos[2]+=nBIVA
+	     aSTipos[3]+=nTotEXEN
+	     aSTipos[4]+=nIVA
+	     aSTipos[5]+=nIVAP
+	     aSTipos[6]+=nIBP
+	     aSTipos[7]+=nTotOtros
+	     aSTipos[8]+=nEXCL		  	 	  	 
+	  	Else
+	  	 AADD(aTLocalIVA,{nContabil,nBIVA,nTotEXEN,nIVA,nIVAP,nIBP,nTotOtros,nEXCL,nAliqIVA,STR0022}) //"Nacionais"
+         aSTipos[1]+=nContabil
+	     aSTipos[2]+=nBIVA
+	     aSTipos[3]+=nTotEXEN
+	     aSTipos[4]+=nIVA
+	     aSTipos[5]+=nIVAP
+	     aSTipos[6]+=nIBP
+	     aSTipos[7]+=nTotOtros
+	     aSTipos[8]+=nEXCL		  	 	  	 
+	  Endif
+   Endif	  
+Endif      
+Return (nTotEXEN)
+
+/*****************************************************************************************/
+//FUNÇOES UTILIZADAS NO BLOCO DE CODIGO EM "oSection:Cell("nExenNoGrav"):SetBlock({|| })"//
+//sfBaseIVA() / sfVrIVA() / sfVrIVAP() / sfVrIB() / sfVrEXCL()
+//Soma das colunas de forma dinamica atraves dos arrays de cada imposto
+//aColIVA{}  = Armazena o nro das colunas IVA no SF3 conforme cadastro no SFB
+//aColIVAP{} = Armazena o nro das colunas IVAp no SF3 conforme cadastro no SFB
+//aColIB{}   = Armazena o nro das colunas IB no SF3 conforme cadastro no SFB
+//aaColEXCL{}= Armazena o nro das colunas Impostos INTERNOS no SF3 conforme cadastro no SFB
+/*****************************************************************************************/
+STATIC FUNCTION sfAliqIVA() //FUNÇÃO DE RETORNO COLUNA VALOR ALIQ IVA
+Local nResult:=0
+Local nI
+For nI=1 to Len(aColIVA)
+    If nResult=0
+       cResult="(cAliasA)->F3_ALQIMP"+aColIVA[nI]
+       nResult+=&cResult
+    Endif   
+Next
+IF !Empty((cAliasA)->F3_DTCANC) .And. MV_PAR03 == 3 
+   nResult := 0
+Endif 
+Return(nResult)
+
+STATIC FUNCTION sfBaseIVA() //FUNÇÃO DE RETORNO COLUNA VALOR BASE IVA
+Local nResult:=0
+Local nI        
+Local nSinal:= 1
+For nI=1 to Len(aColIVA)
+    If nResult=0
+       cResult="(cAliasA)->F3_BASIMP"+aColIVA[nI]
+       nResult+=&cResult
+    Endif   
+Next 
+If Alltrim(( cAliasA )->F3_ESPECIE) $ "NCC|NDE"
+	nSinal:=-1
+EndIf                    
+nContab:= ( cAliasA )->F3_VALCONT*nSinal
+
+IF !Empty((cAliasA)->F3_DTCANC) .And. MV_PAR03 == 3 
+   nResult := 0
+   nContab := 0
+Endif
+
+Return(nResult*nSinal)
+
+STATIC FUNCTION sfVrIVA() //FUNÇÃO DE RETORNO COLUNA VALOR IVA
+Local nResult:=0
+Local nI        
+Local nSinal:= 1
+For nI=1 to Len(aColIVA)
+    cResult="(cAliasA)->F3_VALIMP"+aColIVA[nI]
+    nResult+=&cResult
+Next 
+If Alltrim(( cAliasA )->F3_ESPECIE) $ "NCC|NDE"
+	nSinal:=-1
+EndIf    
+
+IF !Empty((cAliasA)->F3_DTCANC) .And. MV_PAR03 == 3 
+   nResult := 0
+Endif   
+
+Return(nResult*nSinal)
+    
+STATIC FUNCTION sfVrIVAP() //FUNÇÃO DE RETORNO COLUNA VALOR IVAP
+Local nResult:=0
+Local nI        
+Local nSinal:= 1
+For nI=1 to Len(aColIVAP)
+    cResult="(cAliasA)->F3_VALIMP"+aColIVAP[nI]
+    nResult+=&cResult
+Next 
+If Alltrim(( cAliasA )->F3_ESPECIE) $ "NCC|NDE"
+	nSinal:=-1
+EndIf  
+
+IF !Empty((cAliasA)->F3_DTCANC) .And. MV_PAR03 == 3 
+   nResult := 0
+Endif
+
+Return(nResult*nSinal)
+
+STATIC FUNCTION sfVrIB() //FUNÇÃO DE RETORNO COLUNA VALOR IB
+Local nResult:=0
+Local nI 
+Local nSinal:= 1
+For nI=1 to Len(aColIB)
+    cResult="(cAliasA)->F3_VALIMP"+aColIB[nI]
+    nResult+=&cResult
+Next                 
+If Alltrim(( cAliasA )->F3_ESPECIE) $ "NCC|NDE"
+	nSinal:=-1
+EndIf 
+
+IF !Empty((cAliasA)->F3_DTCANC) .And. MV_PAR03 == 3 
+   nResult := 0
+Endif
+
+Return(nResult*nSinal)
+  
+STATIC FUNCTION sfVrEXCL() //FUNÇÃO DE RETORNO COLUNA VALOR EXCL
+Local nResult:=0
+Local nI        
+Local nSinal:= 1
+For nI=1 to Len(aColEXCL)
+    cResult="(cAliasA)->F3_VALIMP"+aColEXCL[nI]
+    nResult+=&cResult
+Next 
+If Alltrim(( cAliasA )->F3_ESPECIE) $ "NCC|NDE"
+	nSinal:=-1
+EndIf    
+
+IF !Empty((cAliasA)->F3_DTCANC) .And. MV_PAR03 == 3 
+   nResult := 0
+Endif
+
+Return(nResult*nSinal)  
+
+
+/*****************************************************************************************/
+//PERGUNTAS 
+/*****************************************************************************************/
+Static Function AjustaSX1()
+Local aHelp	:= {}
+
+Aadd(aHelp,{{"Informe a Data Inicial"		    },{"Enter the Initial Date    "           	},{"Indique la Fecha Inicial    "  			}})	
+Aadd(aHelp,{{"Informe a Data Final"	    	    },{"Enter the Final Date    "             	},{"Indique la Fecha Final    "  			}})	
+Aadd(aHelp,{{"Selecione o Tipo do Titulo" 	    },{"Enter the Bill Typee    "             	},{"Seleccione el Tipo del Titulo" 			}})	
+Aadd(aHelp,{{"Informe o Formato do Relatorio"   },{"Enter the Report Format  "             	},{"Indique el Formato del Informe" 		}})	
+Aadd(aHelp,{{"Selecione a Filial"        	    },{"Enter the Branch   "                  	},{"Elija la Sucursal"          			}})	
+Aadd(aHelp,{{"Deseja imprimir Totais do IVA"    },{"Would you like to printer Totals IVA"},{"Desea que se imprima los Totales del IVA"}})	
+Aadd(aHelp,{{"Deseja imprimir o Resumo DDJJ-IVA"},{"Would you like to printer the Summary DDJJ-IVA"},{"Desea que se imprima lo Resumen DDJJ-IVA"}})	
+Aadd(aHelp,{{"Pagina inicial"       		    },{"Pagina inicial "                   	    },{"Pagina inicial " 			 			}})	
+Aadd(aHelp,{{"Informe a Ordem de Impressão     "},{"Enter the Order to Printer."            },{"Indique el Ordenamiento del Informe"    }})	
+
+PutSx1(CPERG,"01","Data Inicial ?","¿Fecha Inicial ?", "Initial Date ?","mv_ch1","D",8,0,0,"G","","","","","mv_par01","","","","",;
+       "","","","","","","","","","","","",aHelp[1,1],aHelp[1,2],aHelp[1,3])
+  
+PutSx1(CPERG,"02","Data Final  ?","¿Fecha Final ?", "Final Date  ?","mv_ch2","D",8,0,0,"G","","","","","mv_par02","","","","",;
+       "","","","","","","","","","","","S",aHelp[2,1],aHelp[2,2],aHelp[2,3])
+
+PutSx1(CPERG,"03","Incluir  ?","¿Incluir ?", "Include ?","mv_ch3","N",1,0,1,"C","","","","","mv_par03","Ativos","Activos","Actives","",;
+       "Anulados","Anulados","Anull","Todos","Todos","All","","","","","","",aHelp[3,1],aHelp[3,2],aHelp[3,3])     
+       
+PutSx1(CPERG,"04","Estilo   ?","¿Estilo  ?", "Style  ?","mv_ch4","N",1,0,1,"C","","","","","mv_par04","Analitico","Analitico","Detailed","",;
+       "Resumido","Resumido","Summarized","","","","","","","","","",aHelp[4,1],aHelp[4,2],aHelp[4,3])     
+
+PutSx1(CPERG,"05","Filial   ?","¿Sucursale ?", "Branch  ?","mv_ch5","C",TamSx3("F3_FILIAL")[1],0,0,"G","","SM0","","","mv_par05","","","","",;
+       "","","","","","","","","","","SM0","",aHelp[5,1],aHelp[5,2],aHelp[5,3])     
+
+PutSx1(CPERG,"06","Totais IVA  ?","¿Totales IVA?", "Totals IVA ?","mv_ch6","N",1,0,1,"C","","","","","mv_par06","Imprimir","Imprimir","Printer","",;
+       "Nao Imprimir","No Imprimir","Not Printer","","","","","","","","","",aHelp[6,1],aHelp[6,2],aHelp[6,3])         
+
+PutSx1(CPERG,"07","Resumo DDJJ-IVA  ?","¿Resumen DDJJ-IVA?", "Summary DDJJ-IVA?","mv_ch7","N",1,0,1,"C","","","","","mv_par06","Imprimir","Imprimir","Printer","",;
+       "Nao Imprimir","No Imprimir","Not Printer","","","","","","","","","",aHelp[7,1],aHelp[7,2],aHelp[7,3])         
+
+PutSx1(CPERG,"08","Pagina Inicial ?","Pagina de inicio ?","Report homepage ?","mv_ch8","N",6,0,0,"G","","","","","mv_par07","","","","1",;
+       "","","","","","","","","","","","",aHelp[8,1],aHelp[8,2],aHelp[8,3])
+
+PutSx1(CPERG,"09","Ordem          ?","Ordenamiento     ?","Order           ?","mv_ch9","N",1,0,1,"C","","","","","mv_par08","DtEnt+NFiscal","Fecha+Comprob","DtEntry+Document","1",;
+       "DtEmi+NFiscal","Fecha Alta+Compr","Dt.Issue+Docum.","","","","","","","","","",aHelp[9,1],aHelp[9,2],aHelp[9,3])
+       
+dbSelectArea("SX1")
+SX1->(dbSetOrder(1))
+If SX1->(dbSeek(cPerg+"05"))
+	If SX1->X1_TAMANHO <> TamSx3("F3_FILIAL")[1]
+		If RecLock("SX1",.F.)
+			SX1->X1_TAMANHO := TamSx3("F3_FILIAL")[1]
+			MsUnlock()
+		EndIf
+	EndIf
+EndIf
+
+Return

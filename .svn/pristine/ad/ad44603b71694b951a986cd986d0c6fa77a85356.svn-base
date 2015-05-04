@@ -1,0 +1,213 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\REPORT.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\fatr100.prx"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "PROTHEUS.CH"
+#line 3 "d:\totvs 11\microsiga\protheus\my projects\materiais\fatr100.prx"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FATR100.CH"
+#line 19 "d:\totvs 11\microsiga\protheus\my projects\materiais\fatr100.prx"
+Function Fatr100()
+Local oReport
+
+	Pergunte("FATR100", .F. )
+
+	oReport := Ftr100RptDef()
+	oReport:PrintDialog()
+
+Return( .T. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function Ftr100RptDef()
+Local oReport
+Local oSection1
+Local oSection2
+Local oSection3
+Local oSection4
+Local cAlias1 := "QRYFRCT"
+
+
+	cAlias1		:= GetNextAlias()
+
+
+
+
+ oReport := TReport():New("FATR100", "FORECAST", "FATR100", {|oReport|Ftr100PrtRpt(oReport,cAlias1)} , "FORECAST",,,,,,,)
+
+
+
+
+ oSection1 := TRSection():New(oReport, "Unidade", { "ADK"}, ,, ,,,,,,,,,,,,,,,)
+
+
+
+
+ TRCell():New(oSection1, "ADK_COD", "ADK",,,,,,,,,,,,,,)
+ TRCell():New(oSection1, "ADK_NOME", "ADK",,,,,,,,,,,,,,)
+
+
+
+
+ oSection2 := TRSection():New(oSection1, "Vendedor", { "SA3"}, ,, ,,,,,,,,,,,,,,,)
+
+ TRCell():New(oSection2, "A3_COD", "SA3",,,,,,,,,,,,,,)
+ TRCell():New(oSection2, "A3_NOME", "SA3",,,,,,,,,,,,,,)
+
+ oSection3 := TRSection():New(oSection2, "Oportunidade", { "AD1"}, ,, ,,,,,,,,,,,,,,,)
+
+ TRCell():New(oSection3, "AD1_CODCLI", "AD1",,, 35,, {||Iif(!Empty((cAlias1)->AD1_PROSPE),Alltrim(Posicione("SUS",1,xFilial("SUS")+(cAlias1)->AD1_PROSPE,"US_NOME")),Alltrim(Posicione("SA1",1,xFilial("SA1")+(cAlias1)->AD1_CODCLI,"A1_NOME")))},,,,,,,,,)
+ TRCell():New(oSection3, "AD1_NROPOR", "AD1",,, 40,, {||(cAlias1)->AD1_NROPOR+"-"+AD1_DESCRI},,,,,,,,,)
+ TRCell():New(oSection3, "AD1_PRFRCT", "AD1",,,,,,,,,,,,,,)
+ TRCell():New(oSection3, "AD1_FEELIN", "AD1",,, 10,, {||Iif((cAlias1)->AD1_FEELIN=="2","60%","90%")},,,,,,,,,)
+ TRCell():New(oSection3, "AD1_DTPFIM", "AD1",,,,,,,,,,,,,,)
+
+ oSection4 := TRSection():New(oSection3, If(cPaisLoc$"ANG|PTG","Artigos","Produtos"), { "SCK"}, ,, ,,,,,,,,,,,,,,,)
+
+ TRCell():New(oSection4, "CK_PRODUTO", "SCK",,,,,,,,,,,,,,)
+ TRCell():New(oSection4, "CK_DESCRI", "SCK",,,,,,,,,,,,,,)
+ TRCell():New(oSection4, "CK_QTDVEN", "SCK",,,,,,,,,,,,,,)
+ TRCell():New(oSection4, "CK_PRCVEN", "SCK",,,,,,,,,,,,,,)
+ TRCell():New(oSection4, "CK_VALOR", "SCK",,,,,,,,,,,,,,)
+
+oSection1:SetTotalInLine( .F. )
+oSection2:SetTotalInLine( .F. )
+oSection3:SetTotalInLine( .F. )
+oSection4:SetTotalInLine( .F. )
+oReport:SetTotalInLine( .F. )
+
+ TRFunction():New(oSection4:Cell("CK_VALOR"),,"SUM",, "Unidade",,,,,, oSection1,,,)
+
+ TRFunction():New(oSection4:Cell("CK_VALOR"),,"SUM",, "Vendedor",,,,,, oSection2,,,)
+
+ TRFunction():New(oSection4:Cell("CK_VALOR"),,"SUM",, "Oportunidade",,,,,, oSection3,,,)
+
+
+Return oReport
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function Ftr100PrtRpt(oReport, cAlias1)
+Local oSection1 := oReport:Section(1)
+Local oSection2 := oSection1:Section(1)
+Local oSection3 := oSection2:Section(1)
+Local oSection4 := oSection3:Section(1)
+Local cFiltro	:= ""
+Local aVend := {}
+Local cVend := ""
+Local cVendFil := ""
+Local nI := 0
+
+cVend := Posicione("SA3",7,xFilial("SA3")+Alltrim(__CUserId),"A3_COD")
+aVend := Ft320Time( cVend )
+
+For nI := 1 To Len(aVend)
+
+	If aVend[nI] >= MV_PAR03 .And.  aVend[nI] <= MV_PAR04
+		If MV_PAR03 == MV_PAR04
+			cVendFil += (aVend[nI])
+			Exit
+		EndIf
+		If nI == 1
+			If Len(aVend) == 1
+				cVendFil += (aVend[nI])
+			Else
+				cVendFil += (aVend[nI] + "'" + ",")
+			EndIf
+		ElseIf nI == Len(aVend)
+			cVendFil += ("'" + aVend[nI])
+		Else
+			cVendFil += ("'" + aVend[nI] + "'" + ",")
+		EndIf
+	EndIf
+Next
+
+oSection1:BeginQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAlias1," SELECT AD1_NROPOR, AD1_PRFRCT, AD1_DESCRI, AD1_CODCLI, AD1_PROSPE, AD1_FEELIN, AD1_DTPFIM, A3_COD, A3_NOME, ADK_COD, ADK_NOME, CK_PRODUTO, CK_DESCRI, CK_QTDVEN, CK_PRCVEN, CK_VALOR, AD1_VEND FROM  "+RetSqlName('AD1')+" AD1,  "+RetSqlName('SA3')+" SA3,  "+RetSqlName('ADK')+" ADK,  "+RetSqlName('SCK')+" SCK WHERE AD1.AD1_FILIAL =  '" +xFilial('AD1')+"'  AND AD1.AD1_VEND = SA3.A3_COD AND AD1.AD1_PRFRCT = SCK.CK_PROPOST AND SA3.A3_UNIDAD = ADK.ADK_COD AND (AD1.AD1_FEELIN = '2'OR AD1.AD1_FEELIN = '3') AND AD1.AD1_DTPFIM >=  "+___SQLGetValue(MV_PAR01)+" AND AD1.AD1_DTPFIM <=  "+___SQLGetValue(MV_PAR02)+" AND AD1.AD1_PRFRCT <> '      ' AND AD1.AD1_VEND IN ( "+___SQLGetValue(CVENDFIL)+") AND AD1.D_E_L_E_T_= ' ' AND SA3.D_E_L_E_T_= ' ' AND ADK.D_E_L_E_T_= ' ' AND SCK.D_E_L_E_T_= ' ' ORDER BY A3_UNIDAD, A3_COD",{},.F.)
+oSection1:EndQuery(); If oSection1:bCompQuery <> NIL; oSection1:bRealQuery := {|__section| __runcb(__section:bCompQuery, .T. )}; EndIf
+
+oSection2:SetParentQuery()
+oSection2:SetParentFilter({|cParam| (cAlias1)->ADK_COD == cParam},{|| (cAlias1)->ADK_COD })
+
+oSection3:SetParentQuery()
+oSection3:SetParentFilter({|cParam| (cAlias1)->A3_COD == cParam},{|| (cAlias1)->A3_COD })
+
+oSection4:SetParentQuery()
+oSection4:SetParentFilter({|cParam| (cAlias1)->AD1_NROPOR == cParam},{|| (cAlias1)->AD1_NROPOR })
+
+
+
+
+oSection2:SetLineBreak()
+
+
+
+
+oSection1:Print()
+
+Return( .T. )

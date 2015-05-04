@@ -1,0 +1,761 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Matr970.ch"
+#line 23 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr970.prx"
+Function Matr970()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And.  TRepInUse()
+
+
+
+	oReport	:= ReportDef()
+	oReport:PrintDialog()
+Else
+	Matr970R3()
+EndIf
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportDef()
+
+Local oReport
+Local oNfSaid
+
+
+
+
+oReport := TReport():New("MATR970",If( cPaisLoc $ "ANG|PTG", "Rel.trimestral Das Operações Interestaduais", "Rel.Trimestral das Operacoes Interestaduais" ),"MTR970", {|oReport| ReportPrint(oReport)},"Emissäo da relaçäo trimestral das vendas interestaduais"+" "+If( cPaisLoc $ "ANG|PTG", "Totalizada por distrito.", "totalizada por estado." ))
+oReport:SetTotalInLine( .F. )
+oReport:SetLandscape()
+Ajustasx1()
+Pergunte("MTR970", .F. )
+
+
+
+
+oNfSaid:= TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Documentos de saída", "Documentos de Saída" ),{"SF2","SA1"},{"UF e emissão"},,)
+oNfSaid:SetTotalInLine( .F. )
+TRCell():New(oNfSaid,"F2_FILIAL"	,"SF2"	,If( cPaisLoc $ "ANG|PTG", "Filial ", "FILIAL " ),,0,,)
+TRCell():New(oNfSaid,"F2_EST"	    ,"SF2"	,If( cPaisLoc $ "ANG|PTG", "Distrito", "Estado" ),,0,,)
+TRCell():New(oNfSaid,"F2_DOC"		,"SF2"	,If( cPaisLoc $ "ANG|PTG", "N.f", "N.F" ),,TamSX3("F2_DOC")[1],,)
+TRCell():New(oNfSaid,"F2_SERIE"		,"SF2"	,If( cPaisLoc $ "ANG|PTG", "Sr.", "SR." ),,,,)
+TRCell():New(oNfSaid,"F2_EMISSAO"	,"SF2"	,If( cPaisLoc $ "ANG|PTG", "Emissão", "EMISSAO" ),,,,)
+TRCell():New(oNfSaid,"F2_CLIENTE"	,"SF2"	,If( cPaisLoc $ "ANG|PTG", "Razão Social", "RAZAO SOCIAL" ),,20,,)
+TRCell():New(oNfSaid,"A1_END"		,"SA1"	,If( cPaisLoc $ "ANG|PTG", "Morada", "ENDERECO" ),,20,,)
+TRCell():New(oNfSaid,"A1_CEP"		,"SA1"	,If( cPaisLoc $ "ANG|PTG", "Código postal", "CEP" ),"@R 99999-999",,,)
+TRCell():New(oNfSaid,"A1_INSCR"		,"SA1"	,If( cPaisLoc $ "ANG|PTG", "Insc.estadual", "INSC.ESTADUAL" ),"@!",15,,)
+TRCell():New(oNfSaid,"A1_CGC"		,"SA1"	,If( cPaisLoc $ "ANG|PTG", "C.n.p.j", "C.N.P.J" ),"@R 99.999.999/9999-99",,,)
+TRCell():New(oNfSaid,"F2_VALMERC"	,"SF2"	,If( cPaisLoc $ "ANG|PTG", "Valor Da Mercadoria", "VALOR MERCADORIA" ),"@E 999,999,999.99",,,)
+TRCell():New(oNfSaid,"F2_VALIPI"	,"SF2"	,If( cPaisLoc $ "ANG|PTG", "Valor Do Iva", "VALOR DO IPI" ),"@E 999,999,999.99",,,)
+TRCell():New(oNfSaid,"F2_VALICM"	,"SF2"	,If( cPaisLoc $ "ANG|PTG", "Valor Do Contribuinte", "VALOR DO ICMS" ),"@E 999,999,999.99",,,)
+TRCell():New(oNfSaid,"VL_TOTAL"		,"SF2"	,If( cPaisLoc $ "ANG|PTG", "Valor Total", "VALOR TOTAL" ),"@E 999,999,999.99",,,)
+
+oNfSaid:Cell("F2_FILIAL"):Disable()
+oNfSaid:Cell("F2_EST"):Disable()
+
+Return(oReport)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportPrint(oReport)
+
+Local oNfSaid := oReport:Section(1)
+Local oBreakEs
+Local oBreakFil
+
+Local cCliFor   :=	""
+Local cEndereco	:=	""
+Local cCEP		:=	""
+Local cInscEst	:=	""
+Local cCGC		:=	""
+Local cUF		:=	""
+Local cDesc		:=	""
+Local cAliasSF2	:= "SF2"
+
+
+Local aFilsCalc  := MatFilCalc(mv_par05 == 1)
+Local cFilBack   := cFilAnt
+Local nForFilial := 0
+Local lProc	     := .T. 
+
+
+
+
+
+
+oBreakEs := TRBreak():New(oNfSaid,oNfSaid:Cell("F2_EST"),If( cPaisLoc $ "ANG|PTG", "Total do estado ", "Total do Estado " ), .F. )
+TRFunction():New(oNfSaid:Cell("F2_VALMERC"),Nil,"SUM",oBreakEs,"","@E 999,999,999.99",, .F. , .F. , .F. )
+TRFunction():New(oNfSaid:Cell("F2_VALIPI"),Nil,"SUM",oBreakEs,"","@E 999,999,999.99",, .F. , .F. , .F. )
+TRFunction():New(oNfSaid:Cell("F2_VALICM"),Nil,"SUM",oBreakEs,"","@E 999,999,999.99",, .F. , .F. , .F. )
+TRFunction():New(oNfSaid:Cell("VL_TOTAL"),Nil,"SUM",oBreakEs,"","@E 999,999,999.99",, .F. , .F. , .F. )
+
+oBreakFil := TRBreak():New(oNfSaid,oNfSaid:Cell("F2_FILIAL"),If( cPaisLoc $ "ANG|PTG", "Total Da Filial", "Total da Filial" ), .F. )
+TRFunction():New(oNfSaid:Cell("F2_VALMERC"),Nil,"SUM",oBreakFil,"","@E 999,999,999.99",, .F. , .F. , .F. )
+TRFunction():New(oNfSaid:Cell("F2_VALIPI"),Nil,"SUM",oBreakFil,"","@E 999,999,999.99",, .F. , .F. , .F. )
+TRFunction():New(oNfSaid:Cell("F2_VALICM"),Nil,"SUM",oBreakFil,"","@E 999,999,999.99",, .F. , .F. , .F. )
+TRFunction():New(oNfSaid:Cell("VL_TOTAL"),Nil,"SUM",oBreakFil,"","@E 999,999,999.99",, .F. , .F. , .F. )
+
+If !Empty(aFilsCalc)
+
+	For nForFilial := 1 To Len(aFilsCalc)
+
+		If aFilsCalc[ nForFilial, 1 ]
+
+			cFilAnt := aFilsCalc[ nForFilial, 2 ]
+
+			oReport:EndPage()
+
+			oReport:SetTitle( "Emissäo da relaçäo trimestral das vendas interestaduais" + " - " + aFilsCalc[ nForFilial, 3 ] )
+			oBreakFil:SetTotalText(If( cPaisLoc $ "ANG|PTG", "Total Da Filial", "Total da Filial" ) + " - " + aFilsCalc[ nForFilial, 3 ])
+
+
+
+
+
+
+
+
+
+				MakeSqlExpr(oReport:uParam)
+
+
+
+				oNfSaid:BeginQuery()
+
+
+
+
+				If lProc
+					cAliasSF2 := GetNextAlias()
+					lProc := .F. 
+				Endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasSF2," SELECT DISTINCT F2_FILIAL,F2_EST,F2_EMISSAO,F2_DOC,F2_SERIE,F2_CLIENTE, F2_LOJA, F2_TIPO, F2_VALMERC, F2_VALIPI, F2_VALICM, F2_FRETE, F2_SEGURO, A1_COD, A1_LOJA FROM  "+RetSqlName('SF2')+" SF2,  "+RetSqlName('SD2')+" SD2,  "+RetSqlName('SA1')+" SA1 WHERE F2_FILIAL =  '" +xFilial('SF2')+"'  AND F2_EMISSAO >=  "+___SQLGetValue(DTOS(MV_PAR01))+" AND F2_EMISSAO <=  "+___SQLGetValue(DTOS(MV_PAR02))+" AND F2_EST <>  "+___SQLGetValue(GETMV("MV_ESTADO"))+" AND F2_FILIAL = D2_FILIAL AND F2_DOC = D2_DOC AND F2_SERIE = D2_SERIE AND F2_CLIENTE = D2_CLIENTE AND F2_CLIENTE = A1_COD AND F2_LOJA = D2_LOJA AND F2_LOJA = A1_LOJA AND NOT(D2_CF LIKE '7%') AND SF2.D_E_L_E_T_= ' ' AND SD2.D_E_L_E_T_= ' ' ORDER BY F2_FILIAL, F2_EST , F2_EMISSAO, F2_DOC, F2_SERIE",{},.F.)
+
+
+
+
+
+
+
+
+				oNfSaid:EndQuery()
+				oNfSaid:SetParentQuery()
+				oNfSaid:SetParentFilter( { || (cAliasSF2)->F2_EST},{ || (cAliasSF2)->F2_EST })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			oNfSaid:Cell("F2_CLIENTE"):SetBlock({|| cCliFor})
+			oNfSaid:Cell("A1_END"):SetBlock({||cEndereco})
+			oNfSaid:Cell("A1_CEP"):SetBlock({||cCep})
+			oNfSaid:Cell("A1_INSCR"):SetBlock({||cInscEst})
+			oNfSaid:Cell("A1_CGC"):SetBlock({||	cCGC})
+			oNfSaid:Cell("VL_TOTAL"):SetBlock({||(cAliasSF2)->F2_VALMERC+(cAliasSF2)->F2_FRETE+(cAliasSF2)->F2_SEGURO+(cAliasSF2)->F2_VALIPI})
+
+
+
+
+
+			(cAliasSF2)->(dbGoTop())
+			dbSelectArea(cAliasSF2)
+			oReport:SetMeter((cAliasSF2)->(LastRec()))
+
+			While !oReport:Cancel() .And.  !(cAliasSF2)->(Eof())
+
+				cUF := (cAliasSF2)->F2_EST
+
+				If oReport:Cancel()
+					Exit
+				EndIf
+
+
+
+
+
+
+
+
+				oNfSaid:Init()
+
+		    	While !oReport:Cancel() .And.  !(cAliasSF2)->(Eof()) .And.  (cAliasSF2)->F2_EST == cUF
+
+					If (cAliasSF2)->F2_TIPO$"DB"
+		  				dbSelectArea("SA2")
+						SA2->(dbSetOrder(1))
+						SA2->(dbSeek(xFilial("SA2")+(cAliasSF2)->F2_CLIENTE+(cAliasSF2)->F2_LOJA))
+						cCliFor		:=Substr(SA2->A2_NOME,1,30)
+						cEndereco	:=SA2->A2_END
+						cCEP		:=SA2->A2_CEP
+						cInscEst	:=SA2->A2_INSCR
+						cCGC		:=SA2->A2_CGC
+					Else
+						dbSelectArea("SA1")
+						SA1->(dbSetOrder(1))
+						SA1->(dbSeek(xFilial("SA1")+(cAliasSF2)->F2_CLIENTE+(cAliasSF2)->F2_LOJA))
+						cCliFor		:=Substr(SA1->A1_NOME,1,30)
+						cEndereco	:=SA1->A1_END
+						cCEP		:=SA1->A1_CEP
+						cInscEst	:=SA1->A1_INSCR
+						cCGC		:=SA1->A1_CGC
+					Endif
+
+					oNfSaid:PrintLine()
+
+					dbSelectArea("SX5")
+					cChave:=xFilial()+"12"+cUF
+					dbSeek(cChave)
+
+					oBreakEs:SetTotalText(If( cPaisLoc $ "ANG|PTG", "Total do estado ", "Total do Estado " ) + (cAliasSF2)->F2_EST + " - " + X5Descri())
+
+					oReport:IncMeter()
+					(cAliasSF2)->(DbSkip())
+				Enddo
+				oReport:IncMeter()
+			Enddo
+
+			oNfSaid:Finish()
+
+			(cAliasSF2)->(DbCloseArea())
+		Endif
+	next
+Endif
+
+
+cFilant:=cFilback
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MatR970R3
+
+
+
+
+LOCAL wnrel
+LOCAL tamanho:="G"
+LOCAL limite:=220
+LOCAL cDesc1:="Emissäo da relaçäo trimestral das vendas interestaduais"
+LOCAL cDesc2:=If( cPaisLoc $ "ANG|PTG", "Totalizada por distrito.", "totalizada por estado." )
+LOCAL cDesc3:=""
+LOCAL lEnd:= .F. 
+
+Local aFilsCalc	:= {}
+
+PRIVATE Titulo:=OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Rel.trimestral Das Operações Interestaduais", "Rel.Trimestral das Operacoes Interestaduais" ))
+PRIVATE aReturn:={ If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ), 1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 2, 2, 1, "",1 }
+PRIVATE nomeprog:="MATR970",nLastKey:=0
+PRIVATE cPerg:="MTR970"
+PRIVATE cString:="SF2"
+
+
+
+Ajustasx1()
+Pergunte("MTR970", .F. )
+wnrel:="MATR970"
+wnrel:=SetPrint(cString,wnrel,cPerg,Titulo,cDesc1,cDesc2,cDesc3, .F. ,"",,Tamanho)
+If nLastKey==27
+	Return
+Endif
+
+aFilsCalc := MatFilCalc( MV_PAR05 == 1 )
+if Empty(aFilsCalc)
+	dbSelectArea(cString)
+	dbSetOrder(1)
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+If nLastKey==27
+	Return
+Endif
+
+
+
+
+
+RptStatus({|lEnd| R970Imp(@lEnd,wnRel,cString,Tamanho,aFilsCalc)},titulo)
+
+If aReturn[5]==1
+	Set( 24, "" )
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R970Imp(lEnd,wnRel,cString,Tamanho,aFilsCalc)
+Local cUF         := ""
+Local cCliFor     := ""
+Local cEndereco   := ""
+Local cCEP        := ""
+Local cInscEst    := ""
+Local cCGC        := ""
+LOCAL CbCont      := 0
+Local cBTxt       := Space(10)
+Local cabec1      := ""
+Local cabec2      := ""
+Local cAliasSF2   := "SF2"
+Local cFilterUser :=aReturn[7]
+Local nLin        := 80
+Local lQuery      := .F. 
+Local cFilBack    := cFilAnt
+Local nForFilial  := 0
+Local lImprimiu	  := .T. 
+
+
+	Local aStruSF2	:=	{}
+	Local cQuery	:=	""
+	Local nX		:=	0
+
+
+
+
+
+
+
+PRIVATE aLinha:={}
+
+
+
+pergunte(cPerg, .F. )
+
+
+
+
+
+
+
+
+PRIVATE m_pag:=IIf(mv_par03<=0,1,mv_par03)
+PRIVATE nQtFeixe:=IIF(mv_par04<=0,500,mv_par04)
+
+For nForFilial := 1 to Len(aFilsCalc)
+
+	If aFilsCalc[nForFilial][1]
+
+		cFilAnt := aFilsCalc[nForFilial][2]
+		nLin := 80
+
+
+
+
+		Cabec1:=If( cPaisLoc $ "ANG|PTG", "FACT.      SR.  EMISSÃO    DESTINATÁRIO                                                                                                                           VALOR            VALOR              VALOR             TOTAL", "NOTA      SR.  EMISSAO    DESTINATARIO                                                                                                                           VALOR            VALOR              VALOR             TOTAL" )
+		Cabec2:=If( cPaisLoc $ "ANG|PTG", "FISCAL                    RAZÃO SOCIAL                     MORADA                                  CP        INSCR. ESTATAL    NR.CONTRIB.                  MERCADORIA              IPI                ICM", "FISCAL                    RAZAO SOCIAL                     ENDERECO                                 CEP       INSCR. ESTADUAL    C.N.P.J.                   MERCADORIA              IPI                ICM" )
+
+
+
+
+
+
+		cAliasSF2	:=	"SF2"
+		dbSelectArea(cAliasSF2)
+
+
+		    If TcSrvType()<>"AS/400"
+				lQuery 		:= .T. 
+				cAliasSF2	:= "SF2_MTR970"
+				aStruSF2	:=	SF2->(dbStruct())
+				cQuery	:=	"SELECT DISTINCT SF2.F2_FILIAL, SF2.F2_EMISSAO, SF2.F2_EST, SF2.F2_DOC, SF2.F2_SERIE, SF2.F2_CLIENTE, "
+				cQuery	+=	"SF2.F2_LOJA, SF2.F2_TIPO, SF2.F2_VALMERC, SF2.F2_VALIPI, SF2.F2_VALICM, SF2.F2_FRETE, SF2.F2_SEGURO "
+				cQuery	+=	"FROM " + RetSqlName("SF2") + " SF2, " + RetSqlName("SD2") + " SD2 "
+				cQuery	+=	"WHERE SF2.F2_FILIAL = '" + xFilial("SF2") + "' AND "
+				cQuery	+=	"SF2.F2_EMISSAO >= '" + Dtos(mv_par01) + "' AND "
+				cQuery	+=	"SF2.F2_EMISSAO <= '" + Dtos(mv_par02) + "' AND "
+				cQuery	+=	"SF2.F2_EST <> '" + GetMV("mv_estado")	+"' AND "
+				cQuery	+=	"SF2.F2_FILIAL = SD2.D2_FILIAL AND SF2.F2_DOC = SD2.D2_DOC AND SF2.F2_SERIE = SD2.D2_SERIE AND "
+				cQuery	+=  "SF2.F2_CLIENTE = SD2.D2_CLIENTE AND SF2.F2_LOJA = SD2.D2_LOJA AND NOT(SD2.D2_CF LIKE '7%') AND "
+				cQuery	+=	"SF2.D_E_L_E_T_ = ' ' "
+				cQuery	+=	"ORDER BY F2_FILIAL, F2_EST, F2_EMISSAO, F2_DOC, F2_SERIE"
+				cQuery	:=	ChangeQuery(cQuery)
+
+				dbUseArea( .T. ,"TOPCONN",TcGenQry(,,cQuery),cAliasSF2)
+				For nX := 1 To len(aStruSF2)
+					If aStruSF2[nX][2] <> "C" .And.  FieldPos(aStruSF2[nX][1])<>0
+						TcSetField(cAliasSF2,aStruSF2[nX][1],aStruSF2[nX][2],aStruSF2[nX][3],aStruSF2[nX][4])
+					EndIf
+				next
+
+				dbSelectArea(cAliasSF2)
+
+			Else
+
+				cNomeArq	:=	CriaTrab(NIL, .F. )
+				cCondSF2	:=	"F2_FILIAL=='" + xFilial() + "' .And. "
+				cCondSF2	+=	"dTos(F2_EMISSAO) >= '" + dTos(mv_par01) + "' .And. dTos(F2_EMISSAO) <= '" + dTos(mv_par02) + "' .And. "
+				cCondSF2	+=	"F2_EST !='" + GetMV("mv_estado")	+ "'"
+				cKey_SF2	:=	"F2_FILIAL+F2_EST+DTOS(F2_EMISSAO)+F2_DOC+F2_SERIE"
+				IndRegua(cAliasSF2,cNomeArq,cKey_SF2,,cCondSF2,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+				dbSelectArea(cAliasSF2)
+				SetRegua(RecCount())
+				dbGoTop()
+
+			Endif
+
+
+
+
+		nTAC1:=0
+		nTAC2:=0
+		nTAC3:=0
+		nTAC4:=0
+
+		While !eof()
+
+			If Interrupcao(@lEnd)
+				Exit
+			Endif
+
+
+
+
+
+
+
+
+
+
+			nAC1 := 0
+			nAC2 := 0
+			nAC3 := 0
+			nAC4 := 0
+			lImprimiu	:= .F. 
+
+			cUF := (cAliasSF2)->F2_EST
+		dbSelectArea(cAliasSF2)
+		While !(cAliasSF2)->(eof()) .And.  cUF == (cAliasSF2)->F2_EST
+
+
+
+
+				If !Empty(cFilterUser) .And.  !((cAliasSF2)->&(cFilterUser))
+					dbSkip()
+					Loop
+				EndIf
+				lImprimiu	:= .T. 
+
+				If Interrupcao(@lEnd)
+					Exit
+				Endif
+
+
+
+
+
+
+
+
+				IF nLin > 60
+					cabec(titulo,cabec1,cabec2,nomeprog,tamanho,15)
+					If m_pag%(nQtFeixe+1)==0
+						m_pag:=1
+					Endif
+					nLin:=_PROW()
+				EndIF
+
+				If (cAliasSF2)->F2_TIPO$"DB"
+					dbSelectArea("SA2")
+					dbSetOrder(1)
+					dbSeek(xFilial("SA2")+(cAliasSF2)->F2_CLIENTE+(cAliasSF2)->F2_LOJA)
+					cCliFor:=Substr(A2_NOME,1,30)
+					cEndereco:=A2_END
+					cCEP:=A2_CEP
+					cInscEst:=A2_INSCR
+					cCGC:=A2_CGC
+				Else
+					dbSelectArea("SA1")
+					dbSetOrder(1)
+					dbSeek(xFilial("SA1")+(cAliasSF2)->F2_CLIENTE+(cAliasSF2)->F2_LOJA)
+					cCliFor:=Substr(A1_NOME,1,30)
+					cEndereco:=A1_END
+					cCEP:=A1_CEP
+					cInscEst:=A1_INSCR
+					cCGC:=A1_CGC
+				Endif
+
+				dbSelectArea(cAliasSF2)
+
+				nLin++
+				PrintOut(nLin,000,(cAliasSF2)->F2_DOC,,)
+				PrintOut(nLin,010,(cAliasSF2)->F2_SERIE,,)
+				PrintOut(nLin,015,(cAliasSF2)->F2_EMISSAO,,)
+				PrintOut(nLin,026,cCliFor,,)
+				PrintOut(nLin,059,Substr(cEndereco,1,36),,)
+				PrintOut(nLin,095,cCEP,"@R 99999-999",)
+				PrintOut(nLin,105,Alltrim(cInscEst),"@!",)
+				PrintOut(nLin,124,cCGC,"@R 99.999.999/9999-99",)
+				PrintOut(nLin,143,(cAliasSF2)->F2_VALMERC,"@E 999,999,999,999.99",)
+				PrintOut(nLin,163,(cAliasSF2)->F2_VALIPI,"@E 9,999,999,999.99",)
+				PrintOut(nLin,181,(cAliasSF2)->F2_VALICM,"@E 999,999,999,999.99",)
+				PrintOut(nLin,200,((cAliasSF2)->F2_VALMERC+(cAliasSF2)->F2_FRETE+(cAliasSF2)->F2_SEGURO+(cAliasSF2)->F2_VALIPI),"@E 999,999,999,999.99",)
+
+				nAC1+=(cAliasSF2)->F2_VALMERC
+				nAC2+=(cAliasSF2)->F2_VALIPI
+				nAC3+=(cAliasSF2)->F2_VALICM
+				nAC4+=((cAliasSF2)->F2_VALMERC+(cAliasSF2)->F2_FRETE+(cAliasSF2)->F2_SEGURO+(cAliasSF2)->F2_VALIPI)
+				(cAliasSF2)->(dbSkip())
+
+			EndDo
+
+			If lEnd
+				Loop
+			EndIf
+
+			If lImprimiu
+				nLin++
+				PrintOut(nLin,000,Repli("-",220),,)
+				dbSelectArea("SX5")
+				cChave:=xFilial()+"12"+cUF
+				dbSeek(cChave)
+
+				nLin++
+				PrintOut(nLin,000,If(cPaisLoc$"ANG|PTG","Total de distritos-> ","TOTAL Estado -> ")+cUF+" - "+X5Descri(),,)
+				dbSelectArea(cAliasSF2)
+				PrintOut(nLin,143,nAC1,"@E 999,999,999,999.99",)
+				PrintOut(nLin,163,nAC2,"@E 9,999,999,999.99",)
+				PrintOut(nLin,181,nAC3,"@E 999,999,999,999.99",)
+				PrintOut(nLin,200,nAC4,"@E 999,999,999,999.99",)
+				nTAC1 += nAC1
+				nTAC2 += nAC2
+				nTAC3 += nAC3
+				nTAC4 += nAC4
+
+				nLin +=2
+			EndIf
+		EndDo
+
+		If (nTAC1+nTAC2+nTAC3+nTAC4)>0.and.!lEnd
+			IF nLin > 63
+				cabec(titulo,cabec1,cabec2,nomeprog,tamanho,15)
+				If m_pag%(nQtFeixe+1)==0
+					m_pag:=1
+				Endif
+				nLin:=_PROW()
+			EndIF
+			nLin++
+			PrintOut(nLin,000,repl("=",220),,)
+			nLin++
+			PrintOut(nLin,001,If(cPaisLoc$"ANG|PTG","Total crial --->","TOTAL GERAL --->")+If(cPaisLoc$"ANG|PTG","Filial ","FILIAL ")+cFilAnt,,)
+			PrintOut(nLin,143,nTAC1,"@E 999,999,999,999.99",)
+			PrintOut(nLin,163,nTAC2,"@E 9,999,999,999.99",)
+			PrintOut(nLin,181,nTAC3,"@E 999,999,999,999.99",)
+			PrintOut(nLin,200,nTAC4,"@E 999,999,999,999.99",)
+			nLin++
+			PrintOut(nLin,000,repl("=",220),,)
+			If nLin < 60
+				roda(cbcont,cbtxt,tamanho)
+			Endif
+		Endif
+
+		If lQuery
+			dbSelectArea(cAliasSF2)
+			dbCloseArea()
+		Else
+			dbSelectArea(cAliasSF2)
+			RetIndex(cAliasSF2)
+			dbClearFilter()
+			Ferase(cNomeArq+OrdBagExt())
+			dbSetOrder(1)
+		Endif
+
+	Endif
+
+next
+
+cFilAnt:=cFilBack
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSx1()
+
+
+Local aHelpPor := { "Seleciona as filiais desejadas. Se NAO", "apenas a filial corrente sera afetada.", "" }
+
+
+Local aHelpSpa := { "Selecciona las sucursales deseadas. Si", "NO solamente la sucursal actual es", "afectado." }
+
+
+Local aHelpEng := { "Select desired branch offices. If NO", "only current branch office will be", "affected." }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PutSx1("MTR970",    "05",    "Seleciona filiais?",    "¿Selecciona sucursales?",    "Select branch offices?",    "mv_ch5",    "N",    1,    0,    2,    "C",    "",    "",    "",    "",    "mv_par05",    "Sim",    "Si",    "Yes",    "",    "Nao",    "No",    "No",    "",    "",    "",    "",    "",    "",    "",    "",    "",    aHelpPor,    aHelpSpa,    aHelpEng,    "")
+
+dbSelectArea("SF2")
+
+Return

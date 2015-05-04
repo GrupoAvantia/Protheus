@@ -1,0 +1,626 @@
+#Include "MATR835.CH"
+#Include "FIVEWIN.CH"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³MATR835   ³ Autor ³Felipe Nunes Toledo    ³ Data ³ 19/06/06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Mapa de recuo e avanco                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß           
+*/
+Function MATR835()
+Local   oReport
+Private nTamSX1 := Len(SX1->X1_GRUPO)
+Private nTipoAloc
+
+//-- Verifica se o SH8 esta locado para atualizacao por outro processo                
+If !IsLockSH8()
+
+	If SH8->(LastRec()) = 0
+		Help(" ",1, "A690NAOCA1")
+		dbSelectArea("SH8")
+		dbCloseArea()
+		Return
+	Endif
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Pega do SX1 o resultado da pergunta de alocacao pelo Fim ou pelo Inicio ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	dbSelectArea("SX1")
+	dbSeek(PADR("MTA690",nTamSX1)+"01")
+	nTipoAloc := X1_PRESEL
+	If nTipoAloc != 1 .And. nTipoAloc != 2
+		nTipoAloc := 2
+	EndIf
+	
+	If FindFunction("TRepInUse") .And. TRepInUse()
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Interface de impressao                                                  ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		oReport:= ReportDef()
+		If !oReport:PrintDialog()
+	   		dbSelectArea("SH8")
+			Set Filter to
+			dbCloseArea()
+			Return Nil
+		EndIf
+	Else
+		MATR835R3()
+	EndIf
+
+EndIf	
+Return NIL
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportDef ³ Autor ³Felipe Nunes Toledo    ³ Data ³19/06/06  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR835			                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+Local oReport
+Local oSection
+Local aOrdem     := {STR0005,STR0006}	//" Por Ordem Producao "###" Por Recurso        "
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao do componente de impressao                                      ³
+//³                                                                        ³
+//³TReport():New                                                           ³
+//³ExpC1 : Nome do relatorio                                               ³
+//³ExpC2 : Titulo                                                          ³
+//³ExpC3 : Pergunte                                                        ³
+//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+//³ExpC5 : Descricao                                                       ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:= TReport():New("MATR835",OemToAnsi(STR0001),"MTR835", {|oReport| ReportPrint(oReport)},OemToAnsi(STR0002)+OemToAnsi(STR0003)+" "+OemToAnsi(STR0004)) //"Este programa ir  emitir um mapa com as opera‡„es que necessi-taram ser deslocadas no tempo. Este deslocamento normalmente identifica um gargalo na linha de produ‡„o."
+oReport:SetLandscape() //Define a orientacao de pagina do relatorio como paisagem.
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas - MTR835                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                         ³
+//³ mv_par01            // OP inicial ?                          ³
+//³ mv_par02            // OP final ?                            ³
+//³ mv_par03            // Recurso inicial ?                     ³
+//³ mv_par04            // Recurso final ?                       ³
+//³ mv_par05            // Data ideal inicial ?                  ³
+//³ mv_par06            // Data ideal final ?                    ³
+//³ mv_par07            // Considera Ops ?                       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Pergunte(oReport:uParam,.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da secao utilizada pelo relatorio                               ³
+//³                                                                        ³
+//³TRSection():New                                                         ³
+//³ExpO1 : Objeto TReport que a secao pertence                             ³
+//³ExpC2 : Descricao da secao                                              ³
+//³ExpA3 : Array com as tabelas utilizadas pela secao. A primeira tabela   ³
+//³        sera considerada como principal para a secao.                   ³
+//³ExpA4 : Array com as Ordens do relatorio                                ³
+//³ExpL5 : Carrega campos do SX3 como celulas                              ³
+//³        Default : False                                                 ³
+//³ExpL6 : Carrega ordens do Sindex                                        ³
+//³        Default : False                                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Sessao 1 (oSection)                                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSection := TRSection():New(oReport,OemToAnsi(STR0015),{"SH8","SC2","SB1","SH1","SH4"},aOrdem) //"Mapa de Recuo e Avanco"
+oSection:SetNoFilter({"SC2"})
+oSection:SetHeaderPage()
+
+TRCell():New(oSection,'H8_OP'	   	,'SH8',/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection,'C2_PRODUTO' 	,'SC2',/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection,'B1_DESC'   	,'SB1',/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection,'H8_OPER'  	,'SH8',/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection,'H8_RECURSO' 	,'SH8',/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection,'H1_DESCRI'	,'SH1',/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection,'H8_FERRAM'	,'SH8',/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection,'H4_DESCRI'	,'SH4',/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection,'H8_DTIDEAL'	,'SH8',/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection,'H8_HRIDEAL'	,'SH8',/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+IF nTipoAloc == 1
+	TRCell():New(oSection,'H8_DTFIM'	,'SH8',/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oSection,'H8_HRFIM'	,'SH8',/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oSection,'Diferenca' 	,'SH8', STR0014  ,/*Picture*/,/*Tamanho*/,/*lPixel*/, {|| R815Dur((cQryAloc)->H8_RECURSO,(cQryAloc)->H8_DTIDEAL,(cQryAloc)->H8_HRIDEAL,(cQryAloc)->H8_DTFIM,(cQryAloc)->H8_HRFIM) } )
+Else
+	TRCell():New(oSection,'H8_DTINI'	,'SH8',/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oSection,'H8_HRINI'	,'SH8',/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oSection,'Diferenca' 	,'SH8', STR0014  ,/*Picture*/,/*Tamanho*/,/*lPixel*/, {|| R815Dur((cQryAloc)->H8_RECURSO,(cQryAloc)->H8_DTINI,(cQryAloc)->H8_HRINI,(cQryAloc)->H8_DTIDEAL,(cQryAloc)->H8_HRIDEAL) } )
+EndIF
+
+Return(oReport)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrint ³ Autor ³Felipe Nunes Toledo  ³ Data ³14/06/06  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportPrint devera ser criada para todos  ³±±
+±±³          ³os relatorios que poderao ser agendados pelo usuario.       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatorio                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR835			                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport)
+Local  oSection  := oReport:Section(1)
+Local  nOrdem    := oSection:GetOrder()
+Local  cWhere01  := ""
+Local  cWhere02  := ""
+Local  cWhere03  := ""
+Local  cWhere04  := ""
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Definindo o titulo do relatorio³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+IF nOrdem == 1		
+	oReport:SetTitle(STR0001+"    "+"("+Trim(SubStr(STR0005,6,20))+")") //"Mapa de Recuo e Avanco"####" Ordem Producao "
+ElseIF nOrdem == 2
+	oReport:SetTitle(STR0001+"    "+"("+Trim(SubStr(STR0006,6,20))+")") //"Mapa de Recuo e Avanco"####" Recurso        "
+EndIF
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Filtragem do relatorio                                                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+#IFDEF TOP
+	dbSelectArea("SH8")
+	dbSetOrder(nOrdem)
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Transforma parametros Range em expressao SQL                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	MakeSqlExpr(oReport:uParam)
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Query do relatorio da secao 1                                           ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	
+	oSection:BeginQuery()	
+	
+	cQryAloc := GetNextAlias()
+	
+	cWhere01 := "%"
+	If nTipoAloc == 1
+		cWhere01 += " SH8.H8_DTIDEAL <> SH8.H8_DTFIM OR SH8.H8_HRIDEAL <> SH8.H8_HRFIM "
+	Else
+		cWhere01 += " SH8.H8_DTIDEAL <> SH8.H8_DTINI OR SH8.H8_HRIDEAL <> SH8.H8_HRINI "
+	EndIf
+	cWhere01 += "%"  
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Condicao Where para filtrar OP's                             ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	cWhere02 := "%"
+	If	Upper(TcGetDb()) $ 'ORACLE,DB2,POSTGRES,INFORMIX'
+		cWhere02  += "SC2.C2_NUM = SUBSTR(SH8.H8_OP,1,6) AND "
+		cWhere02  += "SC2.C2_ITEM = SUBSTR(SH8.H8_OP,7,2) AND "
+		cWhere02  += "SC2.C2_SEQUEN = SUBSTR(SH8.H8_OP,9,3) AND "
+		cWhere02  += "SC2.C2_ITEMGRD = SUBSTR(SH8.H8_OP,12,2)"
+	Else
+		cWhere02  += "SC2.C2_NUM = SUBSTRING(SH8.H8_OP,1,6) AND "
+		cWhere02  += "SC2.C2_ITEM = SUBSTRING(SH8.H8_OP,7,2) AND "
+		cWhere02  += "SC2.C2_SEQUEN = SUBSTRING(SH8.H8_OP,9,3) AND "
+		cWhere02  += "SC2.C2_ITEMGRD = SUBSTRING(SH8.H8_OP,12,2)"
+	EndIf
+	cWhere02 += "%"
+	
+	cWhere03 += "%'"+DtoS(CriaVar("H8_DTIDEAL",.F.))+"'%"
+	cWhere04 += "%'"+CriaVar("H8_HRINI",.F.)+"'%"
+	
+	BeginSql Alias cQryAloc
+
+	SELECT SH8.H8_FILIAL, SH8.H8_OP, SH8.H8_OPER, SH8.H8_RECURSO, SH8.H8_FERRAM, SH8.H8_DTIDEAL, SH8.H8_HRIDEAL,
+	SH8.H8_DTFIM, SH8.H8_HRFIM, SH8.H8_DTINI, SH8.H8_HRINI, 
+	SC2.C2_FILIAL, SC2.C2_PRODUTO, SC2.C2_NUM, SC2.C2_ITEM, SC2.C2_SEQUEN, SC2.C2_ITEMGRD, SC2.C2_TPOP, SC2.C2_ROTEIRO,
+	SB1.B1_FILIAL, SB1.B1_COD, SB1.B1_DESC, SB1.B1_OPERPAD,
+	SH1.H1_FILIAL, SH1.H1_CODIGO, SH1.H1_DESCRI,
+	SH4.H4_FILIAL, SH4.H4_CODIGO, SH4.H4_DESCRI
+
+	FROM %table:SH8% SH8
+
+	LEFT JOIN %table:SC2% SC2 ON
+	SC2.C2_FILIAL = %xFilial:SC2% AND
+	%Exp:cWhere02% AND
+	SC2.%NotDel%
+	
+	LEFT JOIN %table:SB1% SB1 ON
+	SB1.B1_FILIAL = %xFilial:SB1% AND
+	SB1.B1_COD = SC2.C2_PRODUTO AND
+	SB1.%NotDel%
+	
+	LEFT JOIN %table:SH1% SH1 ON
+	SH1.H1_FILIAL = %xFilial:SH1% AND
+	SH1.H1_CODIGO = SH8.H8_RECURSO AND
+	SH1.%NotDel%
+	
+	LEFT JOIN %table:SH4% SH4 ON
+	SH4.H4_FILIAL = %xFilial:SH4% AND
+	SH4.H4_CODIGO = SH8.H8_FERRAM AND
+	SH4.%NotDel%
+
+	WHERE SH8.H8_FILIAL = %xFilial:SH8% AND
+	      SH8.H8_OP >= %Exp:mv_par01% AND
+	 	  SH8.H8_OP <= %Exp:mv_par02% AND
+	 	  SH8.H8_RECURSO >= %Exp:mv_par03% AND
+	 	  SH8.H8_RECURSO <= %Exp:mv_par04% AND
+	 	  SH8.H8_DTIDEAL >= %Exp:mv_par05% AND
+	 	  SH8.H8_DTIDEAL <= %Exp:mv_par06% AND
+          %Exp:cWhere01% AND
+          SH8.H8_DTIDEAL <> %Exp:cWhere03% AND
+	 	  SH8.H8_HRINI <> %Exp:cWhere04% AND
+		  SH8.%NotDel%
+	
+	ORDER BY %Order:SH8%
+
+	EndSql 
+
+	oSection:EndQuery()
+#ELSE
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Transforma parametros Range em expressao ADVPL                          ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	MakeAdvplExpr(oReport:uParam)
+
+	cQryAloc := "SH8"
+	dbSelectArea(cQryAloc)
+	dbSetOrder(nOrdem)	
+
+	cCondicao := "H8_OP>='"+mv_par01+"'.And.H8_OP<='"+mv_par02+"'.And.H8_FILIAL=='"+xFilial("SH8")+"'"
+	cCondicao += ".And.H8_RECURSO>='"+mv_par03+"'"
+	cCondicao += ".And.H8_RECURSO<='"+mv_par04+"'"
+	cCondicao += ".And.DTOS(H8_DTIDEAL)>='"+DTOS(mv_par05)+"'"
+	cCondicao += ".And.DTOS(H8_DTIDEAL)<='"+DTOS(mv_par06)+"'"
+	If nTipoAloc == 1
+		cCondicao += ".And.DTOS(H8_DTIDEAL) <> DTOS(H8_DTFIM) .Or. H8_HRIDEAL <> H8_HRFIM"
+	Else
+		cCondicao += ".And.DTOS(H8_DTIDEAL) <> DTOS(H8_DTINI) .Or. H8_HRIDEAL <> H8_HRINI"
+	EndIf
+	cCondicao += ".And. !Empty(H8_DTIDEAL) .And. !Empty(H8_HRINI)"
+
+	oReport:Section(1):SetFilter(cCondicao,IndexKey())
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Posicionamento das tabelas³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	TRPosition():New(oSection,"SC2",1,{|| xFilial("SC2")+(cQryAloc)->H8_OP })
+	TRPosition():New(oSection,"SB1",1,{|| xFilial("SB1")+SC2->C2_PRODUTO })
+	TRPosition():New(oSection,"SH1",1,{|| xFilial("SH1")+(cQryAloc)->H8_RECURSO })
+	TRPosition():New(oSection,"SH4",1,{|| xFilial("SH4")+(cQryAloc)->H8_FERRAM })
+   
+#ENDIF
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Inicio da impressao do fluxo do relatorio                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:SetMeter(SH8->(LastRec()))
+oSection:Init()
+
+dbSelectArea(cQryAloc)
+While !oReport:Cancel() .And. !(cQryAloc)->(Eof())
+	oReport:IncMeter()
+	//-- Valida se a OP deve ser Impressa ou nao
+ 	#IFNDEF TOP
+		dbSelectArea("SC2")
+		dbSeek(xFilial("SC2")+(cQryAloc)->H8_OP)
+	#ENDIF		
+	If !MtrAValOP(mv_par07, 'SC2', If(cQryAloc<>'SH8',cQryAloc,NIL))
+		dbSelectArea(cQryAloc)
+		dbSkip()
+		Loop
+	EndIf
+	oSection:PrintLine()
+	dbSelectArea(cQryAloc)
+	dbSkip()
+EndDo
+
+oSection:Finish()
+(cQryAloc)->(DbCloseArea())
+dbSelectArea("SH8")
+Set Filter to
+dbCloseArea()
+
+Return NIL
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR835  ³ Autor ³ Eveli Morasco         ³ Data ³ 24/05/93 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Mapa de recuo e avanco                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Rodrigo Sart³03/11/98³XXXXXX³ Acerto p/ Bug Ano 2000                   ³±±
+±±³Fernando J. ³07/02/99³META  ³Imprimir OP's Firmes, Previstas ou Ambas. ³±±
+±±³Cesar       ³31/03/99³XXXXXX³Manutencao na SetPrint()                  ³±±
+±±³Patricia Sal³18/04/00³003265³Imprimir Cod/Descr. da Ferramenta.        ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+*/
+Function Matr835R3()
+LOCAL titulo   := STR0001	//"Mapa de Recuo e Avanco"
+LOCAL cString  := "SH8"
+LOCAL wnrel    := "MATR835"
+LOCAL cDesc1   := STR0002	//"Este programa ir  emitir um mapa com as opera‡„es que necessi-"
+LOCAL cDesc2   := STR0003	//"taram ser deslocadas no tempo. Este deslocamento  normalmente"
+LOCAL cDesc3   := STR0004	//"identifica um gargalo na linha de produ‡„o."
+LOCAL aOrd     := {STR0005,STR0006}	//" Por Ordem Producao "###" Por Recurso        "
+LOCAL Tamanho  := "G"
+PRIVATE aReturn := {STR0007,1,STR0008, 2, 2, 1, "",1 }	//"Zebrado"###"Administracao"
+PRIVATE nLastKey := 0
+PRIVATE cPerg := "MTR835"
+                
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                         ³
+//³ mv_par01     // Ordem de Producao inicial                    ³
+//³ mv_par02     // Ordem de Producao final                      ³
+//³ mv_par03     // Recurso Inicial                              ³
+//³ mv_par04     // Recurso Final                                ³
+//³ mv_par05     // Data inicial                                 ³
+//³ mv_par06     // Data final                                   ³
+//³ mv_par07     // Impr. OP's Firmes, Previstas ou Ambas        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+pergunte(cPerg,.F.)
+
+//-- Verifica se o SH8 esta locado para atualizacao por outro processo                
+If !IsLockSH8()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Envia controle para a funcao SETPRINT                        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.F.,aOrd,,Tamanho)
+	
+	If nLastKey = 27
+		dbSelectArea("SH8")
+		Set Filter To
+		dbCloseArea()
+		dbSelectArea("SC2")
+		Return
+	Endif
+	
+	SetDefault(aReturn,cString)
+	
+	If nLastKey = 27
+		dbSelectArea("SH8")
+		Set Filter To
+		dbCloseArea()
+		dbSelectArea("SC2")
+		Return
+	Endif
+	
+	RptStatus({|lEnd| R835Imp(@lEnd,wnRel,titulo,tamanho,aOrd)},titulo)
+	
+EndIf
+Return NIL
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³ R835Imp  ³ Autor ³ Waldemiro L. Lustosa  ³ Data ³ 13.11.95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Chamada do Relat¢rio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR835			                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function R835Imp(lEnd,wnRel,titulo,tamanho,aOrd)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL cabec1,cabec2
+LOCAL cRodaTxt := STR0009	//"REGISTRO(S)"
+LOCAL nCntImpr := 0
+LOCAL nTipo    := 0
+LOCAL nomeprog := "MATR835"
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis tipo Private padrao de todos os relatorios         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Contadores de linha e pagina                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+PRIVATE li := 80 ,m_pag := 1
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis privadas exclusivas deste programa                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+PRIVATE lContinua := .T. ,cCondicao
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa os codigos de caracter Comprimido/Normal da impressora ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+nTipo  := IIF(aReturn[4]==1,15,18)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Adiciona a ordem escolhida ao titulo do relatorio          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If Type("NewHead")#"U"
+	NewHead += " ("+AllTrim(SubStr(aOrd[aReturn[8]],6,20))+")"
+Else
+	Titulo += " ("+AllTrim(SubStr(aOrd[aReturn[8]],6,20))+")"
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Monta os Cabecalhos                                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If nTipoAloc == 1                                                                     
+	cabec1 := STR0010	//"ORDEM       CODIGO DO       DESCRICAO DO PRODUTO             OP   RECURSO                             FERRAMENTA                    FIM        IDEAL       FIM         ALOCADO   DIFE-"
+Else
+	cabec1 := STR0011	//"ORDEM       CODIGO DO       DESCRICAO DO PRODUTO             OP   RECURSO                             FERRAMENTA                   INICIO      IDEAL      INICIO       ALOCADO   DIFE-
+EndIf
+cabec2 := STR0012  	    //"PRODUCAO    PRODUTO                                                                                                                 DATA         HORA      DATA        HORA      RENCA"	
+//					       12345678901 123456789012345 123456789012345678901234567890   12   123456 1234567890123456789012345    123456 12345678901234567890   11/11/1111   11:11   11/11/1111    34:12     1111:12
+//		 			       0         1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16        17        18
+//					       0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456	
+
+dbSelectArea("SH8")
+SetRegua(LastRec())
+
+Set SoftSeek On
+Set Order To aReturn[8]
+If aReturn[8] == 1
+	Seek cFilial+mv_par01
+	cCondicao := "lContinua .And. !EOF() .And. H8_OP <= mv_par02"
+Else
+	Seek cFilial+mv_par03
+	cCondicao := "lContinua .And. !EOF() .And. H8_RECURSO <= mv_par04"
+EndIf
+Set SoftSeek Off
+
+While &cCondicao .and. H8_FILIAL == cFilial
+	
+	If lEnd
+		@ PROW()+1,001 PSay STR0013	//"CANCELADO PELO OPERADOR"
+		Exit
+	EndIf
+	
+	IncRegua()
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Filtra os registros que nao atendem o intervalo de datas     ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If H8_DTIDEAL < mv_par05 .Or. H8_DTIDEAL > mv_par06
+    	dbSkip()
+		Loop
+	EndIf
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Filtra os registros que nao tiveram deslocamento             ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    If nTipoAloc == 1
+		If H8_DTIDEAL == H8_DTFIM .And. H8_HRIDEAL == H8_HRFIM
+			dbSkip()
+			Loop
+		EndIf
+	Else
+		If H8_DTIDEAL == H8_DTINI .And. H8_HRIDEAL == H8_HRINI
+			dbSkip()
+			Loop
+		EndIf
+	EndIf
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Posiciona nos arquivos de cadastro para pegar informacoes    ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	dbSelectArea("SC2")
+	dbSeek(xFilial()+SH8->H8_OP)
+	
+	//-- Valida se a OP deve ser Impressa ou n„o
+	If !MtrAValOP(mv_par07, 'SC2')
+		dbSelectArea('SH8')
+		dbSkip()
+		Loop
+	EndIf
+	
+	dbSelectArea("SB1")
+	dbSeek(xFilial()+SC2->C2_PRODUTO)
+	
+	dbSelectArea("SH1")
+	dbSeek(xFilial()+SH8->H8_RECURSO)
+
+	dbSelectArea("SH4")
+	dbSeek(xFilial()+SH8->H8_RECURSO)
+	
+	dbSelectArea("SH8")
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Imprime cabecalho                                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If li > 55
+		Cabec(titulo,cabec1,cabec2,nomeprog,Tamanho,nTipo)
+	EndIf
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Adiciona 1 ao contador de registros impressos         ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	nCntImpr++
+	
+	@ li,000 PSay H8_OP
+	@ li,012 PSay SC2->C2_PRODUTO
+	@ li,028 PSay SubStr(SB1->B1_DESC,1,30)
+	@ li,061 PSay H8_OPER
+	@ li,066 PSay H8_RECURSO
+	@ li,073 PSay SubStr(SH1->H1_DESCRI,1,25)
+	@ LI,102 PSay H8_FERRAM
+	@ li,109 PSay Substr(SH4->H4_DESCRI,1,20)
+	@ li,132 PSay H8_DTIDEAL
+	@ li,145 PSay H8_HRIDEAL
+
+	If nTipoAloc == 1
+		@ li,153 PSay H8_DTFIM
+		@ li,167 PSay H8_HRFIM
+		@ li,177 PSay R815Dur(H8_RECURSO,H8_DTIDEAL,H8_HRIDEAL,H8_DTFIM,H8_HRFIM)
+	Else
+		@ li,153 PSay H8_DTINI
+		@ li,167 PSay H8_HRINI
+		@ li,177 PSay R815Dur(H8_RECURSO,H8_DTINI,H8_HRINI,H8_DTIDEAL,H8_HRIDEAL)
+	EndIf
+	li++
+	
+	dbSkip()
+	
+EndDo
+
+If li != 80
+	Roda(nCntImpr,cRodaTxt,Tamanho)
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Devolve a condicao original do arquivo principal             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SH8")
+Set Filter To
+dbSetOrder(1)
+dbCloseArea()
+dbSelectArea("SC2")
+
+If aReturn[5] = 1
+	Set Printer To
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return NIL

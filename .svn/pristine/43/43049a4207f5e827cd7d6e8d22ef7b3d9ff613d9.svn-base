@@ -1,0 +1,286 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "protheus.ch"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr992.prw"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\TopConn.ch"
+#line 3 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr992.prw"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Matr992.ch"
+#line 26 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr992.prw"
+Function MatR992(alDados)
+
+
+	Local olReport	:= NIL
+
+	If TRepInUse()
+		olReport := GeraReport(alDados)
+		olReport:PrintDialog()
+	Endif
+
+
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function GeraReport(alDados)
+
+	Local olReport	:= TReport():New("Matr992",,,{|olReport|PrintReport(olReport,alDados)},"")
+	olReport:LHEADERVISIBLE		:= .F. 
+	olReport:LFOOTERVISIBLE  	:= .F. 
+	olReport:LPARAMPAGE			:= .F. 
+	olReport:oPage:NPAPERSIZE	:= 9
+
+Return olReport
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function PrintReport(olReport,alDados)
+
+    Local clData	:= ""
+    Local nlLin		:= 0
+    Local nlI		:= 0
+    Local nlX		:= 0
+    Local olFontN 	:= TFont():New("Courier New",,-16,, .T. )
+    Local olFontI 	:= TFont():New("Courier New",,-14,,,,,,,, .T. )
+    Local olFont 	:= TFont():New("Courier New",,-12,,)
+    Local nlChave	:= TamSx3("X5_CHAVE")[1]
+	Local nlForn	:= TamSx3("F3_CLIEFOR")[1]
+	Local nlLoja	:= TamSx3("F3_LOJA")[1]
+	Local nlNota	:= TamSx3("F3_NFISCAL")[1]
+	Local nlSerie	:= TamSx3("F3_SERIE")[1]
+	Local clForn	:= ""
+	Local clLoja	:= ""
+	Local nlPags	:= 1
+    Local nlCont	:= 0
+    Local alFornPag	:= {}
+	Local nlPos		:= 0
+
+	For nlI	:= 1 to Len(alDados)
+
+		clData	:= SubStr(DtoS(dDataBase),7,2)+"."+SubStr(DtoS(dDataBase),5,2)+"."+SubStr(DtoS(dDataBase),1,4)
+
+		olReport:Box(0300,0050,3050,2425)
+
+
+		olReport:Say(0350,1790,"Data de Emissão",olFont,10,,)
+
+
+		olReport:Say(0430,1890,If( cPaisLoc $ "ANG|PTG", "DIA MÊS ANO", "DIA MES ANO" ),olFont,10,,)
+		olReport:Say(0480,1910,clData ,olFont,10,,)
+
+
+		olReport:Say(0550,0300,MemoLine("CERTIFICADO DE RETENÇÃO DE RENDA NA FONTE",37,1,2, .T. ),olFontN,10,,)
+	    olReport:Say(0610,0680,MemoLine("CERTIFICADO DE RETENÇÃO DE RENDA NA FONTE",37,2,2, .T. ),olFontN,10,,)
+	    olReport:Line(0300,1600,1000,1600)
+	    olReport:Line(0700,1600,0700,2425)
+
+
+	    olReport:Say(0750,1880,"ANO FISCAL" 						 	,olFontN,10,,)
+	    olReport:Say(0850,1950,Alltrim(Str(Year(dDataBase)))	,olFontN,10,,)
+	    olReport:Line(1000,0050,1000,2425)
+
+
+	    olReport:Say(1030,0080,If( cPaisLoc $ "ANG|PTG", "Concelho onde está inscrita a retenção", "Cidade onde está inscrita a retenção" ) 						  	,olFontI,10,,)
+	    olReport:Say(1100,0120,Alltrim(SM0->M0_CIDENT)			,olFont,10,,)
+	    olReport:Line(1170,0050,1170,2425)
+		olReport:Line(1170,1930,1680,1930)
+
+
+	    olReport:Say(1200,0080,"Nome ou razão social a quem se pratica a retenção" 						 	,olFontI,10,,)
+
+	    olReport:Say(1200,1960,"C.C ou NIT"				 			,olFontI,10,,)
+
+	    DbSelectArea("SA2")
+	    if DbSeek(xFilial("SA2")+PadR(alDados[nlI,3],nlForn)+PadR(alDados[nlI,4],nlLoja))
+	    	olReport:Say(1270,0120,Alltrim(SA2->A2_NOME),olFont ,10,,)
+	    	olReport:Say(1270,1960,Alltrim(SA2->A2_CGC) ,olFont ,10,,)
+	    Endif
+
+	    olReport:Line(1340,0050,1340,2425)
+
+
+	    olReport:Say(1370,0080,"Razão social completa ou nomes do Agente Retentor"				 	,olFontI,10,,)
+	    olReport:Say(1440,0120,Alltrim(SM0->M0_NOMECOM),olFont ,10,,)
+	    olReport:Line(1510,0050,1510,2425)
+
+
+	    olReport:Say(1370,1960,"C.C ou NIT"				 	,olFontI,10,,)
+	    olReport:Say(1440,1960,Alltrim(SM0->M0_CGC)	,olFont ,10,,)
+
+
+	    olReport:Say(1540,0080,If( cPaisLoc $ "ANG|PTG", "MORADA do Agente Retentor", "Endereço do Agente Retentor" )				 	,olFontI,10,,)
+	    olReport:Say(1610,0120,Alltrim(SM0->M0_ENDENT)	,olFont ,10,,)
+	    olReport:Line(1680,0050,1680,2425)
+
+
+	    olReport:Say(1540,1480,If( cPaisLoc $ "ANG|PTG", "Concelho", "Municipio" )				 	,olFontI,10,,)
+	    olReport:Say(1610,1500,Alltrim(SM0->M0_CIDENT)	,olFont ,10,,)
+
+
+	    olReport:Say(1540,2020,"Departamento"				 			,olFontI,10,,)
+
+
+	    olReport:Say(1710,0080,"Conceito"				 			,olFontI,10,,)
+	    olReport:Line(1680,1130,2700,1130)
+
+
+	    olReport:Say(1710,1160,If( cPaisLoc $ "ANG|PTG", "No. Factura", "No. Fatura" )				 			,olFontI,10,,)
+	    olReport:Line(1680,1470,2700,1470)
+
+
+	    olReport:Say(1710,1480,"Período"				 			,olFontI,10,,)
+	    olReport:Line(1680,1670,2700,1670)
+
+
+	    olReport:Say(1710,1790,MemoLine("Valor Total",5,1,2, .T. )		,olFontI,10,,)
+	    olReport:Say(1750,1790,MemoLine("Valor Total",5,2,2, .T. )		,olFontI,10,,)
+	    olReport:Line(1680,2050,2700,2050)
+
+
+	    olReport:Say(1710,2160,MemoLine("Valor Retenção",5,1,2, .T. )		,olFontI,10,,)
+	    olReport:Say(1750,2140,MemoLine("Valor Retenção",9,2,2, .T. )		,olFontI,10,,)
+		olReport:Line(1820,0050,1820,2425)
+
+		nlLin	:= 1830
+		clForn	:= alDados[nlI,3]
+		clLoja	:= alDados[nlI,4]
+
+		DbSelectArea("SF3")
+		DbSetOrder(4)
+
+		While alDados[nlI,3] == clForn .and.  clLoja	 == alDados[nlI,4]
+
+			if nlLin <= 2630
+				olReport:Say(nlLin,0060,Tabela("YH",PadR(alDados[nlI,13],nlChave), .F. ) 	,olFontI,10,,)
+				olReport:Say(nlLin,1135,alDados[nlI,6]							   			,olFontI,10,,)
+				if DbSeek(xFilial("SF3")+PadR(alDados[nlI,3],nlForn)+PadR(alDados[nlI,4],nlLoja)+PadR(alDados[nlI,6],nlNota)+PadR(alDados[nlI,7],nlSerie))
+					clData	:= SubStr(DtoS(SF3->F3_ENTRADA),5,2)+"/"+SubStr(DtoS(SF3->F3_ENTRADA),1,4)
+					olReport:Say(nlLin,1480,clData											,olFontI,10,,)
+				Endif
+				olReport:Say(nlLin,1680,Transform(alDados[nlI,8] ,"@E 999,999,999.99") 	,olFontI,10,,)
+				olReport:Say(nlLin,2060,Transform(alDados[nlI,12],"@E 999,999,999.99") 	,olFontI,10,,)
+				nlLin	+= 50
+				nlX++
+			EndIf
+			nlI++
+			nlCont++
+	        if nlI > Len(alDados)
+	        	Exit
+	        Endif
+
+		EndDo
+
+		olReport:Line(2700,0050,2700,2425)
+
+
+	    olReport:Say(2720,0080,"Certificado de Retencao na Fonte expedido em forma continua e empressa em computador, nao necessita "				 			,olFontI,10,,)
+	    olReport:Say(2790,0080,"assinatura registrada ( Art.10 D.R. 836/91)."				 			,olFontI,10,,)
+
+
+        nlI		:= nlX
+
+		nlPos	:= aScan(alFornPag,{|aX| aX[1] == clForn .and.  aX[2] == clLoja})
+		If nlPos == 0
+			nlPags	:= Int(nlCont/17)
+			If nlPags == 0
+				nlPags	:= 1
+			ElseIf nlCont%17 > 0
+				nlPags++
+			EndIf
+
+			aAdd(alFornPag,{clForn,clLoja,1,nlPags})
+
+		Else
+			alFornPag[nlPos,3]++
+		Endif
+		nlCont	:= 0
+
+	    DbSelectArea("SFB")
+	    DbSetOrder(1)
+	    if DbSeek(xFilial("SFB")+"RF0")
+	    	olReport:Say(2750,0110,MemoLine(SFB->FB_CERTIF,16,1,3, .T. ),olFont,10,,)
+	    	olReport:Say(2850,0110,MemoLine(SFB->FB_CERTIF,17,2,3, .T. ),olFont,10,,)
+		    olReport:Say(2950,0110,MemoLine(SFB->FB_CERTIF,38,2,3, .T. ),olFont,10,,)
+	    Endif
+
+	    nlPos	:= aScan(alFornPag,{|aX| aX[1] == clForn .and.  aX[2] == clLoja})
+		If nlPos > 0
+	    	olReport:Say(2950,2170,Alltrim(Str(alFornPag[nlPos,3]))+" / "+Alltrim(Str(alFornPag[nlPos,4])),olFont,10,,)
+		Endif
+
+	    olReport:EndPage()
+
+	next
+Return

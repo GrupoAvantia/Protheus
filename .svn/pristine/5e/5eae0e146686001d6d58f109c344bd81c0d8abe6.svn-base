@@ -1,0 +1,862 @@
+#include "protheus.ch"
+#include "rwmake.ch"
+#include "Fileio.ch"
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³REPIETU  º Autor: J. Mendoza Fecha:  				04/01/2008 ±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ 	Efectúa el cierre de IETU calculando la base de egresos e  ±±
+±±             ingresos efectivamente pagados y cobrados respectivamente                ±±
+±±             y almacenando dichos datos en la tabla CDJ para reportar.				   ±±
+±±             El almacenamiento se hace por grupo IETU.								   ±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ MP10 - Totvs												   ±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+
+//-----------------------------------------------------------------
+// Llama a la función de cierre de IETU.
+//-----------------------------------------------------------------
+Function MATR977()
+Local aArea		:=	GetArea()
+
+IetuPerg()
+Pergunte("REPIET",.T.)
+RptStatus({|| RunProg()},"Generando Reporte... Aguarde!")
+RestArea(aArea)
+Return
+//-----------------------------------------------------------------
+
+
+//-----------------------------------------------------------------
+// Ejecución del cierre de impuesto IETU y almacenamiento de los
+// datos.
+//-----------------------------------------------------------------
+Static Function RunProg()
+Local cQryPag := ""  		// Consulta de pagos efectuados en el periodo
+Local cQryCob := ""			// Consulta de cobros efectuados en el pediodo
+Local cQryTit := ""         // Consulta de títulos SD1 y SD2 asociados al pago o cobro.
+
+Local cCurSer := ""     	// Serie del documento que se analiza.
+Local cCurDoc := ""   		// Número del documento que se analiza.
+Local cCurProd := "" 		// Clave del producto que se analiza
+Local cIetuGrp := ""  		// Grupo IETU en uso
+Local cTipGrp := ""  		// Tipo del grupo IETU en uso
+Local nCurBase := 0			// Almacena la base corriente del documento.
+Local nCurTot := 0
+Local nPorc	   := 0
+Local nPorcImp := 0
+local cEOL:= CHR(13)+CHR(10)
+Local aTotales  := {}  		// Array de totales, contiene la fecha del pago o cobro, el grupo Ietu y el total de cobro o pago.
+Local nPos		:= 0		// Posición del arreglo.
+
+Local nValIvc	:=0			// Valor del Impuesto del Iva Incluido
+Local cPorIvc	:=""		// Valor del porcentual de Iva Incluido
+Local nValIEP	:=0			// Valor del Impuesto del IEPS
+Local cPorIEP	:=0			// Porcentaje para IEPS
+Local cIEPS		:= 	GetNewPar("MV_IEPS ","")
+Local nValTit	:=0
+Local i			:=0
+Private aDetCob	:= {}  		// Array de Detalle de totales, contiene la fecha del pago o cobro, el grupo Ietu, el total de cobro o pago,Documento, Serie, Orden de Pago o Recibo.
+Private aDetPag	:= {}
+cIEPS:=SubSTR(cIEPS,1,3)
+DbSelectArea("SFB")
+DbSetOrder(1)
+SFB->(DbSeek(xFilial("SFB")+"IVC"))
+nValIvc:=SFB->FB_ALIQ
+cPorIvc:="1."+Alltrim(str(nValIvc))
+
+SFB->(DbGoTop())
+SFB->(DbSeek(xFilial("SFB")+cIEPS))
+nValIEP:=SFB->FB_ALIQ
+cPorIEP:="1."+AllTrim(str(nValIEP))
+
+// Consulta de pagos efectuados en SE5
+cQryPag := "SELECT SE52.E5_DATA,SE5.E5_PREFIXO,SE5.E5_NUMERO,SE5.E5_VALOR,SE5.E5_CLIFOR,SE5.E5_LOJA,SE5.E5_RECPAG,SE5.E5_TIPO,SE5.E5_ORDREC,"
+cQryPag += "  	SE5.E5_MOEDA,SE5.E5_VLMOED2,SE5.E5_TXMOEDA" 
+cQryPag += " FROM "+RetSqlName("SE5")+" SE5,"+RetSqlName("SEK")+" SEK, "+RetSqlName("SE5")+" SE52 "
+cQryPag += " WHERE SE5.E5_ORDREC = SEK.EK_ORDPAGO AND SEK.EK_TIPO = 'CH' AND SEK.EK_NUM = SE52.E5_NUMERO AND SEK.EK_PREFIXO = SE52.E5_PREFIXO " 
+cQryPag += " 	AND SE52.E5_CLIFOR = SEK.EK_FORNECE AND SE52.E5_LOJA = SEK.EK_LOJA AND SE52.E5_FILIAL = '"+xFilial("SE5")+"' AND SE5.E5_DATA > '20071231' AND SE52.E5_DATA > '20071231'" 
+cQryPag += "	AND EK_FILIAL = '"+xFilial("SE5")+"' AND SE52.E5_DATA BETWEEN '"+Dtos(mv_par01)+"' AND '"+Dtos(mv_par02)+"' AND SE5.D_E_L_E_T_ = ' '"
+cQryPag += "	AND SEK.D_E_L_E_T_ = ' 'AND SE5.D_E_L_E_T_ = ' 'AND SE5.E5_RECPAG = 'P' AND SE5.E5_SITUACA <> 'C' AND SE52.E5_SITUACA <>'C' AND SE5.E5_TIPODOC <> 'ES'" 
+
+cQryPag += " UNION "
+cQryPag += " SELECT SE52.E5_DATA,SE5.E5_PREFIXO,SE5.E5_NUMERO,SE5.E5_VALOR,SE5.E5_CLIFOR,SE5.E5_LOJA,SE5.E5_RECPAG,SE5.E5_TIPO,SE5.E5_ORDREC,"
+cQryPag += "  	SE5.E5_MOEDA,SE5.E5_VLMOED2,SE5.E5_TXMOEDA" 
+cQryPag += " FROM "+RetSqlName("SE5")+" SE5,"+RetSqlName("SEK")+" SEK, "+RetSqlName("SE5")+" SE52 "
+cQryPag += " WHERE SE5.E5_ORDREC = SEK.EK_ORDPAGO AND SEK.EK_TIPO NOT IN ('CH','NF','NDP') AND SEK.EK_NUM = SE52.E5_NUMERO AND SEK.EK_PREFIXO = SE52.E5_PREFIXO " 
+cQryPag += " 	AND SE52.E5_CLIFOR = SEK.EK_FORNECE AND SE52.E5_LOJA = SEK.EK_LOJA AND SE52.E5_FILIAL = '"+xFilial("SE5")+"'AND SE5.E5_DATA > '20071231' AND SE52.E5_DATA > '20071231'" 
+cQryPag += "	AND EK_FILIAL = '"+xFilial("SE5")+"' AND SE52.E5_DATA BETWEEN '"+Dtos(mv_par01)+"' AND '"+Dtos(mv_par02)+"' AND SE5.D_E_L_E_T_ = ' '"
+cQryPag += "	AND SEK.D_E_L_E_T_ = ' 'AND SE5.D_E_L_E_T_ = ' 'AND SE5.E5_RECPAG = 'P'AND SE5.E5_SITUACA <>'C' AND SE52.E5_SITUACA <>'C' AND SE5.E5_TIPODOC <> 'ES' AND SE5.E5_SITUACA <> 'C' " 
+
+cQryPag += " UNION "
+cQryPag += " SELECT SE5.E5_DATA,E5_PREFIXO,E5_NUMERO,E5_VALOR,SE5.E5_CLIFOR,SE5.E5_LOJA,SE5.E5_RECPAG,SE5.E5_TIPO,E5_ORDREC,E5_MOEDA,E5_VLMOED2,E5_TXMOEDA " //Query para Compensaciones
+cQryPag += " FROM "+RetSqlName("SE5")+" SE5 "
+cQryPag += " WHERE E5_MOTBX='CMP' AND SE5.E5_DATA BETWEEN '"+Dtos(mv_par01)+"' AND '"+Dtos(mv_par02)+"'  AND SE5.D_E_L_E_T_ = ' ' AND E5_RECPAG = 'P'"
+cQryPag += " AND E5_TIPODOC='CP' AND SE5.E5_TIPODOC <> 'ES' AND E5_SITUACA <> 'C' AND E5_FILIAL = '"+xFilial("SE5")+"' AND SE5.E5_DATA > '20071231' "
+
+/******************************************************************************************************************************************/
+cQryPag := ChangeQuery(cQryPag)
+Memowrite("C:\Qry.sql",cQryPag)
+dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQryPag),"QRYPAG",.T.,.T.)
+dbSelectArea("QRYPAG")
+ProcRegua(QRYPAG->(LastRec()))
+While ( !QRYPAG->(Eof()) )        						// Para cada pago se buscará su documento original.
+	dbSelectArea("QRYPAG")
+	cCurSer := 	QRYPAG->(E5_PREFIXO)
+	cCurDoc := 	QRYPAG->(E5_NUMERO)
+	cCurPro :=	QRYPAG->(E5_CLIFOR)
+	cCurLoj :=	QRYPAG->(E5_LOJA)
+	If (AllTrim(QRYPAG->(E5_TIPO)) $ "NF|NCC|NDP")      // En el caso de pagos, estos tipos de títulos se almacenan en SD1
+		cQryTit := "SELECT D1_SERIE AS SERIE, D1_DOC AS DOC, D1_COD AS COD,D1_TES AS TES, D1_TOTAL AS TOTAL, D1_FORNECE AS CLIFOR, D1_LOJA AS LOJA"
+		cQryTit += " FROM "+RetSqlName("SD1")+" SD1 "
+		cQryTit += " WHERE D1_SERIE 		= '"+cCurSer+"' "
+		cQryTit += " AND   D1_DOC   		= '"+cCurDoc+"' "
+		cQryTit += " AND   D1_FORNECE   	= '"+cCurPro+"' "
+		cQryTit += " AND   D1_LOJA   	= '"+cCurLoj+"' "
+		cQryTit += " AND   D1_ESPECIE = '"+QRYPAG->(E5_TIPO)+"' AND D1_EMISSAO > '20071231' "
+		cQryTit += " AND   D_E_L_E_T_ = '' AND D1_FILIAL = '"+xFilial("SD1")+"'"
+		MemoWrite("c:\qryTit.sql",cQryTit)
+	else                                                // Toma en cuenta NDC y NCP dentro de SD2
+		cQryTit := "SELECT D2_SERIE AS SERIE, D2_DOC AS DOC, D2_COD AS COD,D2_TES AS TES, D2_TOTAL AS TOTAL, D2_CLIENTE AS CLIFOR, D2_LOJA AS LOJA "
+		cQryTit += "FROM "+RetSqlName("SD2")+" SD2 "
+		cQryTit += "WHERE D2_SERIE = '"+cCurSer+"' "
+		cQryTit += "AND   D2_DOC   = '"+cCurDoc+"' "
+		cQryTit += "AND   D2_ESPECIE = '"+QRYPAG->(E5_TIPO)+"' AND D2_EMISSAO > '20071231'"
+		cQryTit += "AND   D_E_L_E_T_ = ' ' AND D2_FILIAL = '"+xFilial("SD2")+"'"
+	endif
+	cQryTit := ChangeQuery(cQryTit)
+	dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQryTit),"QRYTIT",.T.,.T.)
+	dbSelectArea("QRYTIT")
+	SFC->(DbSetOrder(2))
+	QRYTIT->(dbGoTop())
+	While ( !QRYTIT->(Eof()) )	 						// Recorrer los ítems del título.
+		cCurProd := QRYTIT->(COD)
+		cIetuGrp := Posicione("SB1",1,xFilial("SB1")+cCurProd,"B1_GPIETU")   // Se busca grupo Ietu asociado al producto.
+		If (!Empty(cIetuGrp))
+			cTipGrp := Posicione("CCI",1,xFilial("CCI")+cIetuGrp,"CCI_TIPO")	 // Se busca el tipo del grupo ietu (ingreso/egreso/ambos)
+			If (!Empty(cTipGrp) .and. cTipGrp <> "I") 						 // Para grupos ietu que no sean de ingreso.
+				If (AllTrim(QRYPAG->(E5_TIPO)) $ "NF|NCC|NDP")
+					nCurTot	 	:= Posicione("SF1",1,xFilial("SF1")+QRYTIT->(DOC)+QRYTIT->(SERIE)+QRYTIT->(CLIFOR)+QRYTIT->(LOJA),"F1_VALBRUT")
+					nMoneda	 :=SF1->F1_MOEDA
+					nTxMoeda :=SF1->F1_TXMOEDA
+					nCurTot  :=xMoeda(nCurTot,nMoneda,1,SF1->F1_EMISSAO)
+					
+				Else
+					nCurTot	 	:= Posicione("SF2",1,xFilial("SF2")+QRYTIT->(DOC)+QRYTIT->(SERIE)+QRYTIT->(CLIFOR)+QRYTIT->(LOJA),"F2_VALBRUT")
+					nMoneda	 :=SF2->F2_MOEDA
+					nTxMoeda :=SF2->F2_TXMOEDA
+					nCurTot  := xMoeda(nCurTot,nMoneda,1,SF2->F2_EMISSAO)
+				EndIf
+					nPorCent 	:=xMoeda(QRYPAG->(E5_VLMOED2),nMoneda,1,STOD(QRYPAG->(E5_DATA)))/ nCurTot// QRYPAG->(E5_VALOR)/ nCurTot				
+					
+				If SFC->(DbSeek(xFilial("SFC")+QRYTIT->(TES)+"IVC"))// JM para cosiderar la base si el impuesto es incluido
+					nValTit	:=(QRYTIT->(TOTAL)/Val(cPorIvc))
+				ElseIf SFC->(DbSeek(xFilial("SFC")+QRYTIT->TES+cIEPS))// JM para cosiderar la base si el impuesto es incluido por IEPS
+					nValTit	:=	(QRYTIT->(TOTAL)/Val(cPorIEP))
+				Else
+					nValTit	:=	QRYTIT->(TOTAL)      
+				EndIf
+				nValTit  := xMoeda(nValTit,nMoneda,1,STOD(QRYPAG->(E5_DATA)))  
+				aAdd(aDetPag, { QRYPAG->(E5_DATA),cIetuGrp,nValTit*nPorCent,QRYTIT->(DOC),QRYTIT->(SERIE),QRYPAG->(E5_ORDREC),QRYPAG->(E5_CLIFOR),QRYPAG->(E5_LOJA),QRYPAG->(E5_RECPAG),'2',QRYPAG->(E5_TIPO)})
+			EndIf
+		EndIf
+		QRYTIT->(dbSkip())
+	Enddo
+	QRYTIT->(dbCloseArea())
+	QRYPAG->(dbSkip())
+	IncProc("Procesando Pagos...")
+Enddo
+
+QRYPAG->(dbCloseArea())
+dbSelectArea("CDJ")
+dbSetOrder(1)
+
+
+// Consulta de cobros efectuados en SE5
+//------------------------------------
+aTotales 	:= {}
+nCurTot	 	:=	0
+nMoneda	 	:= 	1
+nTxMoeda 	:=	1
+
+cQryCob := "SELECT SE52.E5_DATA,SE5.E5_PREFIXO,SE5.E5_NUMERO,SE5.E5_VALOR,SE5.E5_CLIFOR,SE5.E5_LOJA,SE5.E5_RECPAG,SE5.E5_TIPO, "
+cQryCob += " SE5.E5_ORDREC,SE5.E5_MOEDA,SE5.E5_VLMOED2,SE5.E5_TXMOEDA,SEL.EL_TIPO,SE5.E5_TIPODOC,SE5.E5_MOTBX "
+cQryCob += " FROM "+RetSqlName("SE5")+" SE5 ,"+RetSqlName("SEL")+" SEL, "+RetSqlName("SE5")+" SE52 " 
+cQryCob += " WHERE SE5.E5_ORDREC = EL_RECIBO  AND SEL.EL_TIPO = 'CH' AND SEL.EL_NUMERO = SE52.E5_NUMERO "
+cQryCob += " AND SEL.EL_PREFIXO = SE52.E5_PREFIXO AND SE52.E5_CLIFOR = SEL.EL_CLIORIG AND SE52.E5_LOJA = SEL.EL_LOJORIG AND SE52.E5_FILIAL = '"+xFilial("SE5")+"'" 
+cQryCob += " AND EL_FILIAL = '"+xFilial("SEL")+"' AND SE52.E5_DATA BETWEEN '"+Dtos(mv_par01)+"' AND '"+Dtos(mv_par02)+"' AND SEL.D_E_L_E_T_ = ' ' AND SE52.D_E_L_E_T_ = ' '" 
+cQryCob += " AND SE5.D_E_L_E_T_ = ' 'AND SE5.E5_RECPAG = 'R' AND SE5.E5_TIPODOC <> 'ES' AND SE52.E5_SITUACA <> 'C' AND SE5.E5_SITUACA <> 'C' AND SE5.E5_TIPO <> 'CH'  AND SE5.E5_TIPO <> 'NCC' AND SE5.E5_TIPO <> 'RA'"
+cQryCob += " AND SE5.E5_FILIAL = '"+xFilial("SE5")+"' AND SE52.E5_MOTBX <> 'CMP' AND SE5.E5_MOTBX <> 'CMP' AND SE52.E5_TIPODOC <> 'ES' AND SE52.E5_RECPAG <> 'P'"
+cQryCob += " UNION " 
+cQryCob += " SELECT SE52.E5_DATA,SE5.E5_PREFIXO,SE5.E5_NUMERO,SE5.E5_VALOR,SE5.E5_CLIFOR,SE5.E5_LOJA,SE5.E5_RECPAG,SE5.E5_TIPO, "
+cQryCob += " SE5.E5_ORDREC,SE5.E5_MOEDA,SE5.E5_VLMOED2,SE5.E5_TXMOEDA,SEL.EL_TIPO,SE5.E5_TIPODOC,SE5.E5_MOTBX "
+cQryCob += " FROM "+RetSqlName("SE5")+" SE5 ,"+RetSqlName("SEL")+" SEL, "+RetSqlName("SE5")+" SE52 " 
+cQryCob += " WHERE SE5.E5_ORDREC = EL_RECIBO  AND SEL.EL_TIPO NOT IN ('CH','NF','NDC') AND SEL.EL_NUMERO = SE52.E5_NUMERO "
+cQryCob += " AND SEL.EL_PREFIXO = SE52.E5_PREFIXO AND SE52.E5_CLIFOR = SEL.EL_CLIORIG AND SE52.E5_LOJA = SEL.EL_LOJORIG AND SE52.E5_FILIAL = '"+xFilial("SE5")+"'" 
+cQryCob += " AND EL_FILIAL = '"+xFilial("SEL")+"' AND SE52.E5_DATA BETWEEN '"+Dtos(mv_par01)+"' AND '"+Dtos(mv_par02)+"' AND SEL.D_E_L_E_T_ = ' ' AND SE52.D_E_L_E_T_ = ' '" 
+cQryCob += " AND SE5.D_E_L_E_T_ = ' 'AND SE5.E5_RECPAG = 'R' AND SE5.E5_TIPODOC <> 'ES' AND SE52.E5_SITUACA <> 'C' AND SE5.E5_SITUACA <> 'C' AND SE5.E5_TIPO NOT IN  ('CH','EF','VL','TF','NCC','RA')  "
+cQryCob += " AND SE5.E5_FILIAL = '"+xFilial("SE5")+"'  AND SEL.EL_TIPODOC <> 'RA'"
+cQryCob += " UNION "
+cQryCob += " SELECT SE5.E5_DATA,E5_PREFIXO,E5_NUMERO,E5_VALOR,SE5.E5_CLIFOR,SE5.E5_LOJA,SE5.E5_RECPAG,SE5.E5_TIPO,E5_ORDREC,E5_MOEDA,E5_VLMOED2,E5_TXMOEDA,SE5.E5_TIPO AS EL_TIPO,SE5.E5_TIPODOC,SE5.E5_MOTBX " //Query para Compensaciones
+cQryCob += " FROM "+RetSqlName("SE5")+" SE5 "
+cQryCob += " WHERE E5_MOTBX='CMP' AND SE5.E5_DATA BETWEEN '"+Dtos(mv_par01)+"' AND '"+Dtos(mv_par02)+"'  AND SE5.D_E_L_E_T_ = ' ' AND E5_RECPAG = 'R'"
+cQryCob += " AND E5_TIPODOC='CP' AND E5_SITUACA <> 'C' AND E5_FILIAL = '"+xFilial("SE5")+"'"              
+/*
+cQryCob += " UNION "
+cQryCob += " SELECT SE5.E5_DATA,E5_PREFIXO,E5_NUMERO,E5_VALOR,SE5.E5_CLIFOR,SE5.E5_LOJA,SE5.E5_RECPAG,SE5.E5_TIPO,E5_ORDREC,E5_MOEDA,E5_VLMOED2,E5_TXMOEDA,SE5.E5_TIPO AS EL_TIPO, SE5.E5_TIPODOC,SE5.E5_MOTBX " //Query para Compensaciones
+cQryCob += " FROM "+RetSqlName("SE5")+" SE5 "
+cQryCob += " WHERE E5_MOTBX='CMP' AND SE5.E5_DATA BETWEEN "+Dtos(mv_par01)+" AND "+Dtos(mv_par02)+"  AND SE5.D_E_L_E_T_ = ' ' AND E5_RECPAG = 'P'"
+cQryCob += " AND E5_TIPODOC='ES' AND E5_SITUACA <> 'C' AND E5_FILIAL = '"+xFilial("SE5")+"'"
+*/
+cQryCob := ChangeQuery(cQryCob)
+MemoWrite("C:\QryCob.sql",cQryCob)
+dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQryCob),"QRYCOB",.T.,.T.)
+dbSelectArea("QRYCOB")
+ProcRegua(QRYCOB->(LastRec()))
+
+While ( !QRYCOB->(Eof()) )        						// Para cada pago se buscará su documento original.
+	dbSelectArea("QRYCOB")
+	cCurSer := QRYCOB->(E5_PREFIXO)
+	cCurDoc := QRYCOB->(E5_NUMERO)
+	cCurPro :=	QRYCOB->(E5_CLIFOR)
+	cCurLoj :=	QRYCOB->(E5_LOJA)
+	If (AllTrim(QRYCOB->(E5_TIPO)) $ "NCC|NDP")      // En el caso de cobros, estos tipos de títulos (NCC,NDP) se almacenan en SD1
+		cQryTit := "SELECT D1_SERIE AS SERIE, D1_DOC AS DOC, D1_COD AS COD,D1_TES AS TES, D1_TOTAL AS TOTAL, D1_FORNECE AS CLIFOR, D1_LOJA AS LOJA "
+		cQryTit += "FROM "+RetSqlName("SD1")+" SD1 "
+		cQryTit += "WHERE D1_SERIE = '"+cCurSer+"' "
+		cQryTit += "AND   D1_DOC   = '"+cCurDoc+"' "
+		cQryTit += "AND   D1_FORNECE = '"+cCurPro+"' "
+		cQryTit += "AND   D1_LOJA   = '"+cCurLoj+"' "
+		cQryTit += "AND   D1_ESPECIE = '"+QRYCOB->(E5_TIPO)+"' "
+		cQryTit += "AND   D_E_L_E_T_ = '' AND D1_FILIAL = '"+xFilial("SD1")+"'"
+	Else                                                // Toma en cuenta NDC y NCP dentro de SD2
+		cQryTit := "SELECT D2_SERIE AS SERIE, D2_DOC AS DOC, D2_COD AS COD,D2_TES AS TES, D2_TOTAL AS TOTAL, D2_CLIENTE AS CLIFOR, D2_LOJA AS LOJA "
+		cQryTit += "FROM "+RetSqlName("SD2")+" SD2 "
+		cQryTit += "WHERE D2_SERIE = '"+cCurSer+"' "
+		cQryTit += "AND   D2_DOC   = '"+cCurDoc+"' "
+		cQryTit += "AND   D2_ESPECIE = '"+QRYCOB->(E5_TIPO)+"' "
+		cQryTit += "AND   D_E_L_E_T_ = '' AND D2_FILIAL = '"+xFilial("SD2")+"'"
+	EndIf
+	
+	cQryTit := ChangeQuery(cQryTit)
+	dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQryTit),"QRYTIT",.T.,.T.)
+	dbSelectArea("QRYTIT")
+	SFC->(DbSetOrder(2))
+	QRYTIT->(dbGoTop())
+	While ( !QRYTIT->(Eof()) )	 						// Recorrer los ítems del título.
+		cCurProd := QRYTIT->(COD)
+		cIetuGrp := Posicione("SB1",1,xFilial("SB1")+cCurProd,"B1_GPIETU")   // Se busca grupo Ietu asociado al producto.
+		if (!Empty(cIetuGrp))
+			cTipGrp := Posicione("CCI",1,xFilial("CCI")+cIetuGrp,"CCI_TIPO")	 // Se busca el tipo del grupo ietu (ingreso/egreso/ambos)
+			if (!Empty(cTipGrp) .and. cTipGrp <> "E") 						 // Para grupos ietu que no sean de egreso.
+				If (AllTrim(QRYCOB->(E5_TIPO)) $ "NCC|NCP|RA")
+					nCurTot	 	:= Posicione("SF1",1,xFilial("SF1")+QRYTIT->(DOC)+QRYTIT->(SERIE)+QRYTIT->(CLIFOR)+QRYTIT->(LOJA),"F1_VALBRUT")
+					nMoneda	 :=SF1->F1_MOEDA
+					nTxMoeda :=SF1->F1_TXMOEDA  
+					nCurTot  := xMoeda(nCurTot,nMoneda,1,SF1->F1_EMISSAO)
+				Else
+					nCurTot	 	:= Posicione("SF2",1,xFilial("SF2")+QRYTIT->(DOC)+QRYTIT->(SERIE)+QRYTIT->(CLIFOR)+QRYTIT->(LOJA),"F2_VALBRUT")
+					nMoneda	 :=SF2->F2_MOEDA
+					nTxMoeda :=SF2->F2_TXMOEDA    
+					nCurTot  := xMoeda(nCurTot,nMoneda,1,SF2->F2_EMISSAO)
+				EndIf
+				nPorCent 	:= xMoeda(QRYCOB->(E5_VLMOED2),nMoneda,1,STOD(QRYCOB->(E5_DATA)))/ nCurTot
+				If SFC->(DbSeek(xFilial("SFC")+QRYTIT->TES+"IVC"))// JM para cosiderar la base si el impuesto es incluido
+					nValTit  := (QRYTIT->(TOTAL)/Val(cPorIvc))
+				ElseIf SFC->(DbSeek(xFilial("SFC")+QRYTIT->TES+cIEPS))// JM para cosiderar la base si el impuesto es incluido por IEPS
+					nValTit  := (QRYTIT->(TOTAL)/Val(cPorIEP))
+				Else
+					nValTit  := QRYTIT->(TOTAL)
+				EndIf
+				nValTit  := xMoeda(nValTit,nMoneda,1,STOD(QRYCOB->(E5_DATA)))  	
+				DbSelectArea("SEL")
+				DbSetorder(1)
+				IF (!SEL->(DbSeek(xFilial("SEL")+QRYCOB->(E5_ORDREC)+"CH")) .AND. QRYCOB->(EL_TIPO) $ "NCC|RA" ) .OR. !QRYCOB->(EL_TIPO) $ "NCC|RA" 
+				    If QRYCOB->(E5_TIPODOC) <> 'ES'
+						aAdd(aDetCob, { QRYCOB->(E5_DATA),cIetuGrp,nValTit*nPorCent,QRYTIT->(DOC),QRYTIT->(SERIE),QRYCOB->(E5_ORDREC),QRYCOB->(E5_CLIFOR),QRYCOB->(E5_LOJA),QRYCOB->(E5_RECPAG),'1',QRYCOB->(E5_TIPO)})
+			        Else
+			            MsgAlert("Estorno")
+			        	aAdd(aDetCob, { QRYCOB->(E5_DATA),cIetuGrp,nValTit*nPorCent*-1,QRYTIT->(DOC),QRYTIT->(SERIE),QRYCOB->(E5_ORDREC),QRYCOB->(E5_CLIFOR),QRYCOB->(E5_LOJA),QRYCOB->(E5_RECPAG),'1',QRYCOB->(E5_TIPO)})
+					EndIf
+				EndIf
+				//						1				2				3				4			5						6				7					8				9            10		11
+			endif
+		endif
+		QRYTIT->(dbSkip())
+	Enddo
+	QRYTIT->(dbCloseArea())
+	QRYCOB->(dbSkip())
+Enddo
+QRYCOB->(dbCloseArea())
+
+/***************************************                          ************************************/
+/***************************************                          ************************************/
+/***************************************                          ************************************/
+cQryNcc := " SELECT F1_SERIE,F1_DOC,F1_DOC,F1_LOJA,F1_VALBRUT,F1_MOEDA,F1_TXMOEDA,F1_VALBRUT,F1_VALMERC,F1_FORNECE,F1_LOJA,F1_EMISSAO,F1_ESPECIE  FROM "+RetSqlName("SF1")+" SF1 "
+cQryNcc += " WHERE F1_ESPECIE='NCC' AND SF1.D_E_L_E_T_ <> '*' AND F1_EMISSAO BETWEEN '"+Dtos(mv_par01)+"' AND '"+Dtos(mv_par02)+"'"
+cQryNcc += " AND F1_FILIAL = '"+xFilial("SF1")+"'"
+cQryNcc := ChangeQuery(cQryNcc)
+MemoWrite("C:\QRYNCC.sql",cQryNcc)
+dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQryNcc),"QRYNCC",.T.,.T.)
+dbSelectArea("QRYNCC")
+While ( !QRYNCC->(Eof()) )       						// Para cada pago se buscará su documento original.
+	dbSelectArea("QRYNCC")
+	cCurSer		:= 	QRYNCC->(F1_SERIE)
+	cCurDoc		:= 	QRYNCC->(F1_DOC)
+	cCurPro		:=	QRYNCC->(F1_FORNECE)
+	cCurLoj		:=	QRYNCC->(F1_LOJA)
+	nCurTot		:= 	QRYNCC->(F1_VALBRUT)
+	nMoneda		:=	QRYNCC->(F1_MOEDA)
+	nTxMoeda 	:=	QRYNCC->(F1_TXMOEDA)
+           
+	nCurTot  :=xMoeda(nCurTot,nMoneda,1,QRYNCC->(F1_EMISSAO))
+	cQryTit := "SELECT D1_SERIE AS SERIE, D1_DOC AS DOC, D1_COD AS COD,D1_TES AS TES, D1_TOTAL AS TOTAL, D1_FORNECE AS CLIFOR, D1_LOJA AS LOJA "
+	cQryTit += "FROM "+RetSqlName("SD1")+" SD1 "
+	cQryTit += "WHERE D1_SERIE = '"+cCurSer+"' "
+	cQryTit += "AND   D1_DOC   = '"+cCurDoc+"' "
+	cQryTit += "AND D1_FORNECE = '"+cCurPro+"' "
+	cQryTit += "AND   D1_LOJA   = '"+cCurLoj+"' "
+	cQryTit += "AND   D1_ESPECIE = 'NCC'"
+	cQryTit += "AND   D_E_L_E_T_ = '' AND D1_FILIAL = '"+xFilial("SD1")+"'"
+	
+	cQryTit := ChangeQuery(cQryTit)
+	dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQryTit),"QRYTIT",.T.,.T.)
+	dbSelectArea("QRYTIT")
+	SFC->(DbSetOrder(2))
+	QRYTIT->(dbGoTop())
+	While ( !QRYTIT->(Eof()) )	 						// Recorrer los ítems del título.
+		cCurProd := QRYTIT->(COD)
+		cIetuGrp := Posicione("SB1",1,xFilial("SB1")+cCurProd,"B1_GPIETU")   // Se busca grupo Ietu asociado al producto.
+		If (!Empty(cIetuGrp))
+			cTipGrp := Posicione("CCI",1,xFilial("CCI")+cIetuGrp,"CCI_TIPO")	 // Se busca el tipo del grupo ietu (ingreso/egreso/ambos)
+			If (!Empty(cTipGrp) .and. cTipGrp <> "E") 						 // Para grupos ietu que no sean de egreso.
+				If SFC->(DbSeek(xFilial("SFC")+QRYTIT->TES+"IVC"))// JM para cosiderar la base si el impuesto es incluido
+					nValTit  := (QRYTIT->(TOTAL)/Val(cPorIvc))
+				ElseIf SFC->(DbSeek(xFilial("SFC")+QRYTIT->TES+cIEPS))// JM para cosiderar la base si el impuesto es incluido por IEPS
+					nValTit  := (QRYTIT->(TOTAL)/Val(cPorIEP))
+				Else
+					nValTit  := QRYTIT->(TOTAL)
+				EndIf
+				nValTit  := xMoeda(nValTit,nMoneda,1,STOD(QRYNCC->(F1_EMISSAO)))  
+				DbSelectArea("SEL")
+				DbSetorder(1)
+					aAdd(aDetCob, { QRYNCC->(F1_EMISSAO),cIetuGrp,nValTit * -1,QRYTIT->(DOC),QRYTIT->(SERIE),"",QRYNCC->(F1_FORNECE),QRYNCC->(F1_LOJA),'R','1',QRYNCC->(F1_ESPECIE)})
+					//						1				2		3			4				5			  6				7					8		9   10
+			Endif
+		Endif
+		QRYTIT->(dbSkip())
+	Enddo
+	QRYTIT->(dbCloseArea())
+	QRYNCC->(dbSkip())
+Enddo
+QRYNCC->(dbCloseArea())
+/***************************************                          ************************************/
+/***************************************                          ************************************/
+/***************************************                          ************************************/
+
+cQryPag := " SELECT *  FROM "+RetSqlName("SF2")+" SF2 "
+cQryPag += " WHERE F2_ESPECIE='NCP' AND SF2.D_E_L_E_T_ <> '*' AND F2_EMISSAO BETWEEN '"+Dtos(mv_par01)+"' AND '"+Dtos(mv_par02)+"'"
+cQryPag += " AND F2_FILIAL = '"+xFilial("SF2")+"'"
+cQryPag := ChangeQuery(cQryPag)
+MemoWrite("C:\QRYNCP.sql",cQryPag)
+dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQryPag),"QRYNCP",.T.,.T.)
+dbSelectArea("QRYNCP")
+While ( !QRYNCP->(Eof()) )       						// Para cada pago se buscará su documento original.
+	dbSelectArea("QRYNCP")
+	cCurSer		:= 	QRYNCP->(F2_SERIE)
+	cCurDoc		:= 	QRYNCP->(F2_DOC)
+	cCurPro		:=	QRYNCP->(F2_CLIENTE)
+	cCurLoj		:=	QRYNCP->(F2_LOJA)
+	nCurTot		:= 	QRYNCP->(F2_VALBRUT)
+	nMoneda		:=	QRYNCP->(F2_MOEDA)
+	nTxMoeda 	:=	QRYNCP->(F2_TXMOEDA)
+	nCurTot  :=xMoeda(nCurTot,nMoneda,1,QRYNCP->(F2_EMISSAO))
+	cQryTit := "SELECT D2_SERIE AS SERIE, D2_DOC AS DOC, D2_COD AS COD,D2_TES AS TES, D2_TOTAL AS TOTAL, D2_CLIENTE AS CLIFOR, D2_LOJA AS LOJA "
+	cQryTit += "FROM "+RetSqlName("SD2")+" SD2 "
+	cQryTit += "WHERE D2_SERIE = '"+cCurSer+"' "
+	cQryTit += "AND   D2_DOC   = '"+cCurDoc+"' "
+	cQryTit += "AND   D2_CLIENTE = '"+cCurPro+"' "
+	cQryTit += "AND   D2_LOJA   = '"+cCurLoj+"' "
+	cQryTit += "AND   D2_ESPECIE = 'NCP'"
+	cQryTit += "AND   D_E_L_E_T_ = '' AND D2_FILIAL = '"+xFilial("SD2")+"'"
+	cQryTit := ChangeQuery(cQryTit)
+	dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQryTit),"QRYTIT",.T.,.T.)
+	dbSelectArea("QRYTIT")
+	SFC->(DbSetOrder(2))
+	QRYTIT->(dbGoTop())
+	While ( !QRYTIT->(Eof()) )// Recorrer los ítems del título.
+		cCurProd := QRYTIT->(COD)
+		cIetuGrp := Posicione("SB1",1,xFilial("SB1")+cCurProd,"B1_GPIETU")   // Se busca grupo Ietu asociado al producto.
+		If (!Empty(cIetuGrp))
+			cTipGrp := Posicione("CCI",1,xFilial("CCI")+cIetuGrp,"CCI_TIPO")	 // Se busca el tipo del grupo ietu (ingreso/egreso/ambos)
+			If (!Empty(cTipGrp) .and. cTipGrp <> "I") 						 // Para grupos ietu que no sean de egreso.
+				If SFC->(DbSeek(xFilial("SFC")+QRYTIT->TES+"IVC"))// JM para cosiderar la base si el impuesto es incluido
+					nValTit  := (QRYTIT->(TOTAL)/Val(cPorIvc))
+				ElseIf SFC->(DbSeek(xFilial("SFC")+QRYTIT->TES+cIEPS))// JM para cosiderar la base si el impuesto es incluido por IEPS
+					nValTit  := (QRYTIT->(TOTAL)/Val(cPorIEP))
+				Else
+					nValTit  := QRYTIT->(TOTAL)
+				EndIf   
+				nValTit  := xMoeda(nValTit,nMoneda,1,STOD(QRYNCP->(F2_EMISSAO)))  
+				aAdd(aDetPag, { QRYNCP->(F2_EMISSAO),cIetuGrp,nValTit * -1,QRYTIT->(DOC),QRYTIT->(SERIE),"",QRYNCP->(F2_CLIENTE),QRYNCP->(F2_LOJA),'P','2',QRYNCP->(F2_ESPECIE)})
+				//						1				2		3			4				5			  6				7					8		9  10
+				//x[10]+x[2]+x[1]+x[6]+x[4]+x[5]
+			Endif
+		Endif
+		QRYTIT->(dbSkip())
+	Enddo
+	QRYTIT->(dbCloseArea())
+	QRYNCP->(dbSkip())
+Enddo
+QRYNCP->(dbCloseArea())
+/***************************************                          ************************************/
+/***************************************                          ************************************/
+/***************************************                          ************************************/
+
+
+dbSelectArea("CDJ")
+dbSetOrder(1)
+
+/************************************************************************************************
+**								IMPRESION DE INFORME 										   **
+*************************************************************************************************
+**  								JMendoza												   **
+************************************************************************************************/
+
+aDetCob:=aSort(aDetCOB,,,{|x,y| x[10]+x[2]+x[1]+x[6]+x[4]+x[5] < y[10]+y[2]+y[1]+y[6]+y[4]+y[5]})   // Ordenado de los Vectores
+aDetPag:=aSort(aDetPag,,,{|x,y| x[10]+x[2]+x[1]+x[6]+x[4]+x[5] < y[10]+y[2]+y[1]+y[6]+y[4]+y[5]})
+
+
+// --------------------------------------
+Private	cFromDate 	:= SubStr(dtos(mv_par01),1,4)+SubStr(dtos(mv_par01),5,2)
+Private cToDate		:= SubStr(dtos(mv_par02),1,4)+SubStr(dtos(mv_par02),5,2)
+Private cCurGrp		:= ""
+private nTotalIng		:= 0
+private nTotalEgr		:= 0
+
+// Variables de control de impresion
+// ---------------------------------
+Private nLin		:=	100//Getmv("MV_RENINI")
+Private nCol		:=	100//Getmv("MV_COLINI")
+Private nCS			:=	{300,900,1500,2100,2380}			// Column Spaces - Espacio desde margen de cada columna
+
+// Variables de Encabezado
+// -----------------------
+Private cNomEmp 	:= 	ALLTRIM(SM0->M0_NOMECOM)
+Private cNomFil 	:= 	ALLTRIM(SM0->M0_FILIAL)
+Private cNomPrg		:= 	"BASE IETU"
+//Private nTsIETU		:=	SuperGetMV("MV_TSIETU ",,.F.)
+
+// Variables de Impresion y fuentes
+// --------------------------------
+Private oPrn
+Private oFnA08		:=  TFont():New( "Arial"  ,,08,,.F.,,,,,.F.)
+Private oFnA08b		:=  TFont():New( "Arial"  ,,08,,.T.,,,,,.F.)
+Private oFnA09		:=	TFont():New( "Arial"  ,,09,,.F.,,,,,.F.)
+Private oFnA09b		:=	TFont():New( "Arial"  ,,09,,.T.,,,,,.F.)
+Private oFnA10		:=	TFont():New( "Arial"  ,,10,,.F.,,,,,.F.)
+Private oFnA10b		:=	TFont():New( "Arial"  ,,10,,.T.,,,,,.F.)
+Private oFnA11		:=	TFont():New( "Arial"  ,,11,,.F.,,,,,.F.)
+Private oFnA11b		:=	TFont():New( "Arial"  ,,11,,.T.,,,,,.F.)
+Private oBrush		:= 	TBrush():New(,2)//CLR_LIGHTGRAY)
+Private cFileLogoR	:=  GetSrvProfString("Startpath","") + "/LGRL" +cFilAnt+ ".BMP"   // Logo según filial en caso de requerirse
+Private lSint		:=	.F.
+Private lCob		:=	.F.
+Private ntam		:=	25
+
+If MV_PAR03 = 1
+	lSint:=.T.
+Else
+	lSint:=.F.
+EndIf
+// Configuracion de la Impresion
+// -----------------------------
+oPrn := TMSPrinter():New()
+oPrn:SetPortrait()
+if (!oPrn:Setup())		//Muestra pantalla para seleccion de impresora
+	return
+endif
+
+// Inicia pagina...
+// ----------------
+
+
+cIETU:=""
+oPrn:StartPage()
+if (lAbortPrint)
+	oPrn:Say( 232, 210, "*** CANCELADO  ***", oFnA09)
+	Return
+endif
+nValDoc:=0
+nValGPO:=0
+nTotIng:=0
+nTotEgr:=0
+cTipTmp:=""
+If Len(aDetPag)	> 0 .OR. Len(aDetCob) >0
+	lCob:=.T.
+	Encab()// Imprimir Encabezado
+	GrpTmp:=""
+	//nLin:=450
+	If Len(aDetCob)	> 0
+			cDoctos:=aDetCob[1][5]+aDetCob[1][4]+aDetCob[1][7]+aDetCob[1][8]+aDetCob[1][2]+aDetCob[1][11]
+		For i := 1 to Len(aDetCob)// Mostrar
+			If aDetCob[i][2] != GrpTmp
+				If i <> 1
+					nCol:=120
+					//nTotalIng:=nTotalIng+nValDoc
+					If aDetCob[i][5]+aDetCob[i][4]+aDetCob[i][7]+aDetCob[i][8]+aDetCob[i][2]+aDetCob[i][11] != cDoctos	 .AND. lSint
+						//nValDoc-=aDetCob[i][3]
+						oPrn:Say(nLin, nCol, Transform(STOD(aDetCob[i-1][1]),"@D"), oFnA09,,,,0)
+						nCol+=8*ntam
+						oPrn:Say(nLin, nCol, aDetCob[i-1][6]	, oFnA09,,,,0)
+						nCol+=8*ntam  
+						oPrn:Say(nLin, nCol, aDetCob[i-1][11], oFnA09,,,,0)
+						nCol+=4*ntam
+						oPrn:Say(nLin, nCol, aDetCob[i-1][5], oFnA09,,,,0)
+						nCol+=3*ntam
+						oPrn:Say(nLin, nCol, "-"+aDetCob[i-1][4], oFnA09,,,,0)
+						nCol+=16*ntam
+						oPrn:Say(nLin, nCol, aDetCob[i-1][7]+"-"+aDetCob[i-1][8]	, oFnA09,,,,0)
+						nCol+=9*ntam
+						//	nTotalIng:=nTotalIng+nValDoc
+						oPrn:Say(nLin, nCol, Posicione("SA1",1,xFilial("SA1")+aDetCob[i-1][7]+aDetCob[i-1][8],"A1_NOME")	, oFnA09,,,,0)
+						nCol+=37*ntam
+						oPrn:Say(nLin, nCol+5, Transform(nValDoc,"@E 999,999,999.99"), oFnA09,,,,1)
+						nValDoc:=0//aDetCob[i][3]
+						nLin+=30
+						cDoctos:=aDetCob[i][5]+aDetCob[i][4]+aDetCob[i][7]+aDetCob[i][8]+aDetCob[i][2]+aDetCob[i][11]
+					EndIf
+					nCol:=100
+				   	If lsint
+						nLin+=20
+					Endif 
+					oPrn:Say(nLin, nCol, "TOTAL GRUPO "+GrpTmp+" "+Posicione("CCI",1,xFilial("CCI")+GrpTmp,"CCI_DESC")+": ", oFnA09,,,,0)
+					oPrn:Say(nLin,nCol+100+82*ntam, Transform(nValGPO,"@E 999,999,999.99"), oFnA09,,,,1)
+					nValGPO:=0
+					nLin+=60
+				EndIf
+				If lSint
+					nCol:=100
+					oPrn:Say(nLin, nCol, aDetCob[i][2]+" "+Posicione("CCI",1,xFilial("CCI")+aDetCob[i][2],"CCI_DESC"), oFnA10b,,,,0)
+					nLin+=50
+				EndIf
+				xVerPag()
+			EndIf
+			nValDoc+=aDetCob[i][3]
+			nValGPO+=aDetCob[i][3]
+			nTotalIng+=aDetCob[i][3]
+			nCol:=120
+			If aDetCob[i][5]+aDetCob[i][4]+aDetCob[i][7]+aDetCob[i][8]+aDetCob[i][2]+aDetCob[i][11] != cDoctos .AND. lSint
+				If i > 1
+					nValDoc-=aDetCob[i][3]
+					oPrn:Say(nLin, nCol, Transform(STOD(aDetCob[i-1][1]),"@D"), oFnA09,,,,0)
+					nCol+=8*ntam
+					oPrn:Say(nLin, nCol, aDetCob[i-1][6]	, oFnA09,,,,0)
+					nCol+=8*ntam
+					oPrn:Say(nLin, nCol, aDetCob[i-1][11], oFnA09,,,,0)
+					nCol+=4*ntam
+					oPrn:Say(nLin, nCol, aDetCob[i-1][5], oFnA09,,,,0)
+					nCol+=3*ntam
+					oPrn:Say(nLin, nCol, "-"+aDetCob[i-1][4], oFnA09,,,,0)
+					nCol+=16*ntam
+					oPrn:Say(nLin, nCol, aDetCob[i-1][7]+"-"+aDetCob[i-1][8]	, oFnA09,,,,0)
+					nCol+=9*ntam
+					//nTotalIng:=nTotalIng+nValDoc
+					oPrn:Say(nLin, nCol, Posicione("SA1",1,xFilial("SA1")+aDetCob[i-1][7]+aDetCob[i-1][8],"A1_NOME")	, oFnA09,,,,0)
+					nCol+=37*ntam
+					oPrn:Say(nLin, nCol+5, Transform(nValDoc,"@E 999,999,999.99"), oFnA09,,,,1)    
+					nValDoc:=aDetCob[i][3]
+					nLin+=30
+				EndIf
+			EndIf
+			cDoctos:=aDetCob[i][5]+aDetCob[i][4]+aDetCob[i][7]+aDetCob[i][8]+aDetCob[i][2]+aDetCob[i][11]
+			//cIETU:=cIETU+aDetCob[i][2]+","+aDetCob[i][1]+","+aDetCob[i][6]+","+aDetCob[i][5]+","+aDetCob[i][4]+","+aDetCob[i][7]+","+aDetCob[i][8]+","+str(aDetCob[i][3])+" "+cEOL
+			GrpTmp:=aDetCob[i][2]
+			cTipTmp:=aDetCob[i][9]
+			xVerPag()
+		Next i
+		If nValDoc <> 0.AND. lSint
+			nCol:=120
+			oPrn:Say(nLin, nCol, Transform(STOD(aDetCob[Len(aDetCob)][1]),"@D"), oFnA09,,,,0)
+			nCol+=8*ntam
+			oPrn:Say(nLin, nCol, aDetCob[Len(aDetCob)][6]	, oFnA09,,,,0)
+			nCol+=8*ntam 
+			oPrn:Say(nLin, nCol, aDetCob[Len(aDetCob)][11]	, oFnA09,,,,0)
+			nCol+=4*ntam
+			oPrn:Say(nLin, nCol, aDetCob[Len(aDetCob)][5]	, oFnA09,,,,0)
+			nCol+=3*ntam
+			oPrn:Say(nLin, nCol, "-"+aDetCob[Len(aDetCob)][4]	, oFnA09,,,,0)
+			nCol+=16*ntam
+			oPrn:Say(nLin, nCol, aDetCob[Len(aDetCob)][7]+"-"+aDetCob[Len(aDetCob)][8]	, oFnA09,,,,0)
+			nCol+=9*ntam
+			//nTotalIng:=nTotalIng+nValDoc
+			oPrn:Say(nLin, nCol, Posicione("SA1",1,xFilial("SA1")+aDetCob[Len(aDetCob)][7]+aDetCob[Len(aDetCob)][8],"A1_NOME")	, oFnA09,,,,0)
+			nCol+=37*ntam
+			oPrn:Say(nLin, nCol+5, Transform(nValDoc,"@E 999,999,999.99"), oFnA09,,,,1)
+			nValDoc:=0
+			nLin+=50   //80
+		EndIf
+		nCol:=100
+		oPrn:Say(nLin, nCol, "TOTAL GRUPO "+GrpTmp+" "+Posicione("CCI",1,xFilial("CCI")+GrpTmp,"CCI_DESC")+": ", oFnA09,,,,0)
+		oPrn:Say(nLin,nCol+100+82*ntam, Transform(nValGPO,"@E 999,999,999.99"), oFnA09,,,,1)
+		If nTotalIng <> 0
+			nLin+=60
+			oPrn:Say(nLin,nCol+60*ntam, "TOTAL", oFnA10b,,,,0)
+			oPrn:Say(nLin,nCol+100+82*ntam, Transform(nTotalIng,"@E 999,999,999.99"), oFnA10b,,,,1)
+			nLin+=60
+		EndIf
+		
+	EndIf
+	//****************************************************************************************************************//
+	// FIN DE INGRESOS                                                                                                //
+	//****************************************************************************************************************//
+	If Len(aDetPag) >0
+		nValDoc:=0
+		nValGPO:=0
+		cTipTmp:=""
+		lCob:=.F.
+		GrpTmp:=""
+		//nLin:=450
+		xCab()
+		cDoctos:=aDetPag[1][5]+aDetPag[1][4]+aDetPag[1][7]+aDetPag[1][8]+aDetPag[1][2]+aDetPag[1][11]+aDetPag[1][6]
+		For i := 1 to Len(aDetPag)// Mostrar
+			If aDetPag[i][2] != GrpTmp
+				If i <> 1
+					nCol:=120
+					If aDetPag[i][5]+aDetPag[i][4]+aDetPag[i][7]+aDetPag[i][8]+aDetPag[i][2]+aDetPag[i][11]+aDetPag[i][6] != cDoctos	.AND. lSint
+						//nValDoc-=aDetPag[i][3]
+						oPrn:Say(nLin, nCol, Transform(STOD(aDetPag[i-1][1]),"@D"), oFnA09,,,,0)
+						nCol+=8*ntam
+						oPrn:Say(nLin, nCol, aDetPag[i-1][6]	, oFnA09,,,,0)
+						nCol+=8*ntam
+						oPrn:Say(nLin, nCol, aDetPag[i-1][11]	, oFnA09,,,,0)
+						nCol+=4*ntam
+						oPrn:Say(nLin, nCol, aDetPag[i-1][5]	, oFnA09,,,,0)
+						nCol+=3*ntam
+						oPrn:Say(nLin, nCol, "-"+aDetPag[i-1][4]	, oFnA09,,,,0)
+						nCol+=16*ntam
+						oPrn:Say(nLin, nCol, aDetPag[i-1][7]+"-"+aDetPag[i-1][8]	, oFnA09,,,,0)
+						nCol+=9*ntam
+						//nTotalEgr:=nTotalEgr+nValDoc
+						oPrn:Say(nLin, nCol, Posicione("SA2",1,xFilial("SA2")+aDetPag[i-1][7]+aDetPag[i-1][8],"A2_NOME"), oFnA09,,,,0)
+						nCol+=37*ntam
+						oPrn:Say(nLin, nCol+5, Transform(nValDoc,"@E 999,999,999.99"), oFnA09,,,,1)     
+						nValDoc:=0//aDetPag[i][3]
+						nLin+=30
+						cDoctos:=aDetPag[i][5]+aDetPag[i][4]+aDetPag[i][7]+aDetPag[i][8]+aDetPag[i][2]+aDetPag[i][11]+aDetPag[i][6]
+					EndIf
+					nCol:=100
+					If lsint
+						nLin+=20
+					Endif 
+					oPrn:Say(nLin, nCol, "TOTAL GRUPO "+GrpTmp+" "+Posicione("CCI",1,xFilial("CCI")+GrpTmp,"CCI_DESC")+": ", oFnA09,,,,0)
+					oPrn:Say(nLin,nCol+100+82*ntam, Transform(nValGPO,"@E 999,999,999.99"), oFnA09,,,,1)
+					nValGPO:=0//aDetPag[i][3]
+					nLin+=60
+				EndIf
+				If lSint
+					nCol:=100
+					oPrn:Say(nLin, nCol, aDetPag[i][2]+" "+Posicione("CCI",1,xFilial("CCI")+aDetPag[i][2],"CCI_DESC"), oFnA10b,,,,0)
+					nLin+=50
+				EndIf
+				xVerPag()
+			EndIf
+			nValDoc+=aDetPag[i][3]
+			nValGPO+=aDetPag[i][3]
+			nTotalEgr+=aDetPag[i][3]
+			nCol:=120
+			If aDetPag[i][5]+aDetPag[i][4]+aDetPag[i][7]+aDetPag[i][8]+aDetPag[i][2]+aDetPag[i][11]+aDetPag[i][6] != cDoctos.AND. lSint
+				If i > 1
+					nValDoc-=aDetPag[i][3]
+					oPrn:Say(nLin, nCol, Transform(STOD(aDetPag[i-1][1]),"@D"), oFnA09,,,,0)
+					nCol+=8*ntam
+					oPrn:Say(nLin, nCol, aDetPag[i-1][6]	, oFnA09,,,,0)
+					nCol+=8*ntam
+					oPrn:Say(nLin, nCol, aDetPag[i-1][11]	, oFnA09,,,,0)
+					nCol+=4*ntam
+					oPrn:Say(nLin, nCol, aDetPag[i-1][5]	, oFnA09,,,,0)
+					nCol+=3*ntam
+					oPrn:Say(nLin, nCol, "-"+aDetPag[i-1][4]	, oFnA09,,,,0)
+					nCol+=16*ntam
+					oPrn:Say(nLin, nCol, aDetPag[i-1][7]+"-"+aDetPag[i-1][8]	, oFnA09,,,,0)
+					nCol+=9*ntam
+					//nTotalEgr:=nTotalEgr+nValDoc
+					oPrn:Say(nLin, nCol, Posicione("SA2",1,xFilial("SA2")+aDetPag[i-1][7]+aDetPag[i-1][8],"A2_NOME")	, oFnA09,,,,0)
+					nCol+=37*ntam
+					oPrn:Say(nLin, nCol+5, Transform(nValDoc,"@E 999,999,999.99"), oFnA09,,,,1)   
+					nValDoc:=aDetPag[i][3]
+					nLin+=30
+				EndIf
+			EndIf
+			cDoctos:=aDetPag[i][5]+aDetPag[i][4]+aDetPag[i][7]+aDetPag[i][8]+aDetPag[i][2]+aDetPag[i][11]+aDetPag[i][6]
+			//cIETU:=cIETU+aDetPag[i][2]+","+aDetPag[i][1]+","+aDetPag[i][6]+","+aDetPag[i][5]+","+aDetPag[i][4]+","+aDetPag[i][7]+","+aDetPag[i][8]+","+str(aDetPag[i][3])+" "+cEOL
+			GrpTmp:=aDetPag[i][2]
+			cTipTmp:=aDetPag[i][9]
+			xVerPag()
+		Next i
+		If nValDoc <> 0 .AND. lSint
+			nCol:=120
+			oPrn:Say(nLin, nCol, Transform(STOD(aDetPag[Len(aDetPag)][1]),"@D"), oFnA09,,,,0)
+			nCol+=8*ntam
+			oPrn:Say(nLin, nCol, aDetPag[Len(aDetPag)][6]	, oFnA09,,,,0)
+			nCol+=8*ntam
+			oPrn:Say(nLin, nCol, aDetPag[Len(aDetPag)][11]	, oFnA09,,,,0)
+			nCol+=4*ntam
+			oPrn:Say(nLin, nCol, aDetPag[Len(aDetPag)][5]	, oFnA09,,,,0)
+			nCol+=3*ntam
+			oPrn:Say(nLin, nCol, "-"+aDetPag[Len(aDetPag)][4]	, oFnA09,,,,0)
+			nCol+=16*ntam
+			oPrn:Say(nLin, nCol, aDetPag[Len(aDetPag)][7]+"-"+aDetPag[Len(aDetPag)][8]	, oFnA09,,,,0)
+			nCol+=9*ntam
+			//nTotalEgr:=nTotalEgr+nValDoc
+			oPrn:Say(nLin, nCol, Posicione("SA2",1,xFilial("SA2")+aDetPag[Len(aDetPag)][7]+aDetPag[Len(aDetPag)][8],"A2_NOME")	, oFnA09,,,,0)
+			nCol+=37*ntam
+			oPrn:Say(nLin, nCol+5, Transform(nValDoc,"@E 999,999,999.99"), oFnA09,,,,1)   
+			nValDoc:=0
+			nLin+=50 //80
+		EndIf
+		nCol:=100
+		oPrn:Say(nLin, nCol, "TOTAL GRUPO "+GrpTmp+" "+Posicione("CCI",1,xFilial("CCI")+GrpTmp,"CCI_DESC")+": ", oFnA09,,,,0)
+		oPrn:Say(nLin,nCol+100+82*ntam, Transform(nValGPO,"@E 999,999,999.99"), oFnA09,,,,1)
+		If nTotalEgr <> 0
+			nLin+=60
+			xVerPag()
+			oPrn:Say(nLin,nCol+60*ntam, "TOTAL", oFnA10b,,,,0)
+			oPrn:Say(nLin,nCol+100+82*ntam, Transform(nTotalEgr,"@E 999,999,999.99"), oFnA10b,,,,1)
+			nLin+=60
+			xVerPag()
+		EndIf
+	EndIf
+	
+	nLin+=60    
+	xVerPag()
+	oPrn:Say(nLin,nCol+50*ntam, "BASE PARA IETU", oFnA10b,,,,0)
+	oPrn:Say(nLin,nCol+100+82*ntam, Transform(nTotalIng-nTotalEgr,"@E 999,999,999.99"), oFnA10b,,,,1)
+	nLin+=60
+  //	oPrn:Say(nLin,nCol+40*ntam, "IETU", oFnA10b,,,,0)
+  //	oPrn:Say(nLin,nCol+100+79*ntam, Transform(	(nTotalIng-nTotalEgr)* (nTsIETU / 100),"@E 999,999,999.99"), oFnA10b,,,,1)
+  //	nLin+=60
+	nValGO:=0
+	nLin+=60
+Else
+	oPrn:Say(nLin, nCol, "No existen datos para IETU para esos parametros"	, oFnA09,,,,0)
+EndIf
+oPrn:preview()
+//MemoWrite("c:\wa.cvs",cIETU)
+Return
+//-----------------------------------------------------------------
+Static Function Encab()
+//Local cCurDoc	:=	""
+xfecha	:=	Date()
+xtime 	:=	time()
+
+// Imprimir Logo de cliente
+// ------------------------
+oPrn:SayBitmap(0001,0001,cFileLogoR,97*8,19*8) //2000,060,2000,230      y,x,archivo,ancho,alto
+
+// Imprimir datos de referencia
+// ----------------------------
+oPrn:Say(nLin		,nCol+2270	,"Fc.Ref:   "+dtoc(xfecha)				,oFnA08	,,,,1)
+oPrn:Say(nLin+40	,nCol+2270	,"Hr.Rer:   "+xtime						,oFnA08	,,,,1)
+oPrn:Say(nLin+80	,nCol+2270	,"Imprimió: "+AllTrim(cUserName)		,oFnA08	,,,,1)
+
+// Imprimir empresa y filial
+// -------------------------
+oPrn:Say(nLin	 , nCol+1135	,AllTrim(cNomPrg)			,oFnA11b,,,,2)
+oPrn:Say(nLin+100, nCol+1135	,AllTrim(cNomEmp)			,oFnA11b,,,,2)
+oPrn:Say(nLin+150, nCol+1135	,AllTrim(cNomFil)			,oFnA11b,,,,2)
+oPrn:Say(nLin+200, nCol+1135    ,"Del "+dtoc(mv_par01)+" Al "+dtoc(mv_par02),oFnA10,,,,2)
+nLin += 250
+
+// Imprimir rótulos de columnas
+// ----------------------------
+// >>> Rótulos aqui
+//If lsint
+xCab()
+//EndIf
+//(oPrn:Say(nLin		, nCol+1135    ,"Del "+dtoc(mv_par01)+" Al "+dtoc(mv_par02),oFnA09,,,,2)
+
+Return()
+
+//-----------------------------------------------------------------------------------------------------------------------
+/*
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Función para Revisar el Salto de Pág. del Reporte ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+*/
+Static Function xCab()
+nCol:=120
+If lCob
+	
+	If Len(aDetCob)	> 0
+		nLin+=30
+		oPrn:Say(nLin	 	, nCol+835		,"INGRESOS"			,oFnA11b,,,,2)
+		nLin+=50
+		If lsint
+			oPrn:Say(nLin	 	, nCol	     	,"Fecha Cobro"		,oFnA09b,,,,0)
+			oPrn:Say(nLin		, nCol+9*ntam 	,"Recibo"			,oFnA09b,,,,0)
+			oPrn:Say(nLin		, nCol+15*ntam	,"Tipo"				,oFnA09b,,,,0)
+			oPrn:Say(nLin		, nCol+20*ntam	,"Ser-Docto"		,oFnA09b,,,,0)
+			oPrn:Say(nLin		, nCol+38*ntam	,"Cliente"			,oFnA09b,,,,0)
+		EndIf
+		oPrn:Say(nLin		, nCol+82*ntam	,"Valor Base"		,oFnA09b,,,,1)
+		nLin+=20
+		oPrn:Say(nLin		,100	,"__________________________________________________________________________________________________________________________________________________"		,oFnA09b,,,,0)
+		nLin+=50
+	EndIf
+Else
+	nLin+=30
+	oPrn:Say(nLin	 	, nCol+835		,"EGRESOS"			,oFnA11b,,,,2)
+	nLin+=50
+	If lsint
+		oPrn:Say(nLin	 	, nCol	     	,"Fecha Pago"		,oFnA09b,,,,0)
+		oPrn:Say(nLin		, nCol+9*ntam 	,"Ord Pago"			,oFnA09b,,,,0)
+		oPrn:Say(nLin		, nCol+15*ntam	,"Tipo"		,oFnA09b,,,,0)
+		oPrn:Say(nLin		, nCol+20*ntam	,"Ser-Docto"		,oFnA09b,,,,0)
+		oPrn:Say(nLin		, nCol+38*ntam	,"Proveedor"		,oFnA09b,,,,0)
+	EndIf
+	oPrn:Say(nLin		, nCol+82*ntam	,"Valor Base"		,oFnA09b,,,,1)
+	nLin+=20
+	oPrn:Say(nLin		, 100	,"_______________________________________________________________________________________________________________________________________________"		,oFnA09b,,,,0)
+	nLin+=50
+EndIf
+Return
+//-----------------------------------------------------------------------------------------------------------------------
+Static Function xVerPag()
+/*
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Función para Revisar el Salto de Pág. del Reporte ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+*/
+If (nLin>=3100)
+	nLin:= 120
+	oPrn:EndPage()
+	oPrn:StartPage()
+	xCab()
+EndIf
+Return //Fin Funcion xVerpag
+//-----------------------------------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------
+Static Function IetuPerg() // PutSx1 inserta las preguntas a la SX1
+dbSelectArea("SX1")
+dbSetOrder(1)
+if (!dbSeek("REPIET    01"))
+
+
+
+	PutSx1("REPIET","01", "¿De fecha?", 	  	   			"¿De fecha?",				 		"¿De fecha?",   	   			"mv_ch1", "D"/*fecha*/ , 8,0,0			,	"G"/*texto*/,"",""/*consulta*/,"","","mv_par01",""		,""		,""		,""       	,""			,""			,""		,""		,""		,""		,""		,""		,""		,""		,""		,"")
+	PutSx1("REPIET","02", "¿A fecha?",  	  	  	   		"¿A fecha?", 	 	   			"¿A fecha?",		  	   		"mv_ch2", "D"/*numero*/, 8,0,0/*Presel*/,		"G"/*combo*/,"",""/*consulta*/,"","","mv_par02",""		,""		,""		,""       	,""			,""			,""		,""		,""		,""		,""		,""		,""		,""		,""		,"")
+	PutSx1("REPIET","03", "Analit. o Sint.?" ,"Analit. o Sint.?" ,"Analit. o Sint.?" ,	"mv_ch3" ,"N" ,01,00,01,"C","","","","","MV_PAR03","Analitico","Analitico","Analitico","","Sintetico","Sintetico","Sintetico"    ,""             ,""             ,""          ,""          ,""          ,"","","","","","","","","","","","","",""," ")
+//	PutSx1("MTA940","21","Natureza Operacoes","Natureza Operacoes","Natureza Operacoes","mv_chl","N",1  ,0 ,3 ,"C","","","","","MV_PAR21" ,"Inter. ST","Inter. ST","Inter. ST","","Interestadual","Interestadual","Interestadual","Totalidade","Totalidade","Totalidade","","","","","","",aHelpPor,aHelpEng,aHelpSpa)	
+endif
+Return(NIL)
+//-----------------------------------------------------------------
+

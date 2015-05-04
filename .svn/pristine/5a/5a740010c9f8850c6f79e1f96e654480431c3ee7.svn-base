@@ -1,0 +1,203 @@
+#INCLUDE "REPORT.CH"
+#INCLUDE "PROTHEUS.CH"    
+#INCLUDE "FATR100.CH"    
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณFATR100   บAutor  ณFelipe Caiado       บ Data ณ  24/04/08   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Relatorio de Forecast                                      บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ CRM                                                        บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Function Fatr100()
+Local oReport	//Objeto relatorio TReport (Release 4)
+
+	Pergunte("FATR100",.F.)
+
+	oReport := Ftr100RptDef()
+	oReport:PrintDialog()
+
+Return(.T.)   
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณFtr100RptDefบAutor  ณFelipe Caiado       บ Data ณ  24/04/08   บฑฑ
+ฑฑฬออออออออออุออออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Relatorio de Forecast                                        บฑฑ
+ฑฑบ          ณ                                                              บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ CRM                                                          บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function Ftr100RptDef()
+Local oReport				//Objeto relatorio TReport (Release 4)
+Local oSection1 			//Objeto secao 1 do relatorio (Cabecalho, campos da tabela SU7) 
+Local oSection2  			//Objeto secao 2 do relatorio (detalhes, campos das tabelas "SU7","SU0","SX5") 
+Local oSection3  			//Objeto secao 2 do relatorio (detalhes, campos das tabelas "SU7","SU0","SX5") 
+Local oSection4  			//Objeto secao 2 do relatorio (detalhes, campos das tabelas "SU7","SU0","SX5") 
+Local cAlias1 := "QRYFRCT"		//Alias da consulta Embedded SQL
+
+#IFDEF TOP
+	cAlias1		:= GetNextAlias()						// Pega o proximo Alias Disponivel
+#ENDIF
+
+// "Cadastro de Operadores" # "Este programa ira emitir uma relacao dos operadores do sistema call center"
+// "com acesso as rotinas de Telemarketing, Televendas e Telecobranca" # "A emissao ocorrera baseada nos parametros do relatorio"
+DEFINE REPORT oReport NAME "FATR100" TITLE STR0001 PARAMETER "FATR100" ACTION {|oReport| Ftr100PrtRpt( oReport, cAlias1 )} DESCRIPTION STR0001 //FORECAST
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณDefine a secao1 do relatorio, informando que o arquivo principal ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+DEFINE SECTION oSection1 OF oReport TITLE STR0002 TABLES "ADK"      // "Unidade"
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณDefine as celulas que irao aparecer na secao1ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+DEFINE CELL NAME "ADK_COD"		OF oSection1 ALIAS "ADK"
+DEFINE CELL NAME "ADK_NOME"		OF oSection1 ALIAS "ADK"
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณDefine a secao2 do relatorio, informando que o arquivo principal ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+DEFINE SECTION oSection2 OF oSection1 TITLE STR0003 TABLES "SA3"	// "Vendedor"
+
+DEFINE CELL NAME "A3_COD"	OF oSection2 ALIAS "SA3"
+DEFINE CELL NAME "A3_NOME"		OF oSection2 ALIAS "SA3"
+
+DEFINE SECTION oSection3 OF oSection2 TITLE STR0004 TABLES "AD1"	// "Oportunidade"
+
+DEFINE CELL NAME "AD1_CODCLI"		OF oSection3 ALIAS "AD1" BLOCK {||Iif(!Empty((cAlias1)->AD1_PROSPE),Alltrim(Posicione("SUS",1,xFilial("SUS")+(cAlias1)->AD1_PROSPE,"US_NOME")),Alltrim(Posicione("SA1",1,xFilial("SA1")+(cAlias1)->AD1_CODCLI,"A1_NOME")))} SIZE 35
+DEFINE CELL NAME "AD1_NROPOR"		OF oSection3 ALIAS "AD1" BLOCK {||(cAlias1)->AD1_NROPOR + "-" + AD1_DESCRI} SIZE 40
+DEFINE CELL NAME "AD1_PRFRCT"		OF oSection3 ALIAS "AD1"
+DEFINE CELL NAME "AD1_FEELIN"		OF oSection3 ALIAS "AD1" BLOCK {||Iif((cAlias1)->AD1_FEELIN == "2","60%","90%")} Size 10
+DEFINE CELL NAME "AD1_DTPFIM"		OF oSection3 ALIAS "AD1"
+
+DEFINE SECTION oSection4 OF oSection3 TITLE STR0005 TABLES "SCK"	// "Produtos"
+
+DEFINE CELL NAME "CK_PRODUTO"		OF oSection4 ALIAS "SCK"
+DEFINE CELL NAME "CK_DESCRI"		OF oSection4 ALIAS "SCK"
+DEFINE CELL NAME "CK_QTDVEN"		OF oSection4 ALIAS "SCK"
+DEFINE CELL NAME "CK_PRCVEN"		OF oSection4 ALIAS "SCK"
+DEFINE CELL NAME "CK_VALOR"			OF oSection4 ALIAS "SCK"
+
+oSection1:SetTotalInLine(.F.)
+oSection2:SetTotalInLine(.F.)
+oSection3:SetTotalInLine(.F.)
+oSection4:SetTotalInLine(.F.)
+oReport:SetTotalInLine(.F.)
+
+DEFINE FUNCTION FROM oSection4:Cell("CK_VALOR") OF oSection1 FUNCTION SUM TITLE STR0002
+
+DEFINE FUNCTION FROM oSection4:Cell("CK_VALOR") OF oSection2 FUNCTION SUM TITLE STR0003
+
+DEFINE FUNCTION FROM oSection4:Cell("CK_VALOR") OF oSection3 FUNCTION SUM TITLE STR0004
+
+
+Return oReport
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณFtr100PrtRptบAutor  ณFelipe Caiado       บ Data ณ  24/04/08   บฑฑ
+ฑฑฬออออออออออุออออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Relatorio de Forecast                                        บฑฑ
+ฑฑบ          ณ                                                              บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ CRM                                                          บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function Ftr100PrtRpt(oReport, cAlias1)
+Local oSection1 := oReport:Section(1)		//Objeto secao 1 do relatorio (Cabecalho, campos da tabela SU7) 
+Local oSection2 := oSection1:Section(1) 	//Objeto secao 2 do relatorio (detalhes, campos das tabelas "SU7","SU0","SX5") 
+Local oSection3 := oSection2:Section(1) 	//Objeto secao 2 do relatorio (detalhes, campos das tabelas "SU7","SU0","SX5") 
+Local oSection4 := oSection3:Section(1) 	//Objeto secao 2 do relatorio (detalhes, campos das tabelas "SU7","SU0","SX5") 
+Local cFiltro	:= ""      					//String contendo o filtro de busca a ser utilizado com DBF
+Local aVend := {}  
+Local cVend := ""
+Local cVendFil := ""
+Local nI := 0
+
+cVend := Posicione("SA3",7,xFilial("SA3")+Alltrim(__CUserId),"A3_COD")
+aVend := Ft320Time( cVend )
+
+For nI := 1 To Len(aVend)
+
+	If aVend[nI] >= MV_PAR03 .And. aVend[nI] <= MV_PAR04
+		If MV_PAR03 == MV_PAR04
+			cVendFil += (aVend[nI])
+			Exit
+		EndIf
+		If nI == 1
+			If Len(aVend) == 1
+				cVendFil += (aVend[nI])
+			Else
+				cVendFil += (aVend[nI] + "'" + ",")
+			EndIf
+		ElseIf nI == Len(aVend)
+			cVendFil += ("'" + aVend[nI])
+		Else
+			cVendFil += ("'" + aVend[nI] + "'" + ",")
+		EndIf
+	EndIf
+Next
+
+BEGIN REPORT QUERY oSection1 
+ 	BeginSQL alias cAlias1
+			SELECT    	AD1_NROPOR, AD1_PRFRCT, AD1_DESCRI, AD1_CODCLI,
+			    		AD1_PROSPE, AD1_FEELIN, AD1_DTPFIM, A3_COD,
+			    		A3_NOME, ADK_COD, ADK_NOME, CK_PRODUTO,
+			    		CK_DESCRI, CK_QTDVEN, CK_PRCVEN, CK_VALOR, AD1_VEND
+			FROM %table:AD1% AD1, %table:SA3% SA3, %table:ADK% ADK, %table:SCK% SCK 
+			WHERE    
+				AD1.AD1_FILIAL = %xfilial:AD1% AND
+				AD1.AD1_VEND = SA3.A3_COD AND
+				AD1.AD1_PRFRCT = SCK.CK_PROPOST AND
+				SA3.A3_UNIDAD = ADK.ADK_COD AND
+				(AD1.AD1_FEELIN = '2'OR
+				AD1.AD1_FEELIN = '3') AND
+				AD1.AD1_DTPFIM >=	%exp:mv_par01% 	AND
+				AD1.AD1_DTPFIM <=	%exp:mv_par02% 	AND
+				AD1.AD1_PRFRCT <> '      ' AND
+				AD1.AD1_VEND IN (%exp:cVendFil%) AND
+				AD1.%notDel% AND    
+				SA3.%notDel% AND    
+				ADK.%notDel% AND    
+				SCK.%notDel% 
+			ORDER BY A3_UNIDAD, A3_COD 
+	EndSql 
+END REPORT QUERY oSection1      
+
+oSection2:SetParentQuery()
+oSection2:SetParentFilter({|cParam| (cAlias1)->ADK_COD == cParam},{|| (cAlias1)->ADK_COD })
+
+oSection3:SetParentQuery()
+oSection3:SetParentFilter({|cParam| (cAlias1)->A3_COD == cParam},{|| (cAlias1)->A3_COD })
+
+oSection4:SetParentQuery()
+oSection4:SetParentFilter({|cParam| (cAlias1)->AD1_NROPOR == cParam},{|| (cAlias1)->AD1_NROPOR })
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณQuebra a linha, caso existam muitas colunasณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+oSection2:SetLineBreak()
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณExecuta a impressao dos dados, de acordo com o filtro ou queryณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+oSection1:Print()
+
+Return(.T.)

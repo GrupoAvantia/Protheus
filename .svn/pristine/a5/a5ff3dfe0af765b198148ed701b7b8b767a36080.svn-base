@@ -1,0 +1,96 @@
+#INCLUDE "rwmake.ch"
+#INCLUDE "protheus.ch"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³JBRA001   º Autor ³ Grayson B.Tavares  º Data ³  27/05/09   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescricao ³Mbrowse para chamada das rotinas de Troca de Naturez/CC e   º±±
+±±º          ³Copia de titulos                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³Especifico JBR Engenharia                                   º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+User Function JBRA001
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Declaracao de Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Private cCadastro := ":: Utilitarios Contas a Pagar ::"
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Monta um aRotina proprio                                            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Private aRotina := { {"Pesquisar","AxPesqui",0,1} ,;
+                     {"Visualizar","AxVisual",0,2} ,;
+                     {"Rateio"  ,'Execblock("RatNatCP",.f.,.f.)',0,4} ,;
+                     {"Legenda" ,"FA040Legenda", 0 , 9,,.F.} } 
+
+Private cDelFunc := ".T."
+
+Private cString := "SE2"
+
+dbSelectArea("SE2")
+dbSetOrder(1)
+
+dbSelectArea(cString)
+mBrowse( 6, 1,22,75,"SE2",,,,,, Fa040Legenda("SE2"))
+
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa   ³RatNatCP ³ Autores ³Grayson B.Tavares       ³ Data ³  /  /    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao  ³Rotina para rateio de multipla Naturezas e Centros de Custo   ³±±
+±±³           ³                                                              ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+User Function RatNatCP
+
+RegToMemory("SE2")
+ 
+Private cAlias  := "SE2"
+Private nHdlPrv := 0
+Private nTotal  := SE2->E2_VALOR
+Private cArquivo :=""
+Private lContabiliza := .f.
+Private nOpc          := 3//4
+Private nImpostos     := 0
+Private lRatImpostos   := .f.
+Private aColsM := {}
+Private aHeaderM := {}
+Private aRegs := {}
+Private lGrava := .t.
+Private lMostraTela := .t.
+Private lRotAuto := .f.
+
+
+If SE2->E2_MULTNAT == "2"
+   Reclock("SE2",.F.)
+     E2_MULTNAT := "1"
+   Msunlock()
+Endif   
+
+If SE2->E2_MULTNAT == "1" //((SE2->E2_MULTNAT == "1" .And. ( Empty(SE2->E2_ORIGEM) .Or.;
+	//Upper(Trim(SE2->E2_ORIGEM)) = "FINA050")) .And.;
+	//SE2->E2_FORNECE + SE2->E2_LOJA # GetMV("MV_UNIAO") + Space(Len(SE2->E2_FORNECE) - Len(GetMV("MV_UNIAO"))) + "00" .And.;
+	//SE2->E2_FORNECE + SE2->E2_LOJA # GetMV("MV_FORINSS") + Space(Len(SE2->E2_FORNECE) - Len(GetMV("MV_FORINSS"))) + "00" .And.;
+	//SE2->E2_FORNECE + SE2->E2_LOJA 	# GetMV("MV_MUNIC") + Space(Len(SE2->E2_FORNECE) - Len(GetMV("MV_MUNIC"))) + "00")
+	
+	MultNat(cAlias,0,M->E2_VALOR,"",.F.,nOpc,nImpostos,lRatImpostos,aHeaderM,aColsM,aRegs,lGrava,lMostraTela,lRotAuto)
+	//MultNat2(cAlias,nOpc,nImpostos,lRatImpostos,aColsM,aHeaderM,lMostraTela)
+Endif
+
+
+Return

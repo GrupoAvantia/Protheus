@@ -1,0 +1,59 @@
+#include "rwmake.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ALTIND    ºAutor  ³Grayson B.Tavares   º Data ³  07/01/09   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Execblock para replicar o indice para os outros itens da    º±±
+±±º          ³composição                                                  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³Gestao de Projetos                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+User Function AltInd
+
+lRet := .t.
+
+nPCustD  := ASCAN(aHeader,{|x|x[2] = "AF3_CUSTD"})
+nPQuant  := ASCAN(aHeader,{|x|x[2] = "AF3_QUANT"})
+nPQtdOri := ASCAN(aHeader,{|x|x[2] = "AF3_QTDORI"})
+nPQtdAnt := ASCAN(aHeader,{|x|x[2] = "AF3_QTDANT"})
+nPRefAnt := ASCAN(aHeader,{|x|x[2] = "AF3_REFANT"})
+nPComp   := ASCAN(aHeader,{|x|x[2] = "AF3_COMP"})
+nPIndice := ASCAN(aHeader,{|x|x[2] = "AF3_INDICE"})
+nPUM     := ASCAN(aHeader,{|x|x[2] = "AF3_UM"})
+
+cComp   := aCols[n,nPComp]
+cUM     := aCols[n,nPUM]
+nIndice := M->AF3_INDICE
+
+nTCusUni := 0
+nTCusVen := 0
+nTTotUni := 0
+nTTotVen := 0
+
+For _nx:=1 To Len(aCols)
+	If _nx <> n
+		If aCols[_nx,nPComp]==cComp 
+			aCols[_nx,nPIndice] := nIndice
+			If aCols[_nx,nPQtdAnt] = 0
+				aCols[_nx,nPQtdAnt] := aCols[_nx,nPQuant]
+			EndIf
+			If aCols[_nx,nPRefAnt] = 0
+				aCols[_nx,nPRefAnt] := aCols[_nx,nPQtdOri]
+			EndIf
+			aCols[_nx,nPUM]     := cUM
+			aCols[_nx,nPQtdOri] := (nIndice*aCols[_nx,nPQtdOri])/(aCols[_nx,nPQtdOri]/aCols[_nx,nPRefAnt])
+			aCols[_nx,nPQuant ] := aCols[_nx,nPQtdOri]*nIndice//(aCols[_nx,nPQtdOri]*M->AF2_QUANT)*nIndice
+		EndIf		
+    EndIf    
+Next
+
+GetDRefresh()
+
+Return lRet

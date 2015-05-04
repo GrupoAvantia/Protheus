@@ -1,0 +1,205 @@
+#INCLUDE "rwmake.ch"
+#INCLUDE "protheus.ch"
+#INCLUDE "FINA050.CH"
+#INCLUDE "DBINFO.CH"
+#INCLUDE "MSMGADD.CH"                                       
+#INCLUDE "FWMVCDEF.CH"
+#INCLUDE "FWADAPTEREAI.CH"
+#INCLUDE "XMLXFUN.CH" 
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³JBRA001   º Autor ³ Grayson B.Tavares  º Data ³  27/05/09   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescricao ³Mbrowse para chamada das rotinas de Troca de Naturez/CC e   º±±
+±±º          ³Copia de titulos                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³Especifico JBR Engenharia                                   º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+User Function JBRA001
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Declaracao de Variaveis                                             ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	
+	Private cCadastro := ":: Utilitarios Contas a Pagar ::"
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Monta um aRotina proprio                                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	
+	Private aRotina := { {"Pesquisar"	,"AxPesqui"							,0,1} ,;
+	                     {"Visualizar"	,"AxVisual"							,0,2} ,;
+	                     {"Alterar"		,"U_FA050AAlter"						,0,4},; //"Alterar"
+	                     {"Rateio"  	,'Execblock("RatNatCP",.f.,.f.)'	,0,4} ,;
+	                     {"Legenda" 	,"FA040Legenda"						,0,9,,.F.}} 
+	
+	Private cDelFunc := ".T."
+	
+	Private cString := "SE2"
+	
+	dbSelectArea("SE2")
+	dbSetOrder(1)
+	
+	dbSelectArea(cString)
+	mBrowse( 6, 1,22,75,"SE2",,,,,, Fa040Legenda("SE2"))
+
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa   ³RatNatCP ³ Autores ³Grayson B.Tavares       ³ Data ³  /  /    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao  ³Rotina para rateio de multipla Naturezas e Centros de Custo   ³±±
+±±³           ³                                                              ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+User Function RatNatCP
+
+	RegToMemory("SE2")
+	 
+	Private cAlias  		:= "SE2"
+	Private nHdlPrv 		:= 0
+	Private nTotal  		:= SE2->E2_VALOR
+	Private cArquivo 		:= ""
+	Private lContabiliza	:= .F.
+	Private nOpc         := 3	//4
+	Private nImpostos    := 0
+	Private lRatImpostos := .F.
+	Private aColsM 		:= {}
+	Private aHeaderM 		:= {}
+	Private aRegs 		:= {}
+	Private lGrava 		:= .T.
+	Private lMostraTela 	:= .T.
+	Private lRotAuto 		:= .F.
+	
+	If SE2->E2_MULTNAT == "1"
+		HelpInDark(.F.)
+		Help("",1,"JBRA00101")
+		HelpInDark(.T.)
+		//MSGALERT("Já foi efetuado rateio para esse pagamento.","A  T  E  N  C  A  O  !  !  !")	
+	Else
+		nConfirmo := MultNat(cAlias,0,M->E2_VALOR,"",.F.,nOpc,nImpostos,lRatImpostos,aHeaderM,aColsM,aRegs,lGrava,lMostraTela,lRotAuto)
+		If Len(aRegs) > 0
+			Reclock("SE2",.F.)
+				E2_MULTNAT := "1"
+			Msunlock()
+		EndIf
+	EndIf   
+	
+	//If SE2->E2_MULTNAT == "1" //((SE2->E2_MULTNAT == "1" .And. ( Empty(SE2->E2_ORIGEM) .Or.;
+		//Upper(Trim(SE2->E2_ORIGEM)) = "FINA050")) .And.;
+		//SE2->E2_FORNECE + SE2->E2_LOJA # GetMV("MV_UNIAO") + Space(Len(SE2->E2_FORNECE) - Len(GetMV("MV_UNIAO"))) + "00" .And.;
+		//SE2->E2_FORNECE + SE2->E2_LOJA # GetMV("MV_FORINSS") + Space(Len(SE2->E2_FORNECE) - Len(GetMV("MV_FORINSS"))) + "00" .And.;
+		//SE2->E2_FORNECE + SE2->E2_LOJA 	# GetMV("MV_MUNIC") + Space(Len(SE2->E2_FORNECE) - Len(GetMV("MV_MUNIC"))) + "00")
+		
+		//MultNat(cAlias,0,M->E2_VALOR,"",.F.,nOpc,nImpostos,lRatImpostos,aHeaderM,aColsM,aRegs,lGrava,lMostraTela,lRotAuto)
+		//MultNat2(cAlias,nOpc,nImpostos,lRatImpostos,aColsM,aHeaderM,lMostraTela)
+	//Endif
+
+Return
+
+/*/
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³FA050AAlter³ Autor ³ Wagner Xavier       ³ Data ³ 27/04/92  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Programa para altera‡„o de contas a pagar                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ FA050AAlter(ExpC1,ExpN1,ExpN2)                             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpC1 = Alias do arquivo                                   ³±±
+±±³          ³ ExpN1 = N£mero do registro                                 ³±±
+±±³          ³ ExpN2 = N£mero da op‡„o selecionada                        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso		 ³ FINA050                                                  ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+User Function FA050AAlter(cAlias,nReg,nOpc)
+
+	RegToMemory("SE2")
+	 
+	Private cAlias  		:= "SE2"
+	Private nHdlPrv 		:= 0
+	Private nTotal  		:= SE2->E2_VALOR
+	Private cArquivo 		:= ""
+	Private lContabiliza	:= .F.
+	Private nOpc         := 3	//4
+	Private nImpostos    := 0
+	Private lRatImpostos := .F.
+	Private aColsM 		:= {}
+	Private aHeaderM 		:= {}
+	Private aRegs 		:= {}
+	Private lGrava 		:= .T.
+	Private lMostraTela 	:= .T.
+	Private lRotAuto 		:= .F.
+	
+		If SE2->E2_MULTNAT == "1"
+			MultNat(	"SE2",;
+						0 /*@nHdlPrv*/,;
+						SE2->E2_VALOR /*@nTotal*/,;
+						"", /*@cArquivo*/;
+						.F. /*lContabiliza*/,;
+						4 /*nOpc*/,;
+						0 /*nImpostos*/,;
+						 /*lRatImpostos*/,;
+						aHeaderM /*acolsM*/,;
+						aColsM /*aHeaderM*/,;
+						aRegs /*aRegs*/,;
+						.T. /*lGrava*/,;
+						/*lMostraTela*/,;
+						/*lRotAuto*/,;
+						/*lUdaFlag*/,;
+						/*@aFlagCTB*/)	
+		Else
+			HelpInDark(.F.)
+			Help("",1,"JBRA00102")
+			HelpInDark(.T.)
+		EndIf   
+	
+return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³F050ACSX3 ³ Autor ³ Ana Paula Nascimento  ³ Data ³ 10/05/07  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³Acerta consulta F3 para o campo X3_F3                        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³F050ACSX3 								   	  	                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ SIGAFIN                                                     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Static Function F050ACSX3()
+	
+	Local aArea:=GetArea()
+	Local aAreaSx3:= SX3->(GetArea())
+	
+	SX3->(DbSetOrder(2))
+	If SX3->(DbSeek("E2_CODORCA")) .And. !Empty(SX3->X3_F3)
+		RecLock("SX3",.F.)
+		SX3->X3_F3 := " "
+		MsUnlock()
+	EndIf
+	SX3->(RestArea(aAreaSx3))
+	RestArea(aArea)
+		
+Return

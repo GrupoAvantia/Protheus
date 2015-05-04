@@ -1,0 +1,331 @@
+#INCLUDE "PROTHEUS.CH" 
+#INCLUDE "RWMAKE.CH"
+#INCLUDE "PRCONST.CH"
+#INCLUDE "TOPCONN.CH"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±º Programa  ³ PortoInc º Autor ³ Carlos Beltrão     º Data ³  18/08/14  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±º Descrição ³ Gera um arquivo de inclusões para ser importado no site   º±±
+±±º           ³ da Porto Seguro.                                          º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±º Uso       ³ Exclusivo da Avantia Tec. e Eng. S/A                      º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+User Function PortoInc()
+
+	Local aButtons		:= {}
+	Local bProcesso		:= { |oSelf| PInc01(oSelf)}
+	Local cPergCal  		:= "PORTOINC"
+	Local cCadastro		:= "Inclusão - Porto Seguro"
+	Local cDescricao		:= "Este programa gera um arquivo texto com as informações para serem importadas no site da Porto Seguro."
+	
+	Private aLog			:= {}
+	Private aTitle		:= {}
+	Private lErro			:= .F.
+	
+	PInc04()
+	
+	Pergunte(cPergCal,.F.)
+	
+	tNewProcess():New("PortoIn", cCadastro, bProcesso, cDescricao, cPergCal, , , , , .T., .T.) 
+	
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³ Funcao    ³ PInc01  ³ Autor ³ Carlos Beltrão     ³ Data ³ 18/08/14    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Descricao ³ Programa para criar o arquivo de saída.                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso       ³ Gestão de Pessoal                                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static function PInc01(oSelf)
+
+	local nHdl
+	local cArqVg
+	local cData := DTOS(Date())
+	local cTime := StrTran(Time(),":")
+	
+	oSelf:SaveLog("Inicio do Processamento.")
+	
+	// Criando o arquivo de acordo com o padrão AAAAMMDD_HHMMSS.vg
+	cArqVg := AllTrim(mv_par11) + cData + "_" + cTime + ".vg"
+
+	nHdl := fCreate(cArqVg)
+	
+	If nHdl == -1
+		Aadd(aTitle, "Processamento Interrompido.")
+		Aadd(aLog, {})
+		aAdd(aLog[1], "Não foi possível criar o arquivo de saída.")
+		lErro := .T.
+	Else
+		PInc02(nHdl, oSelf)
+	EndIf
+
+	fClose(nHdl)
+	
+	If lErro
+		oSelf:SaveLog("Ocorreu um erro durante o processamento.")
+	Else
+		oSelf:SaveLog("Fim do Processamento.")
+	EndIf
+	
+	/* ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	   ³ Apresenta com Log de erros                              ³
+	   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ */
+	fMakeLog(aLog, aTitle, , .T., "PORTOINC", "LOG de Processamento", "M", "P", , .F.)
+	
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³ Funcao    ³ PInc02  ³ Autor ³ Carlos Beltrão     ³ Data ³ 14.03.14    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Descricao ³ Programa para escrever as informações no arquivo.         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso       ³ Gestão de Pessoal                                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static function PInc02(nHdl, oSelf)
+
+	local cEOL 			:= chr(13) + chr(10)
+	local cTexto			:= ""
+	local nLinha
+
+	local cTipoLin
+	local cCodigo
+	local cData
+	local cPeriodo
+	local cCodSusep
+	local cCodSubEst
+	local cCaptVg
+	local cCpf
+	local cNome
+	local cDtNasc
+	local cSexo
+	local cEstCiv
+	local cCodPep
+	local cCaptVg
+
+	// Carregando paramentros da consulta
+	local cFilDe		:= mv_par01
+	local cFilAte		:= mv_par02
+	local cCcDe		:= mv_par03
+	local cCcAte		:= mv_par04
+	local cMatDe		:= mv_par05
+	local cMatAte		:= mv_par06
+	local cNomDe		:= AllTrim(mv_par07)
+	local cNomAte		:= AllTrim(mv_par08)
+	local cFunDe		:= mv_par09
+	local cFunAte		:= mv_par10
+	local cAdminDe	:= DTOS(mv_par13)
+	local cAdminAte	:= DTOS(mv_par14)
+
+	// Carregando dados para o cabeçalho
+	cTipoLin 	:= "0" // Cabeçalho
+	nLinha		:= 0
+	cCodigo	:= "0300"
+	cData		:= cValToChar(Day(Date())) + "/" + cValToChar(Month(Date())) + "/" + cValToChar(Year(Date())) // DD/MM/AAAA
+	cPeriodo	:= mv_par12
+	cCodSusep	:= mv_par15
+	cCodSubEst	:= mv_par16
+	
+	cTexto := cTipoLin 				+ "|" 
+	cTexto += cValToChar(nLinha) 	+ "|" 
+	cTexto += cCodigo 				+ "|" 
+	cTexto += cData 					+ "|" 
+	cTexto += cPeriodo 				+ "|" 
+	cTexto += cCodSusep 				+ "|" 
+	cTexto += cCodSubEst 			+ "|" + cEOL
+	
+	// Escrevendo a primeira linha no arquivo
+	if fWrite(nHdl, cTexto, len(cTexto)) != len(cTexto)
+		Aadd(aTitle, "Processamento Interrompido.")
+		Aadd(aLog, {})
+		aAdd(aLog[1], "Ocorreu um erro na gravacao da primeira linha do arquivo.")
+		lErro := .T.
+		Return()				
+	EndIf
+	
+	nLinha++
+	
+	cQryMA:="SELECT RA_CIC 'CPF', RA_NOME 'NOME', RA_NASC 'DT_NASCIMENTO', RA_SEXO 'SEXO', RA_ESTCIVI 'EST_CIVIL' "
+	cQryMA+="FROM "+RetSqlName("SRA")+" SRA "
+	cQryMA+="WHERE SRA.D_E_L_E_T_ <> '*' "
+	cQryMA+="AND RA_SITFOLH = '' "
+	cQryMA+="AND RA_FILIAL >= '" 	+ cFilDe 		+ "' "
+	cQryMA+="AND RA_FILIAL <= '" 	+ cFilAte 		+ "' "
+	cQryMA+="AND RA_CC >= '" 		+ cCcDe 		+ "' "
+	cQryMA+="AND RA_CC <= '" 		+ cCcAte 		+ "' "
+	cQryMA+="AND RA_MAT >= '" 		+ cMatDe 		+ "' "
+	cQryMA+="AND RA_MAT <= '" 		+ cMatAte 		+ "' "
+	cQryMA+="AND RA_NOME >= '" 		+ cNomDe 		+ "' "
+	cQryMA+="AND RA_NOME <= '" 		+ cNomAte 		+ "' "	
+	cQryMA+="AND RA_CODFUNC >= '" 	+ cFunDe 		+ "' "
+	cQryMA+="AND RA_CODFUNC <= '" 	+ cFunAte 		+ "' "	
+	cQryMA+="AND RA_ADMISSA >= '" 	+ cAdminDe 	+ "' "
+	cQryMA+="AND RA_ADMISSA <= '" 	+ cAdminAte 	+ "' "	
+	
+	dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"XMA",.F.,.T.)
+	 
+	dbSelectArea("XMA")
+	oSelf:SetRegua1(Contar("XMA","!Eof()"))
+	XMA->(dbGoTop())
+	 
+	while XMA->(!EOF())
+
+		//IncProc(XMA->NOME)
+		oSelf:IncRegua1(XMA->NOME)
+
+		// Carregando dados para o corpo do arquivo
+		cTipoLin	:= "1" // Admissão
+		cCpf 		:= AllTrim(XMA->CPF)
+		cNome		:= AllTrim(XMA->NOME)
+		cDtNasc	:= SubStr(XMA->DT_NASCIMENTO,7,2) + "/" + SubStr(XMA->DT_NASCIMENTO,5,2) + "/" + SubStr(XMA->DT_NASCIMENTO,1,4)
+		cSexo		:= AllTrim(XMA->SEXO)
+		Do Case
+			Case XMA->EST_CIVIL = "S" .Or. XMA->EST_CIVIL = 'O'
+				cEstCiv := "1"
+			Case XMA->EST_CIVIL = "C" .Or. XMA->EST_CIVIL = 'M'
+				cEstCiv := "2"
+			Case XMA->EST_CIVIL = "V"
+				cEstCiv := "3"
+			Case XMA->EST_CIVIL = "Q"
+				cEstCiv := "4"
+			Case XMA->EST_CIVIL = "D"
+				cEstCiv := "5"
+		EndCase
+		cCodPep 	:= "2" // 1 = Sim, 2 = Não
+		cCaptVg 	:= StrTran(cValToChar(mv_par17),".")
+
+		cTexto := cTipoLin 				+ "|"
+		cTexto += cValToChar(nLinha) 	+ "||"
+		cTexto += cCpf 					+ "|"
+ 		cTexto += cNome 					+ "|"
+ 		cTexto += cDtNasc 				+ "|"
+ 		cTexto += cSexo 					+ "||"
+ 		cTexto += cEstCiv 				+ "|"
+ 		cTexto += cCodPep 				+ "|||"
+		cTexto += cCaptVg 				+ "||||||||||" + cEOL
+		
+		// Escrevendo no corpo do arquivo
+		if fWrite(nHdl, cTexto, len(cTexto)) != len(cTexto)
+			Aadd(aTitle, "Processamento Interrompido.")
+			Aadd(aLog, {})
+			aAdd(aLog[1], "Ocorreu um erro na gravacao do arquivo.")
+			lErro := .T.
+			Return()				
+		EndIf
+
+		nLinha++
+		XMA->(dbSkip())
+	EndDo
+
+	dbCloseArea()
+	
+	// Carregando dados para do rodapé
+	cTipoLin 	:= "4" // Rodapé
+	
+	cTexto := cTipoLin 				+ "|" 
+	cTexto += cValToChar(nLinha) 	+ "|"  
+	cTexto += cData 					+ "|" 
+	cTexto += cValToChar(nLinha-1) 	+ "|" + cEOL
+	
+	// Escrevendo a ultima linha no arquivo
+	if fWrite(nHdl, cTexto, len(cTexto)) != len(cTexto)
+		Aadd(aTitle, "Processamento Interrompido.")
+		Aadd(aLog, {})
+		aAdd(aLog[1], "Ocorreu um erro na gravacao da ultima linha do arquivo.")
+		lErro := .T.
+		Return()				
+	EndIf
+		
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³ Funcao    ³ PInc04  ³ Autor ³ Carlos Beltrão     ³ Data ³ 18/08/14    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Descricao ³ Grava as configurações do parametro.                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso       ³ Gestão de Pessoal                                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function PInc04()
+
+	local aPergs := {}
+	Local aAreaAnt := GetArea()
+	
+	dbSelectArea("SX1")
+	dbSetOrder(1)
+	If !SX1->(dbSeek("PORTOINC")) 
+		Aadd(aPergs,{ "De Filial                ?","","","mv_ch1","C",2	,0,0,"G",""			,"mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","XM0"})
+		Aadd(aPergs,{ "Ate Filial               ?","","","mv_ch2","C",2	,0,0,"G",""			,"mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","XM0"})
+		Aadd(aPergs,{ "De Centro de Custo       ?","","","mv_ch3","C",9	,0,0,"G",""			,"mv_par03","","","","","","","","","","","","","","","","","","","","","","","","","CTT"})
+		Aadd(aPergs,{ "Ate Centro de Custo      ?","","","mv_ch4","C",9	,0,0,"G",""			,"mv_par04","","","","","","","","","","","","","","","","","","","","","","","","","CTT"})
+		Aadd(aPergs,{ "De Matricula             ?","","","mv_ch5","C",6	,0,0,"G",""			,"mv_par05","","","","","","","","","","","","","","","","","","","","","","","","","SRA"})
+		Aadd(aPergs,{ "Ate Matricula            ?","","","mv_ch6","C",6	,0,0,"G",""			,"mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","SRA"})
+		Aadd(aPergs,{ "De Nome                  ?","","","mv_ch7","C",30	,0,0,"G",""			,"mv_par07","","","","","","","","","","","","","","","","","","","","","",""})
+		Aadd(aPergs,{ "Ate Nome                 ?","","","mv_ch8","C",30	,0,0,"G",""			,"mv_par08","","","","","","","","","","","","","","","","","","","","","",""})
+		Aadd(aPergs,{ "De Função                ?","","","mv_ch9","C",5	,0,0,"G",""			,"mv_par09","","","","","","","","","","","","","","","","","","","","","","","","","SRJ"})
+		Aadd(aPergs,{ "Ate Função               ?","","","mv_chA","C",5	,0,0,"G",""			,"mv_par10","","","","","","","","","","","","","","","","","","","","","","","","","SRJ"})
+		Aadd(aPergs,{ "Caminho do Arquivo       ?","","","mv_chB","C",90	,0,0,"G","U_PInc05()","mv_par11","","","","","","","","","","","","","","","","","","","","","",""})
+		Aadd(aPergs,{ "Periodo (MMAAAA)         ?","","","mv_chC","C",6	,0,0,"G",""			,"mv_par12","","","","","","","","","","","","","","","","","","","","","",""})
+		Aadd(aPergs,{ "De Admissão              ?","","","mv_chD","D",8	,0,0,"G","NaoVazio()","mv_par13","","","","","","","","","","","","","","","","","","","","","",""})
+		Aadd(aPergs,{ "Ate Admissão             ?","","","mv_chE","D",8	,0,0,"G","NaoVazio()","mv_par14","","","","","","","","","","","","","","","","","","","","","",""})
+		Aadd(aPergs,{ "Código da SUSEP          ?","","","mv_chF","C",7	,0,0,"G",""			,"mv_par15","","","","","","","","","","","","","","","","","","","","","",""})
+		Aadd(aPergs,{ "Código do Subestipulante ?","","","mv_chG","C",9	,0,0,"G",""			,"mv_par16","","","","","","","","","","","","","","","","","","","","","",""})
+		Aadd(aPergs,{ "Capital VG               ?","","","mv_chH","N",10	,2,0,"G",""			,"mv_par17","","","","","","","","","","","","","","","","","","","","","",""})
+		AjustaSx1("PORTOINC",aPergs)
+	EndIf
+	RestArea(aAreaAnt)
+	
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³ Funcao    ³ PInc05  ³ Autor ³ Carlos Beltrão     ³ Data ³ 18/08/14    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Descricao ³ Seleciona a pasta de destino do arquivo.                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso       ³ Gestão de Pessoal                                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+User Function PInc05()
+
+	//#DEFINE _OPC_cGETFILE ( GETF_RETDIRECTORY + GETF_ONLYSERVER )
+	#DEFINE _OPC_cGETFILE ( GETF_RETDIRECTORY + GETF_LOCALHARD )
+
+	Local cPath := cGetFile("Selecione o Diretorio | ", OemToAnsi("Selecione Diretorio"),NIL,"",.F.,_OPC_cGETFILE)
+	
+	IF !Empty(cPath)
+		mv_par11 := cPath
+	EndIf
+	
+Return 

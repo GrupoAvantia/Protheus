@@ -1,0 +1,960 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\CNTR030.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\cntr030.prw"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "PROTHEUS.CH"
+#line 4 "d:\totvs 11\microsiga\protheus\my projects\materiais\cntr030.prw"
+Function CNTR030()
+local cMens := ""
+Local nOpca := 0
+
+Private cTitRel := OemToAnsi("Medições")
+Private lEnd	:= .F. 
+
+
+
+
+AjustaSX1()
+
+
+
+
+AjustaSXB()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pergunte("CNR030", .F. )
+
+
+
+
+oDlg = MsDialog():New( 96, 9, 310, 592, OemToAnsi("Medições"),,,.F.,,,,,,.T.,, ,.F. )
+ TGroup():New( 18, 6, 66, 287, "", oDlg,,,.T., )
+ TSay():New( 29, 15,{||  OemToAnsi(If(cPaisLoc$"ANG|PTG","Este relatório irá emitir uma relação de medições, exibindo as suas respectivas ","Este relatorio ira emitir uma relacao de medicoes, exibindo suas respectivas "))},oDlg,,,.F.,.F.,.F.,.T.,,, 268, 8,.F.,.F.,.F.,.F.,.F.,.F. )
+ TSay():New( 38, 15,{||  OemToAnsi(If(cPaisLoc$"ANG|PTG","Multas/bonificações, descontos e cauções retidas. favor verificar os  ","multas/bonificacoes, descontos e caucoes retidas. Favor verificar os  "))},oDlg,,,.F.,.F.,.F.,.T.,,, 268, 8,.F.,.F.,.F.,.F.,.F.,.F. )
+ TSay():New( 48, 15,{||  OemToAnsi(If(cPaisLoc$"ANG|PTG","Parâmetros do relatório.","parametros do relatorio."))},oDlg,,,.F.,.F.,.F.,.T.,,, 268, 8,.F.,.F.,.F.,.F.,.F.,.F. )
+ SButton():New( 80, 190,5,{||  Pergunte("CNR030", .T. )}, oDlg,.T.,,)
+ SButton():New( 80, 223,1,{||  (oDlg:End(),nOpca:=1)}, oDlg,.T.,,)
+ SButton():New( 80, 255,2,{||  oDlg:End()}, oDlg,.T.,,)
+oDlg:Activate( oDlg:bLClicked, oDlg:bMoved, oDlg:bPainted,.T.,,,, oDlg:bRClicked, )
+
+If mv_par17 == 3
+	cTitRel += " - (Valores em " +AllTrim(GetMv("MV_SIMB" +Ltrim(Str(mv_par18)))) +")"
+EndIf
+
+If nOpca == 1
+
+
+
+	RptStatus({|lEnd| CNR030Imp(@lEnd)})
+EndIf
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSXB()
+Local i,j
+Local aSXB
+Local aEstrut
+
+dbSelectArea("SXB")
+dbSetOrder(1)
+
+If !SXB->(dbSeek("CND"))
+	aSXB := {}
+	aEstrut:= {"XB_ALIAS","XB_TIPO","XB_SEQ","XB_COLUNA","XB_DESCRI","XB_DESCSPA","XB_DESCENG","XB_CONTEM"}
+	Aadd(aSXB,{"CND   ","1","01","DB","Medições"   ,""           ,""            ,"CND"            })
+	Aadd(aSXB,{"CND   ","2","01","01","Nr Medicao" ,"Nr Medicion","Measur. Nbr.",""               })
+	Aadd(aSXB,{"CND   ","4","01","01","Nr Contrato","Nr Contrato","Contract Nr" ,"CND_CONTRA"     })
+	Aadd(aSXB,{"CND   ","4","01","02","Nr Medicao" ,"Nr Medicao" ,"Nr Medicao"  ,"CND_NUMMED"     })
+	Aadd(aSXB,{"CND   ","5","01",""  ,""           ,""           ,""            ,"CND->CND_NUMMED"})
+
+	For i:= 1 To Len(aSXB)
+		If !Empty(aSXB[i][1])
+			If !dbSeek(aSXB[i,1]+aSXB[i,2]+aSXB[i,3]+aSXB[i,4])
+				RecLock("SXB", .T. )
+
+				For j:=1 To Len(aSXB[i])
+					If !Empty(FieldName(FieldPos(aEstrut[j])))
+						FieldPut(FieldPos(aEstrut[j]),aSXB[i,j])
+					EndIf
+				next
+
+				dbCommit()
+				MsUnLock()
+			EndIf
+		EndIf
+	next
+EndIf
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSX1()
+Local aAreaAnt := GetArea()
+Local aHelpPor := {}
+Local aHelpEng := {}
+Local aHelpSpa := {}
+Local cPerg	   := "CNR030"
+
+
+aHelpPor := {"Numero inicial da Medicao"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"01","Medicao de:","","","mv_ch1","C",6,0,0,"G","","CND","","S","mv_par01","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor := {"Numero final da Medicao"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"02","Medicao ate:","","","mv_ch2","C",6,0,0,"G","","CND","","S","mv_par02","","","","ZZZZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor := {"Numero inicial do Contrato"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"03","Contrato de:","","","mv_ch3","C",15,0,0,"G","","CN9","","S","mv_par03","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor := {"Numero final do Contrato"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"04","Contrato ate:","","","mv_ch4","C",15,0,0,"G","","CN9","","S","mv_par04","","","","ZZZZZZZZZZZZZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+
+aHelpPor := {"Data de inicio da Vigencia"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"05","Vigencia de:","","","mv_ch5","D",08,0,0,"G","","","","S","mv_par05","","","","01/01/06","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor := {"Data de termino da Vigencia"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"06","Vigencia ate:","","","mv_ch6","D",08,0,0,"G","","","","S","mv_par06","","","","31/12/49","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor := {"Codigo inicial da Situacao"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"07","Situacao de:","","","mv_ch7","C",2,0,0,"G","","","","S","mv_par07","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor := {"Codigo final da Situacao"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"08","Situacao ate:","","","mv_ch8","C",2,0,0,"G","","","","S","mv_par08","","","","99","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor := {"Codigo inicial do Fornecedor"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"09","Fornecedor de:","","","mv_ch9","C",6,0,0,"G","CNR030ClFr('1')","SA2","","S","mv_par09","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor := {"Codigo final do Fornecedor"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"10","Fornecedor ate:","","","mv_cha","C",6,0,0,"G","CNR030ClFr('1')","SA2","","S","mv_par10","","","","ZZZZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor := {"Codigo do Tipo de Contrato"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"11","Tipo de Contrato ?","","","mv_chb","C",3,0,0,"G","","CN1","","S","mv_par11","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor := {"Utilizada para exibir os Descontos","do Contrato (Sim/Nao)"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSx1(cPerg,"12","Exibir Descontos ?","","","mv_chc","N",1,0,1,"C","","","","","mv_par12","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor := {"Utilizada para exibir Multas/Bonificacoes","do Contrato (Sim/Nao)"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSx1(cPerg,"13","Exibir Multas/Bonificacoes?","","","mv_chd","N",1,0,1,"C","","","","","mv_par13","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor := {"Utilizada para exibir Caucoes Retidas ","do Contrato (Sim/Nao)"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSx1(cPerg,"14","Exibir Caucoes Retidas?","","","mv_che","N",1,0,1,"C","","","","","mv_par14","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor := {"Codigo inicial do Cliente"}
+aHelpSpa := {"Codigo inicio del Cliente"}
+aHelpEng := {"Client initial Code"}
+
+PutSX1(cPerg,"15","Cliente de:","","","mv_chf","C",6,0,0,"G","CNR030ClFr('2')","SA1","","S","mv_par15","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor := {"Codigo final do Cliente"}
+aHelpSpa := {"Codigo final del Cliente"}
+aHelpEng := {"Client final Code"}
+
+PutSX1(cPerg,"16","Cliente ate:","","","mv_chg","C",6,0,0,"G","CNR030ClFr('2')","SA1","","S","mv_par16","","","","ZZZZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+If !SX1->(dbSeek(PadR(cPerg,Len(SX1->X1_GRUPO)) + "17" ) )
+
+	aHelpPor := {"Define se a impressão dos valores","no relatório será realizada na","moeda da medição, contrato ou outra."}
+	aHelpEng := {"Define if the values will be printed","using measurement, contract or ","other currency"}
+	aHelpSpa := {"Define si la impresión de los valores","en el informe será realizada en la ","moneda del medición, contrato o otra."}
+
+	PutSX1(cPerg,"17","Imprimir valores na moeda","Imprimir valores en moneda","Print values in currency","mv_chh","N",1,0,0,"C","","","","S","mv_par17","Da medição","De la medición","From Measurem.","","Do contrato","Del contrato","Of Contract","Informada","Informada","Informed","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+EndIf
+
+If !SX1->(dbSeek(PadR(cPerg,Len(SX1->X1_GRUPO)) + "18" ) )
+
+	aHelpPor := {"Indica a moeda para impressão","dos valores. A pergunta anterior",'deve estar como "Informada".'}
+	aHelpEng := {"Indica la moneda para impresión","de los valores. La pregunta anterior",'debe estar como "Informada".'}
+	aHelpSpa := {"Indicates the values currency ","printing. The previous question must",'be set as "Informed".'}
+
+	PutSX1(cPerg,"18","Moeda","Moneda","Currency","mv_chi","N",1,0,0,"C","","","","S","mv_par18","Moeda 1","Moneda 1","Currency 1","","Moeda 2","Moneda 2","Currency 2","Moeda 3","Moneda 3","Currency 3","Moeda 4","Moneda 4","Currency 4","Moeda 5","Moneda 5","Currency 5",aHelpPor,aHelpEng,aHelpSpa)
+EndIf
+
+If !SX1->(dbSeek(PadR(cPerg,Len(SX1->X1_GRUPO)) + "19" ) )
+
+	aHelpPor := {"Data de referência para conversão","dos valores entre moedas."}
+	aHelpEng := {"Fecha de referencia para conversión","de los valores entre monedas."}
+	aHelpSpa := {"Reference date for values","convertion between currency."}
+
+	PutSX1(cPerg,"19","Data de referencia","Fecha de referencia","Reference date","mv_chj","D",8,0,0,"G","","","","S","mv_par19","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+EndIf
+
+RestArea(aAreaAnt)
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function CNR030Imp(lEnd,cNumMed)
+Local cQuery := ""
+Local cAliasCND := GetNextAlias()
+Local cAliasCNE
+Local cAliasCNR
+Local cAliasCNT
+Local cMedicao  := ""
+Local cContra   := ""
+Local cRevisa   := ""
+Local aStrucCND := CND->(dbStruct())
+Local aStrucCNE := CNE->(dbStruct())
+Local aStrucCNR := {}
+Local aStrucCNT :={}
+Local nX
+
+Local cDirSpool := GetMv("MV_RELT")
+
+
+
+
+Local oFont06	:= TFont():New("Arial",06,08,, .T. ,,,, .T. , .F. )
+
+
+
+
+
+Local cPtVLMEAC := PesqPict("CND","CND_VLMEAC")
+Local cPtVLSALD := PesqPict("CND","CND_VLSALD")
+Local cPtVLTOT1 := PesqPict("CND","CND_VLTOT")
+Local cPtQTDSOL := PesqPict("CNE","CNE_QTDSOL")
+Local cPtQTAMED := PesqPict("CNE","CNE_QTAMED")
+Local cPtQUANT  := PesqPict("CNE","CNE_QUANT")
+Local cPtPERC   := PesqPict("CNE","CNE_PERC")
+Local cPtVLUNIT := PesqPict("CNE","CNE_VLUNIT")
+Local cPtVLTOT  := PesqPict("CNE","CNE_VLTOT")
+Local lFiltForn := .F. 
+
+cNumMed := If( cNumMed == nil, "", cNumMed ) ;
+
+If !Empty(cNumMed)
+	AjustaSx1()
+	Pergunte("CNR030", .F. )
+
+
+
+	mv_par01 := cNumMed
+	mv_par02 := cNumMed
+	mv_par03 := Space(TamSx3("CN9_NUMERO")[1])
+	mv_par04 := Replicate("Z",TamSx3("CN9_NUMERO")[1])
+	mv_par05 := CTOD("01/01/06")
+	mv_par06 := CTOD("31/12/49")
+	mv_par07 := Space(TamSx3("CN9_SITUAC")[1])
+	mv_par08 := Replicate("Z",TamSx3("CN9_SITUAC")[1])
+	mv_par09 := Space(TamSx3("A2_COD")[1])
+	mv_par10 := Replicate("Z",TamSx3("A2_COD")[1])
+	mv_par11 := Space(TamSx3("CN9_TPCTO")[1])
+	mv_par12 := 1
+	mv_par13 := 1
+	mv_par14 := 1
+	mv_par15 := Space(TamSx3("A1_COD")[1])
+	mv_par16 := Replicate("Z",TamSx3("A1_COD")[1])
+	mv_par17 := 1
+	mv_par18 := 1
+	mv_par19 := ctod("  /  /  ")
+EndIf
+
+lFiltForn := !Empty(mv_par09) .Or.  (!Empty(mv_par10) .And.  UPPER(mv_par10) <> REPLICATE("Z",TamSx3("A2_COD")[1]))
+
+If mv_par13 == 1
+	aStrucCNR := CNR->(dbStruct())
+EndIf
+
+If mv_par14 == 1 .And.  AliasInDic("CNT")
+	aStrucCNT := CNT->(dbStruct())
+EndIf
+
+Private nlin	:= 2900
+Private nPagina := 0
+Private oPrint
+
+
+
+oPrint	:= TMSPrinter():New(OemToAnsi("Medições"))
+oPrint	:SetLandscape()
+oPrint	:Setup()
+
+aStrucCND := CND->(dbStruct())
+cQuery := " SELECT CND.CND_NUMMED, CND.CND_CONTRA, CND.CND_REVISA, CND.CND_NUMERO, CND.CND_FORNEC, CND.CND_LJFORN, CND.CND_CLIENT, "
+cQuery += "        CND.CND_LOJACL, CND.CND_COMPET, CND.CND_DTVENC, CND.CND_VLMEAC, CND.CND_VLSALD, CND.CND_VLTOT, CN9.*"
+cQuery += "   FROM " + RetSQLName("CND")+ " CND," + RetSQLName("CN9") + " CN9 "
+cQuery += "  WHERE CND.CND_FILIAL = '"+xFilial("CND")+"'"
+cQuery += "    AND CN9.CN9_FILIAL = '"+xFilial ("CN9")+"'"
+cQuery += "    AND CND.CND_CONTRA = CN9.CN9_NUMERO "
+cQuery += "    AND CND.CND_REVISA = CN9.CN9_REVISA "
+cQuery += "    AND CND.CND_NUMMED >= '"+MV_PAR01+"'"
+cQuery += "    AND CND.CND_NUMMED <= '"+MV_PAR02+"'"
+cQuery += "    AND CND.CND_CONTRA >= '"+MV_PAR03+"'"
+cQuery += "    AND CND.CND_CONTRA <= '"+MV_PAR04+"'"
+cQuery += "    AND CN9.CN9_DTINIC >= '"+dtos(MV_PAR05)+"'"
+cQuery += "    AND CN9.CN9_DTFIM  <= '"+ dtos (MV_PAR06)+"'"
+cQuery += "    AND CN9.CN9_SITUAC >= '"+MV_PAR07+"'"
+cQuery += "    AND CN9.CN9_SITUAC <= '"+MV_PAR08+"'"
+If lFiltForn
+	cQuery += "    AND CND.CND_FORNEC >= '"+MV_PAR09+"'"
+	cQuery += "    AND CND.CND_FORNEC <= '"+MV_PAR10+"'"
+Else
+	cQuery += "    AND CND.CND_CLIENT >= '"+MV_PAR15+"'"
+	cQuery += "    AND CND.CND_CLIENT <= '"+MV_PAR16+"'"
+EndIf
+
+cQuery += "    AND "
+If !Empty(MV_PAR11)
+	cQuery += " CN9.CN9_TPCTO   = '"+MV_PAR11 + "' AND "
+EndIf
+cQuery += "        CND.D_E_L_E_T_ = ' ' "
+cQuery += "    AND CN9.D_E_L_E_T_ = ' ' "
+
+cQuery := ChangeQuery(cQuery)
+MsAguarde({|| dbUseArea( .T. ,"TOPCONN",TCGenQry(,,cQuery),cAliasCND, .F. , .T. )},OemToAnsi(If( cPaisLoc $ "ANG|PTG", "A processar", "Processando" )))
+
+For nX := 1 to Len(aStrucCND)
+	If aStrucCND[nX,2] <> "C" .And.  aStrucCND[nX,2]  <> "M" .And.  (cAliasCND)->( FieldPos( aStrucCND[nx,1] ) ) > 0
+		TCSetField(cAliasCND,aStrucCND[nX,1], aStrucCND[nX,2],aStrucCND[nX,3],aStrucCND[nX,4])
+	EndIf
+next
+
+While !(cAliasCND)->(Eof())
+	dbSelectArea("CND")
+
+	cMedicao := (cAliasCND)->CND_NUMMED
+	cContra  := (cAliasCND)->CND_CONTRA
+	cRevisa  := (cAliasCND)->CND_REVISA
+	cEspCtr  := If(Empty((cAliasCND)->CN9_CLIENT),"1","2")
+
+
+
+
+
+	nLin += 50
+	CNRBox(0050,2350,OemToAnsi("Medições"),, .T. ,1)
+
+	CNRBox(0050,0300,RetTitle("CND_NUMMED"),(cAliasCND)->CND_NUMMED, .F. )
+
+	CNRBox(0305,0600,RetTitle("CND_NUMERO"),(cAliasCND)->CND_NUMERO, .F. )
+
+	CNRBox(0605,1000,RetTitle("CND_CONTRA"),(cAliasCND)->CND_CONTRA, .F. )
+	If lFiltForn
+
+		CNRBox(1005,1600,RetTitle("CND_FORNEC"),(cAliasCND)->CND_FORNEC, .F. )
+
+		CNRBox(1605,2000,RetTitle("CND_LJFORN"),(cAliasCND)->CND_LJFORN, .F. )
+	Else
+
+		CNRBox(1005,1600,RetTitle("CND_CLIENT"),(cAliasCND)->CND_CLIENT, .F. )
+
+		CNRBox(1605,2000,RetTitle("CND_LOJACL"),(cAliasCND)->CND_LOJACL, .F. )
+	EndIf
+
+	CNRBox(2005,2350,RetTitle("CND_COMPET"),(cAliasCND)->CND_COMPET, .T. )
+
+	CNRBox(0050,0400,RetTitle("CND_DTVENC"),DTOC((cAliasCND)->CND_DTVENC), .F. )
+
+	CNRBox(0405,1050,RetTitle("CND_VLMEAC"),TransForm((cAliasCND)->(C030xMoeda(CND_CONTRA,CND_REVISA,CND_NUMMED,"CND_VLMEAC")),cPtVLMEAC), .F. )
+
+	CNRBox(1055,1800,RetTitle("CND_VLSALD"),TransForm((cAliasCND)->(C030xMoeda(CND_CONTRA,CND_REVISA,CND_NUMMED,"CND_VLSALD")),cPtVLSALD), .F. )
+
+	CNRBox(1805,2350,RetTitle("CND_VLTOT"),TransForm((cAliasCND)->(C030xMoeda(CND_CONTRA,CND_REVISA,CND_NUMMED,"CND_VLTOT")),cPtVLTOT1), .T. )
+
+	dbSelectArea("CNE")
+
+
+
+	CNRBox(0050,0230,RetTitle("CNE_ITEM"),, .F. ,2,oFont06)
+	CNRBox(0235,0700,RetTitle("CNE_PRODUT"),, .F. ,2,oFont06)
+	CNRBox(0705,1000,RetTitle("CNE_QTDSOL"),, .F. ,2,oFont06, .T. )
+	CNRBox(1005,1300,RetTitle("CNE_QTAMED"),, .F. ,2,oFont06, .T. )
+	CNRBox(1305,1600,RetTitle("CNE_QUANT"),, .F. ,2,oFont06, .T. )
+	CNRBox(1605,1800,RetTitle("CNE_PERC"),, .F. ,2,oFont06, .T. )
+	CNRBox(1805,2050,RetTitle("CNE_VLUNIT"),, .F. ,2,oFont06, .T. )
+	CNRBox(2055,2350,RetTitle("CNE_VLTOT"),, .T. ,2,oFont06, .T. )
+
+	cQuery := "SELECT CNE_ITEM,   CNE_PRODUT, CNE_QTDSOL, CNE_QTAMED, CNE_QUANT, CNE_PERC,"
+	cQuery += "       CNE_VLUNIT, CNE_VLTOT "
+	cQuery += "  FROM "+ RetSQLName("CNE")+ " CNE "
+	cQuery += " WHERE CNE.CNE_NUMMED = '"+cMedicao+"'"
+	cQuery += "   AND CNE.CNE_CONTRA = '"+cContra+"'"
+	cQuery += "   AND CNE.CNE_REVISA = '"+cRevisa+"'"
+	cQuery += "   AND CNE.CNE_FILIAL = '"+xFilial("CNE")+"'"
+	cQuery += "   AND CNE.D_E_L_E_T_ = ' ' "
+
+	cAliasCNE := GetNextAlias()
+	cQuery := ChangeQuery(cQuery)
+	MsAguarde({|| dbUseArea( .T. ,"TOPCONN",TCGenQry(,,cQuery),cAliasCNE, .F. , .T. )},OemToAnsi(If( cPaisLoc $ "ANG|PTG", "A processar", "Processando" )))
+
+	For nX := 1 to Len(aStrucCNE)
+		If aStrucCNE[nX,2] <> "C" .And.  (cAliasCNE)->( FieldPos( aStrucCNE[nx,1] ) ) > 0
+			TCSetField(cAliasCNE,aStrucCNE[nX,1], aStrucCNE[nX,2],aStrucCNE[nX,3],aStrucCNE[nX,4])
+		EndIf
+	next
+
+	While !(cAliasCNE)->(Eof())
+
+
+
+
+		CNRBox(0050,0230,(cAliasCNE)->CNE_ITEM,, .F. ,2,oFont06)
+
+		CNRBox(0235,0700,(cAliasCNE)->CNE_PRODUT,, .F. ,2,oFont06)
+
+		CNRBox(0705,1000,TransForm((cAliasCNE)->CNE_QTDSOL,cPtQTDSOL),, .F. ,2,oFont06, .T. )
+
+		CNRBox(1005,1300,TransForm((cAliasCNE)->CNE_QTAMED,cPtQTAMED),, .F. ,2,oFont06, .T. )
+
+		CNRBox(1305,1600,TransForm((cAliasCNE)->CNE_QUANT,cPtQUANT),, .F. ,2,oFont06, .T. )
+
+		CNRBox(1605,1800,TransForm((cAliasCNE)->CNE_PERC,cPtPERC),, .F. ,2,oFont06, .T. )
+
+		CNRBox(1805,2050,TransForm((cAliasCNE)->(C030xMoeda(cContra,cRevisa,(cAliasCND)->CND_NUMMED,"CNE_VLUNIT")),cPtVLUNIT),, .F. ,2,oFont06, .T. )
+
+		CNRBox(2055,2350,TransForm((cAliasCNE)->(C030xMoeda(cContra,cRevisa,(cAliasCND)->CND_NUMMED,"CNE_VLTOT")),cPtVLTOT),, .T. ,2,oFont06, .T. )
+
+		(cAliasCNE)->(dbSkip())
+	EndDo
+
+	(cAliasCNE)->(dbCloseArea())
+
+
+
+
+	If mv_par13 == 1
+		CNTR030Mul(cMedicao,oFont06,cContra,cRevisa)
+	Endif
+
+
+
+
+	If mv_par12 == 1
+		CNTR030Desc(cMedicao,oFont06,cContra,cRevisa)
+	EndIf
+
+
+
+
+	If mv_par14 == 1 .And.  AliasInDic( "CNT" )
+		CNR030Cauc (cMedicao, oFont06, cContra, cEspCtr, lFiltForn, cRevisa)
+	EndIf
+
+	nLin := 2900
+	(cAliasCND)->(dbSkip())
+EndDo
+
+(cAliasCND)->(dbCloseArea())
+
+
+If !Empty(cDirSpool)
+	oPrint:SaveAllAsJPEG(cDirSpool+"CNTR030",875,1170,140)
+EndIF
+
+
+oPrint:Preview()
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function CNTR030Desc(cMedicao,oFont06,cContra,cRevisa)
+Local cQuery    := ""
+Local cAliasCNQ
+Local cPtVALOR1 := PesqPict("CNQ","CNQ_VALOR")
+
+Local nX
+Local ntot      := 0
+Local nValor    := 0
+Local aStrucCNQ := CNQ->(dbStruct())
+cContra := If( cContra == nil, "", cContra ) ;
+
+cQuery := "SELECT CNQ.CNQ_TPDESC, CNQ.CNQ_VALOR, CNP.CNP_DESCRI "
+cQuery += "  FROM "+RetSQLName("CNQ")+" CNQ, "+RetSQLName("CNP")+" CNP "
+cQuery += " WHERE CNQ.CNQ_FILIAL = '"+xfilial("CNQ")+"' AND CNP.CNP_FILIAL='"+xfilial("CNP")+"' "
+cQuery += "   AND CNQ.CNQ_NUMMED = '"+cMedicao+"'"
+cQuery += "   AND CNQ.CNQ_CONTRA = '"+cContra +"'"
+cQuery += "   AND CNQ.CNQ_TPDESC = CNP.CNP_CODIGO"
+cQuery += "   AND CNQ.D_E_L_E_T_ = ' ' "
+cquery += "   AND CNP.D_E_L_E_T_ = ' ' "
+
+cAliasCNQ := GetNextAlias()
+cQuery := ChangeQuery(cQuery)
+MsAguarde({|| dbUseArea( .T. ,"TOPCONN",TCGenQry(,,cQuery),cAliasCNQ, .F. , .T. )},OemToAnsi(If( cPaisLoc $ "ANG|PTG", "A processar", "Processando" )))
+
+If !(cAliasCNQ)->(Eof())
+	nLin += 25
+	For nX := 1 to Len(aStrucCNQ)
+		If aStrucCNQ[nX,2] <> "C" .And.  (cAliasCNQ)->( FieldPos( aStrucCNQ[nx,1] ) ) > 0
+			TCSetField(cAliasCNQ,aStrucCNQ[nX,1], aStrucCNQ[nX,2],aStrucCNQ[nX,3],aStrucCNQ[nX,4])
+		EndIf
+	next
+
+
+
+
+	CNRBox(0050,2350,OemToAnsi("Descontos")+" - "+ OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Núm. Medição:", "Num. Medição:" ))+ cMedicao,, .T. ,1)
+	CNRBox(0050,0500,RetTitle("CNQ_TPDESC"),, .F. ,2,oFont06)
+	CNRBox(0505,1800,RetTitle("CNP_DESCRI"),, .F. ,2,oFont06)
+	CNRBox(1805,2350,RetTitle("CNQ_VALOR"),, .T. ,2,oFont06)
+
+	dbSelectArea ("CNQ")
+	While !(cAliasCNQ)->(Eof())
+		nValor := (cAliasCNQ)->(C030xMoeda(cContra,cRevisa,cMedicao,"CNQ_VALOR"))
+
+
+
+
+		CNRBox(0050,0500,(cAliasCNQ)->CNQ_TPDESC,, .F. ,2,oFont06)
+
+		CNRBox(0505,1800,(cAliasCNQ)->CNP_DESCRI,, .F. ,2,oFont06)
+
+		CNRBox(1805,2350,TransForm(nValor,cPtVALOR1),, .T. ,2,oFont06, .T. )
+
+		If nLin >= 2900
+			CNRCabec(Nil,Nil,OemToAnsi(cTitRel))
+		EndIf
+
+		ntot += nValor
+		(cAliasCNQ)->(dbSkip())
+
+	EndDo
+	cTexto := +TransForm(nTot,cPtVALOR1)
+	oPrint:Say(nLin+7,1970-TamTexto(cTexto),("Total:"),oFont06)
+	CNRBox(2000,2350,cTexto,, .T. ,2,oFont06, .T. )
+EndIf
+(cAliasCNQ)->(dbCloseArea())
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function CNTR030Mul(cMedicao,oFont06,cContra,cRevisa)
+
+Local cQuery :=""
+Local cPtVALOR  := PesqPict("CNR","CNR_VALOR")
+
+Local aliasCNR
+Local aStrucCNR:=CNR->(dbStruct())
+
+Local nX
+Local nTotMult:=0
+Local nTotBoni:=0
+Local nValor  :=0
+
+cQuery := "SELECT CNR.CNR_TIPO, CNR.CNR_DESCRI, CNR.CNR_VALOR "
+cQuery += "  FROM "+ RetSQLName("CNR")+ " CNR "
+cQuery += " WHERE CNR.CNR_FILIAL = '"+xfilial("CNR")+"'"
+cQuery += "   AND CNR.CNR_NUMMED = '"+cMedicao+"'"
+cQuery += "   AND CNR.D_E_L_E_T_ = ' ' "
+cQuery += "   ORDER BY CNR.CNR_TIPO "
+
+cAliasCNR := GetNextAlias()
+cQuery := ChangeQuery(cQuery)
+MsAguarde({|| dbUseArea( .T. ,"TOPCONN",TCGenQry(,,cQuery),cAliasCNR, .F. , .T. )},OemToAnsi(If( cPaisLoc $ "ANG|PTG", "A processar", "Processando" )))
+
+If !(cAliasCNR)->(Eof())
+	nLin += 25
+	For nX := 1 to Len(aStrucCNR)
+		If aStrucCNR[nX,2] <> "C" .And.  (cAliasCNR)->( FieldPos( aStrucCNR[nx,1] ) ) > 0
+			TCSetField(cAliasCNR,aStrucCNR[nX,1], aStrucCNR[nX,2],aStrucCNR[nX,3],aStrucCNR[nX,4])
+		EndIf
+	next
+
+
+
+
+	CNRBox(0050,2350,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Multas/bonificações", "Multas/Bonificações" ))+" - "+ OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Núm. Medição:", "Num. Medição:" ))+ cMedicao,, .T. ,1)
+	CNRBox(0050,0500,RetTitle("CNR_TIPO"),, .F. ,2,oFont06)
+	CNRBox(0505,1800,RetTitle("CNR_DESCRI"),, .F. ,2,oFont06)
+	CNRBox(1805,2350,RetTitle("CNR_VALOR"),, .T. ,2,oFont06)
+
+	While !(cAliasCNR)->(Eof())
+		nValor := (cAliasCNR)->(C030xMoeda(cContra,cRevisa,cMedicao,"CNR_VALOR"))
+		dbSelectArea("CNR")
+
+
+
+
+		CNRBox(0050,0500,If((cAliasCNR)->CNR_TIPO=="1","Multas","Bonificações"),, .F. ,2,oFont06)
+
+		CNRBox(0505,1800,(cAliasCNR)->CNR_DESCRI,, .F. ,2,oFont06)
+
+		CNRBox(1805,2350,TransForm(nValor,cPtVALOR),, .T. ,2,oFont06, .T. )
+
+		If (cAliasCNR)->CNR_TIPO=="1"
+			nTotMult += nValor
+		else
+			nTotBoni += nValor
+		endif
+		(cAliasCNR)->(dbSkip())
+	EndDo
+	cTexto := +TransForm(nTotMult,cPtVALOR)
+	oPrint:Say(nLin+7,1970-TamTexto(cTexto),(If( cPaisLoc $ "ANG|PTG", "Total De Multas:", "Total de Multas:" )),oFont06)
+	CNRBox(2000,2350,cTexto,, .T. ,2,oFont06, .T. )
+	If nLin >= 2900
+	   CNRCabec(Nil,Nil,OemToAnsi(cTitRel))
+	EndIf
+
+	cTexto := +TransForm(nTotBoni,cPtVALOR)
+	oPrint:Say(nLin+7,1970-TamTexto(cTexto),(If( cPaisLoc $ "ANG|PTG", "Total De Bonificações:", "Total de Bonificações:" )),oFont06)
+	CNRBox(2000,2350,cTexto,, .T. ,2,oFont06, .T. )
+	If nLin >= 2900
+	   CNRCabec(Nil,Nil,OemToAnsi(cTitRel))
+	EndIf
+EndIf
+(cAliasCNR)->(dbCloseArea())
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function CNR030Cauc(cMedicao,oFont06,cContra,cEspCtr,lFiltForn,cRevisa)
+Local cQuery     := ""
+Local cAliasCNT
+Local cPtVLRET	 := PesqPict("CNT","CNT_VLRET")
+Local cPtVLBX	 := PesqPict("CNT","CNT_VLBX")
+Local aStrucCNT  := {}
+Local nX
+
+cContra := If( cContra == nil, "", cContra ) ;
+cEspCtr := If( cEspCtr == nil, "1", cEspCtr ) ;
+lFiltForn := If( lFiltForn == nil, .T. , lFiltForn ) ;
+
+
+
+
+If AliasInDic("CNT")
+
+
+
+	aStrucCNT := CNT->(dbStruct())
+	cQuery := "SELECT  CNT.CNT_VLRET, CNT.CNT_VLBX, CNT.CNT_DTBX, "
+	If lFiltForn
+		cQuery += "       CNT.CNT_FORNEC, CNT.CNT_LJFORN, SA2.A2_NOME "
+		cQuery += "  FROM "+RetSQLName("CNT")+" CNT, "+RetSQLName("SA2")+" SA2 "
+		cquery += "   WHERE SA2.A2_FILIAL   = '"+xfilial("SA2")+"'"
+		cQuery += "     AND CNT.CNT_FORNEC  = SA2.A2_COD  "
+		cQuery += "     AND CNT.CNT_LJFORN  = SA2.A2_LOJA "
+	Else
+		cQuery += "       CNT.CNT_CLIENT, CNT.CNT_LOJACL, SA1.A1_NOME "
+		cQuery += "  FROM "+RetSQLName("CNT")+" CNT, "+RetSQLName("SA1")+" SA1 "
+		cquery += " WHERE SA1.A1_FILIAL   = '"+xfilial("SA1")+"'"
+
+		cQuery += "   AND CNT.CNT_CLIENT  = SA1.A1_COD  "
+		cQuery += "   AND CNT.CNT_LOJACL  = SA1.A1_LOJA "
+	EndIf
+
+	cQuery += "   AND CNT.CNT_FILIAL  = '"+xfilial("CNT")+"'"
+	cQuery += "   AND CNT.CNT_NUMMED  = '"+cMedicao+"'"
+	cQuery += "   AND CNT.CNT_CONTRA  = '"+cContra +"'"
+
+	cQuery += "   AND CNT.D_E_L_E_T_  = ' ' "
+
+	cAliasCNT := GetNextAlias()
+	cQuery := ChangeQuery(cQuery)
+
+	MsAguarde({|| dbUseArea( .T. ,"TOPCONN",TCGenQry(,,cQuery),cAliasCNT, .F. , .T. )},OemToAnsi(If( cPaisLoc $ "ANG|PTG", "A processar", "Processando" )))
+
+	If !(cAliasCNT)->(Eof())
+		nLin += 25
+		For nX := 1 to Len(aStrucCNT)
+			If aStrucCNT[nX,2] <> "C" .And.  (cAliasCNT)->( FieldPos( aStrucCNT[nx,1] ) ) > 0
+				TCSetField(cAliasCNT,aStrucCNT[nX,1], aStrucCNT[nX,2],aStrucCNT[nX,3],aStrucCNT[nX,4])
+			EndIf
+		next
+
+
+
+
+		CNRBox(0050,2350,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Retenção-cauções", "Retenção-Cauções" ))+" - "+ OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Núm. Medição:", "Num. Medição:" ))+ cMedicao,, .T. ,1)
+		If lFiltForn
+			CNRBox(0050,0400,RetTitle("CNT_FORNEC"),, .F. ,2,oFont06)
+			CNRBox(0405,0800,RetTitle("CNT_LJFORN"),, .F. ,2,oFont06)
+			CNRBox(0805,1500,RetTitle("A2_NOME"),, .F. ,2,oFont06)
+		Else
+			CNRBox(0050,0400,RetTitle("CNT_CLIENT"),, .F. ,2,oFont06)
+			CNRBox(0405,0800,RetTitle("CNT_LOJACL"),, .F. ,2,oFont06)
+			CNRBox(0805,1500,RetTitle("A1_NOME"),, .F. ,2,oFont06)
+		EndIf
+		CNRBox(1505,1800,RetTitle("CNT_VLRET"),, .F. ,2,oFont06)
+		CNRBox(1805,2100,RetTitle("CNT_VLBX"),, .F. ,2,oFont06)
+		CNRBox(2105,2350,RetTitle("CNT_DTBX"),, .T. ,2,oFont06)
+
+
+		While !(cAliasCNT)->(Eof())
+			dbSelectArea("CNT")
+
+
+
+			If cEspCtr=="1"
+
+				CNRBox(0050,0400,(cAliasCNT)->CNT_FORNEC,, .F. ,2,oFont06)
+
+				CNRBox(0405,0800,(cAliasCNT)->CNT_LJFORN,, .F. ,2,oFont06)
+
+				CNRBox(0805,1500,(cAliasCNT)->A2_NOME,, .F. ,2,oFont06)
+
+			Else
+
+				CNRBox(0050,0400,(cAliasCNT)->CNT_CLIENT,, .F. ,2,oFont06)
+
+				CNRBox(0405,0800,(cAliasCNT)->CNT_LOJACL,, .F. ,2,oFont06)
+
+				CNRBox(0805,1500,(cAliasCNT)->A1_NOME,, .F. ,2,oFont06)
+			EndIf
+
+			CNRBox(1505,1800,Transform((cAliasCNT)->(C030xMoeda(cContra,cRevisa,cMedicao,"CNT_VLRET")),cPtVLRET),, .F. ,2,oFont06)
+
+			CNRBox(1805,2100,Transform((cAliasCNT)->(C030xMoeda(cContra,cRevisa,cMedicao,"CNT_VLBX")),cPtVLBX),, .F. ,2,oFont06)
+
+			CNRBox(2105,2350,DTOC((cAliasCNT)->CNT_DTBX),, .T. ,2,oFont06)
+
+			If nLin >= 2900
+				CNRCabec(Nil,Nil,OemToAnsi(cTitRel))
+			EndIf
+
+			(cAliasCNT)->(dbSkip())
+		EndDo
+	EndIf
+	(cAliasCNT)->(dbCloseArea())
+EndIf
+return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function CNR030ClFr(cTipo)
+Local aSaveArea	:= GetArea()
+
+If cTipo=="1"
+	If !Empty(mv_par09) .Or.  (!Empty(mv_par10) .And.  UPPER(mv_par10) <> REPLICATE("Z",TamSx3("A2_COD")[1]))
+		MV_PAR15	:= Space(6)
+		MV_PAR16	:= REPLICATE("Z",TamSx3("A1_COD")[1])
+	EndIf
+Else
+	If !Empty(mv_par15) .Or.  (!Empty(mv_par16) .And.  UPPER(mv_par16) <> REPLICATE("Z",TamSx3("A1_COD")[1]))
+		MV_PAR09	:= Space(6)
+		MV_PAR10	:= REPLICATE("Z",TamSx3("A2_COD")[1])
+	EndIf
+EndIf
+
+
+RestArea(aSaveArea)
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function C030xMoeda(cContra,cRev,cNumMed,cCampo)
+Local nMoedaOri	:= Posicione("CND",4,xFilial("CND")+cNumMed,"CND_MOEDA")
+Local nMoedaDes := nMoedaOri
+Local nRet 		:= &(cCampo)
+
+If mv_par17 == 2
+	nMoedaDes := Posicione("CN9",1,xFilial("CN9")+cContra+cRev,"CN9_MOEDA")
+ElseIf mv_par17 == 3
+	nMoedaDes := mv_par18
+EndIf
+
+nRet := Round(xMoeda(nRet,nMoedaOri,nMoedaDes,If(Empty(mv_par19),dDataBase,mv_par19),6),TamSX3(cCampo)[2])
+
+Return nRet

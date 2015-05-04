@@ -1,0 +1,1297 @@
+#INCLUDE "MATR899.ch"
+#INCLUDE "Protheus.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ MATR899  ºAutor  ³Cleber Stenio       º Data ³ 15/07/2008  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Documento de Informações Fiscais - DIF                     º±±
+±±º          ³ Relatorio auxiliar para preenchimento                      º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Sigafis                                                    º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Function MATR899
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Definicao das variaveis                                      |
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local aWizard		:= {}         
+Local aCFOPs		:= {}
+Local aArea			:= GetArea()
+
+Local Titulo    	:= STR0001	   	//"Documento de Informações Fiscais (DIF)"
+Local cDesc1    	:= STR0002 		//"Este relatório é uma ferramenta auxiliar para o preenchimento"
+Local cDesc2    	:= STR0003  	//"da DIF - Documento de Informações Fiscais"
+Local cDesc3    	:= ""
+Local wnrel     	:= "MATR899"  			// Nome do Arquivo utilizado no Spool
+Local nomeprog  	:= "MATR899"  			// nome do programa
+Local cString		:= "SF3"
+Local cTitulo		:= ""
+Local cMensagem		:= ""
+Local cHelp			:= ""
+
+Local lRet			:= .T.
+Local lDic      	:= .F. 					// Habilita/Desabilita Dicionario
+Local lComp     	:= .F. 					// Habilita/Desabilita o Formato Comprimido/Expandido
+Local lFiltro   	:= .F. 					// Habilita/Desabilita o Filtro
+Local lHelp			:= .F.
+
+Local nPagina		:= 1
+
+
+Private aReturn 	:= {STR0004,1,STR0005,1,2,1,"",1}	//"Zebrado"###"Administracao"
+
+Private Tamanho 	:= "M"					// P/M/G
+Private cPerg   	:= "MTR939"				// Pergunta do Relatorio
+
+Private lEnd    	:= .F.					// Controle de cancelamento do relatorio
+
+Private Limite  	:= 132 					// 80/132/220
+Private m_pag   	:= 1  					// Contador de Paginas
+Private nLastKey	:= 0  					// Controla o cancelamento da SetPrint e SetDefault
+
+
+
+	
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Processa a Wizard com as configuracoes para o relatorio³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If ! lHelp
+	If MATR899Wiz()
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Envia para a SetPrint                                                   ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		wnrel:=SetPrint(cString,wnrel,"",@titulo,cDesc1,cDesc2,cDesc3,lDic,"",lComp,Tamanho,lFiltro,.F.)
+		If ( nLastKey==27 )
+			dbSelectArea(cString)
+			dbSetOrder(1)
+			dbClearFilter()
+			Return
+		Endif
+		SetDefault(aReturn,cString)
+		If ( nLastKey==27 )
+			dbSelectArea(cString)
+			dbSetOrder(1)
+			dbClearFilter()
+			Return
+		Endif
+		
+		RptStatus({|lEnd| ImpRel(@lEnd,wnRel,cString,Tamanho,nPagina)},titulo)
+	Endif
+Endif
+		
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Restaura Ambiente                                            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea(cString)
+dbClearFilter()
+Set Device To Screen
+Set Printer To
+
+If ( aReturn[5] = 1 )
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+MS_FLUSH()
+
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ ImpRel   ºAutor  ³Cleber Stenio       º Data ³ 26/08/2005  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Imprime o Relatorio                                        º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ MATR899                                                    º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/                    
+
+Static Function ImpRel(lEnd,wnRel,cString,Tamanho,nPagina)       
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Definicao de Variaveis                                       ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	Local aWizard	:= {}                             
+	Local aEntrEst	:= {}                             
+	Local aEntrOut	:= {}                             
+	Local aEntrExt	:= {}                             
+	Local aEntrMun	:= {}
+	Local aEntrUF	:= {}
+	Local aSaiEst	:= {}                             
+	Local aSaiOut	:= {}                             
+	Local aSaiExt	:= {}
+	Local aSaiUF	:= {}                             
+	Local aOutOper	:= {}
+	Local aInvent 	:= {}  
+	Local aEstoque	:= {}
+	Local aUF 		:= {}
+	Local aLay		:= R939LayOut()
+	Local aEst		:= {}
+		
+	Local cAliasSF3	:= "SF3"
+	Local cMunA1	:= GetNewPar("MV_DIFA1","")
+	Local cMunA2	:= GetNewPar("MV_DIFA2","")
+	Local nMunA1		:= Iif(!Empty(cMunA1),SA1->(FieldPos((cMunA1))),0)
+	Local nMunA2 		:= Iif(!Empty(cMunA2),SA2->(FieldPos((cMunA2))),0)
+	Local cMunic	:= ""     
+	Local cInscr	:= ""         
+	Local cTipo		:= ""                          
+	Local cTrib		:= ""
+	Local cProcCFOP	:= ""
+	Local cCFOPNovo	:= ""
+	Local Titulo	:= STR0001 
+	Local cCabec1 	:= STR0027 // "Documento de Informações Fiscais (DIF)"
+	Local cCabec2	:= ""
+	Local nomeProg	:= "MATR899"
+	Local cDataIni	:= ""
+	Local cDataFin	:= ""
+	Local cDescMun	:= ""
+	Local cIncide	:= ""
+	Local cDataB9	:= ""
+	
+	Local lRet 		:= .T.
+	Local lQuery	:= .F.	
+	Local lMov		:= .F.
+	Local lProcessa	:= .F.
+
+
+	Local nPos		:= 0
+	Local nRegsPrint:= 0
+	Local nX		:= 0  
+	Local nLin		:= 55
+	Local nTotCont 	:= 0
+	Local nTotBase 	:= 0
+	Local nTotICMS 	:= 0
+	Local nTotOutr 	:= 0
+	Local nTotEntr 	:= 0
+	Local nTotSai 	:= 0
+	Local nTotIni 	:= 0
+	Local nTotFinal	:= 0
+			
+	#IFDEF TOP
+		Local aStruSF3	:= {}                                       
+		Local aStruSD1	:= {}                                       		
+		Local aStruSD2	:= {}		
+		Local aStruSB9	:= {}		
+		Local cQuery	:= ""
+	#ELSE             
+		Local cIndex		:= ""
+		Local cCondicao		:= ""
+	#ENDIF
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Verifica a consistencia dos parametros da rotina³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If Empty(cMunA1) .Or. nMunA1 == 0
+		cTitulo		:= STR0028 //"Parâmetro não existe"
+		cMensagem	:= STR0033 //"O parâmetro MV_DIFA1 não está definido no dicionário de dados ou o seu conteúdo é inválido. "
+		cMensagem   += STR0034 //"Para que a rotina continue corretamente, "
+		cMensagem	+= STR0035 //"será necessário respeitar a solução proposta abaixo."
+		cHelp		:= STR0036 //"Incluir o parâmetro MV_DIFA1 na tabela SX6 com a seguinte estrutura: "
+		cHelp		+= STR0037 //"Campo da tabela SA1 que indica o código do município do cliente. "
+		cHelp		+= STR0038 //" Para maiores referências, consultar a documentação que acompanha a rotina."
+		xMagHelpFis(cTitulo,cMensagem,cHelp)
+		lHelp		:= .T.
+	Endif
+	
+	If Empty(cMunA2) .Or. nMunA2 == 0
+		cTitulo		:= STR0028 //"Parâmetro não existe"
+		cMensagem	:= STR0039 //"O parâmetro MV_DIFA2 não está definido no dicionário de dados ou o seu conteúdo é inválido. "
+		cMensagem   += STR0034 //"Para que a rotina continue corretamente, "
+		cMensagem	+= STR0035 //"será necessário respeitar a solução proposta abaixo."
+		cHelp		:= STR0040 //"Incluir o parâmetro MV_DIFA2 na tabela SX6 com a seguinte estrutura: "
+		cHelp		+= STR0041 //"Campo da tabela SA2 que indica o código do município do fornecedor. "
+		cHelp		+= STR0038 //" Para maiores referências, consultar a documentação que acompanha a rotina."
+		xMagHelpFis(cTitulo,cMensagem,cHelp)
+		lHelp		:= .T.
+	Endif			
+
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Le a wizard com as configuracoes dos CFOPs³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	lRet := xMagLeWiz("MATR899",@aWizard,.T.)
+	
+	cDataIni := aWizard[01][01]
+	cDataFin := aWizard[01][02]
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Verifica se a data digitada e valida para geracao do relatorio.³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If Empty(cDataIni) .Or. Empty(cDataFin) .Or. cDataIni > cDataFin
+		Return
+	Endif
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Estados para os resumos³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	SX5->(DbSetOrder(1))
+	SX5->(DbSeek(xFilial("SX5")+"12"))
+	
+	Do While !SX5->(Eof()) .And. SX5->X5_TABELA == "12"
+		Aadd(aUF,{AllTrim(SX5->X5_CHAVE),AllTrim(SX5->X5_DESCRI)})
+		SX5->(DbSkip())
+	EndDo 
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Posicoes dos arrays de totalizadores (aEntrEst, aEntrOut, aEntrExt, aSaiEst, ASaiOut, aSaiExt)³
+	//³1 = Titulo da Linha                                                                            ³
+	//³2 = Valor Contabil                                                                             ³
+	//³3 = Base de Calculo                                                                            ³
+	//³4 = Valor do ICMS                                                                              ³
+	//³5 = Outras, Isentas e/ou  não tributadas                                                       ³
+	//³6 = Substituição Tributária                                                                    ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Entradas do Estado³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	Aadd(aEntrEst,{STR0018,0,0,0,0,0}) // Compras
+	Aadd(aEntrEst,{STR0019,0,0,0,0,0}) // Transferências
+	Aadd(aEntrEst,{STR0020,0,0,0,0,0}) // Devoluções
+	Aadd(aEntrEst,{STR0021,0,0,0,0,0}) // Energia Elétrica
+	Aadd(aEntrEst,{STR0022,0,0,0,0,0}) // Comunicações
+	Aadd(aEntrEst,{STR0023,0,0,0,0,0}) // Transportes
+	Aadd(aEntrEst,{STR0024,0,0,0,0,0}) // Outras
+	
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Saídas para o Estado³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	Aadd(aSaiEst,{STR0026,0,0,0,0,0}) // Vendas
+	Aadd(aSaiEst,{STR0019,0,0,0,0,0}) // Transferências
+	Aadd(aSaiEst,{STR0020,0,0,0,0,0}) // Devoluções
+	Aadd(aSaiEst,{STR0024,0,0,0,0,0}) // Outras
+
+	
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³** Entradas por Estado - aEntrUF    ³
+	//³1 = Sigla do Estado                 ³
+	//³2 = Descrição do Estado             ³
+	//³3 = Valor Contábil                  ³
+	//³4 = Base de Cálculo                 ³
+	//³5 = Outras Entradas                 ³
+	//³6 = ST Petróleo                     ³
+	//³7 = ST Outros                       ³
+	//³** Saidas por Estado - aSaiUF       ³
+	//³1 = Sigla do Estado                 ³
+	//³2 = Descrição do Estado             ³
+	//³3 = Valor Contábil Contribuinte     ³
+	//³4 = Valor Contábil Nao Contribuinte ³
+	//³5 = Base de Calculo Contribuinte    ³
+	//³6 = Base de Calculo Nao Contribuinte³
+	//³7 = Outras Saidas                   ³
+	//³8 = Subst. Tributária               ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	For nX := 1 To Len(aUF)
+		Aadd(aEntrUF,{aUF[nx][01],aUF[nx][02],0,0,0,0,0})
+		Aadd(aSaiUF,{aUF[nx][01],aUF[nx][02],0,0,0,0,0,0})		
+	Next
+       
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Estoque - aEstoque ³
+	//³1 = Cod. Identifica³
+	//³2 = Título         ³
+	//³3 = Estoque Inicial³
+	//³4 = Estoque Final  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	Aadd(aEstoque,{"T",STR0048,0,0}) //"Tributados: "	
+	Aadd(aEstoque,{"S",STR0049,0,0}) //"Sujeitos a Subst. Tributária: "
+	Aadd(aEstoque,{"I",STR0050,0,0}) //"Isentos: "
+	Aadd(aEstoque,{"O",STR0051,0,0}) //"Outros: " 
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Outras Operações - aOutOper     ³
+	//³1 = Titulo da Linha             ³
+	//³2 = Base de Calculo nas Entradas³
+	//³3 = Base de Calculo nas Saidas  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	Aadd(aOutOper,{STR0042,0}) //"Compras para o ativo permanente e/ou material para uso e consumo: "
+	Aadd(aOutOper,{STR0043,0}) //"Outras entradas e aquisições não especificadas (transferência, remessa e outras): "	
+	Aadd(aOutOper,{STR0044,0}) //"Vendas de ativo permanente e/ou material de uso e consumo: "
+	Aadd(aOutOper,{STR0045,0}) //"Outras saídas não especificadas (transferência, remessa e outras): "
+
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Seleciona Movimentacao     ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	dbSelectArea("SF3")
+	dbSetOrder(1)               
+	ProcRegua(LastRec())
+	
+	#IFDEF TOP
+	    If TcSrvType()<>"AS/400"
+		    lQuery 		:= .T.
+			cAliasSF3	:= "SF3_DIF"
+			aStru  		:= SF3->(dbStruct())
+			cQuery 		:= "SELECT SF3.F3_FILIAL,SF3.F3_ENTRADA,SF3.F3_NFISCAL,SF3.F3_SERIE,SF3.F3_CLIEFOR,SF3.F3_LOJA,SF3.F3_ESTADO, "
+			cQuery 		+= "SF3.F3_CFO,SF3.F3_TIPO,SF3.F3_VALCONT,SF3.F3_BASEICM,SF3.F3_OUTRICM,SF3.F3_ISENICM,SF3.F3_ICMSRET,SF3.F3_VALICM,SF3.F3_ICMSDIF " 
+			cQuery 		+= "FROM " + RetSqlName("SF3") + " SF3 " 
+			cQuery		+= "WHERE SF3.F3_FILIAL = '" + xFilial("SF3") + "' AND "    
+			cQuery 		+= "SF3.F3_ENTRADA >= '" + cDataIni + "' AND "
+			cQuery 		+= "SF3.F3_ENTRADA <= '" + cDataFin + "' AND "
+			cQuery 		+= "SF3.F3_DTCANC = '" + Dtos(Ctod("")) + "' AND "
+			cQuery 		+= "SF3.F3_TIPO <> 'S' AND "
+			cQuery 		+= "SF3.D_E_L_E_T_ = ' ' "
+			cQuery 		+= "ORDER BY " + SqlOrder(SF3->(IndexKey()))
+		    cQuery := ChangeQuery(cQuery)
+			dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQuery),cAliasSF3)
+			For nX := 1 To len(aStruSF3)
+				If aStruSF3[nX][2] <> "C" .And. FieldPos(aStruSF3[nX][1])<>0
+					TcSetField(cAliasSF3,aStruSF3[nX][1],aStruSF3[nX][2],aStruSF3[nX][3],aStruSF3[nX][4])
+				EndIf
+			Next nX
+			
+			dbSelectArea(cAliasSF3)	
+		Else
+	#ENDIF
+		    cIndex    		:= CriaTrab(NIL,.F.)
+		    cCondicao 		:= 'F3_FILIAL == "' + xFilial("SF3") + '" .And. '
+		   	cCondicao 		+= 'DTOS(F3_ENTRADA) >= "' + cDataIni + '" .And. '
+		   	cCondicao 		+= 'DTOS(F3_ENTRADA) <= "' + cDataFin + '" .And. '
+			cCondicao		+= 'Empty(F3_DTCANC) .And. '
+			cCondicao		+= 'F3_TIPO <> "S" '					
+				   	
+		    IndRegua(cAliasSF3,cIndex,SF3->(IndexKey()),,cCondicao)
+		    dbSelectArea(cAliasSF3)
+		    ProcRegua(LastRec())
+		    dbGoTop()
+	#IFDEF TOP
+		Endif
+	#ENDIF
+	
+	SA1->(dbSetOrder(1))
+	SA2->(dbSetOrder(1))
+
+	While !(cAliasSF3)->(Eof())
+		
+		IncProc(STR0052) // "Preparando Base 1/5 - Processando movimentações de Entrada/Saída"
+		If Interrupcao(@lEnd)
+		    Exit
+	 	Endif
+		          
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Verifica Cliente/Fornecedor³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If Left(AllTrim((cAliasSF3)->F3_CFO),1) >= "5"
+			If (cAliasSF3)->F3_TIPO$"DB"
+				If ! SA2->(dbSeek(xFilial("SA2")+(cAliasSF3)->F3_CLIEFOR+(cAliasSF3)->F3_LOJA))
+					(cAliasSF3)->(dbSkip())
+					Loop
+				Endif
+				cMunic		:= SA2->&(cMunA2)
+				cInscr		:= SA2->A2_INSCR
+				cTipo		:= SA2->A2_TIPO  
+				cDescMun	:= SA2->A2_MUN
+			Else
+				If ! SA1->(dbSeek(xFilial("SA1")+(cAliasSF3)->F3_CLIEFOR+(cAliasSF3)->F3_LOJA))
+					(cAliasSF3)->(dbSkip())
+					Loop				
+				Endif
+				cMunic		:= SA1->&(cMunA1)
+				cInscr		:= SA1->A1_INSCR
+				cTipo		:= SA1->A1_TIPO
+				cDescMun	:= SA1->A1_MUN
+			Endif                 
+		Else
+			If (cAliasSF3)->F3_TIPO$"DB"
+				If ! SA1->(dbSeek(xFilial("SA1")+(cAliasSF3)->F3_CLIEFOR+(cAliasSF3)->F3_LOJA))
+					(cAliasSF3)->(dbSkip())
+					Loop				
+				Endif
+				cMunic		:= SA1->&(cMunA1)
+				cInscr		:= SA1->A1_INSCR
+				cTipo		:= SA1->A1_TIPO
+				cDescMun	:= SA1->A1_MUN
+			Else
+				If ! SA2->(dbSeek(xFilial("SA2")+(cAliasSF3)->F3_CLIEFOR+(cAliasSF3)->F3_LOJA))
+					(cAliasSF3)->(dbSkip())
+					Loop
+				Endif
+				cMunic		:= SA2->&(cMunA2)
+				cInscr		:= SA2->A2_INSCR
+				cTipo  		:= SA2->A2_TIPO
+				cDescMun	:= SA2->A2_MUN
+			Endif                 
+		Endif      
+
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Entradas do Estado³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		// "Compras: "
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[02][01]
+			aEntrEst[01][02] += (cAliasSF3)->F3_VALCONT
+			aEntrEst[01][03] += (cAliasSF3)->F3_BASEICM
+			aEntrEst[01][04] += (cAliasSF3)->F3_VALICM
+			aEntrEst[01][05] += (cAliasSF3)->F3_ISENICM + (cAliasSF3)->F3_OUTRICM
+			aEntrEst[01][06] += (cAliasSF3)->F3_ICMSRET
+		Endif
+		//"Transferências: "                  
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[02][02]
+			aEntrEst[02][02] += (cAliasSF3)->F3_VALCONT
+			aEntrEst[02][03] += (cAliasSF3)->F3_BASEICM
+			aEntrEst[02][04] += (cAliasSF3)->F3_VALICM
+			aEntrEst[02][05] += (cAliasSF3)->F3_ISENICM + (cAliasSF3)->F3_OUTRICM
+			aEntrEst[02][06] += (cAliasSF3)->F3_ICMSRET
+		Endif
+		//"Devoluções: "                      
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[02][03]
+			aEntrEst[03][02] += (cAliasSF3)->F3_VALCONT
+			aEntrEst[03][03] += (cAliasSF3)->F3_BASEICM
+			aEntrEst[03][04] += (cAliasSF3)->F3_VALICM
+			aEntrEst[03][05] += (cAliasSF3)->F3_ISENICM + (cAliasSF3)->F3_OUTRICM
+			aEntrEst[03][06] += (cAliasSF3)->F3_ICMSRET
+		Endif
+		//"Transportes: "                     
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[02][06]
+			aEntrEst[04][02] += (cAliasSF3)->F3_VALCONT
+			aEntrEst[04][03] += (cAliasSF3)->F3_BASEICM
+			aEntrEst[04][04] += (cAliasSF3)->F3_VALICM
+			aEntrEst[04][05] += (cAliasSF3)->F3_ISENICM + (cAliasSF3)->F3_OUTRICM
+			aEntrEst[04][06] += (cAliasSF3)->F3_ICMSRET
+		Endif
+		//"Comunicações : "                   
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[02][05]
+			aEntrEst[05][02] += (cAliasSF3)->F3_VALCONT
+			aEntrEst[05][03] += (cAliasSF3)->F3_BASEICM
+			aEntrEst[05][04] += (cAliasSF3)->F3_VALICM
+			aEntrEst[05][05] += (cAliasSF3)->F3_ISENICM + (cAliasSF3)->F3_OUTRICM
+			aEntrEst[05][06] += (cAliasSF3)->F3_ICMSRET
+		Endif
+		//"Energia Elétrica: "               
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[02][04]
+			aEntrEst[06][02] += (cAliasSF3)->F3_VALCONT
+			aEntrEst[06][03] += (cAliasSF3)->F3_BASEICM
+			aEntrEst[06][04] += (cAliasSF3)->F3_VALICM
+			aEntrEst[06][05] += (cAliasSF3)->F3_ISENICM + (cAliasSF3)->F3_OUTRICM
+			aEntrEst[06][06] += (cAliasSF3)->F3_ICMSRET
+		Endif
+		//"Outras: "                          
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[02][07]
+			aEntrEst[07][02] += (cAliasSF3)->F3_VALCONT
+			aEntrEst[07][03] += (cAliasSF3)->F3_BASEICM
+			aEntrEst[07][04] += (cAliasSF3)->F3_VALICM
+			aEntrEst[07][05] += (cAliasSF3)->F3_ISENICM + (cAliasSF3)->F3_OUTRICM
+			aEntrEst[07][06] += (cAliasSF3)->F3_ICMSRET
+		Endif
+		
+
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Saidas para o Estado³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		// "Vendas: "
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[03][01]
+			aSaiEst[01][02] += (cAliasSF3)->F3_VALCONT
+			aSaiEst[01][03] += (cAliasSF3)->F3_BASEICM
+			aSaiEst[01][04] += (cAliasSF3)->F3_VALICM
+			aSaiEst[01][05] += (cAliasSF3)->F3_ISENICM + (cAliasSF3)->F3_OUTRICM 
+			aSaiEst[01][06] += (cAliasSF3)->F3_ICMSRET
+		Endif
+		//"Transferências: "                  
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[03][02]
+			aSaiEst[02][02] += (cAliasSF3)->F3_VALCONT
+			aSaiEst[02][03] += (cAliasSF3)->F3_BASEICM
+			aSaiEst[02][04] += (cAliasSF3)->F3_VALICM
+			aSaiEst[02][05] += (cAliasSF3)->F3_ISENICM + (cAliasSF3)->F3_OUTRICM 
+			aSaiEst[02][06] += (cAliasSF3)->F3_ICMSRET
+		Endif
+		//"Devoluções: "                      
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[03][03]
+			aSaiEst[03][02] += (cAliasSF3)->F3_VALCONT
+			aSaiEst[03][03] += (cAliasSF3)->F3_BASEICM
+			aSaiEst[03][04] += (cAliasSF3)->F3_VALICM
+			aSaiEst[03][05] += (cAliasSF3)->F3_ISENICM + (cAliasSF3)->F3_OUTRICM 
+			aSaiEst[03][06] += (cAliasSF3)->F3_ICMSRET
+		Endif
+		//"Outras: "                          
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[03][04]
+			aSaiEst[04][02] += (cAliasSF3)->F3_VALCONT
+			aSaiEst[04][03] += (cAliasSF3)->F3_BASEICM
+			aSaiEst[04][04] += (cAliasSF3)->F3_VALICM
+			aSaiEst[04][05] += (cAliasSF3)->F3_ISENICM + (cAliasSF3)->F3_OUTRICM 
+			aSaiEst[04][06] += (cAliasSF3)->F3_ICMSRET
+		Endif
+        
+    	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Mercadorias Adquiridas de outros Municipios com Diferimento de ICMS³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If (cAliasSF3)->F3_ESTADO == "TO" .And. AllTrim((cAliasSF3)->F3_CFO) $ (aWizard[02][01]+"/"+aWizard[02][02]+"/"+aWizard[02][03]+"/"+aWizard[02][04]+"/"+aWizard[02][05]+"/"+aWizard[02][06]+"/"+aWizard[02][07])
+		   If (cAliasSF3)->F3_ICMSDIF > 0
+			nPos := aScan(aEntrMun,{|x| x[1]==cMunic})
+			If nPos == 0                            
+				Aadd(aEntrMun,{cMunic,cDescMun,cInscr,(cAliasSF3)->F3_NFISCAL,(cAliasSF3)->F3_ICMSDIF})
+			Else
+				aEntrMun[nPos][05] += (cAliasSF3)->F3_ICMSDIF
+			Endif
+		   Endif		
+		Endif
+		   
+	    
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Entradas - Total por UF               ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If AllTrim((cAliasSF3)->F3_CFO) $ (aWizard[02][01]+"/"+aWizard[02][02]+"/"+aWizard[02][03]+"/"+aWizard[02][04]+"/"+aWizard[02][05]+"/"+aWizard[02][06]+"/"+aWizard[02][07])
+			nPos := aScan(aEntrUF,{|x| x[1]==(cAliasSF3)->F3_ESTADO})
+			If nPos > 0
+				aEntrUF[nPos][03] += (cAliasSF3)->F3_VALCONT
+				aEntrUF[nPos][04] += (cAliasSF3)->F3_BASEICM
+				aEntrUF[nPos][05] += (cAliasSF3)->F3_ISENICM + (cAliasSF3)->F3_OUTRICM
+				If (cAliasSF3)->F3_ICMSRET > 0
+					If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[04][01]
+						aEntrUF[nPos][06] += (cAliasSF3)->F3_ICMSRET
+					Endif
+					If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[04][02]
+						aEntrUF[nPos][07] += (cAliasSF3)->F3_ICMSRET
+					Endif
+				Endif
+			Endif
+		Endif
+
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Saidas - Total por UF                 ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If AllTrim((cAliasSF3)->F3_CFO) $ (aWizard[03][01]+"/"+aWizard[03][02]+"/"+aWizard[03][03]+"/"+aWizard[03][04])
+			nPos := aScan(aSaiUF,{|x| x[1]==(cAliasSF3)->F3_ESTADO})
+			// Valores para não Contribuintes
+			If nPos > 0
+				If (AllTrim((cAliasSF3)->F3_CFO) $ aWizard[04][03]) .Or.;
+					"ISENT" $Upper(cInscr) .Or. ;
+					(Empty(cInscr) .And. cTipo != "L")
+					aSaiUF[nPos][04] += (cAliasSF3)->F3_VALCONT
+					aSaiUF[nPos][06] += (cAliasSF3)->F3_BASEICM
+				Else
+					aSaiUF[nPos][03] += (cAliasSF3)->F3_VALCONT
+					aSaiUF[nPos][05] += (cAliasSF3)->F3_BASEICM
+				Endif
+				aSaiUF[nPos][07] += (cAliasSF3)->F3_ISENICM + (cAliasSF3)->F3_OUTRICM 
+				aSaiUF[nPos][08] += (cAliasSF3)->F3_ICMSRET
+			Endif
+		Endif
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Outras Operações      ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		//"Compras para o ativo permanente e/ou material para uso e consumo: "
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[05][01]
+			aOutOper[01][02] += (cAliasSF3)->F3_VALCONT
+		Endif                              
+		//"Outras entradas e aquisições não especificadas (transferência, remessa e outras): "	
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[05][02]
+			aOutOper[02][02] += (cAliasSF3)->F3_VALCONT
+		Endif       
+		//"Vendas de ativo permanente e/ou material de uso e consumo: "
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[05][03]
+			aOutOper[03][02] += (cAliasSF3)->F3_VALCONT
+		Endif
+		//"Outras saídas não especificadas (transferência, remessa e outras): "
+		If AllTrim((cAliasSF3)->F3_CFO) $ aWizard[05][04]
+			aOutOper[04][02] += (cAliasSF3)->F3_VALCONT
+		Endif
+			
+		(cAliasSF3)->(dbSkip())
+	Enddo
+                           
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Exclui area de trabalho utilizada - SF3³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If !lQuery
+		RetIndex("SF3")	
+		dbClearFilter()	
+		Ferase(cIndex+OrdBagExt())
+	Else
+		dbSelectArea(cAliasSF3)
+		dbCloseArea()
+	Endif		
+
+	
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿  
+	//³Processando os saldos em estoque³  
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If Left(Alltrim(aWizard[01][03]),1) == "1"
+	
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Processando o saldo inicial do periodo³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		aEst := {"EST",""}
+		FsEstInv(aEst,1,.T.,.F.,sTod(cDataIni)-1,.F.,.F.)
+		
+		EST->(dbGoTop())
+		Do While ! EST->(Eof())
+			
+			IncProc(STR0053) // "Preparando Base 5/5 - Processando Estoques"
+			If Interrupcao(@lEnd)
+			    Exit
+		 	Endif
+
+			Do Case
+			Case EST->CLASSFIS $ "10/30/60/70"
+				cTrib := "S"  
+			Case EST->CLASSFIS $ "40/41"
+				cTrib := "I"
+			Case EST->CLASSFIS $ "50/51/90"
+				cTrib := "O"
+			OtherWise 
+				cTrib := "T"
+			EndCase
+			
+			nPos := aScan(aEstoque,{|x| x[1]==cTrib})
+			If nPos > 0
+				// Estoque na empresa
+				If EST->SITUACA == "1"
+					aEstoque[nPos][03] += EST->CUSTO
+				ElseIf EST->SITUACA == "3" // Estoque de terceiros na empresa (nao deve fazer parte do montante)
+					aEstoque[nPos][03] -= EST->CUSTO
+				Endif
+			Endif
+
+			EST->(dbSkip())
+		Enddo  
+		
+		// Excluindo area aberta pela funcao FsEstInv
+		FsEstInv(aEst,2,,,sTod(cDataIni)-1,.F.,.F.)
+
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Processando o saldo final do periodo  ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		aEst := {"EST",""}
+		FsEstInv(aEst,1,.T.,.F.,sTod(cDataFin),.F.,.F.)
+
+		EST->(dbGoTop())
+		Do While ! EST->(Eof())
+			
+			IncProc(STR0053) // "Preparando Base 5/5 - Processando Estoques"
+			If Interrupcao(@lEnd)
+			    Exit
+		 	Endif
+
+			Do Case
+			Case EST->CLASSFIS $ "10/30/60/70"
+				cTrib := "S"
+			Case EST->CLASSFIS $ "40/41"
+				cTrib := "I"
+			Case EST->CLASSFIS $ "50/51/90"
+				cTrib := "O"
+			OtherWise 
+				cTrib := "T"
+			EndCase
+			
+			nPos := aScan(aEstoque,{|x| x[1]==cTrib})
+			If nPos > 0
+				// Estoque na empresa
+				If EST->SITUACA == "1"
+					aEstoque[nPos][04] += EST->CUSTO                                                             
+				ElseIf EST->SITUACA == "3" // Estoque de terceiros na empresa (nao deve fazer parte do montante)					
+					aEstoque[nPos][04] -= EST->CUSTO			
+				Endif
+			Endif
+
+			EST->(dbSkip())
+		Enddo  
+		
+		// Excluindo area aberta pela funcao FsEstInv
+		FsEstInv(aEst,2,,,sTod(cDataIni)-1,.F.,.F.)
+
+	Endif
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Total de registros a para impressao  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	nRegsPrint := 	Len(aEntrEst) + Len(aEntrOut) + Len(aEntrExt) + Len(aEntrMun) + ;
+					Len(aEntrUF) + Len(aSaiEst) + Len(aSaiOut) + Len(aSaiExt) + ;
+					Len(aSaiUF) + Len(aOutOper) + Len(aEstoque)
+
+	SetRegua(nRegsPrint)                                                         
+	
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Imprimindo a DIF das entradas³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+	cCabec1 := STR0027 // "DIF - Documento de Informações Fiscais"
+	nLin 	:= Cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15,,.F.)
+	nLin++      
+
+	// Entradas do Estado	
+	FmtLin(,aLay[001],,"@X",@nLin)
+	FmtLin(,aLay[002],,"@X",@nLin)
+	FmtLin(,aLay[003],,"@X",@nLin)
+	FmtLin(,aLay[004],,"@X",@nLin)
+	FmtLin(,aLay[005],,"@X",@nLin)
+	FmtLin(,aLay[008],,"@X",@nLin)
+	FmtLin(,aLay[009],,"@X",@nLin)
+
+	nTotCont := 0
+	nTotBase := 0
+	nTotICMS := 0
+	nTotOutr := 0
+	nTotRet  := 0
+
+	For nX := 1 to Len(aEntrEst)
+		IncRegua()
+		FmtLin({SubStr(aEntrEst[nX][01],1,Len(aEntrEst[nX][01])-1),Transform(aEntrEst[nX][02],"@E 999,999,999,999.99"),Transform(aEntrEst[nX][03],"@E 999,999,999,999.99"),Transform(aEntrEst[nX][05],"@E 999,999,999,999.99"),Transform(aEntrEst[nX][06],"@E 999,999,999,999.99")},aLay[010],,"@X",@nLin)	
+		nTotCont += aEntrEst[nX][02]
+		nTotBase += aEntrEst[nX][03]
+		nTotICMS += aEntrEst[nX][04]
+		nTotOutr += aEntrEst[nX][05]
+		nTotRet  += aEntrEst[nX][06]
+	Next                       
+	
+	FmtLin(,aLay[011],,"@X",@nLin)	
+	FmtLin({Transform(nTotCont,"@E 999,999,999,999.99"),Transform(nTotBase,"@E 999,999,999,999.99"),Transform(nTotOutr,"@E 999,999,999,999.99"),Transform(nTotRet,"@E 999,999,999,999.99")},aLay[012],,"@X",@nLin)		
+	FmtLin(,aLay[013],,"@X",@nLin)		
+
+		
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Imprimindo a DIF das Saidas  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	cCabec1 := STR0027 // "DIF - Documento de Informações Fiscais"
+	nLin 	:= Cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15,,.F.)
+	nLin++      
+
+	// Saidas para o Estado	
+	FmtLin(,aLay[016],,"@X",@nLin)
+	FmtLin(,aLay[017],,"@X",@nLin)
+	FmtLin(,aLay[018],,"@X",@nLin)
+	FmtLin(,aLay[019],,"@X",@nLin)
+	FmtLin(,aLay[020],,"@X",@nLin)
+	FmtLin(,aLay[023],,"@X",@nLin)
+	FmtLin(,aLay[024],,"@X",@nLin)
+
+	nTotCont := 0
+	nTotBase := 0
+	nTotICMS := 0
+	nTotOutr := 0
+	nTotRet  := 0
+
+	For nX := 1 to Len(aSaiEst)
+		IncRegua()
+		FmtLin({SubStr(aSaiEst[nX][01],1,Len(aSaiEst[nX][01])-1),Transform(aSaiEst[nX][02],"@E 999,999,999,999.99"),Transform(aSaiEst[nX][03],"@E 999,999,999,999.99"),Transform(aSaiEst[nX][05],"@E 999,999,999,999.99"),Transform(aSaiEst[nX][06],"@E 999,999,999,999.99")},aLay[025],,"@X",@nLin)	
+		nTotCont += aSaiEst[nX][02]
+		nTotBase += aSaiEst[nX][03]
+		nTotICMS += aSaiEst[nX][04]
+		nTotOutr += aSaiEst[nX][05]
+		nTotRet  += aSaiEst[nX][06]
+	Next                       
+	
+	FmtLin(,aLay[026],,"@X",@nLin)	
+	FmtLin({Transform(nTotCont,"@E 999,999,999,999.99"),Transform(nTotBase,"@E 999,999,999,999.99"),Transform(nTotOutr,"@E 999,999,999,999.99"),Transform(nTotRet,"@E 999,999,999,999.99")},aLay[027],,"@X",@nLin)		
+	FmtLin(,aLay[028],,"@X",@nLin)		
+         
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Imprimindo DIF - Entradas por Unidade de Federação³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	cCabec1 := STR0047 //"DIF - Resumo por Unidade de Federação"
+	nLin 	:= Cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15,,.F.)
+	nLin++                     
+		
+	FmtLin(,aLay[047],,"@X",@nLin)	
+	FmtLin(,aLay[048],,"@X",@nLin)	
+	FmtLin(,aLay[049],,"@X",@nLin)	
+	FmtLin(,aLay[050],,"@X",@nLin)	
+	FmtLin(,aLay[051],,"@X",@nLin)	
+	
+	lProcessa := .F.
+	For nX := 1 to Len(aEntrUF)             
+		IncRegua()
+		If aEntrUF[nX][03] + aEntrUF[nX][04] + aEntrUF[nX][05] + aEntrUF[nX][06] + aEntrUF[nX][07] > 0
+			FmtLin({aEntrUF[nX][01],Transform(aEntrUF[nX][03],"@E 999,999,999,999.99"),Transform(aEntrUF[nX][04],"@E 999,999,999,999.99"),Transform(aEntrUF[nX][05],"@E 999,999,999,999.99"),Transform(aEntrUF[nX][06],"@E 999,999,999,999.99"),Transform(aEntrUF[nX][07],"@E 999,999,999,999.99")},aLay[052],,"@X",@nLin)
+			lProcessa := .T.
+		Endif
+	Next                        
+		
+	If !lProcessa
+		FmtLin(,aLay[071],,"@X",@nLin)	
+	Endif
+
+	FmtLin(,aLay[053],,"@X",@nLin)	
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Imprimindo GI - Saídas  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If nLin > 58
+		cCabec1 := STR0047 //"DIF - Resumo por Unidade de Federação"
+		nLin 	:= Cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15,,.F.)
+		nLin++                     
+	Endif                   
+	
+	nLin += 2
+	
+	FmtLin(,aLay[054],,"@X",@nLin)	
+	FmtLin(,aLay[055],,"@X",@nLin)	
+	FmtLin(,aLay[056],,"@X",@nLin)	
+	FmtLin(,aLay[057],,"@X",@nLin)	
+	FmtLin(,aLay[058],,"@X",@nLin)	
+		
+	lProcessa := .F.
+	For nX := 1 to Len(aSaiUF)
+		IncRegua()  
+		If nLin > 58
+			FmtLin(,aLay[060],,"@X",@nLin)	
+			cCabec1 := STR0047 //"DIF - Resumo por Unidade de Federação"
+			nLin 	:= Cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15,,.F.)
+			nLin++                     
+			FmtLin(,aLay[054],,"@X",@nLin)	
+			FmtLin(,aLay[055],,"@X",@nLin)	
+			FmtLin(,aLay[056],,"@X",@nLin)	
+			FmtLin(,aLay[057],,"@X",@nLin)	
+			FmtLin(,aLay[058],,"@X",@nLin)	
+		Endif                   
+
+		If aSaiUF[nX][03] + aSaiUF[nX][04]+ aSaiUF[nX][05] + aSaiUF[nX][06] + aSaiUF[nX][07] + aSaiUF[nX][08] > 0
+			FmtLin({aSaiUF[nX][01],Transform(aSaiUF[nX][03],"@E 999,999,999,999.99"),Transform(aSaiUF[nX][04],"@E 999,999,999,999.99"),Transform(aSaiUF[nX][05],"@E 999,999,999,999.99"),Transform(aSaiUF[nX][06],"@E 999,999,999,999.99"),Transform(aSaiUF[nX][07],"@E 999,999,999,999.99"),Transform(aSaiUF[nX][08],"@E 999,999,999,999.99")},aLay[059],,"@X",@nLin)
+			lProcessa := .T.
+		Endif
+	Next                        
+	
+	If !lProcessa
+		FmtLin(,aLay[071],,"@X",@nLin)	
+	Endif
+
+	FmtLin(,aLay[060],,"@X",@nLin)	
+ 
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Imprimindo Diferimento de ICMS ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ		
+   	cCabec1 := STR0027               
+	nLin 	:= Cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15,,.F.)
+	nLin++      
+		
+	FmtLin(,aLay[040],,"@X",@nLin)	
+	FmtLin(,aLay[041],,"@X",@nLin)	
+	FmtLin(,aLay[042],,"@X",@nLin)	
+	FmtLin(,aLay[043],,"@X",@nLin)	
+	FmtLin(,aLay[044],,"@X",@nLin)
+		
+	For nX := 1 to Len(aEntrMun)
+		IncRegua()
+		If nLin > 58
+			cCabec1 := STR0027               
+			FmtLin(,aLay[046],,"@X",@nLin)			
+			nLin 	:= Cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15,,.F.)
+			nLin++      
+			FmtLin(,aLay[040],,"@X",@nLin)	
+			FmtLin(,aLay[041],,"@X",@nLin)	
+			FmtLin(,aLay[042],,"@X",@nLin)	
+			FmtLin(,aLay[043],,"@X",@nLin)	
+			FmtLin(,aLay[044],,"@X",@nLin)
+		Endif
+		FmtLin({aEntrMun[nX][03],aEntrMun[nX][02],Transform(aEntrMun[nX][04],"@E 99999999999999"),Transform(aEntrMun[nX][05],"@E 999,999,999,999.99")},aLay[045],,"@X",@nLin)
+	Next	                   
+	
+	If Len(aEntrMun) == 0
+		FmtLin(,aLay[070],,"@X",@nLin)	
+	Endif               
+	
+	FmtLin(,aLay[046],,"@X",@nLin)	
+	
+	
+	
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Imprimindo Estoque      ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ	
+	cCabec1 := STR0027
+	nLin 	:= Cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15,,.F.)
+	nLin++      
+	FmtLin(,aLay[061],,"@X",@nLin)
+	FmtLin(,aLay[062],,"@X",@nLin)
+	FmtLin(,aLay[063],,"@X",@nLin)
+	FmtLin(,aLay[064],,"@X",@nLin)
+	FmtLin(,aLay[065],,"@X",@nLin)
+	
+	For nX := 1 to Len(aEstoque)
+		IncRegua()
+		FmtLin({SubStr(aEstoque[nX][02],1,Len(aEstoque[nX][02])-1),Transform(aEstoque[nX][03],"@E 999,999,999,999.99"),Transform(aEstoque[nX][04],"@E 999,999,999,999.99")},aLay[066],,"@X",@nLin)	
+		nTotIni 	+= aEstoque[nX][03]
+		nTotFinal 	+= aEstoque[nX][04]
+	Next                       
+	
+	FmtLin(,aLay[067],,"@X",@nLin)	
+	FmtLin({Transform(nTotIni,"@E 999,999,999,999.99"),Transform(nTotFinal,"@E 999,999,999,999.99")},aLay[068],,"@X",@nLin)		
+	FmtLin(,aLay[069],,"@X",@nLin)
+	
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Imprimindo Outras Operações³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ	
+	cCabec1 := STR0027 
+	nLin 	:= Cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15,,.F.)
+	nLin++      
+	
+	FmtLin(,aLay[031],,"@X",@nLin)	
+	FmtLin(,aLay[032],,"@X",@nLin)	
+	FmtLin(,aLay[033],,"@X",@nLin)	
+	FmtLin(,aLay[034],,"@X",@nLin)	
+	FmtLin(,aLay[035],,"@X",@nLin)					
+	
+	For nX := 1 to Len(aOutOper)
+		IncRegua()
+		FmtLin({SubStr(aOutOper[nX][01],1,Len(aOutOper[nX][01])-1),Transform(aOutOper[nX][02],"@E 999,999,999,999.99")},aLay[036],,"@X",@nLin)	
+		nTotEntr += aOutOper[nX][02]
+	Next
+
+	FmtLin(,aLay[037],,"@X",@nLin)	
+	FmtLin({Transform(nTotEntr,"@E 999,999,999,999.99")},aLay[038],,"@X",@nLin)	
+	FmtLin(,aLay[039],,"@X",@nLin)	
+	
+	
+Return( .T. ) 
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  |R939LayOutºAutor  ³Mary C. Hergert     º Data ³ 05/04/2005  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Layout de Impressao                                         º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³MATR899                                                     º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function R939LayOut()
+
+	Local aLay := Array(75)      
+
+//	aLay[001] :=   0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
+//  aLay[001] :=   0         10        20        30        40        50        60        70        80        90        100       110       120       130
+	aLay[001] := '+-----------------------------------------------------------------------------------------------------------------------------------+'
+	aLay[002] := STR0054 //'|         ENTRADAS DE MERCADORIAS, BENS E/OU PRESTAÇÕES DE SERVIÇOS NO ESTABELECIMENTO DO CONTRIBUINTE                              |'
+	aLay[003] := '|-----------------------------------------------------------------------------------------------------------------------------------|'
+	aLay[004] := STR0055 //'|                                       RESUMO DAS OPERAÇÕES E PRESTAÇÕES DE ENTRADA                                                |'
+	aLay[005] := '|-------------------------------+------------------------+------------------------+------------------------+------------------------|'
+	aLay[008] := STR0056 //'|           Natureza            |     Valor Contábil     |    Base de Cálculo     |          OUTRAS          |  SUBST. TRIBUTÁRIA   |'
+	aLay[009] := '|-------------------------------+------------------------+------------------------+------------------------+------------------------|'
+	aLay[010] := '|   #########################   |   ##################   |   ##################   |   ##################   |   ##################   |'
+	aLay[011] := '|-------------------------------+------------------------+------------------------+------------------------+------------------------|'
+	aLay[012] := '|   SUBTOTAL                    |   ##################   |   ##################   |   ##################   |   ##################   |'
+	aLay[013] := '+-----------------------------------------------------------------------------------------------------------------------------------+'
+	aLay[016] := '+-----------------------------------------------------------------------------------------------------------------------------------+'
+	aLay[017] := STR0057 //'|          SAÍDAS DE MERCADORIAS, BENS E/OU PRESTAÇÕES DE SERVIÇOS NO ESTABELECIMENTO DO CONTRIBUINTE                               |'
+	aLay[018] := '|-----------------------------------------------------------------------------------------------------------------------------------|'
+	aLay[019] := STR0058 //'|                                        RESUMO DAS OPERAÇÕES E PRESTAÇÕES DE SAÍDA                                                 |'
+	aLay[020] := '|-------------------------------+--------------------------------------------------------------------------+------------------------|'
+	aLay[023] := STR0059 //'|           Natureza            |     Valor Contábil     |    Base de Cálculo     |          OUTRAS        |  SUBST. TRIBUTÁRIA     |'
+	aLay[024] := '|-------------------------------+------------------------+------------------------+------------------------+------------------------|'
+	aLay[025] := '|   #########################   |   ##################   |   ##################   |   ##################   |   ##################   |'
+	aLay[026] := '|-------------------------------+------------------------+------------------------+------------------------+------------------------|'
+	aLay[027] := STR0060 //'|   SUBTOTAL                    |   ##################   |   ##################   |   ##################   |   ##################   |'
+	aLay[028] := '+-----------------------------------------------------------------------------------------------------------------------------------+'
+	
+	aLay[031] := '+--------------------------------------------------------------------------------------+'
+	aLay[032] := STR0061 //'|     OUTRAS OPERAÇÕES (INCLUSIVE ATIVO PERMANENTE E MATERIAL DE USO E CONSUMO)        |'
+	aLay[033] := '|--------------------------------------------------------------------------------------|'
+	aLay[034] := STR0062 //'|                         Discriminação                       |  Valor Contábil        |'
+	aLay[035] := '|-------------------------------------------------------------+------------------------|'
+	aLay[036] := '|   #######################################################   |   ##################   |'
+	aLay[037] := '|-------------------------------------------------------------+------------------------|'
+	aLay[038] := STR0063 //'|   TOTAL                                                     |   ##################   |'
+	aLay[039] := '+--------------------------------------------------------------------------------------+'
+		
+	aLay[047] := '+-----------------------------------------------------------------------------------------------------------------------------------+'
+	aLay[048] := STR0067 //'|            ENTRADAS DE MERCADORIAS, BENS E/OU AQUISIÇÕES DE SERVIÇOS, DETALHADAS (POR ESTADO DA FEDERAÇÃO)                        |'
+	aLay[049] := '|-----------------------------------------------------------------------------------------------------------------------------------|'
+	aLay[050] := STR0068 //'|  UF  |     Valor Contábil      |    Base de Cálculo     |    Outras Entradas     |       ST Petróleo      |       ST Outros       |'
+	aLay[051] := '|------+-------------------------+------------------------+------------------------+------------------------+-----------------------|'
+	aLay[052] := '|  ##  |   ##################    |   ##################   |   ##################   |   ##################   |   ##################  |'
+	aLay[053] := '+-----------------------------------------------------------------------------------------------------------------------------------|'
+	aLay[071] := STR0069 //'|                                                        << Sem Movimento >>                                                        |'
+	
+	aLay[040] := '+---------------------------------------------------------------------------------------------------------------------+'
+	aLay[041] := STR0064 //'|            RELAÇÃO DE MERCADORIAS E/OU PRODUTOS ADQUIRIDOS DE OUTROS MUNICIPIOS COM DIFERIMENTO DE ICMS             |'
+	aLay[042] := '|---------------------------------------------------------------------------------------------------------------------|'
+	aLay[043] := STR0065 //'|   IE de Origem     |         Nome do Município          |         Nº Nota Fiscal          |          Valor          |'
+	aLay[044] := '|--------------------+------------------------------------+---------------------------------+-------------------------|'
+	aLay[045] := '| ################## |   ##############################   |       ##################        |  ####################   |'
+	aLay[046] := '+---------------------------------------------------------------------------------------------------------------------+'
+	aLay[070] := STR0066 //'|                                                << Sem Movimento >>                                                  |'
+			
+	aLay[054] := '+-----------------------------------------------------------------------------------------------------------------------------------+'
+	aLay[055] := STR0070 //'|            SAÍDAS DE MERCADORIAS, BENS E/OU AQUISIÇÕES DE SERVIÇOS, DETALHADAS (POR ESTADO DA FEDERAÇÃO)                          |'
+	aLay[056] := '|-----------------------------------------------------------------------------------------------------------------------------------|'
+	aLay[057] := STR0071 //'| UF | VC (Contribuinte)  | VC(N Contribuinte) | BC (Contribuinte)  | BC(N Contribuinte) |   Outras Saidas    | Subst. Tributária   |'
+	aLay[058] := '|----+--------------------+--------------------+--------------------+--------------------+--------------------+---------------------|'
+	aLay[059] := '| ## | ################## | ################## | ################## | ################## | ################## | ##################  |'
+	aLay[060] := '+-----------------------------------------------------------------------------------------------------------------------------------+'
+	aLay[061] := '+--------------------------------------------------------------------------------------+'
+	aLay[062] := STR0072 //'|                          ESTOQUES DE MERCADORIAS E PRODUTOS                          |'
+	aLay[063] := '|--------------------------------------------------------------------------------------|'
+	aLay[064] := STR0073 //'|            Discriminação           |     Inicial (em R$)    |      Final (em R$)     |'
+	aLay[065] := '|------------------------------------+------------------------+------------------------|'
+	aLay[066] := '|   ##############################   |   ##################   |   ##################   |'
+	aLay[067] := '|------------------------------------+------------------------+------------------------|'
+	aLay[068] := STR0074 //'|   TOTAL                            |   ##################   |   ##################   |'
+	aLay[069] := '+--------------------------------------------------------------------------------------+'
+
+
+Return aLay
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³MATR899Wiz  ºAutor  ³Mary C. Hergert     º Data ³ 26/08/2005  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Monta a wizard com as perguntas necessarias                   º±±
+±±º          ³                                                              º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³MATR899                                                       º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Static Function MATR899Wiz()
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Declaracao das variaveis³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	Local aTxtPre 		:= {}
+	Local aPaineis 		:= {}
+	Local aYesNo		:= {STR0015,STR0016} //{"1 - Sim","2 - Não"}
+	
+	Local cTitObj1		:= ""
+	Local nTam			:= 500
+	Local cMask			:= Replicate("X",nTam)
+	
+	Local nPos			:= 0
+	
+	Local lRet			:= 0
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Monta wizard com as perguntas necessarias³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	aAdd(aTxtPre,STR0001) //"Documento de Informações Fiscais (DIF)"
+	aAdd(aTxtPre,STR0006) //"Atenção"
+	aAdd(aTxtPre,STR0007) //"Preencha corretamente as informações solicitadas."
+	aAdd(aTxtPre,STR0008+STR0009+STR0001)	//"Esta rotina ira permitir a configuracao das informacoes "
+											//"necessarias a geracao do relatorio auxiliar para o preenchimento da "
+											//"Documento de Informações Fiscais (DIF)"
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Painel 1 - Informacoes Gerais            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	aAdd(aPaineis,{})
+	nPos :=	Len(aPaineis)
+	aAdd(aPaineis[nPos],STR0010) //"Assistente de parametrização" 
+	aAdd(aPaineis[nPos],STR0011) //"Informações gerais:"
+	aAdd(aPaineis[nPos],{})
+
+	cTitObj1 :=	STR0012 //"Data Inicial: "
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,"@d",3,,,,8})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0013 //"Data Final: "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,"@d",3,,,,8})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0014 //"Gera Informações de Estoque? "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{3,,,1,,aYesNo,,7})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+    
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Painel 2 - CFOPs Entradas                ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	aAdd(aPaineis,{})
+	nPos :=	Len(aPaineis)
+	aAdd(aPaineis[nPos],STR0010) //"Assistente de parametrização" 
+	aAdd(aPaineis[nPos],STR0017) //"DIF - CFOPs utilizados nas Entradas de mercadorias, bens e/ou prestações de serviços no estabelecimento do contribuinte:"
+	aAdd(aPaineis[nPos],{})
+	//
+	cTitObj1 :=	STR0018 //"Compras: "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	cTitObj1 :=	STR0019 //"Transferências: "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	cTitObj1 :=	STR0020 //"Devoluções: "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//   
+	cTitObj1 :=	STR0023 //"Transportes: "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//                                                    
+	cTitObj1 :=	STR0022 //"Comunicações : "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//                             
+	cTitObj1 :=	STR0021 //"Energia Elétrica: "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	cTitObj1 :=	STR0024 //"Outras: "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+                                             
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Painel 3 - CFOPs Saídas                 ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	aAdd(aPaineis,{})
+	nPos :=	Len(aPaineis)
+	aAdd(aPaineis[nPos],STR0010) //"Assistente de parametrização" 
+	aAdd(aPaineis[nPos],STR0025) //"DIF - CFOPs utilizados nas Saidas de mercadorias, bens e/ou prestações de serviços do estabelecimento do contribuinte:"
+	aAdd(aPaineis[nPos],{})
+	//
+	cTitObj1 :=	STR0026 //"Vendas: "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	cTitObj1 :=	STR0019 //"Transferências: "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	cTitObj1 :=	STR0020 //"Devoluções: "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	cTitObj1 :=	STR0024 //"Outras: "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+  	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Painel 4 - CFOPs - Subst. Tributaria        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	aAdd(aPaineis,{})
+	nPos :=	Len(aPaineis)
+	aAdd(aPaineis[nPos],STR0010) //"Assistente de parametrização" 
+	aAdd(aPaineis[nPos],STR0029) //"CFOPs para entradas com Subst. Tributária e Saídas para Não Contribuintes:"
+	aAdd(aPaineis[nPos],{})
+	//
+	cTitObj1 :=	STR0030 //"Entradas com Subst. Tributária - Petróleo: "
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	cTitObj1 :=	STR0031 //"Entradas com Subst. Tributária - Outros: "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	cTitObj1 :=	STR0046 //"Saídas para Não Contribuintes: "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Painel 5 - CFOPs - Outras Operações         ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	aAdd(aPaineis,{})
+	nPos :=	Len(aPaineis)
+	aAdd(aPaineis[nPos],STR0010) //"Assistente de parametrização" 
+	aAdd(aPaineis[nPos],STR0032) //"Outras Operações (Inclusive ativo permanente e material de consumo)"
+	aAdd(aPaineis[nPos],{})
+	//
+	cTitObj1 :=	STR0042 //"Compras (ativo e/ou material uso e consumo): "
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	cTitObj1 :=	STR0043 //"Entradas (transf. , remessa e outras): "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	cTitObj1 :=	STR0044 //"Vendas (ativo e/ou material de uso e consumo): "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})    
+    //
+   	cTitObj1 :=	STR0045 //"Saídas (transf. , remessa e outras): "
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,cMask,1,,,,nTam})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})    
+
+
+	lRet :=	xMagWizard(aTxtPre,aPaineis,"MATR899")
+	
+Return(lRet)   
+
+	

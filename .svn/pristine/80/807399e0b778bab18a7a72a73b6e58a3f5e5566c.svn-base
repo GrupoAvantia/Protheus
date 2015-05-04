@@ -1,0 +1,10 @@
+#include "rwmake.ch"      
+ 
+User Function  CARMEMO()    
+If SB5->(DbSeek(xFilial("SB5")+aCols[n,2]))
+   M->C5_DESCSRV:=RTRIM(SB5->B5_CEME)
+Endif
+
+Return (M->C5_DESCSRV)
+
+

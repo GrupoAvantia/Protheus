@@ -1,0 +1,62 @@
+#Include 'Protheus.ch'
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³ Programa   ³ GP010VALPE ³ Autor ³ Carlos A. Beltrão     ³ Data ³ 13/02/14 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Descri‡…o  ³ Ponto de entrada para alteração ou inclusão de funcionário.  ³±±
+±±³            ³                                                              ³±±
+±±³            ³                                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Parametros ³ Nenhum.                                                      ³±±
+±±³            ³                                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Obs        ³                                                              ³±±
+±±³            ³                                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Retorno    ³  Verdadeiro para cadastrar o funcionário.                    ³±±
+±±³            ³  Falso para não cadastrar o funcionário.                     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+User Function GP010VALPE()
+
+	Local lOk := .T.
+
+	// Verifica se o motivo da admissão foi "Substituição"
+	If M->RA_MTVADM == "2"
+		// Verifica se a matricula do funcionário substituido está em branco
+		If Empty(M->RA_MATSUBS)
+			HelpInDark(.F.)
+			Help("",1,"GP010VALPE01")
+			HelpInDark(.T.)
+			lOk := .F. 
+		Else	
+			DbSelectArea("SRA")
+			dbOrderNickName("FUNCSUBTS")
+			// Verifica se a matricula do funcionário substituido já foi utilizada anteriormente
+			If DbSeek(xFilial("SRA") + M->RA_MATSUBS) .AND. SRA->RA_MAT != M->RA_MAT
+				HelpInDark(.F.)
+				Help("",1,"GP010VALPE02")
+				HelpInDark(.T.)
+				lOk := .F.
+			Else
+				// Verifica se a matricula do funcionário substituido é igual ao subtituto.
+				If M->RA_MAT == M->RA_MATSUBS
+					HelpInDark(.F.)
+					Help("",1,"GP010VALPE03")
+					HelpInDark(.T.)
+					lOk := .F.
+				EndIf
+			EndIf			
+		EndIf
+	EndIf
+
+	POSICIONE("SRA", 1, xFilial("SRA") + M->RA_MAT, "SRA->RA_MAT")
+
+Return lOk
+

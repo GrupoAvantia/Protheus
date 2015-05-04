@@ -1,0 +1,625 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "Protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "Protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "Protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "Protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "Protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "Protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "Protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "Protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "Protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "Protheus.ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "Protheus.ch"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matrpar1.prw"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATRPAR1.ch"
+#line 4 "d:\totvs 11\microsiga\protheus\my projects\materiais\matrpar1.prw"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MATRPAR1(cTipo)
+
+If Select("R00") > 0
+	If cTipo == "G"
+		COA2002Gra()
+	Else
+		COA2002Txt()
+	Endif
+Endif
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+STATIC Function COA2002Gra()
+	Local cTitulo	:= If( cPaisLoc $ "ANG|PTG", "Listagem De Compras", "Listagem de Compras" )
+	Local cOpcao	:= ""
+	Local aPutSX1	:= {}
+	Local oDlg
+	Local oBmp
+	Local cArqTRB	:= ""
+	Local aLetras	:= {}
+	Local Letra		:= 3
+	PRIVATE oPrint	:= TMSPrinter():New("COA002")
+	PRIVATE oFontR12, oFontN12, oBrush
+
+
+	oDlg = MsDialog():New( 0, 0, 120, 430, OemtoAnsi(If(cPaisLoc$"ANG|PTG","Listagem De Compras","Listagem de Compras")),,,.F.,,,,,,.T.,, ,.F. )
+	 oBmp := TBitmap():New( 000, 000, 30, 120, "LOGIN",,.T., oDlg,,,.F.,.F.,,,.F.,{||  .F. },.T.,,.F. )
+	 TSay():New( 010, 035,{||  If(cPaisLoc$"ANG|PTG","Este programa emite um relatório de compras","Este programa emite um relatorio de compras")},,,,.F.,.F.,.F.,.T.,,,,,.F.,.F.,.F.,.F.,.F.,.F. )
+	 TGroup():New( 020, 030, 16, 400, "", oDlg,,,.T., )
+	 TButton():New( 030, 035, "Configurar", oDlg,{||  oPrint:Setup()}, 40, 12,,,.F.,.T.,.F.,,.F.,,,.F. )
+
+	 TButton():New( 030, 125, "Imprimir", oDlg,{||  (cOpcao:="I",oDlg:End())}, 40, 12,,,.F.,.T.,.F.,,.F.,,,.F. )
+	 TButton():New( 030, 170, "Cancelar", oDlg,{||  (cOpcao:="",oDlg:End())}, 40, 12,,,.F.,.T.,.F.,,.F.,,,.F. )
+	oDlg:Activate( oDlg:bLClicked, oDlg:bMoved, oDlg:bPainted,.T.,,,, oDlg:bRClicked, )
+
+	If cOpcao == ""
+		Return
+	EndIF
+
+	CursorWait()
+	aLetras:={"Arial","Courier New","Times New Roman","Verdana"}
+	Letra:=3
+	oFontN12 	:= TFont():New(aLetras[Letra], , 14, , .T. , , , , .F. , .F. )
+	oFontR12 	:= TFont():New(aLetras[Letra], , 14, , .F. , , , , .F. , .F. )
+    RptStatus({|| RunReport() },"Preparando Relatório...")
+	oPrint:Preview()
+	oPrint:End()
+	CursorArrow()
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function RunQuery(cArqTrb)
+	Local cQuery := ""
+
+	cArqTrb := GetNextAlias()
+
+	cQuery	:= ""
+
+	MemoWrite("C:\SENR050.SQL",cQuery)
+	dbUseArea( .T. ,"TOPCONN", TCGENQRY(,,cQuery),cArqTrb, .F. , .T. )
+
+	TcSetField(cArqTrb, ""  	,"D")
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function RunReport()
+	Local nLinha	:= 0
+	Local nCount	:= 0
+	Local nPagina	:= 1
+	Private nColMAX	:= 0
+	Private	nLinMAX	:= 0
+
+	Private nTOTCOMP	:= 0
+	Private nTOTAGRU	:= 0
+	Private nTOTIMPO	:= 0
+	Private nTOTEXON	:= 0
+	Private nTOTTOT	:= 0
+
+
+
+
+
+	DbSelectArea("R00")
+	DbGoTop()
+
+	DbSelectArea("R01")
+	DbGoTop()
+	DbEval( {|| nCount++ } )
+
+	SetRegua(nCount)
+	DbGoTop()
+
+	oPrint:SetPage(9)
+	oPrint:SetPortrait()
+	nColMAX	:= oPrint:nHorzRes()
+	nLinMAX	:= oPrint:nVertRes()
+
+	While !R00->(Eof())
+		CabecGra(R00->RUC, R00->NOME)
+		nLinha	:= 700
+		R01->(DbSetOrder(1))
+		R01->(DbSeek(R00->RUC))
+		While !R01->(Eof()) .And.  R01->RUC == R00->RUC
+			IncRegua("Aguarde... gerando relatório...")
+			If nLinha >= 1600
+				RodapeGra(nPagina, nCount)
+				nPagina++
+				CabecGra(R00->RUC, R00->NOME)
+				nLinha := 700
+				nTOTCOMP	:= 0
+				nTOTAGRU	:= 0
+				nTOTIMPO	:= 0
+				nTOTEXON	:= 0
+				nTOTTOT		:= 0
+			EndIf
+			oPrint:Say (nLinha, 0150, R01->PERFISC                , oFontR12, 390)
+			oPrint:Say (nLinha, 0550, AllTrim(Str(R01->TOTCOMP))  , oFontR12, 390)
+			oPrint:Say (nLinha, 0950, AllTrim(Str(R01->TOTAGRU))  , oFontR12, 390)
+			oPrint:Say (nLinha, 1350, AllTrim(Str(R01->TOTIMPO))  , oFontR12, 390)
+			oPrint:Say (nLinha, 1750, AllTrim(Str(R01->TOTEXON))  , oFontR12, 390)
+
+			nTOTCOMP	+= R01->TOTCOMP
+			nTOTAGRU	+= R01->TOTAGRU
+			nTOTIMPO	+= R01->TOTIMPO
+			nTOTEXON	+= R01->TOTEXON
+			nTOTTOT		:= nTOTCOMP + nTOTAGRU + nTOTIMPO + nTOTEXON
+			nLinha += 60
+			R01->( DbSkip() )
+		EndDO
+		R00->( DbSkip() )
+		If nLinha # 700
+			RodapeGra(nPagina, nCount)
+			nLinha :=700
+		EndIf
+	EndDo
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function CabecGra(cRUC, cNOME)
+	oPrint:StartPage()
+	oPrint:Say (100, 150, "SUB SECRETARIA DE ESTADO DE TRIBUTACIÓN"				,oFontR12,390)
+	oPrint:Say (150, 150, "Proveedores de la Entidad"							,oFontR12,390)
+	oPrint:Say (200, 150, "Confrontación de Operaciones Autodeclaradas (C.O.A.)",oFontR12,390)
+	oPrint:Say (100, 2600, "TALON RESUMEN"										,oFontR12,390)
+	oPrint:Say (150, 2600, "DE LOS DISKETTES"  									,oFontR12,390)
+	oPrint:Say (300, 150, "Identificador RUC: " + AllTrim(cRUC)					,oFontR12,390)
+	oPrint:Say (300, 1300, "Razón Social: " + AllTrim(cNOME)						,oFontR12,390)
+	oPrint:Say (400, 800, "TOTALES MENSUALES DE COMPRAS: "						,oFontR12,390)
+    oPrint:Say (450, 150,"__________________________________________________________________________________________", oFontR12, 390)
+	oPrint:Say (500, 150, "Mes"  												, oFontR12, 390)
+
+	oPrint:Say (500, 550,"Compras"  											, oFontR12, 390)
+	oPrint:Say (550, 550,"Detalhadas"  											, oFontR12, 390)
+	oPrint:Say (600, 550,"por Proveedor"  										, oFontR12, 390)
+
+	oPrint:Say (500, 950,"Compras"		  										, oFontR12, 390)
+	oPrint:Say (550, 950,"sin detallar"  										, oFontR12, 390)
+	oPrint:Say (600, 950,"por Proveedor"  										, oFontR12, 390)
+
+	oPrint:Say (500, 1350,"Importaciones"  										, oFontR12, 390)
+	oPrint:Say (550, 1350,"gravadas"	  										, oFontR12, 390)
+	oPrint:Say (600, 1350,"por el IVA"  										, oFontR12, 390)
+
+	oPrint:Say (500, 1750,"Compras e"	  										, oFontR12, 390)
+	oPrint:Say (550, 1750,"importaciones"  										, oFontR12, 390)
+	oPrint:Say (600, 1750,"exoneradas"  										, oFontR12, 390)
+
+	oPrint:Say (610, 150,"__________________________________________________________________________________________", oFontR12, 390)
+
+Return(Nil)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function RodapeGra(nPagina, nCount)
+	Local nLin	:= 1700
+	Local nSpace:= 60
+	oPrint:Say (nLin, 150,"__________________________________________________________________________________________", oFontR12, 390)
+	nLin+=nSpace
+	oPrint:Say (nLin, 150,"Totales"																					  , oFontR12, 390)
+	oPrint:Say (nLin, 550, AllTrim(Str(nTOTCOMP))                                                                     , oFontR12, 390)
+	oPrint:Say (nLin, 950, AllTrim(Str(nTOTAGRU))																	  , oFontR12, 390)
+	oPrint:Say (nLin, 1350, AllTrim(Str(nTOTIMPO))																	  , oFontR12, 390)
+	oPrint:Say (nLin, 1750, AllTrim(Str(nTOTEXON))																	  , oFontR12, 390)
+	nLin+=nSpace
+	nLin+=nSpace
+	oPrint:Say (nLin, 150, "Monto total de compras informadas: " + AllTrim(Str(nTOTTOT))							  , oFontR12, 390)
+	nLin+=nSpace
+	oPrint:Say (nLin, 150, "Cantidad de registros de los archivos de información: " + AllTrim(Str(nCount))			  , oFontR12, 390)
+	nLin+=nSpace
+	nLin+=nSpace
+	oPrint:Say (nLin, 150, "Lugar y fecha ______________________,____/____/________"								  , oFontR12, 390)
+	nLin+=nSpace
+	nLin+=nSpace
+	oPrint:Say (nLin, 150, "Declaro bajo fe de juramento que los datos y cifras consignados en este Talón"			  , oFontR12, 390)
+	nLin+=nSpace
+	oPrint:Say (nLin, 150, "Resumen y en el/ los Diskettes que lo acompañan son correctos y completos."				  , oFontR12, 390)
+	nLin+=nSpace
+	nLin+=nSpace
+	oPrint:Say (nLin, 300,"_______________________________"  														  , oFontR12, 390)
+	oPrint:Say (nLin, 1300,"_______________________________"  														  , oFontR12, 390)
+	nLin+=nSpace
+	oPrint:Say (nLin, 480,"Firma"																					  , oFontR12, 390)
+	oPrint:Say (nLin, 1380,"Aclaración de Firma"																	  , oFontR12, 390)
+	nLin+=nSpace
+	nLin+=nSpace
+
+	oPrint:Say (nLin, 150,"__________________________________________________________________________________________", oFontR12, 390)
+	nLin+=nSpace
+	oPrint:Say (nLin, 150,"                       Uso Sub Secretaria de Estado de Tributación"  		              , oFontR12, 390)
+	nLin+=nSpace
+	nLin+=nSpace
+	oPrint:Say (nLin, 150,"                   LOS SOPORTES MAGNETICOS ESTAN SUJETOS A VERIFICACIÓN"                   , oFontN12, 390)
+	nLin+=nSpace/2
+	oPrint:Say (nLin, 150,"__________________________________________________________________________________________", oFontR12, 390)
+	nLin+=nSpace
+	nLin+=nSpace
+	oPrint:Say (nLin, 150, "Dependencia Recepcionante:______________________________________ Fecha:____/____/________", oFontR12, 390)
+	nLin+=nSpace
+	nLin+=nSpace
+	oPrint:Say (nLin, 300,"_______________________________"  														  , oFontR12, 390)
+	oPrint:Say (nLin, 1300,"_______________________________"														  , oFontR12, 390)
+	nLin+=nSpace
+	oPrint:Say (nLin, 480,"Firma del Funcionario"																	  , oFontR12, 390)
+	oPrint:Say (nLin, 1380,"Aclaración de Firma"																	  , oFontR12, 390)
+	oPrint:EndPage()
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function COA2002txt()
+
+Local titulo    := "TITULO"
+Local cDesc1    := "DESCRI 1"
+Local cDesc2    := "DESCRI 2"
+Local cString   := "R00"
+Local Tamanho   := "P"
+
+Private _aCampos:= {}
+Private aReturn := { "Zebrado", 1, "Administracao", 1, 2, 1, "", 1 }
+Private nomeprog:= "COA2002"
+Private nLastKey:= 0
+Private wnrel   := "COA2002"
+Private cArqTmp := ""
+
+wnrel := AllTrim(SetPrint(cString,wnrel,"",@titulo,cDesc1,cDesc2," ", .F. ,,,Tamanho))
+
+If nLastKey == 27
+	DbClearFilter()
+	Return
+EndIf
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	DbClearFilter()
+	Return
+EndIf
+
+
+RptStatus({|lEnd| RunTXT(@lEnd,titulo,wnRel,tamanho) })
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function RunTXT(lEnd,titulo,wnRel,tamanho)
+Local aDriver    	:= ReadDriver()
+Local nTOTCOMP 		:= 0
+Local nTOTAGRU		:= 0
+Local nTOTIMPO		:= 0
+Local nTOTEXON		:= 0
+Local nTOTTOT		:= 0
+Local nRegistros	:= 0
+Private 			Li:=1
+
+SetRegua(10)
+
+If lEnd
+	li++
+	PrintOut(_PROW()+1,001,"Cancelado pelo operador",,)
+	Return
+EndIf
+PrintOut(0,0,&(aDriver[3]),,)
+R00->(DbGoTop())
+While !R00->(EOF())
+	nTOTCOMP	:= 0
+	nTOTAGRU	:= 0
+	nTOTIMPO	:= 0
+	nTOTEXON	:= 0
+	nTOTTOT		:= 0
+	nRegistros 	:= 0
+	CabecaTXT(R00->RUC, R00->NOME)
+	li:=14
+	R01->(DbSetOrder(1))
+	R01->(DbSeek(R00->RUC))
+	WHILE !lABORTPRINT .And.  !R01->(Eof()) .And.  R00->RUC == R01->RUC
+		If li >= 33
+			RodapeTXT(nRegistros, nTOTCOMP,nTOTAGRU,nTOTIMPO,nTOTEXON,nTOTTOT)
+			li:=1
+			nTOTCOMP := 0
+			nTOTAGRU := 0
+			nTOTIMPO := 0
+			nTOTEXON := 0
+			nTOTTOT  := 0
+			CabecaTXT(R00->RUC, R00->NOME)
+			li:=14
+		Endif
+		nRegistros++
+		IncRegua()
+		PrintOut(li,001,R01->PERFISC,,)
+		PrintOut(li,014,AllTrim(Str(R01->TOTCOMP)),,)
+		PrintOut(li,031,AllTrim(Str(R01->TOTAGRU)),,)
+		PrintOut(li,048,AllTrim(Str(R01->TOTIMPO)),,)
+		PrintOut(li,065,AllTrim(Str(R01->TOTEXON)),,)
+		nTOTCOMP+=R01->TOTCOMP
+		nTOTAGRU+=R01->TOTAGRU
+		nTOTIMPO+=R01->TOTIMPO
+		nTOTEXON+=R01->TOTEXON
+		nTOTTOT :=nTOTCOMP+nTOTAGRU+nTOTIMPO+nTOTEXON
+		li++
+		R01->(DbSkip())
+	EndDo
+	If li # 14
+		RodapeTXT(nRegistros, nTOTCOMP,nTOTAGRU,nTOTIMPO,nTOTEXON,nTOTTOT)
+	EndIf
+	R00->(DbSkip())
+End
+
+If aReturn[5] == 1
+	Set( 24, "" )
+	dbCommitAll()
+	OurSpool(wnrel)
+EndIf
+
+MS_FLUSH()
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function CabecaTXT(cRUC, cNOME)
+	Local nLin:= 1
+	PrintOut(nLin,001,"SUB SECRETARIA DE ESTADO DE TRIBUTACION                         TALON RESUMEN   ",,)
+	nLin++
+	PrintOut(nLin,001,"Proveedores de la Entidad                                       DE LOS DISKETTES",,)
+	nLin++
+	PrintOut(nLin,001,"Confrontacion de Operaciones Autodeclaradas (C.O.A.)                            ",,)
+	nLin++
+	PrintOut(nLin,001,"                                                                                ",,)
+	nLin++
+	PrintOut(nLin,001,"Identificador RUC: "+AllTrim(cRUC),,)
+	PrintOut(nLin,040,"RAZON SOCIAL: "+AllTrim(cNOME),,)
+	nLin++
+	PrintOut(nLin,001,"                                                                                ",,)
+	nLin++
+	PrintOut(nLin,001,"                         TOTALES MENSUALES DE COMPRAS                           ",,)
+	nLin++
+	PrintOut(nLin,001,"________________________________________________________________________________",,)
+	nLin++
+	PrintOut(nLin,001,"             Compras          Compras          Importaciones    Compras e       ",,)
+	nLin++
+	PrintOut(nLin,001,"MES          Detalhadas       sin detallar     gravadas         importaciones   ",,)
+	nLin++
+	PrintOut(nLin,001,"             por Proveedor    por Proveedor    por el IVA       exoneradas      ",,)
+	nLin++
+	PrintOut(nLin,001,"________________________________________________________________________________",,)
+	nLin++
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function RodapeTXT(nRegistros, nTOTCOMP,nTOTAGRU,nTOTIMPO,nTOTEXON,nTOTTOT)
+	nLin:=34
+	PrintOut(nLin,001,"________________________________________________________________________________",,)
+	nLin++
+	PrintOut(nLin,001,"Totales",,)
+	PrintOut(nLin,014,AllTrim(Str(nTOTCOMP)),,)
+	PrintOut(nLin,031,AllTrim(Str(nTOTAGRU)),,)
+	PrintOut(nLin,048,AllTrim(Str(nTOTIMPO)),,)
+	PrintOut(nLin,065,AllTrim(Str(nTOTEXON)),,)
+	nLin++
+	nLin++
+	PrintOut(nLin,001,"Monto total de compras informadas: ",,)
+ 	PrintOut(nLin,036,AllTrim(Str(nTOTTOT)),,)
+	nLin++
+	PrintOut(nLin,001,"Cantiddad de registros de los archivos de informacion: "+AllTrim(Str(nRegistros)),,)
+	nLin++
+	nLin++
+	PrintOut(nLin,001,"Lugar y fecha _______________________________,____/____/________                ",,)
+	nLin++
+	nLin++
+	PrintOut(nLin,001,"Declaro bajo fe de juramento que los datos y cifras consignados en este Talon   ",,)
+	nLin++
+	PrintOut(nLin,001,"Resumen y en el/ los Diskettes que lo acompañan son correctos y completos.      ",,)
+	nLin++
+	nLin++
+	nLin++
+	nLin++
+	PrintOut(nLin,001,"          _________________________          _________________________          ",,)
+	nLin++
+	PrintOut(nLin,001,"                    Firma                       Aclaracion de Firma             ",,)
+	nLin++
+	nLin++
+	PrintOut(nLin,001,"________________________________________________________________________________",,)
+	nLin++
+	PrintOut(nLin,001,"                  Uso Sub Secretaria de Estado de Tributacion                   ",,)
+	nLin++
+	nLin++
+	PrintOut(nLin,001,"              LOS SOPORTES MAGNETICOS ESTAN SUJETOS A VERIFICACION              ",,)
+	nLin++
+	PrintOut(nLin,001,"________________________________________________________________________________",,)
+	nLin++
+	nLin++
+	PrintOut(nLin,001,"Dependencia Receptionante: _________________________   Fecha: ____/____/________",,)
+	nLin++
+	nLin++
+	nLin++
+	nLin++
+	PrintOut(nLin,001,"          _________________________          _________________________          ",,)
+	nLin++
+	PrintOut(nLin,001,"            Firma del Funcionario               Aclaracion de Firma             ",,)
+	PrintOut(nLin,001,Chr(13),,)
+Return NIL

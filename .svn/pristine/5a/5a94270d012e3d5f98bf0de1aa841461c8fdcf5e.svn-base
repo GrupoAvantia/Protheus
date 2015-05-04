@@ -1,0 +1,273 @@
+#include "rwmake.ch"
+
+
+User Function IMPCSV()
+
+cPerg := "LERCSV"
+
+ValidPerg()
+
+Pergunte("LERCSV",.F.)               // Pergunta no SX1
+
+@ 000,000 TO 150,300 DIALOG oDlg1 TITLE "Importacao  .CSV"
+
+@ 013,007 SAY "  Esta rotina Importara o arquivo .CSV"
+@ 020,007 SAY ""
+@ 037,007 SAY ""
+@ 005,004 TO 052,149 TITLE "Descricao do Programa: "
+@ 060,020 BMPBUTTON TYPE 5 ACTION Pergunte("LERCSV")
+@ 060,060 BMPBUTTON TYPE 1 ACTION OkProc()
+@ 060,100 BMPBUTTON TYPE 2 ACTION Close( oDlg1 )
+
+ACTIVATE DIALOG oDlg1 CENTERED
+
+Return Nil
+                      
+
+
+Static Function OkProc
+
+Local cBuffer   := ""
+Local _nPos     := 0
+Local _nI       := 1
+Local bCampo 	:= {|n| FieldName(n) }
+
+Private aDados  := {}
+Private lPoc    := .t.
+
+Private _PRG_PIN := ""
+Private _GRP_PRT := ""
+Private _DSC_PRT := ""
+Private _SUB_PIN := ""
+Private _SUB_PRT := ""
+Private _DSC_GRP := ""
+Private _CMP_PIN := ""
+Private _COD_CMP := ""
+Private _CMP_PRT := ""
+Private _DSC_CMP := ""
+Private _UM_PIN  := ""
+Private _UM_PRT  := ""
+Private _DSC_UM  := ""
+Private _IT_PIN  := ""
+Private _IT_PRT  := ""
+Private _QTD_IT  := 0
+
+If !File(mv_par01)
+   MsgAlert("Arquivo "+mv_par01+" não encontrado","PMSIMPCSV")
+   Return
+Endif
+
+//+--------------------------------------------------------------+
+//¦ Criando Arquivo Temporario pela ordem selecionada            ¦
+//+--------------------------------------------------------------+
+cArqDBF	:= "COMP"//CriaTrab(NIL,.f.)
+aFields := {}
+AADD(aFields,{"PRG_PIN" 	,"C",5,0})
+AADD(aFields,{"GRP_PRT"   	,"C",5,0})
+AADD(aFields,{"DSC_PRT"    	,"C",255,0})
+AADD(aFields,{"SUB_PIN"  	,"C",10,0})
+AADD(aFields,{"SUB_PRT" 	,"C",3,0})
+AADD(aFields,{"DSC_GRP"   	,"C",255,0})
+AADD(aFields,{"CMP_PIN"    	,"C",5,0})
+AADD(aFields,{"COD_CMP"  	,"C",4,0})
+AADD(aFields,{"CMP_PRT" 	,"C",10,0})
+AADD(aFields,{"DSC_CMP"   	,"C",255,0})
+AADD(aFields,{"UM_PIN"    	,"C",2,0})
+AADD(aFields,{"UM_PRT"  	,"C",2,0})
+AADD(aFields,{"DSC_UM"   	,"C",50,0})
+AADD(aFields,{"IT_PIN"   	,"C",10,0})
+AADD(aFields,{"IT_PRT"    	,"C",15,0})
+AADD(aFields,{"QTD_IT"  	,"N",20,7})
+
+DbCreate(cArqDbf,aFields)
+DbUseArea(.T.,,cArqDbf,cArqDbf,.F.)
+
+dbGoTop()
+
+FT_FUSE(mv_par01)
+FT_FGOTOP()
+
+While !FT_FEOF()
+   
+   IncProc("Lendo arquivo CSV")
+   
+   cBuffer := FT_FREADLN()
+   
+   If _nI > 1 //Desconsidera a primeira linha, pois ela é o cabeçalho dos dados
+      
+      _nPos     := 0
+	  _cTemp    := cBuffer
+      _nPos     := At(";",_cTemp)
+	  
+	  //dados
+	  _PRG_PIN := ""
+	  _GRP_PRT := ""
+	  _DSC_PRT := ""
+	  _SUB_PIN := ""
+	  _SUB_PRT := ""
+	  _DSC_GRP := ""
+	  _CMP_PIN := ""
+	  _COD_CMP := ""
+	  _CMP_PRT := ""
+	  _DSC_CMP := ""
+	  _UM_PIN  := ""
+	  _UM_PRT  := ""
+	  _DSC_UM  := ""
+	  _IT_PIN  := ""
+	  _IT_PRT  := ""
+	  _QTD_IT  := 0
+      
+      If _nPos > 0
+      	 _PRG_PIN := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp  := SubsTr(_cTemp,_nPos+1)
+         _nPos   := At(";",_cTemp)
+      EndIf
+      
+      If _nPos > 0
+      	 _GRP_PRT := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp  := SubsTr(_cTemp,_nPos+1)
+         _nPos   := At(";",_cTemp)
+      EndIf
+      
+      If _nPos > 0
+      	 _DSC_PRT := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp  := SubsTr(_cTemp,_nPos+1)
+         _nPos   := At(";",_cTemp)
+      EndIf   
+      
+      If _nPos > 0
+      	 _SUB_PIN := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp  := SubsTr(_cTemp,_nPos+1)
+         _nPos   := At(";",_cTemp)
+      EndIf
+      
+      If _nPos > 0
+      	 _SUB_PRT := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp  := SubsTr(_cTemp,_nPos+1)
+         _nPos   := At(";",_cTemp)
+      EndIf
+      
+      If _nPos > 0
+         _DSC_GRP := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp  := SubsTr(_cTemp,_nPos+1)
+         _nPos   := At(";",_cTemp)
+      EndIf
+      
+      If _nPos > 0
+         _CMP_PIN := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp  := SubsTr(_cTemp,_nPos+1)
+         _nPos   := At(";",_cTemp)
+      EndIf
+      
+      If _nPos > 0
+         _COD_CMP  := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp   := SubsTr(_cTemp,_nPos+1)
+         _nPos   := At(";",_cTemp)
+      EndIf
+      
+      If _nPos > 0
+         _CMP_PRT := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp  := SubsTr(_cTemp,_nPos+1)
+         _nPos   := At(";",_cTemp)         
+      EndIf
+      
+      If _nPos > 0
+         _DSC_CMP := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp  := SubsTr(_cTemp,_nPos+1)
+         _nPos   := At(";",_cTemp)         
+      EndIf
+      
+      If _nPos > 0
+         _UM_PIN  := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp  := SubsTr(_cTemp,_nPos+1)
+         _nPos   := At(";",_cTemp)         
+      EndIf
+      
+      If _nPos > 0
+         _UM_PRT  := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp  := SubsTr(_cTemp,_nPos+1)
+         _nPos   := At(";",_cTemp)         
+      EndIf
+      
+      If _nPos > 0
+         _DSC_UM  := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp  := SubsTr(_cTemp,_nPos+1)
+         _nPos   := At(";",_cTemp)         
+      EndIf
+      
+      If _nPos > 0
+         _IT_PIN  := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp  := SubsTr(_cTemp,_nPos+1)
+         _nPos   := At(";",_cTemp)         
+      EndIf
+      
+      If _nPos > 0
+         _IT_PRT  := SubsTr(_cTemp,1,_nPos-1)
+         _cTemp  := SubsTr(_cTemp,_nPos+1)
+         _QTD_IT  := SubsTr(_cTemp,1)
+         _QTD_IT  := Val(StrTran(_QTD_IT,",","."))         
+      EndIf
+                   
+      dbSelectArea("COMP")
+      RecLock("COMP",.t.)
+      Replace COMP->PRG_PIN With _PRG_PIN
+	  Replace COMP->GRP_PRT With _GRP_PRT
+	  Replace COMP->DSC_PRT With _DSC_PRT
+	  Replace COMP->SUB_PIN With _SUB_PIN
+	  Replace COMP->SUB_PRT With _SUB_PRT
+	  Replace COMP->DSC_GRP With _DSC_GRP
+	  Replace COMP->CMP_PIN With _CMP_PIN
+	  Replace COMP->COD_CMP With _COD_CMP
+	  Replace COMP->CMP_PRT With _CMP_PRT
+	  Replace COMP->DSC_CMP With _DSC_CMP
+	  Replace COMP->UM_PIN  With _UM_PIN
+	  Replace COMP->UM_PRT  With _UM_PRT
+	  Replace COMP->DSC_UM  With _DSC_UM
+	  Replace COMP->IT_PIN  With _IT_PIN
+	  Replace COMP->IT_PRT  With _IT_PRT
+	  Replace COMP->QTD_IT  With _QTD_IT
+      MsUnlock()
+      
+   EndIf
+   _nI++
+   FT_FSKIP()   
+EndDo
+
+FT_FUSE()
+
+Close( oDlg1 )
+
+Return
+
+
+
+Static Function ValidPerg()
+
+Local _sAlias  := Alias()
+Local cPerg    := "LERCSV"
+Local aRegs    := {}
+Local i,j
+
+dbSelectArea("SX1")
+dbSetOrder(1)
+
+AADD(aRegs,{ cPerg,"01","Arquivo .CSV       :","Arquivo .CSV       :","Arquivo .CSV       :","mv_ch1","C",30,0,0,"G","","mv_par01",""            ,"","","","",""      ,"","","","","","","","","","","","","","","","","","",""   ,"",""})
+
+For i := 1 to Len(aRegs)
+	If !DbSeek(cPerg+ aRegs[i,2] )
+
+			RecLock("SX1",.T.)
+
+			For j := 1 to FCount()
+
+				If j <= Len(aRegs[i] )
+					FieldPut(j,aRegs[ i,j])
+				Endif
+			Next
+		MsUnlock()
+	Endif
+Next
+
+DbSelectArea( _sAlias)
+
+Return

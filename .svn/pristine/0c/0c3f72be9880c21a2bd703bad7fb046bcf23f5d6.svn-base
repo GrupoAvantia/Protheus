@@ -1,0 +1,635 @@
+#INCLUDE "Protheus.ch"
+#INCLUDE "TOPCONN.ch"
+#INCLUDE "rwmake.ch"
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ PROGRAMA   ณ Relacao Seguro de Vida     บ AUTOR ณ Carlos Beltrao    บ DATA ณ 19/01/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Programa tem o objetivo de gerar um relatorio analitico dos funcionarios   บฑฑ
+ฑฑบ            ณ beneficiados pelo seguro de vida.                                          บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ RelSegVi()                                                                 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Pessoal                                                          บฑฑ
+ฑฑฬออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ                      ATUALIZACOES SOFRIDAS DESDE A CONTRUCAO INICIAL                    บฑฑ
+ฑฑวฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤถฑฑ
+ฑฑบ    PROGRAMADOR     ณ    DATA    ณ                  MOTIVO DA ALTERACAO                  บฑฑ
+ฑฑวฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤถฑฑ
+ฑฑบ                    ณ            ณ                                                       บฑฑ 
+ฑฑบ                    ณ            ณ                                                       บฑฑ
+ฑฑศออออออออออออออออออออฯออออออออออออฯอออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+User Function RelSegVi()
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Declaracao de Variaveis Gerais                                      ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	Local aRelSeg		:= {}
+	Local aTabela		:= {}
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Declaracao de Variaveis de Impressao                                ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	Local cTitulo		:= "Relat๓rio Anaํtico de Seguro de Vida"
+	Local cDesc1		:= "Este programa tem como objetivo imprimir uma rela็ใo analํtica "
+	Local cDesc2		:= "dos funcionแrios beneficiados pelo seguro de vida de acordo "
+	Local cDesc3		:= "com os padr๕es definidos pelo usuแrio."
+	Local cString		:= "SRA"
+	Local lDic 		:= .F.
+	Local lComp 		:= .T.
+	Local lFiltro 	:= .T.
+	Local cFile 		:= "RelSegVi"
+	Local cProgName 	:= "Relacao Seguro de Vida"
+	
+	Private Tamanho 	:= "M"
+	Private Limite 	:= 220      // 80/132/220
+	Private aOrd 		:= {"Matricula", "Centro Custo + Matricula", "Nome + Matricula", "Cod. Funcao", "Centro Custo + Nome"}
+	Private cPerg		:= "RELSEG"
+	Private aReturn 	:= {"Zebrado", 1, "Administracao", 1, 2, 1, "", 1}
+	Private lEnd		:= .F.
+	Private m_pag		:= 1
+	Private nLastKey	:= 0
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Verifica as perguntas selecionadas.                                 ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	ValidPerg(cPerg)
+	Pergunte(cPerg,.F.)
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Envia para a SetPrinter.                                            ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	cFile := SetPrint(cString, cFile, cPerg, @cTitulo, cDesc1, cDesc2, cDesc3, lDic, aOrd, lComp, Tamanho, , lFiltro)
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Define a Ordem do Relatorio.                                        ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	nOrdem := aReturn[8]
+	
+	If nLastKey==27
+		DbSelectArea(cString)
+		DbSetOrder(1)
+		Set Filter To
+		Return
+	Endif
+	
+	SetDefault(aReturn, cString)
+	
+	If nLastKey==27
+		DbSelectArea(cString)
+		DbSetOrder(1)
+		Set Filter To
+		Return
+	Endif
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Carregando a tabela com os dados os valores do Seguro de Vida.      ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	Processa({|lEnd| MontarTabela(@lEnd, aTabela)}, "Aguarde...", "Carregando Tabela do Seguro de Vida...",.T.)
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Carrregando o Array que sera exibido.                               ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	Processa({|lEnd| CarregarArray(@lEnd, aRelSeg, aTabela, nOrdem)}, "Aguarde...", "Carregando Funcionแrios Segurados...",.T.)
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Processamento. RPTSTATUS monta janela com a regua de processamento. ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	If mv_par14 == 1 // 1 = Imprimir, 2 = Planilha	
+		RptStatus({|lEnd| Imprimir(@lEnd, cFile, cString, cProgName, cTitulo, aRelSeg)}, cTitulo)
+	Else
+		Processa({|lEnd| ExportarExcel(@lEnd, aRelSeg, cTitulo)}, "Aguarde...", "Carregando os dados no Excel...",.T.)
+	EndIf
+
+	MS_FLUSH()
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Montar Tabela              บ AUTOR ณ Carlos Beltrao    บ DATA ณ 19/01/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Essa funcao monta a tabela com os valores de desconto do seguro de vida.   บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ MontarTabela(@lEnd, aTabela)                                               บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Logical, Array                                                             บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Pessoal                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function MontarTabela(lEnd, aTabela)
+
+	Local cCodigo 	:= ""
+	Local cLinha 		:= ""
+	Local cEmpre1 	:= ""
+	Local cCodSe1 	:= ""
+	Local cDescri 	:= ""
+	Local nDe1 		:= 0
+	Local nAte1 		:= 0
+	Local nPFun1 		:= 0
+	Local nPEmp1 		:= 0
+	Local nBase1 		:= 0
+	Local nMin1 		:= 0
+	Local nMax1 		:= 0
+	
+	dbSelectArea("SRX")
+	dbSetOrder(1)
+	dbGoTop()
+	ProcRegua(RecCount())
+	
+	WHILE SRX->(!EOF())
+		IncProc()
+		IF(lEnd)
+			Alert("*** CANCELADO PELO OPERADOR ***")
+			Exit
+		EndIf
+		IF(SRX->RX_TIP == '39')
+			cCodigo := SubString(AllTrim(SRX->RX_COD),1,2)
+			cLinha := SubString(AllTrim(SRX->RX_COD),3,2)
+			DO CASE 
+				CASE cLinha == '01'
+					cEmpre1 := SRX->RX_FILIAL
+					cCodSe1 := SubString(AllTrim(SRX->RX_COD),1,2)
+					cDescri := AllTrim(SubString(SRX->RX_TXT,1,30))
+					nDe1 := Val(SubString(SRX->RX_TXT,31,12))
+					nAte1 := Val(SubString(SRX->RX_TXT,43,12))
+				CASE cLinha == '02'
+					nPFun1 := Val(SubString(SRX->RX_TXT,1,9))
+					nPEmp1 := Val(SubString(SRX->RX_TXT,10,9))
+					nBase1 := Val(SubString(SRX->RX_TXT,19,12))
+					nMin1 := Val(SubString(SRX->RX_TXT,31,12))
+					nMax1 := Val(SubString(SRX->RX_TXT,43,12))
+				//CASE cLinha == '03'
+				
+				//CASE cLinha == '04'
+				
+				//CASE cLinha == '05'
+				
+				//CASE cLinha == '06'
+				
+				//CASE cLinha == '07'
+				
+				CASE cLinha == '08'
+					AADD(aTabela, {cEmpre1, cCodSe1, cDescri, nDe1, nAte1, nPFun1, nPEmp1, nBase1, nMin1, nMax1})
+			ENDCASE
+		ENDIF
+		
+		SRX->(dbSkip())
+	EndDo
+	
+	dbSelectArea("SRX")
+	SRX->(dbCloseArea())
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Carregar Relacao Segurados บ AUTOR ณ Carlos Beltrao    บ DATA ณ 19/01/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Essa funcao inseri a carga no array com os dados dos funcionarios benefi-  บฑฑ
+ฑฑบ            ณ ciados pelo seguro de vida.                                                บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ CarregarArray(@lEnd, aRelSeg, aTabela, nOrdem)                             บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Logical, Array, Array, Number                                              บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Pessoal                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function CarregarArray(lEnd, aRelSeg, aTabela, nOrdem)
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Selecionando a Ordem de impressao escolhida no parametro.           ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	DbSelectArea("SRA")
+	DO CASE 
+		CASE nOrdem == 1
+			dbSetOrder(1)
+		CASE nOrdem == 2
+			dbSetOrder(2)
+		CASE nOrdem == 3
+			dbSetOrder(3)
+		CASE nOrdem == 4
+			dbSetOrder(7)
+		OTHERWISE
+			dbSetOrder(8)
+	ENDCASE
+	DbGoTop()
+	ProcRegua(RecCount())
+	
+	WHILE SRA->(!EOF())
+		IncProc()
+		IF(lEnd)
+			Alert("*** CANCELADO PELO OPERADOR ***")
+			Exit
+		EndIf
+		/*
+		mv_par01 - Da Filial
+		mv_par02 - Ate a Filial
+		mv_par03 - Do C. Custo 
+		mv_par04 - Ate o C. Custo
+		mv_par05 - De Matricula 
+		mv_par06 - Ate Matricula	
+		mv_par07 - De Nome
+		mv_par08 - Ate Nome 
+		mv_par09 - Situacoes
+		mv_par10 - De Data Admissao
+		mv_par11 - Ate Data Admissao
+		mv_par12 - De Data Demissao
+		mv_par13 - Ate Data Demissao
+		mv_par14 - Tipo
+		*/
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ Consiste Parametrizacao do Intervalo de Impressao.              ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		IF 	(SRA->RA_FILIAL < mv_par01) 	.Or. (SRA->RA_FILIAL > mv_par02) 	.Or. ;
+			(SRA->RA_CC < mv_par03) 			.Or. (SRA->RA_CC > mv_par04) 		.Or. ;
+			(SRA->RA_MAT < mv_par05) 		.Or. (SRA->RA_MAT > mv_par06) 		.Or. ;
+			(SRA->RA_NOME < mv_par07) 		.Or. (SRA->RA_NOME > mv_par08) 		.Or. ;
+			!(SRA->RA_SITFOLH $ mv_par09) 	.Or. (Empty(SRA->RA_SEGUROV)) 		.Or. ;
+			(SRA->RA_ADMISSAO < mv_par10) 	.Or. (SRA->RA_ADMISSAO > mv_par11) .Or. ;
+			(SRA->RA_DEMISSA < mv_par12) 	.Or. (SRA->RA_DEMISSA > mv_par13)
+				SRA->(dbSkip(1))
+				Loop
+		ENDIF
+		
+		FOR c:= 1 TO LEN(aTabela)
+			IF(aTabela[c][2] == SRA->RA_SEGUROV)
+				AADD(aRelSeg, {SRA->RA_FILIAL, SRA->RA_CC, POSICIONE("CTT",1,SRA->RA_FILIAL+SRA->RA_CC,"CTT_DESC01"), SRA->RA_MAT, SRA->RA_NOME, aTabela[c][8]})
+			ENDIF
+		NEXT
+		
+		SRA->(dbSkip())
+	ENDDO
+	
+	DbSelectArea("SRA")
+	SRA->(DbCloseArea())
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Gera a Impr. do Relatorio  บ AUTOR ณ Carlos Beltrao    บ DATA ณ 19/01/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Funcao auxiliar chamada pela RPTSTATUS. A funcao RPTSTATUS monta a janela  บฑฑ
+ฑฑบ            ณ com a regua de processamento.                                              บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ Imprimir(lEnd, cFile, cString, cProgName, cTitulo, aRelSeg)                บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Logic, String, String, String, String, Array                               บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Pessoal                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function Imprimir(lEnd, cFile, cString, cProgName, cTitulo, aRelSeg)
+
+	Local nLin			:= 100
+	Local nTotal		:= 0
+	Local i			:= 1
+	Local cFil 		:= ""
+	Local lImp 		:= .F. // Indica se algo foi impresso
+	Local cbCont 		:= 0 	// Numero de Registros Processados
+	Local cbText 		:= "" 	// Mensagem do Rodape
+							//         10       20        30        40        50        60        70        80        90        100       110       120       130
+							//12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+	Local Cabec1 		:= "Filial         Centro de Custo                     Matric            Nome                                                  Valores"
+	Local Cabec2 		:= ""
+	Local nCntImpr	:= 0
+	Local cRodaTxt 	:= oemtoansi("Rodap้")
+	Local nTipo		:= If(aReturn[4]==1, 15, 18)
+	
+	SetRegua(Len(aRelSeg))
+	While i <= Len(aRelSeg)
+		IncRegua()
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ Verifica o cancelamento pelo usuario.                               ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		If lEnd
+			@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
+			Exit
+		Endif
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ Impressao do cabecalho do relatorio.                                ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		If nLin > 65 // Salto de Pagina. Neste caso o formulario tem 55 linhas...
+			Cabec(cTitulo, Cabec1, Cabec2, cProgName, Tamanho, nTipo)
+			nLin := 9
+		Endif
+		
+		cFil 		:= aRelSeg[i][1]
+		nTotFil 	:= 0
+		nCol 		:= 0
+																																			
+		@nLin,002 Psay Alltrim(aRelSeg[i][01])									// Filial
+		@nLin,007 Psay Alltrim(aRelSeg[i][02])									// Centro de Custo
+		@nLin,017 Psay SubString(Alltrim(aRelSeg[i][03]),1,30)				// Descricao
+		@nLin,051 Psay Alltrim(aRelSeg[i][04])									// Matricula
+		@nLin,058 Psay Alltrim(aRelSeg[i][05])									// Nome
+		@nLin++,117 Psay aRelSeg[i][06] Picture "@E 999,999,999.99" 		// Valor
+			
+		nTotal += aRelSeg[i][06] 												// Total
+		
+		nCntImpr++				
+		i++
+		If i > Len(aRelSeg)
+			Exit
+		Endif
+			
+		If nLin > 65 // Salto de Pagina. Neste caso o formulario tem 55 linhas...
+			Cabec(cTitulo, Cabec1, Cabec2, cProgName, Tamanho, nTipo)
+			nLin := 9
+		Endif
+	
+	EndDo
+	
+	If nLin > 65 // Salto de Pแgina. Neste caso o formulario tem 55 linhas...
+		Cabec(cTitulo, Cabec1, Cabec2, cProgName, Tamanho, nTipo)
+		nLin := 9
+	Endif
+	
+	@nLin++,001 Psay Replicate("-", 130)
+	@nLin,020 Psay "TOTAL"														// Descricao
+	@nLin++,117 Psay nTotal Picture "@E 999,999,999.99" 						// Total
+	@nLin++,001 Psay Replicate("-", 130)
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Imprimindo o rodape.                                                ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	If nLin != 80   	
+		Roda(nCntImpr, cRodaTxt, Tamanho)
+	EndIf
+		
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Finaliza a execucao do relatorio.                                   ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	SET DEVICE TO SCREEN
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Se impressao em disco, chama o gerenciador de impressao.            ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	If aReturn[5]==1
+		dbCommitAll()
+		SET PRINTER TO
+		OurSpool(cFile)
+	Endif
+
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Exportar para Excel        บ AUTOR ณ Carlos Beltrao    บ DATA ณ 19/01/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Funcao que exporta os dados do relatorio para uma planilha de excel.       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ ExportarExcel(lEnd, aRatVT, cTitulo)                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Logic, String, String, String, String, Array                               บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Pessoal                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function ExportarExcel(lEnd, aRatVT, cTitulo)
+
+	Local aCabec	:= {}
+	Local aItem	:= {}
+	Local aDados	:= {}
+	
+	If !ApOleClient("MSExcel") 
+		MsgAlert("Microsoft Excel nใo instalado!")
+		Return
+	EndIf
+	
+	AADD(aCabec, {"Filial"			,"C", 02, 0})
+	AADD(aCabec, {"Centro de Custo"	,"C", 09, 0})
+	AADD(aCabec, {"Descri็ใo"		,"C", 70, 0})
+	AADD(aCabec, {"Matricula"		,"C", 06, 0})
+	AADD(aCabec, {"Nome"				,"C", 35, 0})
+	AADD(aCabec, {"Valor"			,"N", 10, 2})
+
+	ProcRegua(Len(aRatVT))
+
+	FOR i := 1 To Len(aRatVT)
+		IncProc()
+		aItem := Array(Len(aCabec)+1)
+		// Carregando as variaveis
+		aItem[1] := aRatVT[i][1]				// Filial
+		aItem[2] := aRatVT[i][2]				// Centro de Custo
+		aItem[3] := aRatVT[i][3]				// Descicao
+		aItem[4] := aRatVT[i][4]				// Matricula
+		aItem[5] := aRatVT[i][5]				// Nome
+		aItem[6] := Round(aRatVT[i][6],2)	// Valor
+		aItem[7] := "" 						// Tive que adicionar essa coluna em branco pois a ultima coluna sempre esta sendo suprimida
+		AAdd(aDados, aItem)
+		Item := {}
+	NEXT i
+
+	DlgToExcel({ {"GETDADOS", cTitulo, aCabec, aDados} })
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Validador das Perguntas    บ AUTOR ณ Carlos Beltrao    บ DATA ณ 19/01/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Cria as perguntas dos parametros.                                          บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ ValidPerg(cPerg)                                                           บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ String                                                                     บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Pessoal                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function ValidPerg(cPerg)
+
+	Local aAreaAnt := GetArea()
+	Local aHelpPor := {}
+	Local aHelpEng := {}
+	Local aHelpSpa := {}
+	
+	dbSelectArea("SX1")
+	dbSetOrder(1)
+	If !SX1->(dbSeek(cPerg)) 
+		
+		/*
+		mv_par01 - Da Filial
+		mv_par02 - Ate a Filial
+		mv_par03 - Do C. Custo 
+		mv_par04 - Ate o C. Custo
+		mv_par05 - De Matricula 
+		mv_par06 - Ate Matricula	
+		mv_par07 - De Nome
+		mv_par08 - Ate Nome 
+		mv_par09 - Situacoes
+		mv_par10 - De Data Admissao
+		mv_par11 - Ate Data Admissao
+		mv_par12 - De Data Demissao
+		mv_par13 - Ate Data Demissao
+		mv_par14 - Tipo
+		*/
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR01                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"N๚mero inicial da filial."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "01", "Da Filial           ?", "", "", "mv_ch1", "C", 02, 0, 0, "G",          "", "XM0", "", "", "mv_par01", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR02                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"N๚mero final da filial."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "02", "Ate a Filial        ?", "", "", "mv_ch2", "C", 02, 0, 0, "G",  "naovazio", "XM0", "", "", "mv_par02", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR03                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"N๚mero inicial da centro de custo."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "03", "Do C. Custo         ?", "", "", "mv_ch3", "C", 09, 0, 0, "G",          "", "CTT", "", "", "mv_par03", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR04                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"N๚mero final da centro de custo."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "04", "Ate o C. Custo      ?", "", "", "mv_ch4", "C", 09, 0, 0, "G",  "naovazio", "CTT", "", "", "mv_par04", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR05                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"N๚mero inicial da matricula."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "05", "De Matricula        ?", "", "", "mv_ch5", "C", 06, 0, 0, "G",          "", "SRA", "", "", "mv_par05", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR06                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"N๚mero final da matricula."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "06", "Ate Matricula       ?", "", "", "mv_ch6", "C", 06, 0, 0, "G",  "naovazio", "SRA", "", "", "mv_par06", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR07                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"Letra/palavra inicial do nome."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "07", "De Nome             ?", "", "", "mv_ch7", "C", 30, 0, 0, "G",          "",    "", "", "", "mv_par07", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR08                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"Letra/palavra final do nome."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "08", "Ate Nome            ?", "", "", "mv_ch8", "C", 30, 0, 0, "G",  "naovazio",    "", "", "", "mv_par08", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR09                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"Situa็ใo atual do funcionแrio."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "09", "Situacoes           ?", "", "", "mv_ch9", "C", 05, 0, 0, "G", "fSituacao",    "", "", "", "mv_par09", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR10                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"Data inicial da admissใo."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "10", "De Data Admissao    ?", "", "", "mv_chA", "D", 08, 0, 0, "G",          "",    "", "", "", "mv_par10", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR11                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"Data final da admissใo."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "11", "Ate Data Admissao   ?", "", "", "mv_chB", "D", 08, 0, 0, "G",  "naovazio",    "", "", "", "mv_par11", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR12                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"Data inicial da demissใo."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "12", "De Data Demissใo    ?", "", "", "mv_chC", "D", 08, 0, 0, "G",          "",    "", "", "", "mv_par12", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR13                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"Data final da Demissใo."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "13", "Ate Data Demissใo   ?", "", "", "mv_chD", "D", 08, 0, 0, "G",  "naovazio",    "", "", "", "mv_par13", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR14                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"Informe se o relat๓rio serแ impresso ou se o mesmo serแ gerado em excel."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "14", "Tipo                ?", "", "", "mv_chE", "C", 01, 0, 0, "C", "", "", "", "", "mv_par14", "Impressใo", "Impressใo", "Impressใo", "1", "Planilha", "Planilha", "Planilha", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+
+	EndIf	
+
+	RestArea(aAreaAnt)
+	
+Return	

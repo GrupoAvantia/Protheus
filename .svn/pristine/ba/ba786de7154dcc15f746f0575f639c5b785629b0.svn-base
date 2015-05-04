@@ -1,0 +1,3288 @@
+#INCLUDE "CNTR010.CH"
+#INCLUDE "PROTHEUS.CH" 
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNTR010  ³ Autor ³ Marcos V. Ferreira    ³ Data ³ 03.03.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Contratos                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Marcelo Cust³23/05/06³      ³Nome da funcao convertida para xxxxxR3    ³±±
+±±³odio        ³        ³      ³para criacao de novo relario de acordo com³±±
+±±³            ³        ³      ³a classe TReport                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function CNTR010R3()
+Local cMens := ""
+Local nOpca := 0
+
+Private cTitRel := OemToAnsi(STR0001) //Contratos
+Private lEnd	:= .F.
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Ajustar perguntas do SX1									           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AjustaSX1("CNR010")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                         ³
+//³ MV_PAR01     // Contrato de:                                 ³
+//³ mv_par02     // Contrato ate:                                ³
+//³ mv_par03     // Revisao de                                   ³
+//³ mv_par04     // Revisao ate                                  ³
+//³ mv_par05     // Vigencia de:                                 ³
+//³ mv_par06     // Vigencia ate:                                ³
+//³ mv_par07     // Situacao de:                                 ³
+//³ mv_par08     // Situacao ate:                                ³
+//³ mv_par09     // Fornecedor de:                               ³
+//³ mv_par10     // Fornecedor ate:                              ³
+//³ mv_par11     // Tipo de Contrato ?                           ³
+//³ mv_par12     // Exibir Caucoes ? - Sim/Nao                   ³
+//³ mv_par13     // Exibir Fornecedores ? - Sim/Nao              ³
+//³ mv_par14     // Exibir Planilha ? - Sim/Nao                  ³
+//³ mv_par15     // Exibir Cronograma ? - Sim/Nao                ³
+//³ mv_par16     // Exibir Multas/Bonificacoes? - Sim/Nao        ³
+//³ mv_par17     // Exibir Medicoes ? - Sim/Nao                  ³
+//³ mv_par18     // Exibir Textos do Contrato ? - Sim/Nao        ³
+//³ mv_par19     // Exibir Detalhes da Medicao ? - Sim/Nao       ³
+//³ mv_par20     // Exibir Cronograma Contabil ? - Sim/Nao       ³
+//³ mv_par21     // Cliente de:									 ³
+//³ mv_par22     // Cliente ate:								 ³
+//³ mv_par23     // Imprimir valores - Moeda do ctr/Outra moeda  ³
+//³ mv_par24     // Moeda: 										 ³
+//³ mv_par25     // Data de Referencia:							 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Pergunte("CNR010",.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Tela de configuracao do Relatorio							 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+DEFINE MSDIALOG oDlg FROM  96,9 TO 310,592 TITLE OemToAnsi(STR0001) PIXEL    //"Contratos"
+@ 18, 6 TO 66, 287 LABEL "" OF oDlg  PIXEL
+@ 29, 15 SAY OemToAnsi(STR0002) SIZE 268, 8 OF oDlg PIXEL    //"Este programa ira emitir uma relacao de contratos exibindo"
+@ 38, 15 SAY OemToAnsi(STR0003) SIZE 268, 8 OF oDlg PIXEL    //"seus caucoes, fornecedores, planilhas, multas e medicoes"
+@ 48, 15 SAY OemToAnsi(STR0004) SIZE 268, 8 OF oDlg PIXEL    //"referentes aos contrato selecionados."
+DEFINE SBUTTON FROM 80, 190 TYPE 5 ACTION Pergunte("CNR010",.T.) ENABLE OF oDlg
+DEFINE SBUTTON FROM 80, 223 TYPE 1 ACTION (oDlg:End(),nOpca:=1) ENABLE OF oDlg
+DEFINE SBUTTON FROM 80, 255 TYPE 2 ACTION oDlg:End() ENABLE OF oDlg
+ACTIVATE MSDIALOG oDlg CENTER
+
+If mv_par23 == 2
+	cTitRel += STR0065 +AllTrim(GetMv("MV_SIMB" +Ltrim(Str(mv_par24)))) +")"
+EndIf
+
+If nOpca == 1
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Processamento do Relatorio									        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	RptStatus({|lEnd| CNR010Imp(@lEnd)})
+
+EndIf	
+
+Return Nil
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ CNR010IMP³ Autor ³ Marcos V. Ferreira    ³ Data ³ 03.03.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Chamada do Relatorio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010			                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function CNR010Imp(lEnd)
+Local cAliasTOP := CriaTrab(Nil, .F.)
+Local cQuery	:= ""
+Local cSeek		:= ""
+Local aStrucCN8 := {}
+Local aStrucCN9 := {}
+Local nX		:= 0
+Local cDirSpool := GetMv("MV_RELT")
+Local cTipContra
+Local lCtbCron 
+Local cPlanilha := ""         
+Local cTpCtr    := ""
+Local lFiltForn    :=!Empty(mv_par09) .Or. (!Empty(mv_par10) .And. UPPER(mv_par10) != REPLICATE("Z",TamSx3("CNC_CODIGO")[1]))
+Local lFiltClien:= !lFiltForn .And. (!Empty(mv_par21) .Or. (!Empty(mv_par22) .And. UPPER(mv_par22) != REPLICATE("Z",TamSx3("A1_COD")[1])))
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Recupera Picture dos Campos								           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local cPtVIGE	:= PesqPict("CN9","CN9_VIGE")
+Local cPtMINCAU := PesqPict("CN9","CN9_MINCAU")
+Local cPtVLINI  := PesqPict("CN9","CN9_VLINI")
+Local cPtVLATU  := PesqPict("CN9","CN9_VLATU")
+Local cPtSALDO  := PesqPict("CN9","CN9_SALDO")
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Fontes											           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local oFont06	:= TFont():New("Arial",06,08,,.T.,,,,.T.,.F.)
+Local oFont10	:= TFont():New("Arial",10,10,,.F.,,,,.T.,.F.)
+Local oFont10n	:= TFont():New("Arial",10,10,,.T.,,,,.T.,.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas pelo Objeto TMSPrinter					 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Private nlin	:= 2900
+Private nPagina := 0
+Private oPrint
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis Gerais                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Private cImpCtbCro:=IF(mv_par20=1,.T.,.F.) // imrimir Cronograma contabil
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Objeto TMSPrinter								           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oPrint	:= TMSPrinter():New(OemToAnsi(STR0001)) //"Contratos"
+oPrint	:SetPortrait()	//-- Retrato
+oPrint	:Setup() 		//-- Configurar Impressao  
+cTpCtr  := MV_PAR11 
+DbselectArea("CN1")
+Dbseek(xFilial()+cTpCtr)
+If Found()
+   cTipContra:=CN1->CN1_ESPCTR //TIPO DE CONTRAT COMPRA/VENDA
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Query do Contrato											           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+aStrucCN9 := CN9->(dbStruct())
+cQuery := "SELECT DISTINCT CN9_NUMERO, CN9_REVISA, CN9_DTINIC, CN9_SITUAC, CN9_DTFIM, CN9_DTPROP, "
+cQuery += "CN9_DTASSI, CN9_DTENCE, CN9_CONDPG, CN9_TPCTO, CN9_DTULST, CN9_VIGE, CN9_INDICE, "
+cQuery += "CN9_FLGCAU, CN9_MINCAU, CN9_FLGREJ, CN9_REVATU, CN9_VLINI, CN9_VLATU, CN9_SALDO, "
+cQuery += "CN9_CODOBJ, CN9_CODCLA, CN9_CODJUS, CN9_UNVIGE, CN9_CLIENT, CN9_LOJACL, CN9_MOEDA "
+cQuery += "FROM " + RetSqlName("CN9") + " CN9 
+IF lFiltForn
+   cQuery += "LEFT JOIN " + RetSqlName("CNC") + " CNC ON CN9.CN9_NUMERO = CNC.CNC_NUMERO "
+Endif   
+cQuery += "WHERE "
+cQuery += "CN9_FILIAL = '"		+	xFilial("CN9")	+ "' AND "
+cQuery += "CN9_NUMERO >= '"		+	MV_PAR01		+ "' AND "
+cQuery += "CN9_NUMERO <= '"		+	mv_par02		+ "' AND "
+cQuery += "CN9_REVISA >= '"		+	mv_par03		+ "' AND "
+cQuery += "CN9_REVISA <= '"		+	mv_par04		+ "' AND "
+cQuery += "CN9_DTINIC >= '"		+	dtos(mv_par05)	+ "' AND "
+cQuery += "CN9_DTFIM  <= '"		+	dtos(mv_par06)	+ "' AND "
+cQuery += "CN9_SITUAC >= '"		+	mv_par07		+ "' AND "
+cQuery += "CN9_SITUAC <= '"		+	mv_par08		+ "' AND "
+IF lFiltForn
+   cQuery += "CNC_FILIAL = '"		+	xFilial("CNC")	+ "' AND "
+   cQuery += "CNC_CODIGO >= '"		+	mv_par09		+ "' AND "
+   cQuery += "CNC_CODIGO <= '"		+	mv_par10		+ "' AND "
+Else
+	cQuery += "CN9_CLIENT >= '"		+	mv_par21		+ "' AND "
+	cQuery += "CN9_CLIENT <= '"		+	mv_par22		+ "' AND "  
+Endif   
+If !Empty( MV_PAR11 )
+	cQuery += "CN9_TPCTO = '"	   	+	mv_par11		+ "' AND "
+EndIf
+cQuery += "CN9.D_E_L_E_T_ = '' "
+cQuery += "ORDER BY CN9_NUMERO, CN9_REVISA "
+
+cQuery := ChangeQuery(cQuery)
+MsAguarde({|| dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQuery),cAliasTOP,.F.,.T.)},OemToAnsi(STR0022)) //-- Processando
+
+For nX := 1 to Len(aStrucCN9)
+	If aStrucCN9[nX,2] != 'C' .And. FieldPos(aStrucCN9[nx,1]) > 0
+		TCSetField(cAliasTop,aStrucCN9[nX,1], aStrucCN9[nX,2],aStrucCN9[nX,3],aStrucCN9[nX,4])
+	EndIf	 
+Next nX
+
+dbSelectArea(cAliasTop)
+SetRegua(LastRec())
+
+Do While !Eof()
+	If lEnd
+		CNRBox(0050,2350,OemToAnsi(STR0034),,.T.,1) //-- CANCELADO PELO OPERADOR
+		Exit
+	EndIf
+
+	IncProc()
+
+	nLin := 2900 //-- Forca a Quebra da pagina por Contrato
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Impressao do Contrato				      ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	//-- Cabecalho Contrato
+	CNRBox(0050,2350,Upper(OemToAnsi(Substr(STR0001,1,8)))+" : "+(cAliasTop)->CN9_NUMERO,,.T.,1)
+	//-- Numero do Contrato
+	CNRBox(0050,0800,RetTitle("CN9_NUMERO"),(cAliasTop)->CN9_NUMERO,.F.)
+	//-- Revisao
+	CNRBox(0805,1200,RetTitle("CN9_REVISA"),(cAliasTop)->CN9_REVISA,.F.)
+	//-- Data Inicio
+	CNRBox(1205,1500,RetTitle("CN9_DTINIC"),dtoc((cAliasTop)->CN9_DTINIC),.F.)
+	//-- Situacao
+	CNRBox(1505,2350,RetTitle("CN9_SITUAC"),CNR010Sit((cAliasTop)->CN9_SITUAC),.T.)
+	//-- Data Final
+	CNRBox(0050,0800,RetTitle("CN9_DTFIM"),dtoc((cAliasTop)->CN9_DTFIM),.F.)
+	//-- Data da Proposta
+	CNRBox(0805,1200,RetTitle("CN9_DTPROP"),dtoc((cAliasTop)->CN9_DTPROP),.F.)
+	//-- Data Assinatura
+	CNRBox(1205,1500,RetTitle("CN9_DTASSI"),dtoc((cAliasTop)->CN9_DTASSI),.F.)
+	//-- Data de Encerramento
+	CNRBox(1505,2350,RetTitle("CN9_DTENCE"),dtoc((cAliasTop)->CN9_DTENCE),.T.)
+	//-- Condicao de Pagamento
+	CNRBox(0050,1500,RetTitle("CN9_CONDPG"),(cAliasTop)->CN9_CONDPG + " - " + Posicione("SE4",1,xFilial("SE4")+(cAliasTop)->CN9_CONDPG,"E4_DESCRI"),.F.)
+	//-- Tipo do Documento
+	CNRBox(1505,2350,RetTitle("CN9_TPCTO"),(cAliasTop)->CN9_TPCTO + " - " + Posicione("CN1",1,xFilial("CN1")+(cAliasTop)->CN9_TPCTO,"CN1_DESCRI"),.T.)
+
+	If !Empty((cAliasTop)->CN9_CLIENT)
+		//-- Cliente
+		CNRBox(0050,0800,RetTitle("CN9_CLIENT"),(cAliasTop)->CN9_CLIENT,.F.)
+		//-- Loja
+		CNRBox(0805,1300,RetTitle("CN9_LOJACL"),(cAliasTop)->CN9_LOJACL,.F.)
+		//-- Descricao
+		CNRBox(1305,2350,STR0057,Posicione("SA1",1,xFilial("SA1")+(cAliasTop)->CN9_CLIENT+(cAliasTop)->CN9_LOJACL,"A1_NOME"),.T.)//"Razão Social"
+	EndIf
+
+	//-- Data do ultimo status
+	CNRBox(0050,0500,RetTitle("CN9_DTULST"),dtoc((cAliasTop)->CN9_DTULST),.F.)
+	//-- Vigencia (Dias/Meses/Anos)
+	CNRBox(0505,900,RetTitle("CN9_VIGE"),Transform((cAliasTop)->CN9_VIGE,cPtVIGE) + " - " +IIf((cAliasTop)->CN9_UNVIGE == "1",OemToAnsi(STR0017),IIf((cAliasTop)->CN9_UNVIGE=="2",OemToAnsi(STR0018),OemToAnsi(STR0019))),.F.)
+	//-- Indice
+	CNRBox(0905,2350,RetTitle("CN9_INDICE"),(cAliasTop)->CN9_INDICE + " - " + Posicione("CN6",1,xFilial("CN6")+(cAliasTop)->CN9_INDICE,"CN6_DESCRI"),.T.)
+	//-- Caucao (Sim/Nao)
+	CNRBox(0050,0800,RetTitle("CN9_FLGCAU"),IIf((cAliasTop)->CN9_FLGCAU=="1",OemToAnsi(STR0020),OemToAnsi(STR0021)),.F.)
+	//-- Porcentagem Caucao
+	CNRBox(0805,1200,RetTitle("CN9_MINCAU"),TransForm((cAliasTop)->CN9_MINCAU,cPtMINCAU) + "%",.F.)
+	//-- Reajuste (Sim/Nao)
+	CNRBox(1205,1500,RetTitle("CN9_FLGREJ"),IIf((cAliasTop)->CN9_FLGREJ=="1",OemToAnsi(STR0020),OemToAnsi(STR0021)),.F.)
+	//-- Revisao Atual
+	CNRBox(1505,2350,RetTitle("CN9_REVATU"),(cAliasTop)->CN9_REVATU,.T.)
+	//-- Valor Inicial
+	CNRBox(0050,0800,RetTitle("CN9_VLINI"),TransForm((cAliasTop)->(C010xMoeda(.F.,CN9_NUMERO,CN9_REVISA,"CN9_VLINI")),cPtVLINI),.F.)
+	//-- Valor Atual
+	CNRBox(0805,1200,RetTitle("CN9_VLATU"),TransForm((cAliasTop)->(C010xMoeda(.F.,CN9_NUMERO,CN9_REVISA,"CN9_VLATU")),cPtVLATU),.F.)
+	//-- Saldo
+	CNRBox(1205,2350,RetTitle("CN9_SALDO"),TransForm((cAliasTop)->(C010xMoeda(.F.,CN9_NUMERO,CN9_REVISA,"CN9_SALDO")),cPtVLATU),.T.)
+
+	nLin += 50 //-- Salta Linha
+		
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Campos MEMO: Objeto, Clausulas e Justificativa  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If mv_par18 == 1
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Imprime Texto do Objeto do Contrato						      ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		nTotLinha := MlCount(MSMM((cAliasTop)->CN9_CODOBJ))
+		CNRBox(0050,2350,OemToAnsi(STR0023),,.T.,1) //-- Cabecalho OBJETO
+		For nX := 1 To nTotLinha
+			CNRBox(0100,Nil,MemoLine(MSMM((cAliasTop)->CN9_CODOBJ),,nX),,.T.,4,oFont10)
+		Next nX
+	    If nTotLinha == 0
+			CNRBox(0100,0100,OemToAnsi(STR0040),,.T.,4) //-- EM BRANCO
+	    EndIf
+
+		nLin += 50 //-- Salta linha
+
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Imprime Texto de Clausulas do Contrato					      ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		nTotLinha := MlCount(MSMM((cAliasTop)->CN9_CODCLA))
+		CNRBox(0050,2350,OemToAnsi(STR0024),,.T.,1) //-- Cabecalho CLAUSULAS
+		For nX := 1 To nTotLinha
+			CNRBox(0100,Nil,MemoLine(MSMM((cAliasTop)->CN9_CODCLA),,nX),,.T.,4,oFont10)
+		Next nX
+	    If nTotLinha == 0
+			CNRBox(0100,0100,OemToAnsi(STR0040),,.T.,4) //-- EM BRANCO
+	    EndIf
+
+		nLin += 50 //-- Salta linha
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Imprime Texto de Justificativas do Contrato				      ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		nTotLinha := MlCount(MSMM((cAliasTop)->CN9_CODJUS))
+		CNRBox(0050,2350,OemToAnsi(STR0025),,.T.,1) //-- Cabecalho JUSTIFICATIVAS
+		For nX := 1 To nTotLinha
+			CNRBox(0100,Nil,MemoLine(MSMM((cAliasTop)->CN9_CODJUS),,nX),,.T.,4,oFont10)
+		Next nXt
+	    If nTotLinha == 0
+			CNRBox(0100,0100,OemToAnsi(STR0040),,.T.,4) //-- EM BRANCO
+	    EndIf
+
+		nLin += 50 //-- Salta linha
+	
+	EndIf 
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Impressao dos Caucoes						 	  		  		 ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	CNR010Cau((cAliasTop)->CN9_NUMERO,(cAliasTop)->CN9_REVISA)
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Impressao dos Fornecedores						 		  		 ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	CNR010For((cAliasTop)->CN9_NUMERO)
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Impressao de Planilhas e Cronogramas							 ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	CNR010Pla((cAliasTop)->CN9_NUMERO,(cAliasTop)->CN9_REVISA,mv_par14==1, mv_par15==1, mv_par17==1,cImpCtbCro)
+	
+    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Impressao do Cronograma Contabil    							 ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	iF mv_par14==2 .AND. mv_par20==1
+	   CNR010CrnCtb((cAliasTop)->CN9_NUMERO,(cAliasTop)->CN9_REVISA,cPlanilha)
+	Endif   
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Impressao das Multas				 							 ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+  	CNR010Mul((cAliasTop)->CN9_NUMERO)
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Impressao de Medicoes										     ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	CNR010Med("",(cAliasTop)->CN9_NUMERO,(cAliasTop)->CN9_REVISA,mv_par17==1 .and. (mv_par14 != 1 .OR. Posicione("CN1",1,xFilial("CN1")+(cAliasTop)->CN9_TPCTO,"CN1_CTRFIX") == '2'))
+ 
+	(cAliasTop)->(dbSkip())
+EndDo
+
+//-- Encerra arquivo de Trabalho
+dbSelectArea(cAliasTop)
+dbCloseArea()
+
+//-- Grava Imagem em Disco
+If !Empty(cDirSpool)
+	oPrint:SaveAllAsJPEG(cDirSpool+"CNTR010",875,1170,140)
+EndIF	
+
+//-- Visualiza antes de Imprimir
+oPrint:Preview()  
+
+Return Nil
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNR010CAU³ Autor ³ Marcos V. Ferreira    ³ Data ³03/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Caucoes								                             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpC1 = Codigo do Contrato                                 ³±±
+±±³          ³ ExpC2 = Codigo da Revisao                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010  		                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function CNR010Cau(cContrato,cRevisa)
+Local aAreaAnt	:= GetArea()
+Local cSeek		:= ""
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Recupera Picture dos Campos									        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local cPtVLEFET := PesqPict("CN8","CN8_VLEFET")
+
+Default cContrato := ""
+Default cRevisa	  := ""
+
+If !Empty(cContrato)
+	If mv_par12 == 1
+		dbSelectArea("CN8")
+		dbSetOrder(2) //CN8_FILIAL+CN8_CONTRA+CN8_REVISA+CN8_CODIGO
+		If MsSeek(cSeek:=xFilial("CN8")+cContrato+cRevisa)
+			dbSelectArea("CN8")
+			nLin += 50
+			CNRBox(050,2350,Upper(OemToAnsi(STR0035)),,.T.,1) //-- Cabecalho CAUCOES
+			Do While !Eof() .And. cSeek == CN8_FILIAL+CN8_CONTRA+CN8_REVISA
+				//-- Caucao
+				CNRBox(0050,1100,OemToAnsi(STR0026),CN8_CODIGO + " - " + Posicione("CN3",1,xFilial("CN3")+CN8->CN8_TPCAUC,"CN3->CN3_DESCRI"),.F.)
+				//-- Codigo do Fornecedor
+				CNRBox(1105,2350,RetTitle("CN8_FORNEC"),CN8_FORNEC + " - " + Posicione("SA2",1,xFilial("SA2")+CN8_FORNEC+CN8_LOJA,"A2_NOME"),.T.)
+				//-- Loja do Fornecedor
+				CNRBox(0050,0350,RetTitle("CN8_LOJA"),CN8_LOJA,.F.)
+				//-- Documento
+				CNRBox(0355,0750,RetTitle("CN8_NUMDOC"),CN8_NUMDOC,.F.)
+				//-- Data de Entrega
+				CNRBox(0755,1050,RetTitle("CN8_DTENT"),DTOC(CN8_DTENT),.F.)
+				//-- Data de Inicio
+				CNRBox(1055,1550,RetTitle("CN8_DTINVI"),DTOC(CN8_DTINVI),.F.)
+				//-- Data Fim
+				CNRBox(1555,2350,RetTitle("CN8_DTFIVI"),DTOC(CN8_DTFIVI),.T.)
+
+				If mv_par23 == 1
+					//-- Valor Efetivo
+					CNRBox(0050,0500,RetTitle("CN8_VLEFET"),TransForm(CN8_VLEFET,cPtVLEFET),.F.)
+					//-- Moeda
+					CNRBox(0505,1200,RetTitle("CN8_MOEDA"),AllTrim(Str(CN8->CN8_MOEDA,2)) + " - " + SuperGetMv("MV_MOEDA"+AllTrim(Str(CN8->CN8_MOEDA,2)),,""),.F.)
+				Else
+					//-- Valor Efetivo
+					CNRBox(0050,1200,RetTitle("CN8_VLEFET"),TransForm(C010xMoeda(.F.,cContrato,cRevisa,"CN8_VLEFET"),cPtVLEFET),.F.)
+				EndIf
+				
+				//-- Emitente
+				CNRBox(1205,2350,RetTitle("CN8_EMITEN"),CN8_EMITEN,.T.)
+
+				nLin += 30 //-- Salta Linha
+
+				dbSkip()
+			EndDo
+		EndIf	
+	EndIf
+EndIf	
+
+RestArea(aAreaAnt)
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNR010For³ Autor ³ Marcos V. Ferreira    ³ Data ³03/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Fornecedores							                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpC1 = Codigo do Contrato                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010  		                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function CNR010For(cContrato)
+Local aAreaAnt	:= GetArea()
+Local cSeek		:= ""
+Local lCabec	:= .T.
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Fontes											           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local oFont06	:= TFont():New("Arial",06,08,,.T.,,,,.T.,.F.)
+
+Default cContrato := ""
+
+If !Empty(cContrato)
+	If mv_par13 == 1 
+		dbSelectArea("CNC")
+		dbSetOrder(1)
+		If MsSeek(cSeek := xFilial("CNC")+cContrato)
+			nLin += 50
+			CNRBox(050,2350,Upper(OemToAnsi(STR0036)),,.T.,1) //-- Cabecalho FORNECEDORES
+			Do While !Eof() .And. cSeek == CNC->CNC_FILIAL+CNC->CNC_NUMERO
+				If CNC_CODIGO < mv_par09 .Or. CNC_CODIGO > mv_par10
+					dbSkip()
+					Loop
+				EndIf
+				If lCabec
+					CNRBox(0050,0500,RetTitle("CN8_FORNECE"),,.F.,2,oFont06)
+					CNRBox(0505,0700,RetTitle("CNC_LOJA"),,.F.,2,oFont06)
+					CNRBox(0705,2350,RetTitle("CNC_NOME"),,.T.,2,oFont06)
+					lCabec := .F.
+				EndIf
+				//-- Codigo do Fornecedor
+				CNRBox(0050,0500,CNC_CODIGO,,.F.,2,oFont06)
+				//-- Loja do Fornecedor
+				CNRBox(0505,0700,CNC_LOJA,,.F.,2,oFont06)
+				//-- Descricao do Fornecedor
+				CNRBox(0705,2350,Posicione("SA2",1,xFilial("SA2")+CNC_CODIGO+CNC_LOJA,"A2_NOME"),,.T.,2,oFont06)
+				dbSkip()			
+			EndDo
+		EndIf
+	EndIf
+EndIf
+	
+RestArea(aAreaAnt)
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNR010Mul| Autor ³ Marcos V. Ferreira    ³ Data ³03/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Multas								                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpC1 = Codigo do Contrato                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010  		                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function CNR010Mul(cContrato)
+Local aAreaAnt	:= GetArea()
+Local cSeek		:= ""
+Local lCabec	:= .T.
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Fontes										     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local oFont06	:= TFont():New("Arial",06,08,,.T.,,,,.T.,.F.)
+
+Default cContrato := ""
+
+If !Empty(cContrato)
+	If mv_par16 == 1
+		dbSelectArea("CNH")
+		dbSetOrder(1)
+		If MsSeek(cSeek := xFilial("CNC")+cContrato)
+			nLin += 50
+			CNRBox(050,2350,Upper(OemToAnsi(STR0028)),,.T.,1) //-- Cabecalho MULTAS
+			Do While !Eof() .And. cSeek == CNH->CNH_FILIAL+CNH->CNH_NUMERO
+				If lCabec
+					CNRBox(0050,0800,OemToAnsi(STR0037),,.F.,2,oFont06)
+					CNRBox(0805,2350,RetTitle("CN4_DESCRI"),,.T.,2,oFont06)
+					lCabec := .F.
+				EndIf
+				//-- Codigo da Multa
+				CNRBox(0050,0800,CNH_CODIGO,,.F.,2,oFont06)
+				//-- Descricao da Multa
+				CNRBox(0805,2350,Posicione("CN4",1,xFilial("CN4")+CNH->CNH_CODIGO,"CN4_DESCRI"),,.T.,2,oFont06)
+				dbSkip()
+			EndDo
+		EndIf
+	EndIf
+EndIf	
+
+RestArea(aAreaAnt)
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNR010Pla| Autor ³ Marcos V. Ferreira    ³ Data ³03/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Planilhas							                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpC1 = Codigo do Contrato                                 ³±±
+±±³          ³ ExpC2 = Codigo da Revisao                                  ³±±
+±±³          ³ ExpL3 = Imprime Planilha                                   ³±±
+±±³          ³ ExpL4 = Imprime Cronograma                                 ³±±
+±±³          ³ ExpL5 = Imprime Medicao                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010 / CNTR020                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function CNR010Pla(cContrato,cRevisao,lImpPla,lImpCro,lImpMed,cImpCtbCro)
+Local aAreaAnt	:= GetArea()
+Local cAliasPla := CriaTrab(Nil, .F.)
+Local lCabecCro := .T.
+Local cSeek		:= ""
+Local cSeekCNF  := ""
+Local cQuery	:= ""
+Local cPlanilha := ""
+Local cCronogra := ""
+Local aStrucCNA	:= {}
+Local nX		:= 0
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Fontes											 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local oFont06	:= TFont():New("Arial",06,08,,.T.,,,,.T.,.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Recupera Picture dos Campos									 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local cPtVLTOT1 := PesqPict("CNA","CNA_VLTOT")
+Local cPtSALDO1 := PesqPict("CNA","CNA_SALDO")
+Local cPtQUANT  := PesqPict("CNB","CNB_QUANT")
+Local cPtVLTOT2 := PesqPict("CNB","CNB_VLTOT")
+Local cPtVLUNIT := PesqPict("CNB","CNB_VLUNIT")
+Local cPtDESC   := PesqPict("CNB","CNB_DESC")
+Local cPtVLDESC := PesqPict("CNB","CNB_VLDESC")
+Local cPtQTDMED := PesqPict("CNB","CNB_QTDMED")
+Local cPtSLDMED := PesqPict("CNB","CNB_SLDMED")
+Local cProduto1  := ""
+Local cProduto2  := ""
+
+Local nCNBTamPrd:= TamSX3("CNB_PRODUT")[1]
+Local nTipo     := 2
+
+Default cContrato := ""
+Default cRevisao  := ""
+Default lImpPla	  := .T.
+Default lImpCro	  := .T.
+Default lImpMed	  := .T. 		
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Query da Planilha  									   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+aStrucCNA := CNA->(dbStruct())
+cQuery := "SELECT CNA_NUMERO,CNA_FORNEC,CNA_LJFORN,CNA_CRONOG,CNA_DTINI,CNA_VLTOT,CNA_SALDO,CNA_TIPPLA,CNA_DTFIM,CNA_FLREAJ, CNA_CONTRA, CNA_REVISA, CNA.CNA_CLIENT, "
+cQuery += " CNA.CNA_LOJACL, CNB_ITEM, CNB_PRODUT, CNB_QUANT, CNB_VLUNIT, CNB_VLTOT, CNB_VLTOT, CNB_DESC, CNB_VLDESC, CNB_QTDMED, CNB_SLDMED "
+cQuery += "FROM " + RetSqlName("CNA") + " CNA "
+cQuery += "LEFT JOIN " + RetSqlName("CNB") + " CNB ON CNA_NUMERO = CNB_NUMERO AND CNA_CONTRA = CNB_CONTRA AND "
+cQuery += "CNA_REVISA = CNB_REVISA "
+cQuery += "WHERE "
+cQuery += "CNA_FILIAL = '"		+	xFilial("CNA")	+ "' AND "
+cQuery += "CNB_FILIAL = '"		+	xFilial("CNB")	+ "' AND "
+cQuery += "CNA_CONTRA = '"		+	cContrato		+ "' AND "
+cQuery += "CNA_REVISA = '"		+	cRevisao		+ "' AND "
+cQuery += "CNB_CONTRA = '"		+	cContrato		+ "' AND "
+cQuery += "CNB_REVISA = '"		+	cRevisao		+ "' AND "
+cQuery += "CNA.D_E_L_E_T_ = '' AND "
+cQuery += "CNB.D_E_L_E_T_ = '' " 
+			
+cQuery := ChangeQuery(cQuery)
+MsAguarde({|| dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQuery),cAliasPla,.F.,.T.)},OemToAnsi(STR0022)) //Processando
+			
+For nX := 1 to Len(aStrucCNA)
+	If aStrucCNA[nX,2] != 'C' .And. FieldPos(aStrucCNA[nx,1]) > 0
+		TCSetField(cAliasPla,aStrucCNA[nX,1], aStrucCNA[nX,2],aStrucCNA[nX,3],aStrucCNA[nX,4])
+	EndIf	
+Next nX
+If lImpPla 			
+	dbSelectArea(cAliasPla)
+	Do While (cAliasPla)->(!Eof())
+		If Empty(cPlanilha)
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ Informacoes sobre a Planilha						           ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			nLin += 50 //-- Salta Linha
+			CNRBox(0050,2350,Upper(OemToAnsi(STR0029)),,.T.,1) //-- Cabecalho Planilhas
+			//-- Numero da Planilha
+			CNRBox(0050,0300,RetTitle("CNA_NUMERO"),(cAliasPla)->CNA_NUMERO,.F.)
+			//-- Tipo da Planilha
+			CNRBox(0305,1700,RetTitle("CNA_TIPPLA"),(cAliasPla)->CNA_TIPPLA + " - " + Posicione("CNL",1,xFilial("CNL")+(cAliasPla)->CNA_TIPPLA,"CNL_DESCRI"),.F.)
+			//-- Valor Total
+			CNRBox(1705,2350,RetTitle("CNA_VLTOT"),TransForm((cAliasPla)->(C010xMoeda(.F.,cContrato,cRevisao,"CNA_VLTOT")),cPtVLTOT1),.T.)
+			//-- Codigo do Fornecedor 
+			If Empty((cAliasPla)->CNA_CLIENT)
+				//-- Codigo do Fornecedor 
+				CNRBox(0050,0850,RetTitle("CNA_FORNEC"),(cAliasPla)->CNA_FORNEC,.F.)
+				//-- Loja do Fornecedor 
+				CNRBox(0855,1000,RetTitle("CNA_LJFORN"),(cAliasPla)->CNA_LJFORN,.F.) 
+			Else
+				//-- Codigo do Cliente 
+				CNRBox(0050,0850,RetTitle("CNA_CLIENT"),(cAliasPla)->CNA_CLIENT,.F.)
+				//-- Loja do Cliente 
+				CNRBox(0855,1000,RetTitle("CNA_LOJACL"),(cAliasPla)->CNA_LOJACL,.F.) 
+			EndIf	
+			//-- Data Inicial 
+			CNRBox(1005,1400,RetTitle("CNA_DTINI"),DTOC((cAliasPla)->CNA_DTINI),.F.)
+			//-- Data Final
+			CNRBox(1405,2000,RetTitle("CNA_DTFIM"),DTOC((cAliasPla)->CNA_DTFIM),.F.)
+			//-- Saldo
+			CNRBox(2005,2350,RetTitle("CNA_SALDO"),TransForm((cAliasPla)->(C010xMoeda(.F.,cContrato,cRevisao,"CNA_SALDO")),cPtSALDO1),.T.)
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ Cabecalho dos Itens da Planilha						        ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			CNRBox(0050,0210,RetTitle("CNB_ITEM"),,.F.,2,oFont06)
+			CNRBox(0215,0450,RetTitle("CNB_PRODUT"),,.F.,2,oFont06)
+			CNRBox(0455,0680,RetTitle("CNB_QUANT"),,.F.,2,oFont06)
+			CNRBox(0685,0980,RetTitle("CNB_VLUNIT"),,.F.,2,oFont06)
+			CNRBox(0985,1300,RetTitle("CNB_VLTOT"),,.F.,2,oFont06)
+			CNRBox(1305,1480,RetTitle("CNB_DESC"),,.F.,2,oFont06)
+			CNRBox(1485,1750,RetTitle("CNB_VLDESC"),,.F.,2,oFont06)
+			CNRBox(1755,2050,RetTitle("CNB_QTDMED"),,.F.,2,oFont06)
+			CNRBox(2055,2350,RetTitle("CNB_SLDMED"),,.T.,2,oFont06)
+
+			cPlanilha := (cAliasPla)->CNA_NUMERO
+			cCronogra := (cAliasPla)->CNA_CRONOG
+		Else                                                            
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³Verifica o conteudo do campo Produto³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			cProduto1 := (cAliasPla)->CNB_PRODUT  
+					
+			If nCNBTamPrd> 15 .And. !Empty(SubStr((cAliasPla)->CNB_PRODUT,16,nCNBTamPrd))
+				nTipo := 5           
+			   	cProduto1 := SubStr((cAliasPla)->CNB_PRODUT,1,15)           
+			   	cProduto2 := SubStr((cAliasPla)->CNB_PRODUT,16,nCNBTamPrd) 	 
+			Else
+				cProduto2 :=""
+				nTipo     := 2		   
+			EndIf
+
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ Impressao dos Itens da Planilha						        ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			//-- Item da Planilha
+			CNRBox(0050,0210,(cAliasPla)->CNB_ITEM,,.F.,nTipo,oFont06)
+			//-- Codigo do Produto
+			CNRBox(0215,0450,cProduto1,cProduto2,.F.,nTipo,oFont06)
+			//-- Quantidade
+			CNRBox(0455,0680,TransForm((cAliasPla)->CNB_QUANT,cPtQUANT),,.F.,nTipo,oFont06,.T.)
+			//-- Valor Unitario
+			CNRBox(0685,0980,TransForm((cAliasPla)->(C010xMoeda(.F.,cContrato,cRevisao,"CNB_VLUNIT")),cPtVLUNIT),,.F.,nTipo,oFont06,.T.)
+			//-- Valor Total
+			CNRBox(0985,1300,TransForm((cAliasPla)->(C010xMoeda(.F.,cContrato,cRevisao,"CNB_VLTOT")),cPtVLTOT2),,.F.,nTipo,oFont06,.T.)
+			//-- Desconto
+			CNRBox(1305,1480,TransForm((cAliasPla)->CNB_DESC,cPtDESC),,.F.,nTipo,oFont06,.T.)
+			//-- Valor do Desconto
+			CNRBox(1485,1750,TransForm((cAliasPla)->(C010xMoeda(.F.,cContrato,cRevisao,"CNB_VLDESC")),cPtVLDESC),,.F.,nTipo,oFont06,.T.)
+			//-- Quantidade Medida
+			CNRBox(1755,2050,TransForm((cAliasPla)->CNB_QTDMED,cPtQTDMED),,.F.,nTipo,oFont06,.T.)
+			//-- Saldo
+			CNRBox(2055,2350,TransForm((cAliasPla)->CNB_SLDMED,cPtSLDMED),,.T.,nTipo,oFont06,.T.)
+			
+			//-- Salta Linha
+			If  nCNBTamPrd> 15 .And. !Empty(cProduto2)
+				nLin += 110
+			EndIf
+			(cAliasPla)->(dbSkip())
+		EndIf
+
+		If !(cPlanilha == (cAliasPla)->CNA_NUMERO)
+
+			If lImpCro
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Impressao dos Cronogramas							           ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				CNR010Cro(cCronogra,cContrato,cRevisao,lImpCro,nCNBTamPrd,cProduto2)
+			EndIf	
+			If cImpCtbCro
+  				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Impressao do Cronograma Contabil    			           ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ 
+  				CNR010CrnCtb(cContrato,cRevisao,cPlanilha)
+	
+			Endif
+			If lImpMed
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Impressao das Medicoes								           ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				CNR010Med(cPlanilha,cContrato,cRevisao,lImpMed)
+			EndIf	
+
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ Reinicia variaveis para impressao de nova planilha	  ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			cPlanilha := ""
+			cCronogra := ""
+		EndIf
+	EndDo
+Else
+	cPlanilha := (cAliasPla)->CNA_NUMERO
+	cCronogra := (cAliasPla)->CNA_CRONOG 
+	If lImpCro
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Impressao dos Cronogramas							           ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		CNR010Cro(cCronogra,cContrato,cRevisao,lImpCro)
+	EndIf	
+	If lImpMed
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Impressao das Medicoes								           ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		CNR010Med(cPlanilha,cContrato,cRevisao,lImpMed)
+	EndIf	
+	If cImpCtbCro
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Impressao do Cronograma Contabil    			           ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ 
+		CNR010CrnCtb(cContrato,cRevisao,cPlanilha)
+	Endif
+EndIf
+
+//-- Finaliza a query
+(cAliasPla)->(dbCloseArea())
+
+RestArea(aAreaAnt)
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNR010Cro| Autor ³ Marcos V. Ferreira    ³ Data ³03/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Cronogramas							                             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpC1 = Codigo do Cronograma                               ³±±
+±±³          ³ ExpC2 = Codigo do Contrato                                 ³±±
+±±³          ³ ExpC3 = Codigo da Revisao                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010 / CNTR020                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function CNR010Cro(cCronogra,cContrato,cRevisao,lImpCro,nCNBTamPrd,cProduto)
+Local aAreaAnt := GetArea()
+Local cSeekCNF := ""
+Local lCabecCro:= ""
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Fontes										              ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local oFont06  := TFont():New("Arial",06,08,,.T.,,,,.T.,.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Recupera Picture dos Campos									        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local cPtVLPREV := PesqPict("CNF","CNF_VLPREV")
+Local cPtSALDO2 := PesqPict("CNF","CNF_SALDO")
+Local cPtVLREAL := PesqPict("CNF","CNF_VLREAL")
+
+Default cCronogra := ""
+Default cContrato := ""
+Default cRevisao  := ""
+Default lImpCro	  := .T. 	                                      
+Default nCNBTamPrd:= TamSX3("CNB_PRODUT")[1]
+Default cProduto  := ""
+
+If !Empty(cContrato) .And. !Empty(cCronogra)
+
+	If lImpCro
+		dbSelectArea("CNF")
+		dbSetOrder(1) //-- CNF_FILIAL+CNF_NUMERO+CNF_CONTRA+CNF_REVISA
+		If MsSeek(cSeekCNF := xFilial("CNF")+cCronogra+cContrato+cRevisao)  
+		     
+			If  nCNBTamPrd> 15 .And. !Empty(cProduto)
+				nLin += 150
+			Else
+				nLin += 50
+			EndIf
+			
+			lCabecCro := .T.
+			CNRBox(050,2350,OemToAnsi(STR0038),,.T.,1) //-- Cabecalho CRONOGRAMA
+			Do While !Eof() .And. cSeekCNF == CNF->CNF_FILIAL+CNF_NUMERO+CNF->CNF_CONTRA+CNF->CNF_REVISA
+				If lCabecCro
+					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+					//³ Cabecalho dos Itens do Cronograma					        ³
+					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+					CNRBox(0050,0280,RetTitle("CNF_NUMERO"),,.F.,2,oFont06)
+					CNRBox(0285,0480,RetTitle("CNF_PARCEL"),,.F.,2,oFont06)
+					CNRBox(0485,0680,RetTitle("CNF_COMPET"),,.F.,2,oFont06)
+					CNRBox(0685,1050,RetTitle("CNF_VLPREV"),,.F.,2,oFont06)
+					CNRBox(1055,1400,RetTitle("CNF_VLREAL"),,.F.,2,oFont06)
+					CNRBox(1405,1720,RetTitle("CNF_SALDO"),,.F.,2,oFont06)
+					CNRBox(1725,1900,RetTitle("CNF_DTVENC"),,.F.,2,oFont06)
+					CNRBox(1905,2120,RetTitle("CNF_PRUMED"),,.F.,2,oFont06)
+					CNRBox(2125,2350,RetTitle("CNF_DTREAL"),,.T.,2,oFont06)
+					lCabecCro := .F.
+				EndIf
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Impressao dos Itens do Cronograma					        ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				//-- Num. Cronograma
+				CNRBox(0050,0280,CNF->CNF_NUMERO,,.F.,2,oFont06)
+				//-- Parcela
+				CNRBox(0285,0480,CNF->CNF_PARCEL,,.F.,2,oFont06)
+				//-- Competencia
+				CNRBox(0485,0680,CNF->CNF_COMPET,,.F.,2,oFont06)
+				//-- Vl.Prev. Parcela
+				CNRBox(0685,1050,TransForm(C010xMoeda(.F.,cContrato,cRevisao,"CNF_VLPREV"),cPtVLPREV),,.F.,2,oFont06,.T.)
+				//-- Vl. Realizado
+				CNRBox(1055,1400,TransForm(C010xMoeda(.F.,cContrato,cRevisao,"CNF_VLREAL"),cPtVLREAL),,.F.,2,oFont06,.T.)
+				//-- Saldo Parcela
+				CNRBox(1405,1720,TransForm(C010xMoeda(.F.,cContrato,cRevisao,"CNF_SALDO"),cPtSALDO2),,.F.,2,oFont06,.T.)
+				//-- Data de Vencimento
+				CNRBox(1725,1900,DTOC(CNF->CNF_DTVENC),,.F.,2,oFont06)
+				//-- Dt. Prev. Med.
+				CNRBox(1905,2120,DTOC(CNF->CNF_PRUMED),,.F.,2,oFont06)
+				//-- Dt. Realizado
+				CNRBox(2125,2350,DTOC(CNF->CNF_DTREAL),,.T.,2,oFont06)
+				CNF->(dbSkip())
+			EndDo
+		EndIf
+	EndIf
+EndIf	
+RestArea(aAreaAnt)
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNR010Med| Autor ³ Marcos V. Ferreira	| Data ³03/03/06  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Medicoes		            		                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpC1 = Codigo da Planilha                                 ³±±
+±±³          ³ ExpC2 = Codigo do Contrato                                 ³±±
+±±³          ³ ExpC3 = Codigo da Revisao                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function CNR010Med(cPlanilha,cContrato,cRevisao,lImpMed)
+Local aAreaAnt	:= GetArea()
+Local cAliasMed := CriaTrab(Nil, .F.)
+Local cSeek		:= ""   
+Local aStrucCND := {}                      
+Local aStrucCNE := CNE->(dbStruct())
+Local cQuery	:= ""
+Local cMedicao	:= "" 
+Local nX		:= 0
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Fontes											           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local oFont06	:= TFont():New("Arial",06,08,,.T.,,,,.T.,.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Recupera Picture dos Campos									        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local cPtVLMEAC := PesqPict("CND","CND_VLMEAC")
+Local cPtVLSALD := PesqPict("CND","CND_VLSALD")
+Local cPtVLTOT1 := PesqPict("CND","CND_VLTOT")
+Local cPtQTDSOL := PesqPict("CNE","CNE_QTDSOL")
+Local cPtQTAMED := PesqPict("CNE","CNE_QTAMED")
+Local cPtQUANT  := PesqPict("CNE","CNE_QUANT")
+Local cPtPERC   := PesqPict("CNE","CNE_PERC")
+Local cPtVLUNIT := PesqPict("CNE","CNE_VLUNIT")
+Local cPtVLTOT2 := PesqPict("CNE","CNE_VLTOT")
+
+Local cProduto1  := ""
+Local cProduto2  := ""
+Local nCNETamPrd := TamSX3("CNE_PRODUT")[1]
+Local nTipo      := 2
+
+Default cContrato := ""
+Default cRevisao  := ""
+Default cPlanilha := ""
+Default lImpMed	  := .T.
+
+If !Empty(cContrato)
+
+	If lImpMed
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Query da Planilha  									           ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		aStrucCND := CND->(dbStruct())
+		cQuery := "SELECT CND_NUMMED, CND_NUMERO, CND_CONTRA, CND_FORNEC, CND_LJFORN,  CND_COMPET, CND_DTVENC, CND_VLMEAC, CND_VLSALD, CND_VLTOT,"
+		cQuery += "CNE_ITEM, CNE_PRODUT, CNE_QTDSOL, CNE_QTAMED, CNE_QUANT, CNE_PERC, CNE_VLUNIT, CNE_VLTOT "
+		cQuery += "FROM " + RetSqlName("CND") + " CND "
+		cQuery += "LEFT JOIN " + RetSqlName("CNE") + " CNE ON CND_NUMERO = CNE_NUMERO AND "
+		cQuery += "CND_CONTRA = CNE_CONTRA AND CND_REVISA = CNE_REVISA AND CND_NUMMED = CNE_NUMMED "
+		cQuery += "WHERE "
+		cQuery += "CND_FILIAL = '"		+	xFilial("CND")	+ "' AND "
+		cQuery += "CNE_FILIAL = '"		+	xFilial("CNE")	+ "' AND "
+		If !Empty(cPlanilha)
+			cQuery += "CND_NUMERO = '"		+	cPlanilha		+ "' AND "
+		EndIf
+		cQuery += "CND_CONTRA = '"		+	cContrato		+ "' AND "
+		cQuery += "CND_REVISA = '"		+	cRevisao		+ "' AND "
+		cQuery += "CND.D_E_L_E_T_ = '' AND "
+		cQuery += "CNE.D_E_L_E_T_ = '' " 
+		
+		cQuery := ChangeQuery(cQuery)
+		MsAguarde({|| dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQuery),cAliasMed,.F.,.T.)},OemToAnsi(STR0022)) //Processando
+		
+		For nX := 1 to Len(aStrucCND)
+			If aStrucCND[nX,2] != 'C' .And. FieldPos(aStrucCND[nx,1]) > 0
+				TCSetField(cAliasMed,aStrucCND[nX,1], aStrucCND[nX,2],aStrucCND[nX,3],aStrucCND[nX,4])
+			EndIf	
+		Next nX   
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Atualiza estrutura dos itens da medicao  ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ		
+		For nX := 1 to Len(aStrucCNE)
+			If aStrucCNE[nX,2] != 'C' .And.  FieldPos( aStrucCNE[nx,1] ) > 0
+				TCSetField(cAliasMed,aStrucCNE[nX,1], aStrucCNE[nX,2],aStrucCNE[nX,3],aStrucCNE[nX,4])
+			EndIf
+		Next nX
+		
+		dbSelectArea(cAliasMed)
+
+		Do While (cAliasMed)->(!Eof())
+
+			If Empty(cMedicao)
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Informacoes sobre a Medicao						   	     ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ 
+				If nCNETamPrd> 15 .And. !Empty(SubStr((cAliasMed)->CNE_PRODUT,16,nCNETamPrd))
+					nLin += 150 //-- Salta Linha
+				Else
+					nLin += 50 //-- Salta Linha
+				EndIf
+				CNRBox(0050,2350,Upper(OemToAnsi(STR0039)),,.T.,1) //-- Cabecalho MEDICOES
+				//-- Numero da Medicao
+				CNRBox(0050,0500,RetTitle("CND_NUMMED"),(cAliasMed)->CND_NUMMED,.F.)
+				//-- Numero da Planilhao
+				CNRBox(0505,1300,RetTitle("CND_NUMERO"),(cAliasMed)->CND_NUMERO,.F.)
+				//-- Numero do Contrato
+				CNRBox(1305,2000,RetTitle("CND_CONTRA"),(cAliasMed)->CND_CONTRA,.F.)
+				//-- Competencia
+				CNRBox(2005,2350,RetTitle("CND_COMPET"),(cAliasMed)->CND_COMPET,.T.)
+				If !Empty((cAliasMed)->CND_FORNEC)
+					//-- Fornecedor                                                                    '
+				    CNRBox(0050,1900,RetTitle("CND_FORNEC"),(cAliasMed)->CND_FORNEC + " - " + Posicione("SA2",1,xFilial("SA2")+CND_FORNEC+CND_LJFORN,"A2_NOME"),.F.)
+					//-- Loja Fornecedor
+					CNRBox(1905,2350,RetTitle("CND_LJFORN"),(cAliasMed)->CND_LJFORN,.T.)
+				EndIf
+				//-- Data de Vencimento
+				CNRBox(0050,0400,RetTitle("CND_DTVENC"),DTOC((cAliasMed)->CND_DTVENC),.F.)
+				//-- Medicoes Acumuladas
+				CNRBox(0405,1050,RetTitle("CND_VLMEAC"),TransForm((cAliasMed)->(C010xMoeda(.F.,cContrato,cRevisao,"CND_VLMEAC")),cPtVLMEAC),.F.)
+				//-- Saldo da Medicao
+				CNRBox(1055,1800,RetTitle("CND_VLSALD"),TransForm((cAliasMed)->(C010xMoeda(.F.,cContrato,cRevisao,"CND_VLSALD")),cPtVLSALD),.F.)
+				//-- Valor Total
+				CNRBox(1805,2350,RetTitle("CND_VLTOT"),TransForm((cAliasMed)->(C010xMoeda(.F.,cContrato,cRevisao,"CND_VLTOT")),cPtVLTOT1),.T.)
+				        
+			
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Cabecalho dos Itens da Medicao						        ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				CNRBox(0050,0230,RetTitle("CNE_ITEM"),,.F.,2,oFont06)
+				CNRBox(0235,0500,RetTitle("CNE_PRODUT"),,.F.,2,oFont06)
+				CNRBox(0505,0800,RetTitle("CNE_QTDSOL"),,.F.,2,oFont06)
+				CNRBox(0805,1100,RetTitle("CNE_QTAMED"),,.F.,2,oFont06)
+				CNRBox(1105,1400,RetTitle("CNE_QUANT"),,.F.,2,oFont06)
+				CNRBox(1405,1700,RetTitle("CNE_PERC"),,.F.,2,oFont06)
+				CNRBox(1705,2000,RetTitle("CNE_VLUNIT"),,.F.,2,oFont06)
+				CNRBox(2005,2350,RetTitle("CNE_VLTOT"),,.T.,2,oFont06)
+
+				cMedicao := (cAliasMed)->CND_NUMMED
+			Else        
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Verifica o conteudo do campo Produto³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				cProduto1 := (cAliasMed)->CNE_PRODUT  
+					
+				If nCNETamPrd> 15 .And. !Empty(SubStr((cAliasMed)->CNE_PRODUT,16,nCNETamPrd))
+					nTipo := 5           
+				   	cProduto1 := SubStr((cAliasMed)->CNE_PRODUT,1,15)           
+				   	cProduto2 := SubStr((cAliasMed)->CNE_PRODUT,16,nCNETamPrd) 			   
+				Else             
+					nTipo    := 2
+					cProduto2:=""					 
+				EndIf
+				
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Impressao dos Itens da Medicao						        ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				//-- Item da Medicao
+				CNRBox(0050,0230,(cAliasMed)->CNE_ITEM,,.F.,nTipo,oFont06)
+				//-- Produto
+				CNRBox(0235,0500,cProduto1,cProduto2,.F.,nTipo,oFont06)
+				//-- Quantidade Solicitada
+				CNRBox(0505,0800,TransForm((cAliasMed)->CNE_QTDSOL,cPtQTDSOL),,.F.,nTipo,oFont06,.T.)
+				//-- Quantidade Medida
+				CNRBox(0805,1100,TransForm((cAliasMed)->CNE_QTAMED,cPtQTAMED),,.F.,nTipo,oFont06,.T.)
+				//-- Quantidade
+				CNRBox(1105,1400,TransForm((cAliasMed)->CNE_QUANT,cPtQUANT),,.F.,nTipo,oFont06,.T.)
+				//-- Percentual
+				CNRBox(1405,1700,TransForm((cAliasMed)->CNE_PERC,cPtPERC),,.F.,nTipo,oFont06,.T.)
+				//-- Valor Unitario
+				CNRBox(1705,2000,TransForm((cAliasMed)->(C010xMoeda(.F.,cContrato,cRevisao,"CNE_VLUNIT")),cPtVLUNIT),,.F.,nTipo,oFont06,.T.)
+				//-- Valor Total
+				CNRBox(2005,2350,TransForm((cAliasMed)->(C010xMoeda(.F.,cContrato,cRevisao,"CNE_VLTOT")),cPtVLTOT2),,.T.,nTipo,oFont06,.T.)
+
+				If nCNETamPrd> 15 .And. !Empty(cProduto2)
+					nLin += 110 //-- Salta Linha
+				EndIf
+
+				(cAliasMed)->(dbSkip())
+			EndIf
+
+			If (cMedicao != (cAliasMed)->CND_NUMMED)
+				If mv_par19==1
+					CNTR030Mul (cMedicao,oFont06)
+					CNTR030Desc(cMedicao,oFont06)
+					CNR030Cauc (cMedicao, oFont06)
+				EndIf
+				dbselectarea("CND")
+				cMedicao := ""
+			Endif	
+
+		EndDo
+
+		//-- Finaliza a query
+		dbSelectArea(cAliasMed)
+		(cAliasMed)->(dbCloseArea())
+
+	EndIf
+EndIf	
+
+RestArea(aAreaAnt)
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNRCabec ³ Autor ³ Marcos V. Ferreira    ³ Data ³03/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Cabecalho padrao para relatorios graficos                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpN1 = Posicao da coluna para impressao do cTexto         ³±±
+±±³          ³ ExpC2 = Texto a ser impresso	                             ³±±
+±±³          ³ ExpC3 = Titulo do Relatorio                                ³±±
+±±³          ³ ExpO4 = Fonte para impressao do cTexto                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010 / CNR020	                                         ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function CNRCabec(nCol,cTexto,cTitulo,oFontT,lPaisagem)
+Local cFileLogo	:= ""
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Fontes											           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local oFont10	:= TFont():New("Arial",10,10,,.F.,,,,.T.,.F.)
+Local oFont10n	:= TFont():New("Arial",10,10,,.T.,,,,.T.,.F.)
+
+Default nCol	:= 0
+Default cTexto	:= ""
+Default cTitulo := ""
+Default oFontT  := oFont10
+Default lPaisagem := .F.
+
+If (If(lPaisagem,(nLin >= 2350),(nLin >= 2900)))
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Cabecalho da Pagina					      ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	nPagina++ //-- Variavel Private
+	nLin := 200 //-- Variavel private
+	oPrint:EndPage() 	//-- Encerra a pagina anterior
+	oPrint:StartPage()	//-- Inicia uma nova pagina
+	oPrint:Line(50,50,50,If(lPaisagem,3181,2350))
+	oPrint:Line(51,51,51,If(lPaisagem,3181,2351))
+	oPrint:Line(200,50,200,If(lPaisagem,3181,2351))
+	oPrint:Line(201,51,201,If(lPaisagem,3181,2351))
+	oPrint:Say(110,1060,Upper(OemToAnsi(cTitulo)),oFont10n) 				//Texto do Cabecalho
+	oPrint:Say(065,If(lPaisagem,2830,2000),OemToAnsi(STR0031)	+ StrZero(nPagina,3),oFont10) 	//"Folha....: "
+	oPrint:Say(110,If(lPaisagem,2830,2000),OemToAnsi(STR0032)	+ Dtoc(dDataBase),oFont10) 		//"DT.Ref..: "
+	oPrint:Say(160,If(lPaisagem,2830,2000),OemToAnsi(STR0033)	+ Dtoc(Date()),oFont10) 		//"Emissao.: "    
+	cFileLogo += "LGRL"+SM0->M0_CODIGO+".BMP"
+	oPrint:SayBitmap(70,60,cFileLogo,474,117) //-- Logotipo
+EndIf
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Salta para a proxima linha			   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+nLin += 50
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Impressao do texto					      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If !Empty(cTexto)
+	oPrint:Say(nLin,nCol,cTexto,oFontT)
+EndIf	
+
+Return Nil
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNRBox() ³ Autor ³ Marcos V. Ferreira    ³ Data ³03/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Cria Box para Textos			                                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpN1 = Posicao inicial da coluna para criacao do Box      ³±±
+±±³          ³ ExpN2 = Posicao final da coluna para criacao do Box        ³±±
+±±³          ³ ExpC3 = Texto da 1a. linha do Box                          ³±±
+±±³          ³ ExpC4 = Texto da 2a. linha do Box                          ³±±
+±±³          ³ ExpL5 = Quebra para proxima linha apos a impressao do Box  ³±±
+±±³          ³         (.T. Com  Quebra / .F. Sem Quebra)                 ³±±
+±±³          ³ ExpN6 = Tipo do Box : 									           ³±±
+±±³          ³                      1 - Linha de Cabecalho                ³±±
+±±³          ³                      2 - Linha Unica Simples               ³±±
+±±³          ³                      3 - Linha de Detalhe                  ³±±
+±±³          ³                      4 - Somente Texto                     ³±±
+±±³          ³ ExpO7 = Fonte para impressao do Texto                      ³±±
+±±³          ³ ExpL8 = Se .T. realiza o alinhamento do cTexto1 a Direita. ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010  / CNTR020                                         ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function CNRBox(nCol1,nCol2,cTexto1,cTexto2,lQuebra,nTipo,oFontB,lAlinDir)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Fontes											           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local oFont10	:= TFont():New("Arial",10,10,,.F.,,,,.T.,.F.)
+Local oFont10n	:= TFont():New("Arial",10,10,,.T.,,,,.T.,.F.)
+
+Default nCol1	:= 0
+Default nCol2	:= 0
+Default cTexto1 := ""
+Default cTexto2 := ""
+Default lQuebra := .T.
+Default nTipo   := 3
+Default oFontB  := oFont10
+Default lAlinDir:= .F.
+
+If nLin >= 2900
+	CNRCabec(Nil,Nil,OemToAnsi(cTitRel)) //-- Impressao do Cabecalho da pagina
+EndIf
+
+If nTipo == 1  //-- Linha de Cabecalho
+	oPrint:Box(nLin,nCol1,nLin+55,nCol2)
+	oPrint:Box(nLin+5,nCol1+5,nLin+50,nCol2-5)
+	oPrint:Say(nLin+10,((nCol2-nCol1)/2)-((Len(alltrim(cTexto1))/2)*20),cTexto1,oFont10n)
+ElseIf nTipo == 2 //-- Linha Unica Simples
+	oPrint:Box(nLin,nCol1,nLin+45,nCol2)
+	If lAlinDir //-- Alinhamento a Direita
+		oPrint:Say(nLin+7,nCol2-5-TamTexto(Alltrim(cTexto1)),AllTrim(cTexto1),oFontB)
+	Else 
+		oPrint:Say(nLin+7,nCol1+10,cTexto1,oFontB)
+	EndIf
+ElseIf nTipo == 3 //-- Linha de Detalhe
+	oPrint:Box(nLin,nCol1,nLin+100,nCol2)
+	oPrint:Say(nLin+10,nCol1+10,cTexto1,oFont10n)
+	oPrint:Say(nLin+50,nCol1+10,cTexto2,oFontB)
+ElseIf nTipo == 4 //-- Somente Texto
+	oPrint:Say(nLin+7,nCol1,cTexto1,oFontB)  
+ElseIf nTipo == 5 //-- Linha com dois textos   
+	oPrint:Box(nLin,nCol1,nLin+100,nCol2) 
+	If lAlinDir //-- Alinhamento a Direita    
+		oPrint:Say(nLin+10,nCol2-5-TamTexto(Alltrim(cTexto1)),AllTrim(cTexto1),oFontB)
+		oPrint:Say(nLin+50,nCol2-5-TamTexto(Alltrim(cTexto2)),AllTrim(cTexto2),oFontB)
+	Else
+		oPrint:Say(nLin+10,nCol1+10,cTexto1,oFontB)
+		oPrint:Say(nLin+50,nCol1+10,cTexto2,oFontB)
+	EndIf
+EndIf
+If lQuebra //-- Quebra Linha
+	If nTipo == 1
+		nLin += 60	//-- Cabecalho
+	ElseIf nTipo == 2
+		nLin += 50	//-- Unica Simples
+	ElseIf nTipo == 3
+		nLin += 110	//-- Detalhe
+	ElseIf nTipo == 4 
+		nLin += 50 //-- Somente Texto
+	EndIf
+EndIf	
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ TamTexto | Autor ³ Marcos V. Ferreira    ³ Data ³08/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Recupera o tamanho de uma string em pixels                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010 / CNTR020                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function TamTexto(cTexto)
+Local nSize := 0
+Local nx
+Local aSize := {{17.241,2.692,15.241,13.692}} 
+For nx := 1 to Len(cTexto)
+	If Substr(cTexto,nx,1)=="." .Or. Substr(cTexto,nx,1)=="," .or.  Substr(UPPER(cTexto),nx,1)=="I" 
+		nSize += aSize[1,2]
+	ElseIf Substr(cTexto,nx,1)$"abcdefghijklmnopqrstuvxyzw"
+		nSize += aSize[1,4]
+	ElseIf Substr(UPPER(cTexto),nx,1)$"ABCDEFGHIJKLMNOPQRSTUVXWYZ""
+		nSize += aSize[1,3]
+	Else                     
+		nSize += aSize[1,1]
+	EndIf
+Next
+Return nSize
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNR010Sit³ Autor ³ Marcos V. Ferreira    ³ Data ³03/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Retorna o tipo da situacao do Contrato                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010  		                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function CNR010Sit(cTipo)
+Local cRet := ""
+
+Default cTipo := ""
+
+cTipo := AllTrim(cTipo)
+
+Do Case
+Case cTipo == "01"
+	cRet := OemToAnsi(STR0007) //-- 1-Cancelado
+Case cTipo == "02"
+	cRet := OemToAnsi(STR0008) //-- 2-Elaboracao
+Case cTipo == "03"
+	cRet := OemToAnsi(STR0009) //-- 3-Emitido
+Case cTipo == "04"
+	cRet := OemToAnsi(STR0010) //-- 4-Em Aprovacao
+Case cTipo == "05"
+	cRet := OemToAnsi(STR0011) //-- 5-Vigente
+Case cTipo == "06"
+	cRet := OemToAnsi(STR0012) //-- 6-Cancelado
+Case cTipo == "07"
+	cRet := OemToAnsi(STR0013) //-- 7-Solic. Finalizacao
+Case cTipo == "08"
+	cRet := OemToAnsi(STR0014) //-- 8-Finalizado
+Case cTipo == "09"
+	cRet := OemToAnsi(STR0015) //-- 9-Revisao
+Case cTipo == "10"
+	cRet := OemToAnsi(STR0016) //-- 10-Revisado
+EndCase
+
+Return cRet
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ AjustaSX1³ Autor ³ Marcos V. Ferreira    ³ Data ³03/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Ajusta as perguntas do SX1                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function AjustaSX1(cPerg)
+Local aAreaAnt := GetArea()
+Local aHelpPor := {}
+Local aHelpEng := {}
+Local aHelpSpa := {}
+
+If cPerg == "CNR010"
+	If !SX1->( dbSeek( cPerg ) ) 
+		//---------------------------------------MV_PAR01--------------------------------------------------
+		aHelpPor := {"Numero inicial do Contrato"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSX1(cPerg,"01","Contrato de:","De contrato?","From contract?","mv_ch1","C",15,0,0,"G","","CN9","","S","MV_PAR01","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR02--------------------------------------------------
+		aHelpPor := {"Numero final do Contrato"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSX1(cPerg,"02","Contrato ate:","A contrato?","To contract?","mv_ch2","C",15,0,0,"G","","CN9","","S","mv_par02","","","","ZZZZZZZZZZZZZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR03--------------------------------------------------
+		aHelpPor := {"Numero inicial da Revisao"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSX1(cPerg,"03","Revisao de:","De Revision:?","From Review?","mv_ch3","C",3,0,0,"G","","","","S","mv_par03","","","","001","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR04--------------------------------------------------
+		aHelpPor := {"Numero final da Revisao"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSX1(cPerg,"04","Revisao ate:","A Revision:?","Review To?","mv_ch4","C",3,0,0,"G","","","","S","mv_par04","","","","ZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR05--------------------------------------------------
+		aHelpPor := {"Data de inicio da Vigencia"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSX1(cPerg,"05","Vigencia de:","De Vigencia:?","From Validity?","mv_ch5","D",08,0,0,"G","","","","S","mv_par05","","","","01/01/06","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR06--------------------------------------------------
+		aHelpPor := {"Data de termino da Vigencia"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSX1(cPerg,"06","Vigencia ate:","A Vigencia:?","To Validity?","mv_ch6","D",08,0,0,"G","","","","S","mv_par06","","","","31/12/49","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR07--------------------------------------------------
+		aHelpPor := {"Codigo inicial da Situacao"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSX1(cPerg,"07","Situacao de:","De Situacion:?","From status?","mv_ch7","C",2,0,0,"G","","","","S","mv_par07","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR08--------------------------------------------------
+		aHelpPor := {"Codigo final da Situacao"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSX1(cPerg,"08","Situacao ate:","A Situacion:?","To status?","mv_ch8","C",2,0,0,"G","","","","S","mv_par08","","","","99","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR09--------------------------------------------------
+		aHelpPor := {"Codigo inicial do Fornecedor"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSX1(cPerg,"09","Fornecedor de:","De Proveedor:?","From Supplier?","mv_ch9","C",6,0,0,"G","","SA2","","S","mv_par09","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR10--------------------------------------------------
+		aHelpPor := {"Codigo final do Fornecedor"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSX1(cPerg,"10","Fornecedor ate:","A Proveedor:?","To Supplier?","mv_cha","C",6,0,0,"G","","SA2","","S","mv_par10","","","","ZZZZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR11--------------------------------------------------
+		aHelpPor := {"Codigo do Tipo de Contrato"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSX1(cPerg,"11","Tipo de Contrato ?","Tipo de Contrato:?","Type of Contract?","mv_chb","C",3,0,0,"G","","CN1","","S","mv_par11","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR12--------------------------------------------------
+		aHelpPor := {"Utilizada para exibir os Caucoes","do Contrato (Sim/Nao)"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSx1(cPerg,"12","Exibir Caucoes ?","Mostrar garantias?","Display pledges","mv_chc","N",1,0,1,"C","","","","","mv_par12","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR13--------------------------------------------------
+		aHelpPor := {"Utilizada para exibir os Fornecedores","do Contrato (Sim/Nao)"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSx1(cPerg,"13","Exibir Fornecedores ?","Mostrar Proveedores?","Display Supplier?","mv_chd","N",1,0,1,"C","","","","","mv_par13","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR14--------------------------------------------------
+		aHelpPor := {"Utilizada para exibir as Planilhas ","do Contrato (Sim/Nao)"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSx1(cPerg,"14","Exibir Planilha ?","Mostrar Planilla?","Display worksheet?","mv_che","N",1,0,1,"C","","","","","mv_par14","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR15--------------------------------------------------
+		aHelpPor := {"Utilizada para exibir os Cronogramas","do Contrato (Sim/Nao)"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSx1(cPerg,"15","Exibir Cronograma ?","Mostrar Cronograma?","Display schedule?","mv_chf","N",1,0,1,"C","","","","","mv_par15","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR16--------------------------------------------------
+		aHelpPor := {"Utilizada para exibir as Multas ","do Contrato (Sim/Nao)"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSx1(cPerg,"16","Exibir Multas/Bonificacoes?","Mostrar Multas?","Display fines?","mv_chg","N",1,0,1,"C","","","","","mv_par16","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR17--------------------------------------------------
+		aHelpPor := {"Utilizada para exibir as Medicoes ","do Contrato (Sim/Nao)"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSx1(cPerg,"17","Exibir Medicoes ?","Mostrar Mediciones?","Display measurements?","mv_chh","N",1,0,1,"C","","","","","mv_par17","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR18--------------------------------------------------
+		aHelpPor := {"Permite exibir os campos Objeto,","Clausulas e Justificativas do Contrato","(Sim/Nao)"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSx1(cPerg,"18","Exibir Textos do Contrato ?","Mostrar Textos del Contrato?","Display contract texts?","mv_chi","N",1,0,1,"C","","","","","mv_par18","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+		//---------------------------------------MV_PAR19--------------------------------------------------
+		aHelpPor := {"Permite exibir os Valores ","de Multas/Bonificacoes,Caucoes Retidas","e Descontos do Contrato (Sim/Nao)"}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSx1(cPerg,"19","Exibir Detalhes da Medicao ?","Mostrar detalles de Medicion?","Display measurement details?","mv_chj","N",1,0,1,"C","","","","","mv_par19","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	EndIf
+	If !SX1->( dbSeek( PadR(cPerg,10) + "20" ) ) 
+		//---------------------------------------MV_PAR20--------------------------------------------------
+		aHelpPor := {"Permite exibir os Cronograma","Contabil(Sim/Nao)",""}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		
+		PutSx1(cPerg,"20","Exibir Cronograma Contabil ?","Mostrar Cronograma Contable?","Display accounting schedule?","mv_chk","N",1,0,1,"C","","","","","mv_par20","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	EndIf
+
+	If !SX1->( dbSeek( PadR(cPerg,10) + "21" ) ) 
+		//---------------------------------------MV_PAR21--------------------------------------------------
+		aHelpPor := {"Codigo inicial do Cliente"}
+		aHelpEng := {"Codigo inicio del Cliente"}
+		aHelpSpa := {"Client initial Code"}
+		
+		PutSX1(cPerg,"21","Cliente de:","De Cliente:?","From Client?","mv_chl","C",TamSx3('A1_COD')[1],0,0,"G","CNR010CLFR('CNR010','2')","SA1GCT","","S","mv_par21","","","","","","","","","","","","","","","","")
+		PutHelp("P."+cPerg+"21.",aHelpPor,aHelpEng, aHelpSpa,.T.) 
+	EndIf
+
+	If !SX1->( dbSeek( PadR(cPerg,10) + "22" ) ) 	
+		//---------------------------------------MV_PAR22--------------------------------------------------
+		aHelpPor := {"Codigo final do Cliente"}
+		aHelpEng := {"Codigo final del Cliente"}
+		aHelpSpa := {"Client final Code"}
+		
+		PutSX1(cPerg,"22","Cliente ate:","A Cliente:?","To Client?","mv_chm","C",TamSx3('A1_COD')[1],0,0,"G","CNR010CLFR('CNR010','2')","SA1GCT","","S","mv_par22","","","","ZZZZZZ","","","","","","","","","","","","")
+		PutHelp("P."+cPerg+"22.",aHelpPor,aHelpEng, aHelpSpa,.T.) 
+	EndIf
+	
+	If !SX1->( dbSeek( PadR(cPerg,Len(SX1->X1_GRUPO)) + "23" ) ) 	
+		//---------------------------------------MV_PAR23--------------------------------------------------
+		aHelpPor := {"Define se a impressão dos valores","no relatório será realizada na","moeda do contrato ou em outra moeda."}
+		aHelpEng := {"Define if the values will be printed","using contract currency or other currency."}
+		aHelpSpa := {"Define si la impresión de los valores","en el informe será realizada en la ","moneda del contrato o en otra moneda."}
+		
+		PutSX1(cPerg,"23","Imprimir valores na moeda","Imprimir valores en moneda","Print values in currency","mv_chn","N",1,0,0,"C","","","","S","mv_par23","Do contrato","Del contrato","Of Contract","","Informada","Informada","Informed","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	EndIf
+	
+	If !SX1->( dbSeek( PadR(cPerg,Len(SX1->X1_GRUPO)) + "24" ) ) 	
+		//---------------------------------------MV_PAR24--------------------------------------------------
+		aHelpPor := {"Indica a moeda para impressão","dos valores. A pergunta anterior",'deve estar como "Informada".'}
+		aHelpEng := {"Indica la moneda para impresión","de los valores. La pregunta anterior",'debe estar como "Informada".'}
+		aHelpSpa := {"Indicates the values currency ","printing. The previous question must",'be set as "Informed".'}
+		
+		PutSX1(cPerg,"24","Moeda","Moneda","Currency","mv_cho","N",1,0,0,"C","","","","S","mv_par24","Moeda 1","Moneda 1","Currency 1","","Moeda 2","Moneda 2","Currency 2","Moeda 3","Moneda 3","Currency 3","Moeda 4","Moneda 4","Currency 4","Moeda 5","Moneda 5","Currency 5",aHelpPor,aHelpEng,aHelpSpa)
+	EndIf
+	
+	If !SX1->( dbSeek( PadR(cPerg,Len(SX1->X1_GRUPO)) + "25" ) ) 	
+		//---------------------------------------MV_PAR25--------------------------------------------------
+		aHelpPor := {"Data de referência para conversão","dos valores entre moedas."}
+		aHelpEng := {"Fecha de referencia para conversión","de los valores entre monedas."}
+		aHelpSpa := {"Reference date for values","convertion between currency."}
+		
+		PutSX1(cPerg,"25","Data de referencia","Fecha de referencia","Reference date","mv_chp","D",8,0,0,"G","","","","S","mv_par25","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	EndIf
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Inclui validação no parâmetro MV_PAR09 - Fornecedor de?³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If SX1->( dbSeek(PadR(cPerg,10)+"09",.T.) ) 
+		If  SX1->X1_VALID != "CNR010CLFR('CNR010','1')"
+			RecLock("SX1",.F.)
+			SX1->X1_VALID := "CNR010CLFR('CNR010','1')"
+			MsUnlock()
+		EndIf       
+		
+		If  SX1->X1_GRPSXG != "001"             
+			RecLock("SX1",.F.)
+			 SX1->X1_GRPSXG  := "001"
+			MsUnlock()
+		EndIf          
+	EndIf	
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Inclui validação no parâmetro MV_PAR10 - Fornecedor ate?³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If SX1->( dbSeek(PadR(cPerg,10)+"10",.T.) ) 
+		If  SX1->X1_VALID != "CNR010CLFR('CNR010','1')"
+			RecLock("SX1",.F.)
+			SX1->X1_VALID := "CNR010CLFR('CNR010','1')"
+			MsUnlock()
+		EndIf   
+		
+		If  SX1->X1_GRPSXG != "001"             
+			RecLock("SX1",.F.)
+			 SX1->X1_GRPSXG  := "001"
+			MsUnlock()
+		EndIf              
+	EndIf		
+		
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Inclui tamanho e grupo no parâmetro MV_PAR21 - Cliente de?³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If SX1->( dbSeek(PadR(cPerg,10)+"21",.T.) ) 
+		If  SX1->X1_TAMANHO != TamSx3('A1_COD')[1]
+			RecLock("SX1",.F.)
+			SX1->X1_TAMANHO := TamSx3('A1_COD')[1]		
+			MsUnlock()
+		EndIf
+		
+		If  SX1->X1_GRPSXG != "001"             
+			RecLock("SX1",.F.)
+			 SX1->X1_GRPSXG  := "001"
+			MsUnlock()
+		EndIf          
+		
+		If  SX1->X1_F3 != "SA1GCT"             
+			RecLock("SX1",.F.)
+			 SX1->X1_F3   := "SA1GCT"
+			MsUnlock()
+		EndIf         
+		
+		If  SX1->X1_GSC != "G"             
+			RecLock("SX1",.F.)
+			SX1->X1_GSC  := "G"
+			MsUnlock()
+		EndIf
+	EndIf	    
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Inclui tamanho e grupo no parâmetro MV_PAR22 - Cliente ate?³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If SX1->( dbSeek(PadR(cPerg,10)+"22",.T.) ) 
+		If  SX1->X1_TAMANHO != TamSx3('A1_COD')[1]
+			RecLock("SX1",.F.)
+			SX1->X1_TAMANHO := TamSx3('A1_COD')[1] 
+			MsUnlock()
+		EndIf  
+		
+		If  SX1->X1_GRPSXG != "001"             
+			RecLock("SX1",.F.)
+			 SX1->X1_GRPSXG  := "001"
+			MsUnlock()
+		EndIf             
+
+		If  SX1->X1_F3 != "SA1GCT"             
+			RecLock("SX1",.F.)
+			 SX1->X1_F3   := "SA1GCT"
+			MsUnlock()
+		EndIf
+		
+		If  SX1->X1_GSC != "G"             
+			RecLock("SX1",.F.)
+			SX1->X1_GSC  := "G"
+			MsUnlock()
+		EndIf		
+	EndIf	
+Else
+	//---------------------------------------MV_PAR01--------------------------------------------------
+	aHelpPor := {"Numero do Contrato"}
+	aHelpEng := {""}
+	aHelpSpa := {""}
+	
+	PutSX1(cPerg,"01","Contrato ?","Contrato?","Contract?","mv_ch1","C",15,0,0,"R","","CN9","","S","MV_PAR01","","","","CN9_NUMERO","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+	//---------------------------------------MV_PAR02--------------------------------------------------
+	aHelpPor := {"Numero da Revisao"}
+	aHelpEng := {""}
+	aHelpSpa := {""}
+	
+	PutSX1(cPerg,"02","Revisao ?","Revision?","Review?","mv_ch2","C",3,0,0,"R","","","","S","mv_par02","","","","CN9_REVISA","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+	//---------------------------------------MV_PAR03--------------------------------------------------
+	aHelpPor := {"Data de inicio da Vigencia"}
+	aHelpEng := {""}
+	aHelpSpa := {""}
+	
+	PutSX1(cPerg,"03","Vigencia de:","De vigencia?","Valid from?","mv_ch3","D",08,0,0,"G","","","","S","mv_par03","","","","01/01/06","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	
+	//---------------------------------------MV_PAR04--------------------------------------------------
+	aHelpPor := {"Data de termino da Vigencia"}
+	aHelpEng := {""}
+	aHelpSpa := {""}
+	
+	PutSX1(cPerg,"04","Vigencia ate:","A vigencia?","Valid To?","mv_ch4","D",08,0,0,"G","","","","S","mv_par04","","","","31/12/49","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	
+	//---------------------------------------MV_PAR06--------------------------------------------------
+	aHelpPor := {"Codigo da Situacao"}
+	aHelpEng := {""}
+	aHelpSpa := {""}
+	
+	PutSX1(cPerg,"05","Situacao ?","Situacion?","Status?","mv_ch5","C",2,0,0,"R","","","","S","mv_par05","","","","CN9_SITUAC","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	
+	//---------------------------------------MV_PAR06--------------------------------------------------
+	aHelpPor := {"Codigo do Fornecedor"}
+	aHelpEng := {""}
+	aHelpSpa := {""}
+	
+	PutSX1(cPerg,"06","Fornecedor ?","Proveedor?","Supplier?","mv_ch6","C",6,0,0,"R","","SA2","","S","mv_par06","","","","CNC_CODIGO","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+		
+	//---------------------------------------MV_PAR07--------------------------------------------------
+	aHelpPor := {"Codigo do Tipo de Contrato"}
+	aHelpEng := {""}
+	aHelpSpa := {""}
+	
+	PutSX1(cPerg,"07","Tipo de Contrato ?","Tipo de Contrato:?","Contract Type","mv_ch7","C",3,0,0,"G","","CN1","","S","mv_par07","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Exclui perguntas do modelo antigo, pois o controle dos detalhes  ³
+	//³ pode ser feiro atraves da personalizacao do relatorio            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If SX1->( dbSeek(PadR(cPerg,10)+"08",.T.) ) 
+		If "Exibir Cauções ?" $ SX1->X1_PERGUNT  
+			RecLock("SX1",.F.)
+			dbDelete()
+			MsUnlock()
+		EndIf               
+	EndIf           
+	
+	If SX1->( dbSeek(PadR(cPerg,10)+"09",.T.) ) 
+		If  "Exibir Fornecedores ?" $ SX1->X1_PERGUNT 
+			RecLock("SX1",.F.)
+			dbDelete()
+			MsUnlock()
+		EndIf               
+	EndIf 
+	
+	If SX1->( dbSeek(PadR(cPerg,10)+"10",.T.) ) 
+		If "Exibir Planilha ?" $ SX1->X1_PERGUNT
+			RecLock("SX1",.F.)
+			dbDelete()
+			MsUnlock()
+		EndIf               
+	EndIf
+	                 
+	If SX1->( dbSeek(PadR(cPerg,10)+"11",.T.) ) 
+		If  "Exibir Cronograma ?" $ SX1->X1_PERGUNT 
+			RecLock("SX1",.F.)
+			dbDelete()
+			MsUnlock()
+		EndIf               
+	EndIf    
+
+	If SX1->( dbSeek(PadR(cPerg,10)+"12",.T.) ) 
+		If "Exibir Multas ?" $ SX1->X1_PERGUNT 
+			RecLock("SX1",.F.)
+			dbDelete()
+			MsUnlock()
+		EndIf               
+	EndIf
+	
+	If SX1->( dbSeek(PadR(cPerg,10)+"13",.T.) ) 
+		If  "Exibir Medições ?" $ SX1->X1_PERGUNT
+			RecLock("SX1",.F.)
+			dbDelete()
+			MsUnlock()
+		EndIf               
+	EndIf
+	
+	If SX1->( dbSeek(PadR(cPerg,10)+"14",.T.) ) 
+		If "Exibir Textos do Contrato ?" $ SX1->X1_PERGUNT 
+			RecLock("SX1",.F.)
+			dbDelete()
+			MsUnlock()
+		EndIf               
+	EndIf			
+		
+	//---------------------------------------MV_PAR08--------------------------------------------------
+	aHelpPor := {"Permite exibir os campos Objeto, ","Clausulas e Justificativas do Contrato","(Sim/Nao)"}
+	aHelpEng := {"Allows displaying fields Object, ","Clauses and Justifications for the Contract(Yes/No)."}
+	aHelpSpa := {"Permite exhibir los campos Objeto",", Clausulas e Justificaciones del Contrato (Si/No)"}
+		
+	PutSx1(cPerg,"08","Exibir Textos do Contrato ?","Mostrar Textos del Contrato?","Display contract texts?","mv_che","N",1,0,1,"C","","","","","mv_par08","Sim","Si","Yes","","Nao","No","No","","","","","","","","","")
+
+	PutHelp("P."+cPerg+"08.",aHelpPor,aHelpEng, aHelpSpa,.T.)  
+
+	//---------------------------------------MV_PAR09--------------------------------------------------
+	aHelpPor := {"Utilizada para exibir as Medicoes"," do Contrato (Sim/Nao)            "}
+	aHelpEng := {"Used to display the Contract     "," Measurements (Yes/No).           "}
+	aHelpSpa := {"Se utiliza para exhibir las      "," mediciones del contrato (Si/No). "}
+	
+	PutSx1(cPerg,"09","Exibir Detalhes da Medicao ?","Mostrar detalles de Medicion?","Display measurement details?","mv_chf","N",1,0,1,"C","","","","","mv_par09","Sim","Si","Yes","","Nao","No","No","","","","","","","","","")
+	PutHelp("P."+cPerg+"09.",aHelpPor,aHelpEng, aHelpSpa,.T.)   
+	
+	//---------------------------------------MV_PAR10--------------------------------------------------
+	aHelpPor := {"Codigo do Cliente"}
+	aHelpEng := {"Codigo del Cliente"}
+	aHelpSpa := {"Client Code"}
+	
+	PutSX1(cPerg,"10","Cliente ?","Cliente?","Client?","mv_chg","C",TamSx3('A1_COD')[1],0,0,"R","CNR010CLFR('CNR011','2')","SA1GCT","","S","mv_par10","","","","CN9_CLIENT","","","","","","","","","","","","")
+	PutHelp("P."+cPerg+"10.",aHelpPor,aHelpEng, aHelpSpa,.T.)  
+	                                                                           
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Inclui validação no parâmetro MV_PAR06 - Fornecedor de?³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If SX1->( dbSeek(PadR(cPerg,10)+"06",.T.) ) 
+		If  SX1->X1_VALID != "CNR010CLFR('CNR011','1')"
+			RecLock("SX1",.F.)
+			SX1->X1_VALID := "CNR010CLFR('CNR011','1')"
+			MsUnlock()
+		EndIf  
+		
+		If  SX1->X1_GRPSXG != "001"             
+			RecLock("SX1",.F.)
+			 SX1->X1_GRPSXG  := "001"
+			MsUnlock()
+		EndIf               
+	EndIf	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Inclui tamanho e grupo no parâmetro MV_PAR21 - Cliente de?³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If SX1->( dbSeek(PadR(cPerg,10)+"10",.T.) ) 
+		If  SX1->X1_TAMANHO != TamSx3('A1_COD')[1]
+			RecLock("SX1",.F.)
+			SX1->X1_TAMANHO := TamSx3('A1_COD')[1] 
+			MsUnlock()
+		EndIf         
+		
+		If  SX1->X1_GRPSXG != "001"             
+			RecLock("SX1",.F.)
+			 SX1->X1_GRPSXG  := "001"
+			MsUnlock()
+		EndIf             
+		      
+		If  SX1->X1_F3 != "SA1GCT"             
+			RecLock("SX1",.F.)
+			 SX1->X1_F3   := "SA1GCT"
+			MsUnlock()
+		EndIf 
+
+		If  SX1->X1_GSC != "R"             
+			RecLock("SX1",.F.)
+			SX1->X1_GSC  := "R"
+			MsUnlock()
+		EndIf
+	EndIf	    
+	
+	If !SX1->( dbSeek( PadR(cPerg,Len(SX1->X1_GRUPO)) + "11" ) ) 	
+		//---------------------------------------MV_PAR11--------------------------------------------------
+		aHelpPor := {"Define se a impressão dos valores","no relatório será realizada na","moeda do contrato ou em outra moeda."}
+		aHelpEng := {"Define if the values will be printed","using contract currency or other currency."}
+		aHelpSpa := {"Define si la impresión de los valores","en el informe será realizada en la ","moneda del contrato o en otra moneda."}
+		
+		PutSX1(cPerg,"11","Imprimir valores na moeda","Imprimir valores en moneda","Print values in currency","mv_chb","N",1,0,0,"C","","","","S","mv_par23","Do contrato","Del contrato","Of Contract","","Informada","Informada","Informed","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	EndIf
+	
+	If !SX1->( dbSeek( PadR(cPerg,Len(SX1->X1_GRUPO)) + "12" ) ) 	
+		//---------------------------------------MV_PAR12--------------------------------------------------
+		aHelpPor := {"Indica a moeda para impressão","dos valores. A pergunta anterior",'deve estar como "Informada".'}
+		aHelpEng := {"Indica la moneda para impresión","de los valores. La pregunta anterior",'debe estar como "Informada".'}
+		aHelpSpa := {"Indicates the values currency ","printing. The previous question must",'be set as "Informed".'}
+		
+		PutSX1(cPerg,"12","Moeda","Moneda","Currency","mv_chc","N",1,0,0,"C","","","","S","mv_par24","Moeda 1","Moneda 1","Currency 1","","Moeda 2","Moneda 2","Currency 2","Moeda 3","Moneda 3","Currency 3","Moeda 4","Moneda 4","Currency 4","Moeda 5","Moneda 5","Currency 5",aHelpPor,aHelpEng,aHelpSpa)
+	EndIf
+	
+	If !SX1->( dbSeek( PadR(cPerg,Len(SX1->X1_GRUPO)) + "13" ) ) 	
+		//---------------------------------------MV_PAR13--------------------------------------------------
+		aHelpPor := {"Data de referência para conversão","dos valores entre moedas."}
+		aHelpEng := {"Fecha de referencia para conversión","de los valores entre monedas."}
+		aHelpSpa := {"Reference date for values","convertion between currency."}
+		
+		PutSX1(cPerg,"13","Data de referencia","Fecha de referencia","Reference date","mv_chd","D",8,0,0,"G","","","","S","mv_par25","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	EndIf
+EndIf
+
+RestArea(aAreaAnt)
+Return
+
+/*----------Versao TReport-------------*/
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNTR010  ³ Autor ³ Marcelo Custodio      ³ Data ³ 23.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Contratos - Convertido com base no fonte da rotina CNTR010R3³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function CNTR010( ) 
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Ajustar perguntas do SXB									 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If FindFunction("CliConsPad")
+	CliConsPad() 
+EndIf
+
+If  FindFunction("TRepInUse") .And. TRepInUse()
+	AjustaSX1("CNR011")
+
+   //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Variaveis utilizadas para parametros                         ³
+	//³ MV_PAR01     // Contrato de:                                 ³
+	//³ mv_par02     // Revisao de                                   ³
+	//³ mv_par03     // Vigencia de:                                 ³
+	//³ mv_par04     // Vigencia ate:                                ³
+	//³ mv_par05     // Situacao de:                                 ³
+	//³ mv_par06     // Fornecedor de:                               ³
+	//³ mv_par07     // Tipo de Contrato ?                           ³
+	//³ mv_par08     // Exibir Textos do Contrato					 ³
+	//³ mv_par09     // Exibir Detalhes da Medicao					 ³
+	//³ mv_par10     // Cliente de: 		                         ³
+	//| mv_par11     // Imprimir valores - Moeda do ctr/Outra moeda  ³
+	//| mv_par12     // Moeda: 										 ³
+	//| mv_par13     // Data de Referencia:							 ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	Pergunte("CNR011",.F.)
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Executa definicao do relatorio                     ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ	
+	oReport := ReportDef()
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Imprime relatorio                      			 ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ		
+	oReport:PrintDialog()
+	
+Else	
+	Return CNTR010R3() // Executa versão anterior do fonte
+Endif
+
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ ReportDef³ Autor ³ Marcelo Custodio      ³ Data ³ 23.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Define a configuracao do relatorio de contratos            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function ReportDef()
+Local oReport
+Local oSectCab// Sessao Cabecalho
+Local oSectPla// Sessao Planilhas
+Local oSectItm// Sessao Itens de Planilhas
+Local oSectCac// Sessao Caucoes
+Local oSectFrn// Sessao Fornecedores
+Local oSectCli// Sessao Cliente
+Local oSectCro// Sessao Cronograma
+Local oSectMul// Sessao Multas
+Local oSectMed// Sessao Medicoes
+Local oSectIMe// Sessao Itens de medicoes
+Local oSectBon// Sessao Multas/Bonificacoes
+Local oSectDes// Sessao Descontos
+Local oSectCtb// Sessao Cronograma Contabil   
+
+Local nCNBTamPrd:= TamSX3("CNB_PRODUT")[1]
+Local nCNETamPrd:= TamSX3("CNE_PRODUT")[1]
+
+oReport := TReport():New("CNTR010",OemToAnsi(STR0001),"CNR011",{|oReport| CR010Imp(oReport)},"Imprime relatorio de contratos")
+
+oSectCab := TRSection():New(oReport,OemToAnsi(STR0001),{"CN9","SE4","CN1"})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cabecalho do contrato                              ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+TRCell():New(oSectCab,"CN9_NUMERO","CN9",,,TamSx3("CN9_NUMERO"	)[1])
+TRCell():New(oSectCab,"CN9_REVISA","CN9",,,TamSx3("CN9_REVISA"	)[1])
+TRCell():New(oSectCab,"CN9_SITUAC","CN9",,,TamSx3("CN9_SITUAC"	)[1],,{|| QA_CBox("CN9_SITUAC",AllTrim(QRYCN9->CN9_SITUAC))})
+TRCell():New(oSectCab,"CN9_DTFIM","CN9")
+TRCell():New(oSectCab,"CN1_DESCRI","CN1","Tipo",,TamSx3("CN1_DESCRI"	)[1])
+TRCell():New(oSectCab,"CN9_VLATU","CN9",,,,,{|| QRYCN9->(C010xMoeda(.T.,CN9_NUMERO,CN9_REVISA,"CN9_VLATU"))})
+TRCell():New(oSectCab,"CN9_SALDO","CN9",,,,,{|| QRYCN9->(C010xMoeda(.T.,CN9_NUMERO,CN9_REVISA,"CN9_SALDO"))})
+
+oSectCab:Cell("CN1_DESCRI"):SetLineBreak()  
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Fornecedores                                       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectFrn := TRSection():New(oSectCab,OemToAnsi(STR0041),{"CNC","SA2"})
+TRCell():New(oSectFrn,"CNC_CODIGO","CNC")
+TRCell():New(oSectFrn,"CNC_LOJA","CNC")
+TRCell():New(oSectFrn,"A2_NOME","SA2",RetTitle("CNC_NOME"))
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cliente                                            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectCli := TRSection():New(oSectCab,OemToAnsi(STR0063),{"CN9","SA1"})
+TRCell():New(oSectCli,"CN9_CLIENT","CN9",RetTitle("A1_COD"))
+TRCell():New(oSectCli,"CN9_LOJACL","CN9",RetTitle("A1_LOJA"))
+TRCell():New(oSectCli,"A1_NOME","SA1",RetTitle("A1_NOME"))
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Multas                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectMul := TRSection():New(oSectCab,OemToAnsi(STR0042),{"CNH","CN4"})
+TRCell():New(oSectMul,"CNH_CODIGO","CNH")
+TRCell():New(oSectMul,"CN4_DESCRI","CN4")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Caucoes                                            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectCac := TRSection():New(oSectCab,OemToAnsi(STR0043),{"CN8","CN3"})
+TRCell():New(oSectCac,"CN8_CODIGO","CN8")
+TRCell():New(oSectCac,"CN3_DESCRI","CN3")
+TRCell():New(oSectCac,"CN8_FORNECE","CN8")
+TRCell():New(oSectCac,"CN8_LOJA","CN8")
+TRCell():New(oSectCac,"CN8_NUMDOC","CN8")
+TRCell():New(oSectCac,"CN8_DTINVI","CN8")
+TRCell():New(oSectCac,"CN8_DTFIVI","CN8")
+TRCell():New(oSectCac,"CN8_VLEFET","CN8",,,,,{|| QRYCN8->(C010xMoeda(.T.,CN8_CONTRA,CN8_REVISA,"CN8_VLEFET"))})
+TRCell():New(oSectCac,"CN8_MOEDA","CN8")
+TRCell():New(oSectCac,"CN8_EMITEN","CN8")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cabecalho das Planilhas                            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectPla := TRSection():New(oSectCab,OemToAnsi(STR0044),{"CNA","CNL"})
+TRCell():New(oSectPla,"CNA_NUMERO","CNA")
+TRCell():New(oSectPla,"CNL_DESCRI","CNL","Tipo")
+TRCell():New(oSectPla,"CNA_FORNEC","CNA")
+TRCell():New(oSectPla,"CNA_LJFORN","CNA")
+TRCell():New(oSectPla,"CNA_VLTOT","CNA",,,,,{|| QRYCNA->(C010xMoeda(.T.,CNA_CONTRA,CNA_REVISA,"CNA_VLTOT"))})
+TRCell():New(oSectPla,"CNA_SALDO","CNA",,,,,{|| QRYCNA->(C010xMoeda(.T.,CNA_CONTRA,CNA_REVISA,"CNA_SALDO"))})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Itens das planilhas                                ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectItm := TRSection():New(oSectPla,OemToAnsi(STR0045),{"CNB"})
+TRCell():New(oSectItm,"CNB_ITEM","CNB")
+TRCell():New(oSectItm,"CNB_PRODUT","CNB",,,nCNBTamPrd)
+TRCell():New(oSectItm,"CNB_QUANT","CNB")
+TRCell():New(oSectItm,"CNB_VLUNIT","CNB",,,,,{|| QRYCNB->(C010xMoeda(.T.,CNB_CONTRA,CNB_REVISA,"CNB_VLUNIT"))})
+TRCell():New(oSectItm,"CNB_VLTOT","CNB",,,,,{|| QRYCNB->(C010xMoeda(.T.,CNB_CONTRA,CNB_REVISA,"CNB_VLTOT"))})
+TRCell():New(oSectItm,"CNB_DESC","CNB")
+TRCell():New(oSectItm,"CNB_VLDESC","CNB",,,,,{|| QRYCNB->(C010xMoeda(.T.,CNB_CONTRA,CNB_REVISA,"CNB_VLDESC"))})
+TRCell():New(oSectItm,"CNB_QTDMED","CNB")
+TRCell():New(oSectItm,"CNB_SLDMED","CNB")
+
+oSectItm:Cell("CNB_PRODUT"):SetLineBreak()  
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cronogramas                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectCro := TRSection():New(oSectPla,OemToAnsi(STR0046),{"CNF"})
+TRCell():New(oSectCro,"CNF_NUMERO","CNF")
+TRCell():New(oSectCro,"CNF_PARCEL","CNF")
+TRCell():New(oSectCro,"CNF_COMPET","CNF")
+TRCell():New(oSectCro,"CNF_VLPREV","CNF",,,,,{|| QRYCNF->(C010xMoeda(.T.,CNF_CONTRA,CNF_REVISA,"CNF_VLPREV"))})
+TRCell():New(oSectCro,"CNF_VLREAL","CNF",,,,,{|| QRYCNF->(C010xMoeda(.T.,CNF_CONTRA,CNF_REVISA,"CNF_VLREAL"))})
+TRCell():New(oSectCro,"CNF_SALDO","CNF",,,,,{|| QRYCNF->(C010xMoeda(.T.,CNF_CONTRA,CNF_REVISA,"CNF_SALDO"))})
+TRCell():New(oSectCro,"CNF_DTVENC","CNF")
+TRCell():New(oSectCro,"CNF_PRUMED","CNF")
+TRCell():New(oSectCro,"CNF_DTREAL","CNF")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cabecalho das Medicoes                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectMed := TRSection():New(oSectCab,OemToAnsi(STR0047),{"CND"})
+TRCell():New(oSectMed,"CND_NUMMED","CND")
+TRCell():New(oSectMed,"CND_NUMERO","CND")
+TRCell():New(oSectMed,"CND_FORNEC","CND")
+TRCell():New(oSectMed,"CND_LJFORN","CND")
+TRCell():New(oSectMed,"CND_COMPET","CND")
+TRCell():New(oSectMed,"CND_VLTOT","CND",,,,,{|| QRYCND->(C010xMoeda(.T.,CND_CONTRA,CND_REVISA,"CND_VLTOT"))})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Itens de Medicoes                                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectIMe := TRSection():New(oSectMed,OemToAnsi(STR0048),{"CNE"})
+TRCell():New(oSectIMe,"CNE_ITEM","CNE")
+TRCell():New(oSectIMe,"CNE_PRODUT","CNE",,,nCNETamPrd)
+TRCell():New(oSectIMe,"CNE_QTDSOL","CNE")
+TRCell():New(oSectIMe,"CNE_QUANT","CNE")
+TRCell():New(oSectIMe,"CNE_VLUNIT","CNE",,,,,{|| QRYCNE->(C010xMoeda(.T.,CNE_CONTRA,CNE_REVISA,"CNE_VLUNIT"))})
+TRCell():New(oSectIMe,"CNE_VLTOT","CNE",,,,,{|| QRYCNE->(C010xMoeda(.T.,CNE_CONTRA,CNE_REVISA,"CNE_VLTOT"))})
+
+oSectIMe:Cell("CNE_PRODUT"):SetLineBreak()  
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Multas/Bonificacoes                                ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectBon := TRSection():New(oSectMed,OemToAnsi(STR0058),{"CNR"})
+oSectBon:SetTotalText("")
+TRCell():New(oSectBon,"CNR_TIPO","CNR")
+TRCell():New(oSectBon,"CNR_DESCRI","CNR")
+TRCell():New(oSectBon,"CNR_VALOR","CNR",,,,,{|| QRYCNR->(C010xMoeda(.T.,QRYCND->CND_CONTRA,QRYCND->CND_REVISA,"CNR_VALOR"))})
+TRFunction():New(oSectBon:Cell("CNR_VALOR"),NIL,"SUM",/*oBreak*/,OemToAnsi(STR0060),/*cPicture*/,/*uFormula*/,.T.,.F.,,oSectBon,{|| IIf( QRYCNR->CNR_TIPO == "1" , .T. , .F. ) } ) 
+TRFunction():New(oSectBon:Cell("CNR_VALOR"),NIL,"SUM",/*oBreak*/,OemToAnsi(STR0061),/*cPicture*/,/*uFormula*/,.T.,.F.,,oSectBon,{|| IIf( QRYCNR->CNR_TIPO == "2" , .T. , .F. ) } ) 
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Descontos                                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectDes := TRSection():New(oSectMed,OemToAnsi(STR0059),{"CNQ","CNP"})
+oSectDes:SetTotalText("")
+TRCell():New(oSectDes,"CNQ_TPDESC","CNQ")
+TRCell():New(oSectDes,"CNP_DESCRI","CNP")
+TRCell():New(oSectDes,"CNQ_VALOR","CNQ",,,,,{|| QRYCNQ->(C010xMoeda(.T.,QRYCND->CND_CONTRA,QRYCND->CND_REVISA,"CNQ_VALOR"))})
+TRFunction():New(oSectDes:Cell("CNQ_VALOR"),NIL,"SUM",,OemToAnsi(STR0062),,,.T.,.F.,,oSectDes) 
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Parcelas do Cronograma Contabil                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectCtb := TRSection():New(oSectCab,OemToAnsi(STR0055),{"CNW"})
+TRCell():New(oSectCtb,"CNW_NUMERO","CNW")
+TRCell():New(oSectCtb,"CNW_PARCEL","CNW")
+TRCell():New(oSectCtb,"CNW_DTPREV","CNW")
+TRCell():New(oSectCtb,"CNW_VLPREV","CNW",,,,,{|| QRYCNW->(C010xMoeda(.T.,CNW_CONTRA,CNW_REVISA,"CNW_VLPREV"))})
+TRCell():New(oSectCtb,"CNW_HIST","CNW")
+TRCell():New(oSectCtb,"CNW_CC","CNW")
+TRCell():New(oSectCtb,"CNW_DTLANC","CNW")
+TRCell():New(oSectCtb,"CNW_ITEMCT","CNW")
+TRCell():New(oSectCtb,"CNW_CLVL","CNW")
+
+Return oReport
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010Imp  ³ Autor ³ Marcelo Custodio      ³ Data ³ 23.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Executa impressao do relatorio de contratos                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010                                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oExp01 - Objeto principal do relatorio - TReport           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function CR010Imp(oReport)
+Local oSectCab := oReport:Section(1)//Cabecalho do contrato
+Local oSectFrn := oReport:Section(1):Section(1)//Fornecedores
+Local oSectCli := oReport:Section(1):Section(2)//Cliente
+Local oSectMul := oReport:Section(1):Section(3)//Multas
+Local oSectCac := oReport:Section(1):Section(4)//Caucoes
+Local oSectPla := oReport:Section(1):Section(5)//Cabecalho da planilha
+Local oSectItm := oReport:Section(1):Section(5):Section(1)//Itens de Planilhas
+Local oSectCro := oReport:Section(1):Section(5):Section(2)//Cronogramas
+Local oSectMed := oReport:Section(1):Section(6)//Medicoes
+Local oSectIMe := oReport:Section(1):Section(6):Section(1)//Itens de Medicoes
+Local oSectBon := oReport:Section(1):Section(6):Section(2)//Multas e Bonificacoes de Medicoes
+Local oSectDes := oReport:Section(1):Section(6):Section(3)//Descontos de Medicoes
+Local oSectCtb := oReport:Section(1):Section(7)//Cronograma Contabil
+Local lFstCNA  := .T.
+Local lFstCND  := .T.
+Local nTotLinha
+Local nX
+
+If mv_par11 == 2
+	oReport:SetTitle(oReport:Title() +STR0065 +AllTrim(GetMv("MV_SIMB" +Ltrim(Str(mv_par12)))) +")")
+	oSectCac:Cell("CN8_MOEDA"):Disable()
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura perguntas do tipo Range                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ    
+MakeSqlExpr(PadR("CNR011",10))
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Imprime Cabecalho                                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ    
+CR010Cab(oSectCab)
+
+CR010Frn(oSectFrn)
+CR010Cli(oSectCli)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Imprime Planilhas e Itens                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+CR010Pla(oSectPla)
+CR010Itm(oSectItm)
+         
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Imprime cronogramas                                ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+CR010Cro(oSectCro)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Imprime cronogramas contabeis                      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+CR010Ctb(oSectCtb)
+       	
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Imprime Caucoes                                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+CR010Cac(oSectCac)
+         
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Imprime Multas do contrato                         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+CR010Mul(oSectMul)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Imprime Medicoes                                   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+CR010Med(oSectMed)
+CR010IMe(oSectIMe)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica se Imprime Detalhes da medicao            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If MV_PAR09 == 1
+	CR010Bon(oSectBon)
+	CR010Des(oSectDes)
+Else
+	oSectBon:Disable()
+	oSectDes:Disable()
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Processa relatorio                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectCab:Init()
+While !QRYCN9->(Eof())
+	If oReport:Cancel()
+		Exit
+	EndIf
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Imprime cabecalho do contrato                      ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oSectCab:PrintLine()
+
+   If MV_PAR08 == 1
+	   oReport:SkipLine()
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Imprime Texto do Objeto do Contrato   						   ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		nTotLinha := MlCount(MSMM(QRYCN9->CN9_CODOBJ))
+		CR010Box(oReport,STR0023)
+		oReport:SkipLine()
+		For nX := 1 To nTotLinha
+			oReport:PrintText(MemoLine(MSMM(QRYCN9->CN9_CODOBJ),,nX))
+			oReport:SkipLine()
+		Next nX
+	   If nTotLinha == 0
+			oReport:PrintText(OemToAnsi(STR0040))
+	   EndIf
+	   oReport:SkipLine()
+
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Imprime Texto de Clausulas do Contrato					      ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		nTotLinha := MlCount(MSMM(QRYCN9->CN9_CODCLA))
+		CR010Box(oReport,STR0024)
+		oReport:SkipLine()
+		For nX := 1 To nTotLinha
+			oReport:PrintText(MemoLine(MSMM(QRYCN9->CN9_CODCLA),,nX))
+			oReport:SkipLine()
+		Next nX
+	   If nTotLinha == 0
+			oReport:PrintText(OemToAnsi(STR0040))
+	   EndIf
+	   oReport:SkipLine()
+
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Imprime Texto de Justificativas do Contrato				      ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ	   
+		nTotLinha := MlCount(MSMM(QRYCN9->CN9_CODJUS))
+		CR010Box(oReport,STR0025)
+		oReport:SkipLine()
+		For nX := 1 To nTotLinha
+			oReport:PrintText(MemoLine(MSMM(QRYCN9->CN9_CODJUS),,nX))
+			oReport:SkipLine()
+		Next nX
+	   If nTotLinha == 0
+			oReport:PrintText(OemToAnsi(STR0040))
+	   EndIf
+	   oReport:SkipLine()
+   EndIf
+   
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Imprime listagem de fornecedores                   ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If oSectFrn:lEnabled .And. Empty(QRYCN9->CN9_CLIENT)
+		oReport:SkipLine()
+		oReport:SkipLine()
+		CR010Box(oReport,OemToAnsi(STR0049)+QRYCN9->CN9_NUMERO+If(!Empty(QRYCN9->CN9_REVISA),"/"+QRYCN9->CN9_REVISA,""))
+		oSectFrn:Print()
+	Else
+		oReport:SkipLine()
+		oReport:SkipLine()
+		CR010Box(oReport,OemToAnsi(STR0064)+QRYCN9->CN9_NUMERO+If(!Empty(QRYCN9->CN9_REVISA),"/"+QRYCN9->CN9_REVISA,""))
+		oSectCli:Print()	
+	EndIf
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Imprime listagem de multas do contrato             ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If oSectMul:lEnabled
+		oReport:SkipLine()
+		oReport:SkipLine()
+		CR010Box(oReport,OemToAnsi(STR0050)+QRYCN9->CN9_NUMERO+If(!Empty(QRYCN9->CN9_REVISA),"/"+QRYCN9->CN9_REVISA,"")) 
+		oSectMul:Print()
+	EndIf
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Imprime caucoes do contrato                        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If oSectCac:lEnabled
+		oReport:SkipLine()
+		oReport:SkipLine()
+		CR010Box(oReport,OemToAnsi(STR0051)+QRYCN9->CN9_NUMERO+If(!Empty(QRYCN9->CN9_REVISA),"/"+QRYCN9->CN9_REVISA,""))
+		oSectCac:Print()
+	EndIf
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Imprime planilhas/itens/cronogramas                ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If oSectPla:lEnabled
+		oSectPla:Init()
+		lFstCNA := .T.
+
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Percorre planilhas de acordo com o filtro da sessao³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		While !QRYCNA->(Eof())//eval(oSectPla:bParentFilter,eval(oSectPla:bParentParam))
+			If QRYCNA->CNA_CONTRA > QRYCN9->CN9_NUMERO .OR. QRYCNA->CNA_REVISA > QRYCN9->CN9_REVISA
+				Exit
+			EndIf
+			If QRYCNA->CNA_CONTRA == QRYCN9->CN9_NUMERO .And. QRYCNA->CNA_REVISA == QRYCN9->CN9_REVISA
+				oReport:SkipLine()
+				oReport:SkipLine()
+				CR010Box(oReport,OemToAnsi(STR0052)+QRYCN9->CN9_NUMERO+If(!Empty(QRYCN9->CN9_REVISA),"/"+QRYCN9->CN9_REVISA,""))
+				If !lFstCNA
+					oSectPla:PrintHeader()
+				EndIf
+	
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Imprime cabecalho da planilha                      ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				oSectPla:PrintLine()
+				lFstCNA := .F.
+				oReport:SkipLine()
+	
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Imprime itens da planilha                          ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				oSectItm:Print()
+				oReport:SkipLine()
+				oReport:SkipLine()
+
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Imprime cronograma da planilha                     ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				CR010Box(oReport,OemToAnsi(STR0053)+QRYCNA->CNA_NUMERO)
+				oSectCro:Print()
+				oReport:SkipLine()
+				oReport:SkipLine()
+				
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Imprime cronograma contabil da planilha            ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				CR010Box(oReport,OemToAnsi(STR0056)+QRYCNA->CNA_NUMERO)
+				oSectCtb:Print()
+			EndIf
+			QRYCNA->(dbSkip())
+		EndDo
+		oSectPla:Finish()
+	EndIf
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Imprime medicoes do contrato                       ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If oSectMed:lEnabled
+		oSectMed:Init()
+		lFstCND := .T.
+
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Percorre medicoes de acordo com o filtro da sessao ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		While !QRYCND->(Eof())
+			If QRYCND->CND_CONTRA > QRYCN9->CN9_NUMERO .OR. QRYCND->CND_REVISA > QRYCN9->CN9_REVISA
+				Exit
+			EndIf
+			If QRYCND->CND_CONTRA == QRYCN9->CN9_NUMERO .AND. QRYCND->CND_REVISA == QRYCN9->CN9_REVISA
+				oReport:SkipLine()
+				oReport:SkipLine()
+				CR010Box(oReport,OemToAnsi(STR0054)+QRYCN9->CN9_NUMERO+If(!Empty(QRYCN9->CN9_REVISA),"/"+QRYCN9->CN9_REVISA,""))
+				If !lFstCND
+					oReport:SkipLine()
+					oSectMed:PrintHeader()
+				EndIf
+	
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Imprime cabecalho da medicao                       ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				oSectMed:PrintLine()
+				lFstCND := .F.
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Imprime itens da medicao                           ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				oSectIMe:Print()
+				oReport:SkipLine()
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Imprime multas/bonificacoes                        ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				If oSectBon:lEnabled
+					CR010Box(oReport,OemToAnsi(STR0058))
+					oSectBon:Print()
+					oReport:SkipLine()
+				EndIf
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Imprime descontos                                  ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				If oSectDes:lEnabled
+					CR010Box(oReport,OemToAnsi(STR0059))
+					oSectDes:Print()
+					oReport:SkipLine()
+				EndIf
+			EndIf
+			QRYCND->(dbSkip())
+		EndDo
+		oSectMed:Finish()
+	EndIf
+	
+	QRYCN9->(dbSkip())
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Pula pagina quando houver contrato                 ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If !QRYCN9->(Eof())
+		oReport:EndPage()
+	EndIf
+EndDo
+
+oSectCab:Finish()
+
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010Box  ³ Autor ³ Marcelo Custodio      ³ Data ³ 23.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Imprime box com texto centralizado                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ CR010Box(oExp01,cExp02)                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oExp01 - Objeto do relatorio                               ³±±
+±±³          ³ cExp02 - Texto impresso                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function CR010Box(oReport,cTexto)
+Local nCol1 := 7
+Local nCol2 := oReport:PageWidth()-40
+
+oReport:Box(oReport:Row()-10,2,oReport:Row()+38,oReport:PageWidth()-35)
+oReport:Box(oReport:Row()-5,nCol1,oReport:Row()+33,nCol2)
+oReport:PrintText(cTexto,oReport:Row(),((nCol2-nCol1)/2)-((Len(alltrim(cTexto))/2)*20))
+oReport:SkipLine()
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010Cab  ³ Autor ³ Marcelo Custodio      ³ Data ³ 23.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Configura sessao do cabecalho de contratos                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010Imp                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oExp01 - Sessao do cabecalho - TRSection                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function CR010Cab(oSectCab)
+Local cContra:=Replace(MV_PAR01,"CN9_NUMERO","CN9_NUMERO")
+Local cRevisa:=Replace(mv_par02,"CN9_REVISA","CN9_REVISA")
+Local cPart := "%%"
+                   
+If !Empty(mv_par07)
+	cPart := "%AND CN9_TPCTO = '"+mv_par07+"'%"
+EndIf
+
+If Empty(MV_PAR06)
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Gera query de filtro dos contratos                 ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oSectCab:BeginQuery()
+	BeginSql alias "QRYCN9"
+	SELECT CN9_NUMERO,CN9_REVISA,CN9_DTINIC,CN9_SITUAC,CN9_DTFIM,CN9_DTPROP,CN9_DTASSI,CN9_DTENCE,CN9_CONDPG,CN9_TPCTO,CN9_DTULST,CN9_VIGE,CN9_INDICE,CN9_FLGCAU,CN9_MINCAU,CN9_FLGREJ,CN9_REVATU,CN9_VLINI,CN9_VLATU,CN9_SALDO,CN9_CODOBJ,CN9_CODCLA,CN9_CODJUS,CN9_UNVIGE,CN9_CLIENT,CN9_LOJACL
+	FROM %table:CN9% CN9
+	WHERE CN9_FILIAL = %xfilial:CN9% AND
+	CN9_DTINIC >= %exp:dtos(mv_par03)% AND
+	CN9_DTFIM  <= %exp:dtos(mv_par04)% AND
+	CN9.%notDel% %exp:cPart%
+	ORDER BY CN9_NUMERO, CN9_REVISA
+	EndSql
+
+	oSectCab:EndQuery({cContra,cRevisa,MV_PAR05,MV_PAR10})
+Else
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Gera query de filtro dos contratos                 ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oSectCab:BeginQuery()
+	BeginSql alias "QRYCN9"
+	SELECT CN9_NUMERO,CN9_REVISA,CN9_DTINIC,CN9_SITUAC,CN9_DTFIM,CN9_DTPROP,CN9_DTASSI,CN9_DTENCE,CN9_CONDPG,CN9_TPCTO,CN9_DTULST,CN9_VIGE,CN9_INDICE,CN9_FLGCAU,CN9_MINCAU,CN9_FLGREJ,CN9_REVATU,CN9_VLINI,CN9_VLATU,CN9_SALDO,CN9_CODOBJ,CN9_CODCLA,CN9_CODJUS,CN9_UNVIGE,CN9_CLIENT,CN9_LOJACL
+	FROM %table:CN9% CN9, %table:CNC% CNC
+	WHERE CN9.CN9_FILIAL = %xfilial:CN9% AND  
+	      CNC.CNC_FILIAL = %xfilial:CNC% AND
+	      CN9.CN9_DTINIC >= %exp:dtos(mv_par03)% AND
+	      CN9.CN9_DTFIM  <= %exp:dtos(mv_par04)% AND
+	      CNC.CNC_NUMERO = CN9.CN9_NUMERO AND
+	      CNC.%notDel% AND
+	      CN9.%notDel% %exp:cPart%
+	ORDER BY CN9_NUMERO, CN9_REVISA
+	EndSql
+	
+	oSectCab:EndQuery({cContra,cRevisa,MV_PAR05,MV_PAR06})
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura posicionamento das tabelas filhas        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+TRPosition():New(oSectCab,"SE4",1,"xFilial() + QRYCN9->CN9_CONDPG")//Cond. Pagto
+TRPosition():New(oSectCab,"CN1",1,"xFilial() + QRYCN9->CN9_TPCTO")//Tipo de Contrato
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010Pla  ³ Autor ³ Marcelo Custodio      ³ Data ³ 23.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Configura sessao do cabecalho de planilhas                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010Imp                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oE\xp01 - Sessao do cabecalho - TRSection                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function CR010Pla(oSectPla)
+Local cContra:=Replace(MV_PAR01,"CN9_NUMERO","CNA_CONTRA")
+Local cRevisa:=Replace(mv_par02,"CN9_REVISA","CNA_REVISA")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Gera query de filtro das planilhas                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectPla:BeginQuery()
+
+BeginSql alias "QRYCNA"
+SELECT CNA_NUMERO,CNA_FORNEC,CNA_LJFORN,CNA_CRONOG,CNA_DTINI,CNA_VLTOT,CNA_SALDO,CNA_TIPPLA,CNA_DTFIM,CNA_FLREAJ, CNA_CONTRA, CNA_REVISA, CNA_CRONCT
+FROM %table:CNA% CNA WHERE
+CNA_FILIAL = %xfilial:CNA% AND
+CNA.%notDel%
+ORDER BY CNA_CONTRA,CNA_REVISA,CNA_NUMERO
+EndSql
+                           
+oSectPla:EndQuery({cContra,cRevisa})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura filtro de relacionamento com os contratos³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectPla:SetParentFilter({|aParam| QRYCNA->CNA_CONTRA == aParam[1] .AND. QRYCNA->CNA_REVISA == aParam[2]},{|| {QRYCN9->CN9_NUMERO,QRYCN9->CN9_REVISA}})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura posicionamento das tabelas filhas        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+TRPosition():New(oSectPla,"CNL",1,"xFilial() + QRYCNA->CNA_TIPPLA")//Tipos de Tabelas
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010Itm  ³ Autor ³ Marcelo Custodio      ³ Data ³ 23.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Configura sessao dos itens de planilhas                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010Imp                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oExp01 - Sessao dos itens - TRSection                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function CR010Itm(oSectItm)
+Local cContra:=Replace(MV_PAR01,"CN9_NUMERO","CNB_CONTRA")
+Local cRevisa:=Replace(mv_par02,"CN9_REVISA","CNB_REVISA")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Gera query de filtro dos itens de planilhas        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectItm:BeginQuery()
+BeginSql alias "QRYCNB"
+SELECT CNB_ITEM, CNB_PRODUT, CNB_QUANT, CNB_VLUNIT, CNB_VLTOT, CNB_VLTOT, CNB_DESC, CNB_VLDESC, CNB_QTDMED, CNB_SLDMED, CNB_CONTRA, CNB_REVISA, CNB_NUMERO
+FROM %table:CNB% CNB
+WHERE
+CNB_FILIAL = %xfilial:CNB% AND
+CNB.%notDel%
+ORDER BY CNB_CONTRA,CNB_REVISA,CNB_NUMERO,CNB_ITEM
+EndSql
+oSectItm:EndQuery({cContra,cRevisa})
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura filtro de relacionamento com as planilhas³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectItm:SetParentFilter({|aParam| QRYCNB->CNB_CONTRA == aParam[1] .AND. QRYCNB->CNB_REVISA == aParam[2] .AND. QRYCNB->CNB_NUMERO == aParam[3]},{|| {QRYCN9->CN9_NUMERO,QRYCN9->CN9_REVISA,QRYCNA->CNA_NUMERO}})
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010Cro  ³ Autor ³ Marcelo Custodio      ³ Data ³ 23.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Configura sessao dos cronogramas                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010Imp                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oExp01 - Sessao dos cronogramas - TRSection                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function CR010Cro(oSectCro)
+Local cContra:=Replace(MV_PAR01,"CN9_NUMERO","CNF_CONTRA")
+Local cRevisa:=Replace(mv_par02,"CN9_REVISA","CNF_REVISA")
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Gera query de filtro dos cronogramas               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectCro:BeginQuery()	
+BeginSql alias "QRYCNF"
+SELECT CNF.*
+FROM %table:CNF% CNF WHERE
+	 CNF_FILIAL = %xfilial:CNF% AND
+CNF.%notDel%
+ORDER BY CNF_CONTRA,CNF_REVISA,CNF_NUMERO,CNF_PARCEL
+EndSql
+                           
+oSectCro:EndQuery({cContra,cRevisa})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura filtro de relacionamento com as planilhas³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectCro:SetParentFilter({|aParam| QRYCNF->CNF_CONTRA == aParam[1] .And. QRYCNF->CNF_REVISA == aParam[2] .And. QRYCNF->CNF_NUMERO == aParam[3]},{|| {QRYCN9->CN9_NUMERO,QRYCN9->CN9_REVISA,QRYCNA->CNA_CRONOG}})
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010Cac  ³ Autor ³ Marcelo Custodio      ³ Data ³ 23.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Configura sessao das caucoes                               ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010Imp                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oExp01 - Sessao das caucoes  - TRSection                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function CR010Cac(oSectCac)
+Local cContra:=Replace(MV_PAR01,"CN9_NUMERO","CN8_CONTRA")
+Local cRevisa:=Replace(mv_par02,"CN9_REVISA","CN8_REVISA")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Gera query de filtro das caucoes                   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectCac:BeginQuery()	
+BeginSql alias "QRYCN8"
+SELECT CN8.*
+FROM %table:CN8% CN8 WHERE
+CN8_FILIAL = %xfilial:CN8% AND
+CN8.%notDel%
+ORDER BY CN8_CONTRA,CN8_REVISA,CN8_CODIGO
+EndSql
+                           
+oSectCac:EndQuery({cContra,cRevisa})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura filtro de relacionamento com os contratos³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectCac:SetParentFilter({|aParam| QRYCN8->CN8_CONTRA == aParam[1] .AND. QRYCN8->CN8_REVISA == aParam[2]},{|| {QRYCN9->CN9_NUMERO,QRYCN9->CN9_REVISA}})
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010Frn  ³ Autor ³ Marcelo Custodio      ³ Data ³ 23.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Configura sessao dos fornecedores de contratos             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010Imp                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oExp01 - Sessao dos fornecedores - TRSection               ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function CR010Frn(oSectFrn)
+Local cContra:=Replace(MV_PAR01,"CN9_NUMERO","CNC_NUMERO")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Gera query de filtro dos fornecedores              ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectFrn:BeginQuery()	
+BeginSql alias "QRYCNC"
+SELECT CNC.*
+FROM %table:CNC% CNC WHERE
+CNC_FILIAL = %xfilial:CNC% AND
+CNC.%notDel%
+ORDER BY CNC_NUMERO,CNC_CODIGO,CNC_LOJA
+EndSql
+                           
+oSectFrn:EndQuery(cContra)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura filtro de relacionamento com os contratos³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectFrn:SetParentFilter({|cParam| QRYCNC->CNC_NUMERO == cParam },{|| QRYCN9->CN9_NUMERO})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura posicionamento das tabelas filhas        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+TRPosition():New(oSectFrn,"SA2",1,"xFilial() + QRYCNC->CNC_CODIGO + QRYCNC->CNC_LOJA")//Fornecedores
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010Cli  ³ Autor ³ Felipe Bittar         ³ Data ³ 05.03.09 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Configura sessao do cliente do contrato                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010Imp                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oExp01 - Sessao dos clientes - TRSection                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function CR010Cli(oSectCli)
+Local cContra:=Replace(MV_PAR01,"CN9_NUMERO","CN9_NUMERO")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Gera query de filtro dos clientes	               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectCli:BeginQuery()	
+BeginSql alias "QRYCLI"
+SELECT CN9_CLIENT, CN9_LOJACL, CN9_NUMERO, CN9_REVISA
+FROM %table:CN9% CN9 WHERE
+CN9_FILIAL = %xfilial:CN9% AND
+CN9.%notDel%
+ORDER BY CN9_NUMERO,CN9_REVISA
+EndSql
+                           
+oSectCli:EndQuery(cContra)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura filtro de relacionamento com os contratos³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectCli:SetParentFilter({|cParam| QRYCLI->CN9_NUMERO == cParam },{|| QRYCN9->CN9_NUMERO})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura posicionamento das tabelas filhas        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+TRPosition():New(oSectCli,"SA1",1,"xFilial() + QRYCLI->CN9_CLIENT + QRYCLI->CN9_LOJACL")//Cliente
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010Mul  ³ Autor ³ Marcelo Custodio      ³ Data ³ 23.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Configura sessao das multas de contratos                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010Imp                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oExp01 - Sessao dos multas - TRSection                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function CR010Mul(oSectMul)
+Local cContra:=Replace(MV_PAR01,"CN9_NUMERO","CNH_NUMERO")
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Gera query de filtro das multas                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectMul:BeginQuery()	
+BeginSql alias "QRYCNH"
+SELECT CNH.*
+FROM %table:CNH% CNH WHERE
+CNH_FILIAL = %xfilial:CNH% AND
+CNH.%notDel%
+ORDER BY CNH_NUMERO,CNH_CODIGO
+EndSql
+                           
+oSectMul:EndQuery(cContra)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura filtro de relacionamento com os contratos³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectMul:SetParentFilter({|cParam| QRYCNH->CNH_NUMERO == cParam },{|| QRYCN9->CN9_NUMERO})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura posicionamento das tabelas filhas        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+TRPosition():New(oSectMul,"CN4",1,"xFilial() + QRYCNH->CNH_CODIGO")//Tipos de Multas
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010Med  ³ Autor ³ Marcelo Custodio      ³ Data ³ 23.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Configura sessao dos cabecalhos de medicao                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010Imp                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oExp01 - Sessao do cabecalho de medicao - TRSection        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function CR010Med(oSectMed)
+Local cContra:=Replace(MV_PAR01,"CN9_NUMERO","CND_CONTRA")
+Local cRevisa:=Replace(mv_par02,"CN9_REVISA","CND_REVISA")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Gera query de filtro das medicoes                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectMed:BeginQuery()	
+BeginSql alias "QRYCND"
+SELECT CND_NUMMED, CND_NUMERO, CND_CONTRA, CND_REVISA, CND_FORNEC, CND_LJFORN,  CND_COMPET, CND_DTVENC, CND_VLMEAC, CND_VLSALD, CND_VLTOT
+FROM %table:CND% CND WHERE
+CND_FILIAL = %xfilial:CND% AND
+CND.%notDel%
+ORDER BY CND_CONTRA,CND_REVISA,CND_NUMMED
+EndSql
+                           
+oSectMed:EndQuery({cContra,cRevisa})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura filtro de relacionamento com os contratos³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectMed:SetParentFilter({|aParam| QRYCND->CND_CONTRA == aParam[1] .And. QRYCND->CND_REVISA == aParam[2]},{|| {QRYCN9->CN9_NUMERO,QRYCN9->CN9_REVISA}})
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010IMe  ³ Autor ³ Marcelo Custodio      ³ Data ³ 23.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Configura sessao dos itens de medicoes                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010Imp                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oExp01 - Sessao dos itens de medicoes - TRSection          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function CR010IMe(oSectIMe)
+Local cContra:=Replace(MV_PAR01,"CN9_NUMERO","CNE_CONTRA")
+Local cRevisa:=Replace(mv_par02,"CN9_REVISA","CNE_REVISA")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Gera query de filtro dos itens de medicoes         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectIMe:BeginQuery()	
+BeginSql alias "QRYCNE"
+SELECT CNE_ITEM, CNE_CONTRA, CNE_REVISA, CNE_NUMMED, CNE_PRODUT, CNE_QTDSOL, CNE_QTAMED, CNE_QUANT, CNE_PERC, CNE_VLUNIT, CNE_VLTOT
+FROM %table:CNE% CNE WHERE
+CNE_FILIAL = %xfilial:CNE% AND
+CNE.%notDel%
+ORDER BY CNE_CONTRA,CNE_REVISA,CNE_NUMMED,CNE_ITEM
+EndSql
+                           
+oSectIMe:EndQuery({cContra,cRevisa})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura filtro de relacionamento com as medicoes ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectIMe:SetParentFilter({|aParam| QRYCNE->CNE_CONTRA == aParam[1] .And. QRYCNE->CNE_REVISA == aParam[2] .And. QRYCNE->CNE_NUMMED == aParam[3]},{|| {QRYCN9->CN9_NUMERO,QRYCN9->CN9_REVISA,QRYCND->CND_NUMMED}})
+Return              
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNR010CrnCtb| Autor ³ Robson Nayland     ³ Data ³30/11/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Cronograma Contabil                                        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpC1 = Codigo do Planilha                                 ³±±
+±±³          ³ ExpC2 = Codigo da Contrato                                 ³±±
+±±³          ³ ExpL3 = Codigo Revisao                                     ³±±
+±±³          ³ ExpL4 = Imprime Cronograma Contabil                        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010 / CNTR020                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function CNR010CrnCtb(cContrato,cRevisao,cPlanil)
+Local aAreaAnt	:= GetArea()
+Local cAliasCronCtb:= CriaTrab(Nil, .F.)
+Local cQuery	:= ""
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Fontes											           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local oFont06	:= TFont():New("Arial",06,08,,.T.,,,,.T.,.F.)
+
+Default cPlanil := ""
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Query do Cronograma  								           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cQuery := "SELECT 	CNV.*,CNW.*  "
+cQuery += "FROM " + RetSqlName("CNV") + " CNV "
+cQuery += "LEFT JOIN " + RetSqlName("CNW") + " CNW ON CNV_NUMERO = CNW_NUMERO AND CNV_CONTRA = CNW_CONTRA AND "
+cQuery += "CNV_REVISA = CNW_REVISA "
+cQuery += "WHERE "
+cQuery += "CNV.CNV_FILIAL = '"		+	xFilial("CNV")	+ "' AND "
+cQuery += "CNW.CNW_FILIAL = '"		+	xFilial("CNW")	+ "' AND "
+cQuery += "CNV.CNV_CONTRA = '"		+	cContrato   	+ "' AND "
+cQuery += "CNV.CNV_REVISA = '"		+	cRevisao    	+ "' AND "
+If !Empty(cPlanil)
+	cQuery += "CNV.CNV_PLANIL = '"   +  cPlanil        + "' AND "
+EndIf
+cQuery += "CNV.D_E_L_E_T_ = '' AND "
+cQuery += "CNW.D_E_L_E_T_ = '' " 
+	
+cQuery := ChangeQuery(cQuery)
+MsAguarde({|| dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQuery),cAliasCronCtb,.F.,.T.)},OemToAnsi(STR0022)) //Processando
+TCSetField(cAliasCronCtb,"CNW_DTPREV","D",08,0)
+		
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Impressao do Cronograma Contabil				           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ  
+While !eof()
+  	CNR010CroCtb(cAliasCronCtb,cContrato,cRevisao)
+EndDo
+
+//-- Finaliza a query
+(cAliasCronCtb)->(dbCloseArea())
+
+RestArea(aAreaAnt)
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010Ctb  ³ Autor ³ Marcelo Custodio      ³ Data ³ 27.02.07 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Configura sessao dos cronogramas contabeis                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010Imp                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oExp01 - Sessao dos cronogramas contabeis - TRSection      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function CR010Ctb(oSectCtb)
+Local cContra:=Replace(MV_PAR01,"CN9_NUMERO","CNW_CONTRA")
+Local cRevisa:=Replace(mv_par02,"CN9_REVISA","CNW_REVISA")
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Gera query de filtro dos cronogramas               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectCtb:BeginQuery()	
+BeginSql alias "QRYCNW"
+SELECT CNW.*
+FROM %table:CNW% CNW WHERE
+ CNW_FILIAL = %xfilial:CNW% AND
+CNW.%notDel%
+ORDER BY CNW_CONTRA,CNW_REVISA,CNW_NUMERO,CNW_PARCEL
+EndSql
+                           
+oSectCtb:EndQuery({cContra,cRevisa})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura filtro de relacionamento com as planilhas³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectCtb:SetParentFilter({|aParam| QRYCNW->CNW_CONTRA == aParam[1] .And. QRYCNW->CNW_REVISA == aParam[2] .And. QRYCNW->CNW_NUMERO == aParam[3]},{|| {QRYCN9->CN9_NUMERO,QRYCN9->CN9_REVISA,QRYCNA->CNA_CRONCT}})
+Return            
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNR010CroCtb| Autor ³                    ³ Data ³03/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Cronogramas							                             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpC1 = Codigo do Cronograma                               ³±±
+±±³          ³ ExpC2 = Codigo do Contrato                                 ³±±
+±±³          ³ ExpC3 = Codigo da Revisao                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010 / CNTR020                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function CNR010CroCtb(cAliasCronCtb,cContrato,cRevisao)
+Local aAreaAnt := GetArea()
+Local cCron
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Fontes										              ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local oFont06  := TFont():New("Arial",06,08,,.T.,,,,.T.,.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Recupera Picture dos Campos									        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local cPtVLPREV := PesqPict("CNW","CNW_VLPREV")
+
+dbSelectArea(cAliasCronCtb)
+
+cCron := (cAliasCronCtb)->CNV_NUMERO
+
+nLin += 50
+CNRBox(050,2350,"CRONOGRAMA CONTABIL",,.T.,1) //-- Cabecalho CRONOGRAMA
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cabecalho do Cronograma	Contabil    			        ³
+ //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+CNRBox(0050,0280,RetTitle("CNW_NUMERO"),,.F.,2,oFont06)
+CNRBox(0285,0480,RetTitle("CNW_PARCEL"),,.F.,2,oFont06)
+CNRBox(0485,0680,RetTitle("CNW_COMPET"),,.F.,2,oFont06)
+CNRBox(0685,1050,RetTitle("CNW_DTPREV"),,.F.,2,oFont06)
+CNRBox(1055,1400,RetTitle("CNW_VLPREV"),,.F.,2,oFont06)
+CNRBox(1405,1720,RetTitle("CNW_HIST"),,.F.,2,oFont06)
+CNRBox(1725,1910,RetTitle("CNW_CC"),,.F.,2,oFont06)
+CNRBox(1915,2120,RetTitle("CNW_ITEMCT"),,.F.,2,oFont06)
+CNRBox(2125,2350,RetTitle("CNW_CLVL"),,.F.,2,oFont06)
+nLin += 50
+Do While !Eof() .And. (cAliasCronCtb)->CNV_NUMERO == cCron
+   //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Impressao dos Itens do Cronograma					        ³
+   //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+   //-- Num. Cronograma
+	CNRBox(0050,0280,(cAliasCronCtb)->CNW_NUMERO,,.F.,2,oFont06)
+   //-- Parcela
+   CNRBox(0285,0480,(cAliasCronCtb)->CNW_PARCEL,,.F.,2,oFont06)
+   //-- Competencia
+	CNRBox(0485,0680,(cAliasCronCtb)->CNW_COMPET,,.F.,2,oFont06)
+	//-- Data                
+	CNRBox(0685,1050,(cAliasCronCtb)->CNW_DTPREV,,.F.,2,oFont06,.T.)
+	//-- Vl. Apropriado
+	CNRBox(1055,1400,TransForm((cAliasCronCtb)->(C010xMoeda(.F.,cContrato,cRevisao,"CNW_VLPREV")),cPtVLPREV),,.F.,2,oFont06,.T.)
+	//-- Hist            
+	CNRBox(1405,1720,AllTrim((cAliasCronCtb)->CNW_HIST),,.F.,2,oFont06,.F.)
+	//-- Cc           
+	CNRBox(1725,1910,(cAliasCronCtb)->CNW_CC,,.F.,2,oFont06)
+	//-- Item Ct 
+	CNRBox(1915,2120,(cAliasCronCtb)->CNW_ITEMCT,,.F.,2,oFont06)
+	//-- Cls. Valor
+	CNRBox(2125,2350,(cAliasCronCtb)->CNW_CLVL,,.T.,2,oFont06)
+	(cAliasCronCtb)->(dbSkip())
+EndDo
+RestArea(aAreaAnt)
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010Des  ³ Autor ³ Felipe Bittar         ³ Data ³ 14.08.08 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Configura sessao de multas/bonificacoes de medicoes        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010Imp                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oExp01 - Sessao de multas/bonific de medicoes - TRSection  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function CR010Bon(oSectBon)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Gera query de filtro das bonificacoes de medicoes  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectBon:BeginQuery()	
+BeginSql alias "QRYCNR"
+SELECT CNR_NUMMED,CNR_TIPO, CNR_DESCRI, CNR_VALOR
+FROM %table:CNR% CNR WHERE
+CNR_FILIAL = %xfilial:CNR% AND
+CNR.%notDel%
+ORDER BY CNR_NUMMED,CNR_TIPO
+EndSql
+                           
+oSectBon:EndQuery()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura filtro de relacionamento com as medicoes ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectBon:SetParentFilter({|aParam| QRYCNR->CNR_NUMMED == aParam[1]},{|| {QRYCND->CND_NUMMED}})
+Return
+
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³CR010Des  ³ Autor ³ Felipe Bittar         ³ Data ³ 14.08.08 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Configura sessao dos descontos de medicoes                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010Imp                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ oExp01 - Sessao de descontos de medicoes - TRSection       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function CR010Des(oSectDes)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Gera query de filtro dos descontos de medicoes     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectDes:BeginQuery()	
+BeginSql alias "QRYCNQ"
+SELECT CNQ_NUMMED,CNQ_TPDESC,CNQ_VALOR,CNP_DESCRI
+FROM %table:CNQ% CNQ, %table:CNP% CNP WHERE
+CNQ_FILIAL = %xfilial:CNQ% AND
+CNP_FILIAL = %xfilial:CNP% AND
+CNQ_TPDESC = CNP_CODIGO AND
+CNQ.%notDel% AND
+CNP.%notDel%
+ORDER BY CNQ_NUMMED,CNQ_TPDESC
+EndSql
+                           
+oSectDes:EndQuery()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Configura filtro de relacionamento com as medicoes ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSectDes:SetParentFilter({|aParam| QRYCNQ->CNQ_NUMMED == aParam[1]},{|| {QRYCND->CND_NUMMED}})
+Return
+
+/*/
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³CNR010ClFr³ Autor ³ Aline Sebrian         ³ Data ³ 04.01.11 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³Valida os parametro do Cliente e Fornecedor no relatorio.   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³CNR010ClFr()                                                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³CNR010ClFr()                                                ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function CNR010ClFr(cCnr,cTipo)
+Local aSaveArea	:= GetArea()
+
+If cCnr=="CNR010"
+	If cTipo=="1"    
+		If !Empty(mv_par09) .Or. (!Empty(mv_par10) .And. UPPER(mv_par10) != REPLICATE("Z",TamSx3("CNC_CODIGO")[1]))
+			MV_PAR21	:= Space(6)
+			MV_PAR22	:= REPLICATE("Z",TamSx3("A1_COD")[1])	 
+		EndIf
+	Else
+		If !Empty(mv_par21) .Or. (!Empty(mv_par22) .And. UPPER(mv_par22) != REPLICATE("Z",TamSx3("A1_COD")[1]))
+			MV_PAR09	:= Space(6)
+			MV_PAR10	:= REPLICATE("Z",TamSx3("CNC_CODIGO")[1])    
+		EndIf
+	EndIf   
+Else
+	If cTipo=="1"  
+		If !Empty(MV_PAR06)
+			MV_PAR10	:= Space(6) 
+		EndIf
+	Else
+		If !Empty(MV_PAR10)
+			MV_PAR06	:= Space(6)
+		EndIf
+	EndIf              
+EndIf
+	    
+RestArea(aSaveArea)
+
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³C010xMoedaºAutor  ³Microsiga           º Data ³  11/06/11   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescricao ³ Realiza a conversao entre moedas de um determinado valor.  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºParametros³ lTReport: indica se a impressao e em TReport.			  º±±
+±±º			 ³ cContra: numero do contrato que esta sendo impresso.		  º±±
+±±º			 ³ cRev: revisao do contrato que esta sendo impresso.		  º±±
+±±º			 ³ cCampo: nome do campo a ser convertido.					  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºRetorno	 ³ nRet: valor apos conversao								  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ CNTR010													  º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function C010xMoeda(lTReport,cContra,cRev,cCampo)
+Local dDataRef  := If(lTReport,mv_par13,mv_par25)
+Local nMoedaOri	:= 0
+Local nMoedaDes := 0
+Local nRet 		:= 0
+
+If "CNTR020" $ FunName()
+	//-- Impressao da planilha e itens da planilha no CNTR020
+	nRet := C020xMoeda(lTReport,cContra,cRev,cCampo)
+Else
+	If Empty(dDataRef)
+		dDataRef := dDataBase
+	EndIf
+	nMoedaOri := If(Substr(cCampo,1,3) == "CN8",CN8_MOEDA,Posicione("CN9",1,xFilial("CN9")+cContra+cRev,"CN9_MOEDA"))
+	nMoedaDes := nMoedaOri
+	nRet	  := &(cCampo)
+
+	If lTReport
+		If mv_par11 == 2
+			nMoedaDes := mv_par12
+		EndIf
+	ElseIf mv_par23 == 2
+		nMoedaDes := mv_par24
+	EndIf
+	
+	nRet := Round(xMoeda(nRet,nMoedaOri,nMoedaDes,dDataRef,6),TamSX3(cCampo)[2])
+EndIf
+
+Return nRet

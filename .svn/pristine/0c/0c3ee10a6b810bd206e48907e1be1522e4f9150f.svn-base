@@ -1,0 +1,411 @@
+#include "protheus.ch"
+#INCLUDE "MATR977A.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณMATR977A  บAutor  ณMarcello            บFecha ณ 19/09/2008  บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณEmite relatorio com os lancamentos para calculo da base do  บฑฑ
+ฑฑบ          ณIETU.                                                       บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ IETU - Mexico                                              บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Function MATR977A()
+Local aArea	:=	GetArea()
+
+IetuPerg()
+M977ARelat("REPIET",)
+RestArea(aArea)
+Return()
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณM977ARelatบAutor  ณMarcello            บFecha ณ 19/09/2008  บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ                                                            บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ IETU - Mexico                                              บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Function M977ARelat(cPerg,dFecha1,dFecha2,nRelatorio)
+Local aAreaAnt	:= {}
+Local oReport
+Default cPerg := ""
+
+aArea := GetArea()
+oReport := TReport():New("MATR977A",STR0001,cPerg,{|oReport| M977AImpr(oReport,cPerg,dFecha1,dFecha2,nRelatorio)},STR0002) //"Cแlculo da base do IETU"###"Relat๓rio para cแlculo da base do IETU"
+	oReport:SetPortrait() 
+	oReport:SetTotalInLine(.F.)
+oReport:PrintDialog()
+RestArea(aArea)
+Return()
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณM977AImpr บAutor  ณMarcello            บFecha ณ 19/09/2008  บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณImprime o relatorio para base de IETU                       บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ IETU - Mexico                                              บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Function M977AImpr(oReport,cPerg,dFecha1,dFecha2,nRelatorio)
+Local cGrpIETU	:= ""
+Local cAliasCDK	:= ""
+Local cOrdem	:= ""
+Local cCondic	:= ""
+Local cArqTrab	:= ""
+Local cFilCDK	:= ""
+Local cOper		:= ""
+Local cDescGrp	:= ""
+Local nTtlPgo 	:= 0
+Local nTtlRec	:= 0 
+Local nColPgo	:= 0
+Local nColRec	:= 0
+Local nAltPag	:= 0
+Local nLin		:= 0
+Local nBaseGrp	:= 0
+Local nLancGrp	:= 0
+Local nBaseIETU	:= 0
+Local nBaseOper	:= 0
+Local nLancOper	:= 0
+Local nIndex	:= 0
+Local nCol		:= 0
+Local nPgoMens	:= 0
+Local nRecMens	:= 0
+Local nLinImp	:= 0
+Local dInicio	:= Ctod("//")
+Local dFim		:= Ctod("//")
+Local nRelat	:= 0
+Local aRect		:= {}
+Local aTamFts	:= {}
+Local aEstrCDK	:= {}
+Local lSubMens	:= .F.
+Local oDetalhe
+Local oBrush
+Local oFont
+
+If !Empty(cPerg)
+	Pergunte(cPerg,.F.)
+	dInicio := MV_PAR01
+	dFim := MV_PAR02
+	nRelat := MV_PAR03
+Else
+	dInicio := dFecha1
+	dFim := dFecha2
+	nRelat := nRelatorio
+Endif
+//
+nIndex := 0
+cArqTrab := ""
+//Detalhe
+If nRelat == 1	//analitico
+	oReport:SetTitle(oReport:Title() + "  -  " + Dtoc(dInicio) + " - " + Dtoc(dFim) + " (" + STR0003 + ")" ) //"analํtico"
+	oDetalhe := TRSection():New(oReport,STR0004,{"CDK"}) //"Detalhes com os pagamentos/recebimentos"
+		TRCell():New(oDetalhe,"CDK_OPERACAO","","Operaci๓n",,15,.F.)
+		TRCell():New(oDetalhe,"CDK_GPIETU","CDK",Alltrim(RetTitle("CDK_GPIETU")),,30,.F.)
+		TRCell():New(oDetalhe,"CDK_DTCOPG","CDK",Alltrim(STR0015),PesqPict("CDK","CDK_DTCOPG"),20,.F.) //"Data"
+		TRCell():New(oDetalhe,"CDK_DOC","CDK",Alltrim(RetTitle("CDK_DOC")),PesqPict("CDK","CDK_DOC"),50,.F.)
+		TRCell():New(oDetalhe,"DET_DOCPR","",AllTrim(RetTitle("EK_ORDPAGO")) + "/" + AllTrim(RetTitle("EL_RECIBO")),"",40,.F.,{||AllTrim(CDK_RECPAG)})
+		TRCell():New(oDetalhe,"DET_CLIFOR","",Alltrim(RetTitle("CDK_CLIFOR")),,40,.F.,{|| CDK_CLIFOR + "/" + CDK_LOJA + " " + SA1->A1_NREDUZ})
+		TRCell():New(oDetalhe,"DET_BASEP","",Alltrim(STR0017),,25,.F.,{|| Transform(CDK_BASE,PesqPict("CDK","CDK_BASE"))})
+Else
+	oReport:SetTitle(oReport:Title() + "  -  " + Dtoc(dInicio) + " - " + Dtoc(dFim) + " (" + STR0009 + ")") //"sint้tico"
+	oDetalhe := TRSection():New(oReport,STR0010,{}) //"Detalhes com as bases de IETU por grupo"
+		TRCell():New(oDetalhe,"CDK_OPERACAO","","Operaci๓n",,15,.F.)
+		TRCell():New(oDetalhe,"CDK_GPIETU","CDK",RetTitle("CDK_GPIETU"),,100,.F.)
+		TRCell():New(oDetalhe,"DET_BASEP","",AllTrim(STR0017),,30,.F.,{|| })
+Endif
+nAltPag := oReport:PageHeight()
+nAltPag -= 60		//garantir espaco para impressao dos totais
+//
+#IFDEF TOP
+	cCondic := "select count(*) as TTLREG from " + RetSQLName("CDK")
+	cCondic += " where CDK_FILIAL = '" + xFilial("CDK") + "'"
+	cCondic += " and D_E_L_E_T_=''"
+	cCondic+= " and CDK_DTCOPG >= '" + Dtos(dInicio) + "'"
+	cCondic+= " and CDK_DTCOPG <= '" + Dtos(dFim) + "'"
+	cAliasCDK := GetNextAlias()
+	cCondic := ChangeQuery(cCondic)
+	dbUseArea(.T.,"TOPCONN",TcGenQry(,,cCondic),cAliasCDK,.T.,.T.)
+	If !((cAliasCDK)->(Eof()))
+		oReport:SetMeter((cAliasCDK)->TTLREG + 2)
+	Else
+		oReport:SetMeter(2)
+	Endif
+	(cAliasCDK)->(DbCloseArea())
+	//
+	cAliasCDK := GetNextAlias()
+	cOrdem := "%CDK_RP,CDK_FECHA,CDK_GPIETU,CDK_DOC,CDK_SERIE,CDK_DTCOPG,CDK_RECPAG,CDK_TIPO%"
+	cCondic:= "%"
+	cCondic+= " and CDK_DTCOPG >= '" + Dtos(dInicio) + "'"
+	cCondic+= " and CDK_DTCOPG <= '" + Dtos(dFim) + "'"
+	cCondic+= " and CCI_CODGRP = CDK_GPIETU"
+	cCondic+= "%"
+	oDetalhe:BeginQuery()
+		BeginSql Alias cAliasCDK
+			select CDK_FECHA,CDK_GPIETU,CDK_DTCOPG,CDK_SERECP,CDK_RECPAG,CDK_DOC,CDK_SERIE,CDK_CLIFOR,CDK_LOJA,CDK_BASE,CDK_RP,CDK_TIPO,CDK_DOCBX,CCI_DESC
+			from %Table:CDK% CDK, %Table:CCI% CCI
+			where CDK_FILIAL = %xFilial:CDK% and CDK.%notdel% and CCI_FILIAL = %xFilial:CCI% and CCI.%notdel%
+					%Exp:cCondic%
+			order by %Exp:cOrdem%
+		EndSql       
+	oDetalhe:EndQuery()
+#ELSE
+	cAliasCDK:= GetNextAlias()
+	aEstrCDK := CDK->(DbStruct())
+	cArqTrab := CriaTrab(Nil,.F.)
+	DbCreate(cArqTrab,aEstrCDK)
+ 	dbUseArea(.T.,,cArqTrab,cAliasCDK,.F.,.F.)
+ 	cFilCDK := xFilial("CDK")
+ 	CDK->(DbSetOrder(1))
+ 	CDK->(DbSeek(cFilCDK + Substr(Dtos(dInicio),1,6),.T.))
+ 	While !(CDK->(Eof())) .And. CDK->CDK_FILIAL == cFilCDK .And. Substr(CDK->CDK_FECHA,1,6) >= Substr(Dtos(dInicio),1,6) .And. Substr(CDK->CDK_FECHA,1,6) <= Substr(Dtos(dFim),1,6) 
+ 		(cAliasCDK)->(DbAppend())
+ 		For nLin := 1 To Len(aEstrCDK)
+ 			cCpo := aEstrCDK[nlin,1]
+ 			(cAliasCDK)->(&cCpo) := CDK->&cCpo
+ 		Next
+ 		CDK->(DbSkip())
+ 	Enddo
+ 	(cAliasCDK)->(DbCreateIndex(cArqTrab + OrdBagExt(),"CDK_RP+CDK_FECHA+CDK_GPIETU+CDK_DOC+CDK_SERIE+Dtos(CDK_DTCOPG)+CDK_RECPAG+CDK_TIPO",{|| CDK_RP+CDK_FECHA+CDK_GPIETU+CDK_DOC+CDK_SERIE+Dtos(CDK_DTCOPG)+CDK_RECPAG+CDK_TIPO}))
+	oReport:SetMeter((cAliasCDK)->(RecCount()) + 2)
+#ENDIF
+//
+If nRelat == 1
+	oDetalhe:Cell("CDK_DTCOPG"):SetBlock({|| (cAliasCDK)->CDK_DTCOPG})
+	oDetalhe:Cell("CDK_DOC"):SetBlock({|| (cAliasCDK)->CDK_DOC + "/" + Alltrim((cAliasCDK)->CDK_SERIE)})
+Endif
+oBrush  := TBrush():New(,RGB(215,215,215))
+oDetalhe:Init()
+While !oReport:Cancel() .And. !((cAliasCDK)->(Eof()))
+	cOper := (cAliasCDK)->CDK_RP
+	nBaseOper := 0
+	nLancOper := 0
+	oDetalhe:Cell("CDK_OPERACAO"):SetValue(If((cAliasCDK)->CDK_RP == "P",STR0006,STR0008))
+	While !oReport:Cancel() .And. !((cAliasCDK)->(Eof())) .And. (cAliasCDK)->CDK_RP == cOper
+		nBaseGrp	:= 0
+		nLancGrp	:= 0
+		cGrpIETU := (cAliasCDK)->CDK_GPIETU
+		nLimImp := 0
+		#IFDEF TOP
+			oDetalhe:Cell("CDK_GPIETU"):SetValue((cAliasCDK)->CDK_GPIETU + " " + (cAliasCDK)->CCI_DESC)
+			cDescGrp := AllTrim((cAliasCDK)->CCI_DESC)
+		#ELSE
+			CCI->(MsSeek(xFilial("CCI") + (cAliasCDK)->CDK_GPIETU))
+			oDetalhe:Cell("CDK_GPIETU"):SetValue((cAliasCDK)->CDK_GPIETU + " " + CCI->CCI_DESC)
+			cDescGrp := AllTrim(CCI->CCI_DESC)
+		#ENDIF
+		While !oReport:Cancel() .And. !((cAliasCDK)->(Eof())) .And. (cAliasCDK)->CDK_RP == cOper .And. (cAliasCDK)->CDK_GPIETU == cGrpIETU
+			nLancGrp++
+			nLancOper++
+			If !(Empty((cAliasCDK)->CDK_RECPAG) .And. Alltrim((cAliasCDK)->CDK_TIPO) $ "NCP,NCC")
+				nBaseGrp += (cAliasCDK)->CDK_BASE
+				nBaseOper += (cAliasCDK)->CDK_BASE
+				If cOper == "P"
+					nBaseIETU -= (cAliasCDK)->CDK_BASE
+				Else
+					nBaseIETU += (cAliasCDK)->CDK_BASE
+				Endif
+			Endif
+			If nRelat == 1	//analiltico
+				If (cAliasCDK)->CDK_RP == "P"
+					SA2->(DbSeek(xFilial("SA2") + (cAliasCDK)->CDK_CLIFOR + (cAliasCDK)->CDK_LOJA))
+					oDetalhe:Cell("DET_CLIFOR"):SetValue((cAliasCDK)->CDK_CLIFOR + "/" + (cAliasCDK)->CDK_LOJA + " " + AllTrim(SA2->A2_NREDUZ))
+				Else
+					SA1->(DbSeek(xFilial("SA1") + (cAliasCDK)->CDK_CLIFOR + (cAliasCDK)->CDK_LOJA))
+					oDetalhe:Cell("DET_CLIFOR"):SetValue((cAliasCDK)->CDK_CLIFOR + "/" + (cAliasCDK)->CDK_LOJA + " " + AllTrim(SA1->A1_NREDUZ))
+				Endif
+				If Alltrim((cAliasCDK)->CDK_TIPO) $ "NCP,NCC" 
+					If !Empty((cAliasCDK)->CDK_RECPAG)
+						oDetalhe:Cell("CDK_DOC"):SetValue("(" + (cAliasCDK)->CDK_TIPO + ") " + Alltrim((cAliasCDK)->CDK_DOCBX) + "/" + AllTrim((cAliasCDK)->CDK_SERECP))
+					Endif
+				Else
+					oDetalhe:Cell("CDK_DOC"):SetBlock({|| (cAliasCDK)->CDK_DOC + "/" + Alltrim((cAliasCDK)->CDK_SERIE)})
+				Endif
+				If nLin >= nAltPag
+					oReport:EndPage()
+					oDetalhe:Init()
+					oDetalhe:Cell("CDK_OPERACAO"):SetValue(If((cAliasCDK)->CDK_RP == "P",STR0006,STR0008))
+					#IFDEF TOP
+						oDetalhe:Cell("CDK_GPIETU"):SetValue((cAliasCDK)->CDK_GPIETU + " " + (cAliasCDK)->CCI_DESC)
+					#ELSE
+						oDetalhe:Cell("CDK_GPIETU"):SetValue((cAliasCDK)->CDK_GPIETU + " " + CCI->CCI_DESC)
+					#ENDIF
+				Endif
+				oDetalhe:PrintLine()
+				nLimImp++
+				oDetalhe:Cell("CDK_DOC"):SetBlock({|| (cAliasCDK)->CDK_DOC + "/" + Alltrim((cAliasCDK)->CDK_SERIE)})
+				oDetalhe:Cell("CDK_GPIETU"):SetValue(" ")
+				oDetalhe:Cell("CDK_OPERACAO"):SetValue(" ")
+				If Alltrim((cAliasCDK)->CDK_TIPO) $ "NCP,NCC" .And. Empty((cAliasCDK)->CDK_RECPAG)
+					oDetalhe:Cell("DET_BASEP"):SetValue({|| Transform(-CDK_BASE,PesqPict("CDK","CDK_BASE"))})
+					oDetalhe:Cell("CDK_DOC"):SetValue("(" + (cAliasCDK)->CDK_TIPO + ") " + Alltrim((cAliasCDK)->CDK_DOCBX) + "/" + AllTrim((cAliasCDK)->CDK_SERECP))
+					oDetalhe:PrintLine()
+					nLimImp++
+					oDetalhe:Cell("CDK_DOC"):SetBlock({|| (cAliasCDK)->CDK_DOC + "/" + Alltrim((cAliasCDK)->CDK_SERIE)})
+					oDetalhe:Cell("DET_BASEP"):SetBlock({|| Transform(CDK_BASE,PesqPict("CDK","CDK_BASE"))})
+				Endif
+				nLin := oReport:Row()
+			Endif
+			(cAliasCDK)->(DbSkip())
+			oReport:IncMeter()
+		Enddo
+		//Total por grupo
+		If nLancGrp <> 0
+			If nRelat == 1
+				aRect := {0,0,0,oReport:PageWidth()}
+				aRect[1] := oReport:Row()
+				aRect[2] := oDetalhe:Cell("CDK_GPIETU"):ColPos()
+				aRect[3] := aRect[1]
+				oReport:FillRect(aRect,oBrush)
+				oDetalhe:Cell("CDK_GPIETU"):Hide()
+				oDetalhe:Cell("CDK_DTCOPG"):Hide()
+				oDetalhe:Cell("CDK_DOC"):Hide()
+				oDetalhe:Cell("DET_DOCPR"):Hide()
+				oDetalhe:Cell("DET_CLIFOR"):SetValue(STR0013 + " " + cDescGrp						) //"Total
+				oDetalhe:Cell("DET_BASEP"):SetValue({|| Transform(nBaseGrp,PesqPict("CDK","CDK_BASE"))})
+				oDetalhe:PrintLine()
+				oDetalhe:Cell("CDK_GPIETU"):Show()
+				oDetalhe:Cell("CDK_DTCOPG"):Show()
+				oDetalhe:Cell("CDK_DOC"):Show()
+				oDetalhe:Cell("DET_DOCPR"):Show()
+				oDetalhe:Cell("DET_CLIFOR"):SetBlock({|| CDK_CLIFOR + "/" + CDK_LOJA + " " + SA1->A1_NREDUZ})
+				oDetalhe:Cell("DET_BASEP"):SetBlock({|| Transform(CDK_BASE,PesqPict("CDK","CDK_BASE"))})
+				oReport:IncRow()
+				oReport:IncRow()
+			Else
+				oDetalhe:Cell("DET_BASEP"):SetValue({|| Transform(nBaseGrp,PesqPict("CDK","CDK_BASE"))})
+				oDetalhe:PrintLine()
+				oDetalhe:Cell("CDK_OPERACAO"):SetValue(" ")
+			Endif
+		Endif
+	Enddo
+	//Total por operacao
+	If nLancOper <> 0
+		If nRelat == 1
+			aRect := {0,0,0,oReport:PageWidth()}
+			aRect[1] := oReport:Row()
+			aRect[2] := oDetalhe:Cell("CDK_OPERACAO"):ColPos()
+			aRect[3] := aRect[1]
+			oReport:FillRect(aRect,oBrush)
+			oDetalhe:Cell("CDK_GPIETU"):Hide()
+			oDetalhe:Cell("CDK_DTCOPG"):Hide()
+			oDetalhe:Cell("CDK_DOC"):Hide()
+			oDetalhe:Cell("DET_DOCPR"):Hide()
+			oDetalhe:Cell("DET_CLIFOR"):SetValue(STR0013 + " " + If(cOper == "P",STR0006,STR0008))
+			oDetalhe:Cell("DET_BASEP"):SetValue({|| Transform(nBaseOper,PesqPict("CDK","CDK_BASE"))})
+			oDetalhe:PrintLine()
+			oDetalhe:Cell("CDK_GPIETU"):Show()
+			oDetalhe:Cell("CDK_DTCOPG"):Show()
+			oDetalhe:Cell("CDK_DOC"):Show()
+			oDetalhe:Cell("DET_DOCPR"):Show()
+			oDetalhe:Cell("DET_CLIFOR"):SetBlock({|| CDK_CLIFOR + "/" + CDK_LOJA + " " + SA1->A1_NREDUZ})
+			oDetalhe:Cell("DET_BASEP"):SetBlock({|| Transform(CDK_BASE,PesqPict("CDK","CDK_BASE"))})
+		Else
+			aRect := {0,0,0,oReport:PageWidth()}
+			aRect[1] := oReport:Row()
+			aRect[2] := oDetalhe:Cell("CDK_OPERACAO"):ColPos()
+			aRect[3] := aRect[1]
+			oReport:FillRect(aRect,oBrush)
+			oDetalhe:Cell("CDK_OPERACAO"):Hide()
+			oDetalhe:Cell("CDK_GPIETU"):SetValue(STR0013 + " " + If(cOper == "P",STR0006,STR0008))
+			oDetalhe:Cell("DET_BASEP"):SetValue({|| Transform(nBaseOper,PesqPict("CDK","CDK_BASE"))})
+			oDetalhe:PrintLine()
+			oDetalhe:Cell("CDK_OPERACAO"):Show()
+		Endif
+		oReport:IncRow()
+		oReport:IncRow()
+	Endif
+Enddo
+// impressao da base para IETU
+oReport:IncMeter()
+If oReport:Cancel()
+	aRect := {0,0,0,oReport:PageWidth()}
+	aRect[1] := oReport:Row()
+	oReport:IncRow()
+	oReport:IncRow()
+	aRect[3] := oReport:Row()
+	oBrush := TBrush():New(,RGB(221,221,221))
+	oFont := TFont():New(oReport:cFontBody,,12,,.T.,,.T.,,.F.,,,,,,,)
+	aTamFts := GetFontPixWidths(oReport:cFontBody,12,.T.,.T.,.F.)
+	oReport:FillRect(aRect,oBrush)
+	nCol := 0
+	For nLin := 1 To Len(STR0014) //"IMPRESSรO CANCELADA PELO USUมRIO"
+		nCol += aTamFts[Asc(Substr(STR0014,nLin,1))]
+	Next
+	nCol := (oReport:PageWidth() - nCol) / 3
+	oReport:Say(aRect[1]+2,nCol,STR0014,oFont)
+Else
+	oReport:IncRow()
+	If nBaseIETU <> 0
+		If nRelat == 1
+			oDetalhe:Cell("CDK_GPIETU"):Hide()
+			oDetalhe:Cell("CDK_DTCOPG"):Hide()
+			oDetalhe:Cell("CDK_DOC"):Hide()
+			oDetalhe:Cell("DET_CLIFOR"):SetValue(STR0017)	//"Base para IETU"
+			oDetalhe:Cell("DET_DOCPR"):Hide()
+			oDetalhe:Cell("DET_BASEP"):SetValue({|| Transform(nBaseIETU,PesqPict("CDK","CDK_BASE"))})
+		Else
+			oDetalhe:Cell("CDK_OPERACAO"):Hide()
+			oDetalhe:Cell("CDK_GPIETU"):SetValue(STR0017)		//"Base para IETU"
+			oDetalhe:Cell("DET_BASEP"):SetValue({|| Transform(nBaseIETU,PesqPict("CDK","CDK_BASE"))})
+		Endif
+		oDetalhe:PrintLine()
+	Endif
+Endif
+oDetalhe:Finish()
+oReport:IncMeter()
+//	
+#IFNDEF TOP
+	DbSelectArea(cAliasCDK)
+	DbCloseArea()
+	If File(cArqTrab + GetDBExtension())
+	   Ferase(cArqTrab + GetDBExtension())
+	EndIf
+	If File(cArqTrab + OrdBagExt())
+	   Ferase(cArqTrab + OrdBagExt())
+	EndIf
+	DbSelectArea("CDK")
+#ENDIF
+//
+Return()
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณIETUPERG  บAutor  ณ                    บFecha ณ             บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ                                                            บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ IETU - Mexico                                              บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function IetuPerg()
+dbSelectArea("SX1")
+dbSetOrder(1)
+If (!dbSeek("REPIET    01"))
+	PutSx1("REPIET","01", "ฟDe fecha?", 	  	   			"ฟDe fecha?",				 		"ฟDe fecha?",   	   			"mv_ch1", "D"/*fecha*/ , 8,0,0			,	"G"/*texto*/,"",""/*consulta*/,"","","mv_par01",""		,""		,""		,""       	,""			,""			,""		,""		,""		,""		,""		,""		,""		,""		,""		,"")
+	PutSx1("REPIET","02", "ฟA fecha?",  	  	  	   		"ฟA fecha?", 	 	   			"ฟA fecha?",		  	   		"mv_ch2", "D"/*numero*/, 8,0,0/*Presel*/,		"G"/*combo*/,"",""/*consulta*/,"","","mv_par02",""		,""		,""		,""       	,""			,""			,""		,""		,""		,""		,""		,""		,""		,""		,""		,"")
+	PutSx1("REPIET","03", "Analit. o Sint.?" ,"Analit. o Sint.?" ,"Analit. o Sint.?" ,	"mv_ch3" ,"N" ,01,00,01,"C","","","","","MV_PAR03","Analitico","Analitico","Analitico","","Sintetico","Sintetico","Sintetico"    ,""             ,""             ,""          ,""          ,""          ,"","","","","","","","","","","","","",""," ")
+Endif
+Return()					

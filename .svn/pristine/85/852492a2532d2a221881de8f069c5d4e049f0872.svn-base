@@ -1,0 +1,433 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "Protheus.Ch"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matrbol3.prw"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MatrBol3.ch"
+#line 18 "d:\totvs 11\microsiga\protheus\my projects\materiais\matrbol3.prw"
+Function U_MatrBol3()
+Local cPerg		:= "MTRBO3"
+Local cTitulo	:= "Livro de" + " " + "Compras" + "/" + "Vendas"
+Local cDescr1	:= If( cPaisLoc $ "ANG|PTG", "Impressão do livro fiscal (compras/vendas)", "Impressao do livro fiscal (compras/vendas)" )
+Local cNomeProg	:= "MATRBOL3"
+Local aArea		:= {}
+
+Private cAliasLCV	:= "LCV"
+Private cTam		:= "G"
+Private wnRel		:= ""
+Private aReturn		:= {"Zebrado", 1,"Administracao", 2, 2, 1, "", 1}
+Private lEnd		:= .F. 
+Private nLastKey	:= 0
+Private m_pag		:= 1
+
+aArea := GetArea()
+AjustaSX1(cPerg)
+Pergunte(cPerg, .F. )
+wnRel := SetPrint("",cNomeProg,cPerg,cTitulo,cDescr1,,, .F. ,, .T. ,cTam,, .T. )
+If !(nLastKey == 27)
+	SetDefault(aReturn,cAliasLCV)
+	If !(nLastKey == 27)
+		RptStatus({|lEnd| BOL3Impr(@lEnd)},cTitulo)
+	Endif
+Endif
+RestArea(aArea)
+Return()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function BOL3Impr(lEnd)
+Local nLin		:= 0
+Local nPag		:= 0
+Local nAltPag	:= 0
+Local nLarPag	:= 0
+Local nCpo		:= 0
+Local nPos		:= 0
+Local nEspTot	:= 0
+Local cTitulo	:= ""
+Local cTit		:= ""
+Local aTitulo	:= {}
+Local aDados	:= {}
+
+Private aCposImp	:= {}
+Private aTitDet		:= {}
+Private aCab		:= {}
+Private cLinDet		:= ""
+Private nLinTit		:= 0
+Private nTotFat		:= 0
+Private nTotIC		:= 0
+Private nTotIse		:= 0
+Private nTotBas		:= 0
+Private nTotIVA		:= 0
+
+
+
+
+
+
+If MV_PAR03 == 1
+	MsgRun(If( cPaisLoc $ "ANG|PTG", "A preparar as informações para o livro de compras", "Preparando as informacoes para o livro de compras" ),"Livros fiscais",{|| DaVinci("C")})
+
+
+	Aadd(aCposImp,{"TIPONF",07,"","C",If( cPaisLoc $ "ANG|PTG", "Tipo de factura", "Tipo de fatura" )})
+	Aadd(aCposImp,{"NIT",10,"","C","NIT do fornecedor"})
+	Aadd(aCposImp,{"RAZSOC",25,"","C",If( cPaisLoc $ "ANG|PTG", "Razão social", "Razao social" )})
+	Aadd(aCposImp,{"NFISCAL",12,"","C",If( cPaisLoc $ "ANG|PTG", "Factura", "Fatura" )})
+	Aadd(aCposImp,{"POLIZA",20,"","C",If( cPaisLoc $ "ANG|PTG", "Poliza de importação", "Poliza de importacao" )})
+	Aadd(aCposImp,{"NUMAUT",15,"","C",If( cPaisLoc $ "ANG|PTG", "Número de autorização", "Numero de autorizacao" )})
+	Aadd(aCposImp,{"EMISSAO",10,"","D",If( cPaisLoc $ "ANG|PTG", "Data da factura", "Data da fatura" )})
+	Aadd(aCposImp,{"VALCONT",17,"@E 99,999,999,999.99","N",If( cPaisLoc $ "ANG|PTG", "Valor total da factura", "Valor total da fatura" )})
+	Aadd(aCposImp,{"ICE",17,"@E 99,999,999,999.99","N","Valor ICE"})
+	Aadd(aCposImp,{"EXENTAS",17,"@E 99,999,999,999.99","N","Valores isentos ou a taxa zero"})
+	Aadd(aCposImp,{"BASEIMP",17,"@E 99,999,999,999.99","N",If( cPaisLoc $ "ANG|PTG", "Valor sujeito a crédito fiscal", "Valor sujeito a credito fiscal" )})
+	Aadd(aCposImp,{"VALIMP",17,"@E 99,999,999,999.99","N",If( cPaisLoc $ "ANG|PTG", "Crédito fiscal", "Credito fiscal" )})
+	Aadd(aCposImp,{"CODCTR",14,"","C",If( cPaisLoc $ "ANG|PTG", "Código de controlo", "Codigo de controle" )})
+Else
+	MsgRun(If( cPaisLoc $ "ANG|PTG", "A preparar as informações para o livro de vendas", "Preparando as informacoes para o livro de vendas" ),"Livros fiscais",{|| DaVinci("V")})
+
+
+	Aadd(aCposImp,{"NIT",10,"","C","NIT"})
+	Aadd(aCposImp,{"RAZSOC",25,"","C",If( cPaisLoc $ "ANG|PTG", "Razão social", "Razao social" )})
+	Aadd(aCposImp,{"NFISCAL",12,"","C",If( cPaisLoc $ "ANG|PTG", "Factura", "Fatura" )})
+	Aadd(aCposImp,{"NUMAUT",15,"","C",If( cPaisLoc $ "ANG|PTG", "Número de autorização", "Numero de autorizacao" )})
+	Aadd(aCposImp,{"EMISSAO",10,"","D",If( cPaisLoc $ "ANG|PTG", "Data da factura", "Data da fatura" )})
+	Aadd(aCposImp,{"VALCONT",17,"@E 99,999,999,999.99","N",If( cPaisLoc $ "ANG|PTG", "Valor total da factura", "Valor total da fatura" )})
+	Aadd(aCposImp,{"ICE",17,"@E 99,999,999,999.99","N","Valor ICE"})
+	Aadd(aCposImp,{"EXENTAS",17,"@E 99,999,999,999.99","N","Valores isentos ou a taxa zero"})
+	Aadd(aCposImp,{"BASEIMP",17,"@E 99,999,999,999.99","N",If( cPaisLoc $ "ANG|PTG", "Valor sujeito a débito fiscal", "Valor sujeito a debito fiscal" )})
+	Aadd(aCposImp,{"VALIMP",17,"@E 99,999,999,999.99","N",If( cPaisLoc $ "ANG|PTG", "Débito fiscal", "Debito fiscal" )})
+	Aadd(aCposImp,{"STATUSNF",9,"","C",If( cPaisLoc $ "ANG|PTG", "Estado da factura", "Estado da fatura" )})
+	Aadd(aCposImp,{"CODCTR",14,"","C",If( cPaisLoc $ "ANG|PTG", "Código de controlo", "Codigo de controle" )})
+Endif
+
+
+For nCpo := 1 To Len(aCposImp)
+	If nCpo > 1
+		cLinDet += " "
+	Endif
+	cLinDet += Replicate("#",aCposImp[nCpo,2])
+Next
+
+
+
+(cAliasLCV)->(DbGoTop())
+nLarPag := Len(cLinDet)
+nAltPag := 62
+nLinTit := 0
+aTitDet := {}
+For nCpo := 1 To Len(aCposImp)
+	cTitulo := Upper(AllTrim(aCposImp[nCpo,5]))
+	aTitulo := {}
+	While !Empty(cTitulo)
+		cTit := AllTrim(Substr(cTitulo,1,aCposImp[nCpo,2]))
+		nPos := aCposImp[nCpo,2]
+		If !Empty(Substr(cTitulo,aCposImp[nCpo,2] + 1,1))
+			While nPos > 0 .And.  !Empty(Substr(cTitulo,nPos,1))
+				nPos--
+			Enddo
+			If nPos > 0
+				cTit := Substr(cTitulo,1,nPos - 1)
+			Else
+				nPos := aCposImp[nCpo,2]
+			Endif
+		Endif
+
+		If aCposImp[nCpo,4] == "N"
+			cTit := PadL(cTit,aCposImp[nCpo,2])
+		Endif
+		Aadd(aTitulo,cTit)
+		cTitulo := LTrim(Substr(cTitulo,nPos + 1))
+	Enddo
+	nLinTit := Max(nLinTit,Len(aTitulo))
+	Aadd(aTitDet,aTitulo)
+Next
+
+nTotFat	:= 0
+nTotIC	:= 0
+nTotIse	:= 0
+nTotBas	:= 0
+nTotIVA := 0
+SetRegua((cAliasLCV)->(RecCount()))
+While !((cAliasLCV)->(Eof())) .And.  !lEnd
+
+
+	nPag++
+	nLin := BOL3Cabec(nPag)
+
+
+	nPos := 0
+	While !((cAliasLCV)->(Eof())) .And.  nLin < nAltPag .And.  !lEnd
+		aDados := {}
+		For nCpo := 1 To Len(aCposImp)
+			If Empty(aCposImp[nCpo,3])
+				Aadd(aDados,PadR((cAliasLCV)->(FieldGet(FieldPos(aCposImp[nCpo,1]))),aCposImp[nCpo,2]))
+			Else
+				Aadd(aDados,Transform((cAliasLCV)->(FieldGet(FieldPos(aCposImp[nCpo,1]))),aCposImp[nCpo,3]))
+			Endif
+		Next
+		FmtLin(aDados,cLinDet,,,@nLin)
+		If AllTrim((cAliasLCV)->STATUSNF) == "V"
+			nTotFat += (cAliasLCV)->VALCONT
+			nTotIC  += (cAliasLCV)->ICE
+			nTotIse += (cAliasLCV)->EXENTAS
+			nTotBas += (cAliasLCV)->BASEIMP
+			nTotIVA += (cAliasLCV)->VALIMP
+		Endif
+		If lEnd
+			(cAliasLCV)->(DbGoBottom())
+		Endif
+		(cAliasLCV)->(DbSkip())
+		IncRegua()
+	Enddo
+	If (cAliasLCV)->(Eof()) .And.  !lEnd
+		If nTotFat <> 0
+	  		BOL3Totais()
+		Endif
+	Endif
+Enddo
+If Select(cAliasLCV) > 0
+	DbSelectArea(cAliasLCV)
+	DbCloseArea()
+Endif
+If lEnd
+	cTit := Upper(AllTrim(If( cPaisLoc $ "ANG|PTG", "Impressão cancelada pelo utilizador", "Impressao cancelada pelo usuario" )))
+	nPos := (nLarPag - Len(cTit)) / 2
+	PrintOut(_PROW()+2,nPos,cTit,,)
+Endif
+
+If aReturn[5]==1
+   dbCommitAll()
+   Set( 24, "" )
+   OurSpool(wnRel)
+Endif
+MS_FLUSH()
+Return()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function BOL3Cabec(nPag)
+Local cTitLivro	:= ""
+Local nLin		:= 0
+Local nX		:= 0
+Local nY		:= 0
+Local nLarPag	:= 0
+Local nColTit	:= 0
+Local aDados	:= {}
+
+nLarPag := Len(cLinDet)
+
+
+cTitLivro := "IVA - " + "Livro de" + " " + If(MV_PAR03 == 1,"Compras","Vendas")
+nColTit := 0
+nLin := 0
+nColTit := (nLarPag - Len(cTitLivro)) / 2
+PrintOut(nLin,nColTit,cTitLivro,,)
+nLin++
+PrintOut(nLin,0,Replicate("_",nLarPag),,)
+nLin++
+
+
+PrintOut(nLin,0,If(cPaisLoc$"ANG|PTG","Nome ou razão social","Nome ou razao social")+": "+AllTrim(SM0->M0_NOMECOM),,)
+PrintOut(nLin,nLarPag/2,"Filial"+": "+cFilAnt,,)
+PrintOut(nLin,(nLarPag*3)/4,"NIT: "+AllTrim(SM0->M0_CGC),,)
+nLin++
+
+
+PrintOut(nLin,0,If(cPaisLoc$"ANG|PTG","Morada","Endereco")+": "+AllTrim(SM0->M0_ENDCOB),,)
+PrintOut(nLin,(nLarPag*3)/4,If(cPaisLoc$"ANG|PTG","Período","Periodo")+": "+Dtoc(MV_PAR01)+" - "+Dtoc(MV_PAR02),,)
+nLin++
+
+
+PrintOut(nLin,0,If(cPaisLoc$"ANG|PTG","Apresentação","Apresentacao")+": "+Dtoc(dDataBase),,)
+PrintOut(nLin,(nLarPag*3)/4,"Folio"+": "+StrZero(nPag,4),,)
+nLin++
+PrintOut(nLin,0,Replicate("_",nLarPag),,)
+nLin++
+
+
+For nY := 1 To nLinTit
+	aDados := {}
+	For nX := 1 To Len(aTitDet)
+		Aadd(aDados,Space(aCposImp[nX,2]))
+		If nY <= Len(aTitDet[nX])
+			Adados[Len(aDados)] := aTitDet[nX,nY]
+		Endif
+	Next
+	FmtLin(aDados,cLinDet,,,@nLin)
+Next
+PrintOut(nLin,0,Replicate("_",nLArPag),,)
+
+nLin++
+Return(nLin)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function BOL3Totais()
+Local nCpo		:= 0
+Local nLin		:= 0
+Local nLarPag	:= 0
+Local aDados	:= {}
+
+nLin := _PROW() + 1
+nLarPag := Len(cLinDet)
+
+
+PrintOut(nLin,0,Replicate("_",nLArPag),,)
+nLin++
+For nCpo := 1 To Len(aCposImp)
+	Aadd(aDados,Space(aCposImp[nCpo,2]))
+Next
+
+nCpo := Ascan(aCposImp,{|cpo| cpo[1] == "NUMAUT"})
+aDados[nCpo] := "Total"
+
+nCpo := Ascan(aCposImp,{|cpo| cpo[1] == "VALCONT"})
+aDados[nCpo] := Transform(nTotFat,aCposImp[nCpo,3])
+
+nCpo := Ascan(aCposImp,{|cpo| cpo[1] == "ICE"})
+aDados[nCpo] := Transform(nTotIC,aCposImp[nCpo,3])
+
+nCpo := Ascan(aCposImp,{|cpo| cpo[1] == "EXENTAS"})
+aDados[nCpo] := Transform(nTotIse,aCposImp[nCpo,3])
+
+nCpo := Ascan(aCposImp,{|cpo| cpo[1] == "BASEIMP"})
+aDados[nCpo] := Transform(nTotBas,aCposImp[nCpo,3])
+
+nCpo := Ascan(aCposImp,{|cpo| cpo[1] == "VALIMP"})
+aDados[nCpo] := Transform(nTotIVA,aCposImp[nCpo,3])
+
+FmtLin(aDados,cLinDet,,,@nLin)
+
+
+nLin++
+MV_PAR04 := Upper(AllTrim(MV_PAR04))
+MV_PAR05 := Upper(AllTrim(MV_PAR05))
+PrintOut(nLin,00,PadC(MV_PAR04,20),,)
+PrintOut(nLin,40,PadC(MV_PAR05,50),,)
+nLin++
+PrintOut(nLin,00,Replicate("_",20),,)
+PrintOut(nLin,40,Replicate("_",50),,)
+nLin++
+PrintOut(nLin,00,PadC(Upper(Alltrim("CI")),20),,)
+PrintOut(nLin,40,PadC(Upper(AllTrim(If(cPaisLoc$"ANG|PTG","Nome completo do responsável","Nome completo do responsavel"))),50),,)
+Return()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSX1(cPerg)
+Local aHelpP  := {}
+Local aHelpE  := {}
+Local aHelpS  := {}
+
+
+
+aHelpP  := {}
+aHelpE  := {}
+aHelpS  := {}
+aHelpP	:= {"Informe a data inicial para geracao do","livro."}
+aHelpE	:= {"Enter the initial date to generate the","record."}
+aHelpS	:= {"Informe fecha inicial para generar el ","libro."}
+PutSx1(cPerg,"01","Data inicial","Fecha inicial","Initial date","mv_ch1","D",8,0,0,"G",,,,,"mv_par01",,,,,,,,,,,,,,,,,aHelpP,aHelpE,aHelpS)
+
+
+aHelpP  := {}
+aHelpE  := {}
+aHelpS  := {}
+aHelpP	:= {"Informe a data final para geracao do","livro."}
+aHelpE	:= {"Enter the final date to generate the","record."}
+aHelpS	:= {"Informe fecha final para generar el ","libro."}
+PutSx1(cPerg,"02","Data final","Fecha Final","Final date","mv_ch2","D",8,0,0,"G",,,,,"mv_par02",,,,,,,,,,,,,,,,,aHelpP,aHelpE,aHelpS)
+
+
+aHelpP  := {}
+aHelpE  := {}
+aHelpS  := {}
+aHelpP	:= {"Informe o Livro que deseja imprimir:","compras ou vendas"}
+aHelpE	:= {"Enter the Record you want to print:","Purchases or Sales"}
+aHelpS	:= {"Informe el Libro que desea imprimir:","Compras o Ventas"}
+PutSx1(cPerg,"03","Livro","Libro","Record","mv_ch3","N",1,0,0,"C",,,,,"mv_par03","Compras","Compras","Purchases",,"Vendas","Ventas","Sales",,,,,,,,,,aHelpP,aHelpE,aHelpS)
+
+
+aHelpP  := {}
+aHelpE  := {}
+aHelpS  := {}
+aHelpP	:= {"Informe o numero do C.I. do responsavel"}
+aHelpE	:= {"Enter the responsible C.I. number"}
+aHelpS	:= {"Informe el numero del C.I. del responsable"}
+PutSx1(cPerg,"04","C.I.","C.I.","C.I.","mv_ch4","C",20,0,0,"G",,,,,"mv_par04",,,,,,,,,,,,,,,,,aHelpP,aHelpE,aHelpS)
+
+
+aHelpP  := {}
+aHelpE  := {}
+aHelpS  := {}
+aHelpP	:= {"Informe o nome completo do responsavel."}
+aHelpE	:= {"Enter the responsible full name"}
+aHelpS	:= {"Informe el nombre completo del responsable."}
+PutSx1(cPerg,"05","Responsavel","Responsable","Resonsible","mv_ch5","C",55,0,0,"G",,,,,"mv_par05",,,,,,,,,,,,,,,,,aHelpP,aHelpE,aHelpS)
+Return()

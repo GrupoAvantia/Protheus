@@ -1,0 +1,2646 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATR240.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr240.prx"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "PROTHEUS.CH"
+#line 17 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr240.prx"
+Function MATR240()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And.  TRepInUse()
+
+
+
+	oReport:= ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR240R3()
+EndIf
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportDef()
+
+Local cAliasTOP	:= "SB1"
+Local cAliasSB2	:= "SB2"
+Local cAliasSB5	:= "SB5"
+Local aOrdem    := {OemToAnsi(If( cPaisLoc $ "ANG|PTG", " por código         ", " Por Codigo         " )),OemToAnsi(If( cPaisLoc $ "ANG|PTG", " por tipo           ", " Por Tipo           " )),OemToAnsi(If( cPaisLoc $ "ANG|PTG", " por descrição    ", " Por Descricao    " )),OemToAnsi(If( cPaisLoc $ "ANG|PTG", " por grupo        ", " Por Grupo        " ))}
+Local aSB1Cod	:= TAMSX3("B1_COD")
+Local aSB1Ite	:= TAMSX3("B1_CODITE")
+Local lVEIC		:= UPPER(GETMV("MV_VEICULO"))=="S"
+Local lVersao	:= (VAL(GetVersao( .F. )) == 11 .And.  GetRpoRelease() >= "R6" .Or.  VAL(GetVersao( .F. ))  > 11)
+Local cPerg		:= "MTR240"
+Local cPict		:= ""
+
+Local oSection
+
+Local aSizeQT	:= TamSX3("B2_QATU")
+Local aSizeQTF  := TamSX3("B2_QFIM")
+Local aSizeVL	:= TamSX3("B2_VATU1")
+Local aSizeLZ   := If(lVersao,TamSX3("NNR_DESCRI"),TamSX3("B2_LOCALIZ"))
+Local cPictQT   := PesqPict("SB2","B2_QATU")
+Local cPictVL   := PesqPict("SB2","B2_VATU1")
+Local cPictLZ   := If(lVersao,PesqPict("NNR","NNR_DESCRI"),PesqPict("SB2","B2_LOCALIZ"))
+
+
+
+
+
+
+
+
+
+
+
+oReport:= TReport():New("MATR240",If( cPaisLoc $ "ANG|PTG", "Saldos Em Stock", "Saldos em Estoque" ),cPerg, {|oReport| ReportPrint(oReport,@cAliasTOP,@cAliasSB2,lVeic,aOrdem,@cAliasSB5)},If( cPaisLoc $ "ANG|PTG", "Este programa irá emitir um resumo dos saldos, em quantidade,", "Este programa ira' emitir um resumo dos saldos ,em quantidade," )+" "+If( cPaisLoc $ "ANG|PTG", "Dos produtos em stock.", "dos produtos em estoque." ))
+oReport:SetPortrait()
+
+
+
+
+
+AjustaSX1(cPerg,lVeic,aSB1Cod,aSB1Ite)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pergunte(oReport:uParam, .F. )
+
+If ( cPaisLoc=="CHI" )
+	cPict   := "@E 999,999,999.99"
+Else
+	cPict	:= PesqPictQt(If(mv_par15==1,"B2_QATU","B2_QFIM"),If(mv_par15==1, aSizeQT[1], aSizeQTF[1]))
+EndIf
+
+
+
+If lVersao
+	oSection := TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Saldos Em Stock", "Saldos em Estoque" ),{"SB1","SB2","NNR"},aOrdem)
+Else
+	oSection := TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Saldos Em Stock", "Saldos em Estoque" ),{"SB1","SB2"},aOrdem)
+EndIf
+oSection:SetHeaderPage()
+oSection:SetTotalInLine( .F. )
+oSection:SetReadOnly()
+
+TRCell():New(oSection,"B1_CODITE"	, "SB1")
+TRCell():New(oSection,"B2_COD"		,"SB2",,,,,)
+TRCell():New(oSection,"B1_TIPO"		,"SB1")
+TRCell():New(oSection,"B1_GRUPO"	,"SB1")
+
+	TRCell():New(oSection,"B1_DESC"		,"SB1",,,30,,{ || If(mv_par17 == 1 .And.  !Empty((cAliasSB5)->B5_CEME),(cAliasSB5)->B5_CEME,(cAliasTOP)->B1_DESC) })
+
+
+
+TRCell():New(oSection,"B1_UM"		,"SB1")
+TRCell():New(oSection,"B2_FILIAL"	,"SB2")
+TRCell():New(oSection,"B2_LOCAL"	,"SB2")
+TRCell():New(oSection,"QUANT"		,"SB2")
+oSection:Cell("QUANT"):GetFieldInfo(If(mv_par15==1,"B2_QATU","B2_QFIM"))
+oSection:Cell("QUANT"):SetTitle(If( cPaisLoc $ "ANG|PTG", "Qtde.1a.u.m.", "Qtde.1a.U.M." ))
+oSection:Cell("QUANT"):SetPicture(cPict)
+TRCell():New(oSection,"B1_SEGUM"	,"SB1")
+TRCell():New(oSection,"QUANT2"		,"SB2")
+oSection:Cell("QUANT2"):GetFieldInfo("B2_QTSEGUM")
+oSection:Cell("QUANT2"):SetTitle(If( cPaisLoc $ "ANG|PTG", "Qtde.2a.u.m.", "Qtde.2a.U.M." ))
+oSection:Cell("QUANT2"):SetPicture(cPict)
+TRCell():New(oSection,"DISPON"		,"",Left(If( cPaisLoc $ "ANG|PTG", "Disponível   ", "Disponivel   " ),1)+"/"+Left(If( cPaisLoc $ "ANG|PTG", "Indisponível ", "Indisponivel " ),1),,,,{ || Left( If(SubStr((cAliasSB2)->B2_STATUS,1,1)$"2",If( cPaisLoc $ "ANG|PTG", "Indisponível ", "Indisponivel " ),If( cPaisLoc $ "ANG|PTG", "Disponível   ", "Disponivel   " )) ,1) })
+If lVersao
+	TRCell():New(oSection,"NNR_DESCRI"	,"NNR")
+Else
+	TRCell():New(oSection,"B2_LOCALIZ"	,"SB2")
+EndIf
+
+Return(oReport)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportPrint(oReport,cAliasTOP,cAliasSB2,lVeic,aOrdem,cAliasSB5)
+
+Local oSection   := oReport:Section(1)
+Local nOrdem     := oSection:GetOrder()
+Local aRegs      := {}
+Local lRet       := .T. 
+Local lVersao	:= (VAL(GetVersao( .F. )) == 11 .And.  GetRpoRelease() >= "R6" .Or.  VAL(GetVersao( .F. ))  > 11)
+Local oTotaliz
+Local oBreak
+
+
+
+
+Local nSoma      := nSoma2    := 0
+Local nTotSoma   := nTotSoma2 := 0
+Local nX         := 0
+Local nRegM0     := 0
+Local nIndB1     := 0
+Local nIndB2     := 0
+Local nQtdProd   := 0
+Local aSalProd   := {}
+Local cFilialDe  := ""
+Local cQuebra1   := ""
+Local cCampo     := ""
+Local cMens      := ""
+Local aProd      := {}
+Local aProd1     := {}
+Local aArea
+Local cFilOld    := "úú"
+Local cCodAnt    := "úú"
+Local cDesc
+Local lIsCient
+Local nQtdBlq    := nQtdBlq2 := 0
+Local nQuant     := 0.00
+Local nQuant2    := 0.00
+Local aFiliais   := {}
+Local cNomArqB2  := ""
+
+
+
+
+	Local cWhere	:= ""
+	Local cSelect	:= ""
+	Local cOrderBy  := ""
+	Local cGroupBy  := ""
+	Local cJoin		:= ""
+
+
+
+
+
+
+
+
+
+
+
+
+
+Local cCodite    := ""
+
+
+
+
+PRIVATE XSB1			:= XFILIAL("SB1")
+PRIVATE XSB2			:= XFILIAL("SB2")
+PRIVATE XSB5			:= XFILIAL("SB5")
+
+
+
+
+oReport:SetTitle(oReport:Title()+" - ("+AllTrim(aOrdem[nOrdem])+")")
+
+
+
+If nOrdem == 1
+	oBreak := TRBreak():New(oSection,oSection:Cell("B2_COD"),, .f. )
+ElseIf nOrdem == 2
+	oBreak := TRBreak():New(oSection,oSection:Cell("B1_TIPO"),"Total do "+" "+"Tipo..........", .F. )
+ElseIf nOrdem == 3
+	oBreak := TRBreak():New(oSection,oSection:Cell("B1_DESC"),, .f. )
+ElseIf nOrdem == 4
+	oBreak := TRBreak():New(oSection,oSection:Cell("B1_GRUPO"),"Total do "+" "+"Grupo.........", .F. )
+EndIf
+
+If nOrdem == 1 .Or.  nOrdem == 3
+
+
+	oTotaliz := TRFunction():New(oSection:Cell("QUANT"),"DISP1","SUM",oBreak,"(" + Substr(If( cPaisLoc $ "ANG|PTG", "Disponível   ", "Disponivel   " ),1,1)+ ") = " + "Qtde. " + If( cPaisLoc $ "ANG|PTG", "Disponível   ", "Disponivel   " ),, , .F. , .F. ,)
+	oTotaliz:SetCondition({ || SubStr((cAliasSB2)->B2_STATUS,1,1)<>"2"})
+
+	If mv_par18 == 1
+		oTotaliz := TRFunction():New(oSection:Cell("QUANT2"),"DISP2","SUM",oBreak,"(" + Substr(If( cPaisLoc $ "ANG|PTG", "Disponível   ", "Disponivel   " ),1,1)+ ") = " + "Qtde. " + If( cPaisLoc $ "ANG|PTG", "Disponível   ", "Disponivel   " ) ,,, .F. , .F. ,)
+		oTotaliz:SetCondition({ || SubStr((cAliasSB2)->B2_STATUS,1,1)<>"2"})
+	EndIf
+	oTotaliz := TRFunction():New(oSection:Cell("QUANT"),"INDISP1","SUM",oBreak,"(" + SubStr(If( cPaisLoc $ "ANG|PTG", "Indisponível ", "Indisponivel " ),1,1)+ ") = " + "Qtde. " + If( cPaisLoc $ "ANG|PTG", "Indisponível ", "Indisponivel " ),,, .F. , .F. ,)
+	oTotaliz:SetCondition({ || SubStr((cAliasSB2)->B2_STATUS,1,1)$"2"})
+
+	If mv_par18 == 1
+		oTotaliz := TRFunction():New(oSection:Cell("QUANT2"),"INDISP2","SUM",oBreak,"(" + SubStr(If( cPaisLoc $ "ANG|PTG", "Indisponível ", "Indisponivel " ),1,1)+ ") = " + "Qtde. " + If( cPaisLoc $ "ANG|PTG", "Indisponível ", "Indisponivel " ) ,,, .F. , .F. ,)
+		oTotaliz:SetCondition({ || SubStr((cAliasSB2)->B2_STATUS,1,1)$"2"})
+	EndIf
+
+EndIf
+
+oTotaliz := TRFunction():New(oSection:Cell("QUANT"),"QT1","SUM",oBreak,If(Alltrim(Str(nOrdem)) $ "1|3",If( cPaisLoc $ "ANG|PTG", "Total Do Artigo", "Total do Produto" ),),,, .F. , .F. ,)
+If mv_par18 == 1
+	oTotaliz := TRFunction():New(oSection:Cell("QUANT2"),"QT2","SUM",oBreak,,,, .F. , .F. ,)
+EndIf
+
+
+aFiliais := {}
+nRegM0   := SM0->(Recno())
+SM0->(DBSeek(cEmpAnt, .T. ))
+while !SM0->(Eof()) .And. SM0->M0_CODIGO==cEmpAnt
+	If SM0->M0_CODFIL >= mv_par02 .And.  SM0->M0_CODFIL <= mv_par03
+		aAdd(aFiliais, SM0->M0_CODFIL)
+	EndIf
+	SM0->(dbSkip())
+EndDo
+SM0->(dbGoto(nRegM0))
+
+
+
+
+If mv_par18 == 2
+	oSection:Cell("B1_SEGUM"):Disable()
+	oSection:Cell("QUANT2"):Disable()
+EndIf
+If ! lVeic
+	oSection:Cell("B1_CODITE"):Disable()
+EndIf
+
+
+	If ! (mv_par19 == 1 .And.  mv_par01==1)
+		If lVersao
+			oSection:Cell("NNR_DESCRI"):Disable()
+		Else
+			oSection:Cell("B2_LOCALIZ"):Disable()
+		EndIf
+	EndIf
+
+
+
+	MakeSqlExpr(oReport:uParam)
+
+
+
+
+	cJoin := "%"
+	cJoin += "   JOIN " + RetSqlName("SB1") + " SB1 ON "
+
+	If FWModeAccess("SB1") == "E" .And.  FWModeAccess("SB2") == "E"
+		cJoin += "  SB1.B1_FILIAL =  SB2.B2_FILIAL AND "
+	EndIf
+
+	If FWModeAccess("SB1",3) == "E"
+		cJoin += " SB1.B1_FILIAL >= '" + mv_par02 + "' AND "
+		cJoin += " SB1.B1_FILIAL <= '" + mv_par03 + "' AND "
+	ElseIf FWModeAccess("SB1",2) == "E"
+		cJoin += " SB1.B1_FILIAL >= '" + PadR(Substr(MV_PAR02,1,Len(FWSM0Layout(,1)) +Len(FWSM0Layout(,2))),FWSizeFilial()) + "' AND "
+		cJoin += " SB1.B1_FILIAL <= '" + PadR(Substr(MV_PAR03,1,Len(FWSM0Layout(,1)) +Len(FWSM0Layout(,2))),FWSizeFilial()) + "' AND "
+	ElseIf FWModeAccess("SB1",1) == "E"
+		cJoin += " SB1.B1_FILIAL >= '" + PadR(Substr(MV_PAR02,1,Len(FWSM0Layout(,1))),FWSizeFilial()) + "' AND "
+		cJoin += " SB1.B1_FILIAL <= '" + PadR(Substr(MV_PAR03,1,Len(FWSM0Layout(,1))),FWSizeFilial()) + "' AND "
+	Else
+		cJoin += " SB1.B1_FILIAL >= '" + Space(FWSizeFilial()) + "' AND "
+		cJoin += " SB1.B1_FILIAL <= '" + Space(FWSizeFilial()) + "' AND "
+	EndIf
+
+	cJoin += " SB1.B1_COD    = SB2.B2_COD AND "
+	cJoin += " SB1.B1_TIPO  >= '" + mv_par08 + "' AND "
+	cJoin += " SB1.B1_TIPO  <= '" + mv_par09 + "' AND "
+	cJoin += " SB1.B1_GRUPO >= '" + mv_par10 + "' AND "
+	cJoin += " SB1.B1_GRUPO <= '" + mv_par11 + "' AND "
+	cJoin += " SB1.B1_DESC  >= '" + mv_par12 + "' AND "
+	cJoin += " SB1.B1_DESC  <= '" + mv_par13 + "' AND "
+	cJoin += " SB1.D_E_L_E_T_ = ' ' "
+	If mv_par17 == 1
+		cJoin += " LEFT JOIN " + RetSqlName("SB5") + " SB5 "
+		cJoin += "     ON  SB5.B5_FILIAL = '" + xFilial("SB5") + "' "
+		cJoin += "     AND SB5.B5_COD    = SB1.B1_COD "
+		cJoin += "     AND SB5.D_E_L_E_T_ = ' ' "
+	EndIf
+	If lVersao .And.  mv_par19 == 1 .And.  mv_par01==1
+		cJoin += " LEFT JOIN " + RetSqlName("NNR") + " NNR "
+		cJoin += "     ON  NNR.NNR_FILIAL = '" + xFilial("NNR") + "' "
+		cJoin += "     AND NNR.NNR_CODIGO = SB2.B2_LOCAL "
+		cJoin += "     AND NNR.D_E_L_E_T_ = ' ' "
+	EndIf
+	cJoin += "%"
+
+
+
+
+	cSelect := "%"
+	If mv_par18 == 1
+		cSelect += ", SB1.B1_SEGUM SEGUM"
+	EndIf
+	If lVeic
+		cSelect += ", SB1.B1_CODITE CODITE"
+	EndIf
+	If mv_par01 == 1
+		cSelect += ", SB2.B2_LOCAL LOC, SB2.B2_FILIAL FILIAL"
+	Else
+		cSelect += ", '**' LOC"
+	EndIf
+	If  mv_par01 == 2
+		cSelect += ", SB2.B2_FILIAL FILIAL"
+	EndIf
+	If mv_par01 == 3
+		cSelect += ", '**' FILIAL"
+	EndIf
+	If mv_par19 == 1 .And.  mv_par01==1
+		If lVersao
+			cSelect += ", NNR.NNR_DESCRI DESCARM"
+		Else
+			cSelect += ", SB2.B2_LOCALIZ DESCARM"
+		EndIf
+	EndIf
+	If mv_par17 == 1
+		cSelect += ", SB5.B5_CEME"
+	EndIf
+	cSelect += "%"
+
+	cWhere += "%"
+	If lVeic
+		cWhere += " AND SB1.B1_CODITE >= '" + mv_par06 + "' AND SB1.B1_CODITE <='" + mv_par07 + "' "
+	Else
+		cWhere += " AND SB1.B1_COD >= '" + mv_par06 + "' AND SB1.B1_COD <='" + mv_par07 + "' "
+	EndIf
+	If mv_par16 == 1 .And.  mv_par01 == 1
+		If mv_par14 == 2
+			If mv_par15 == 1
+				cWhere += " AND (SB2.B2_QATU < 0)"
+			ElseIf mv_par15 == 2
+				cWhere += " AND (SB2.B2_QFIM < 0)"
+			EndIf
+		Else
+			If mv_par15== 1
+				cWhere += " AND (SB2.B2_QATU <= 0)"
+			ElseIf mv_par15 == 2
+				cWhere += " AND (SB2.B2_QFIM <= 0)"
+			EndIf
+		EndIf
+	ElseIf mv_par14 == 2 .And.  mv_par01 == 1
+		If mv_par15 == 1
+			cWhere += " AND (SB2.B2_QATU <> 0)"
+		ElseIf mv_par15 == 2
+			cWhere += " AND (SB2.B2_QFIM <> 0)"
+		EndIf
+	EndIf
+	cWhere += "%"
+
+	cGroupBy := "%"
+	If ! lVEIC
+		cGroupBy += " SB2.B2_COD, SB1.B1_TIPO, SB1.B1_GRUPO"
+	Else
+		cGroupBy += " SB1.B1_CODITE, SB2.B2_COD, SB1.B1_TIPO, SB1.B1_GRUPO"
+	EndIf
+	cGroupBy += ", SB1.B1_DESC"
+	cGroupBy += ", SB1.B1_UM"
+	If mv_par18 == 1
+		cGroupBy += ", SB1.B1_SEGUM"
+	EndIf
+	If mv_par01 == 1
+		cGroupBy += ", SB2.B2_LOCAL, SB2.B2_FILIAL"
+	EndIf
+	If mv_par01 == 2
+		cGroupBy += ", SB2.B2_FILIAL"
+	EndIf
+	If mv_par01 == 3
+		cGroupBy += " "
+	EndIf
+	cGroupBy += ", SB2.B2_STATUS"
+	If mv_par19 == 1 .And.  mv_par01==1
+		If lVersao
+			cGroupBy += ", NNR.NNR_DESCRI"
+		Else
+			cGroupBy += ", SB2.B2_LOCALIZ"
+		EndIf
+	EndIf
+	If mv_par17 == 1
+		cGroupBy += ", SB5.B5_CEME "
+	EndIf
+	cGroupBy += "%"
+
+	cOrderBy := "%"
+	If ! lVEIC
+		If nOrdem == 4
+			cOrderBy += " GRUPO, COD"
+			cCampo := "B1_GRUPO"
+			cMens  := OemToAnsi("Grupo.........")
+		ElseIf nOrdem == 3
+			cOrderBy += " B1_DESC, COD"
+			cCampo := .T. 
+		ElseIf nOrdem == 2
+			cOrderBy += " TIPO, COD"
+			cCampo := "B1_TIPO"
+			cMens  := OemToAnsi("Tipo..........")
+		Else
+			cOrderBy += " COD"
+			cCampo := .T. 
+		EndIf
+	Else
+		If nOrdem == 4
+			cOrderBy += " GRUPO, CODITE"
+			cCampo := "B1_GRUPO"
+			cMens  := OemToAnsi("Grupo.........")
+		ElseIf nOrdem == 3
+			cOrderBy += " B1_DESC, CODITE"
+			cCampo := .T. 
+		ElseIf nOrdem == 2
+			cOrderBy += " TIPO, CODITE"
+			cCampo := "B1_TIPO"
+			cMens  := OemToAnsi("Tipo..........")
+		Else
+			cOrderBy += " CODITE"
+			cCampo := .T. 
+		Endif
+	EndIf
+	cOrderBy += "%"
+
+
+
+
+	oReport:Section(1):BeginQuery()
+
+	cAliasTOP := GetNextAlias()
+	cAliasSB2 := cAliasTOP
+	cAliasSB5 := cAliasTOP
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasTOP," SELECT SB2.B2_COD COD ,SB1.B1_TIPO TIPO, SB1.B1_GRUPO GRUPO, SB1.B1_DESC, SB1.B1_UM UM ,SUM(SB2.B2_QATU) QATU, SUM(SB2.B2_QFIM) QFIM, SB2.B2_STATUS ,SUM(SB2.B2_QTSEGUM) QTSEGUM, SUM(SB2.B2_QFIM2) QFIM2  "+___SQLGetValue(CSELECT)+" FROM  "+RetSqlName('SB2')+" SB2  "+___SQLGetValue(CJOIN)+" WHERE SB2.B2_LOCAL >=  "+___SQLGetValue(MV_PAR04)+" AND SB2.B2_LOCAL <=  "+___SQLGetValue(MV_PAR05)+" AND SB2.B2_FILIAL >=  "+___SQLGetValue(MV_PAR02)+" AND SB2.B2_FILIAL <=  "+___SQLGetValue(MV_PAR03)+" AND SB2.D_E_L_E_T_= ' '  "+___SQLGetValue(CWHERE)+" GROUP BY  "+___SQLGetValue(CGROUPBY)+" ORDER BY  "+___SQLGetValue(CORDERBY),{},.F.)
+
+
+
+
+
+
+
+
+		oReport:Section(1):EndQuery()
+
+
+
+
+
+		cFilOld		:= (cAliasTOP)->FILIAL
+		cCodAnt		:= (cAliasTOP)->COD
+		cTipoAnt	:= (cAliasTOP)->TIPO
+		cGrupoAnt	:= (cAliasTOP)->GRUPO
+
+		If lVEIC
+			cCodite    := (cAliasTOP)->CODITE
+		EndIf
+		nQtdProd   := 0
+		nTotProd   := 0
+		nTotProd2  := 0
+		nTotProdBl := 0
+		nTotProdB2 := 0
+		nTotQuebra := 0
+		nTotQuebr2 := 0
+
+		dbSelectArea(cAliasTOP)
+		oReport:SetMeter(SB2->(LastRec()))
+
+		oSection:Init()
+		While !oReport:Cancel() .And.  !(cAliasTOP)->(Eof())
+			If oReport:Cancel()
+				Exit
+			EndIf
+
+			nQuant := 0.00
+			nQuant2:= 0.00
+			If mv_par15 == 3
+				If AllTrim((cAliasTOP)->FILIAL) == "**"
+					For nX := 1 to Len(aFiliais)
+						cFilAnt := aFiliais[nX]
+						If Alltrim((cAliasTOP)->LOC) == "**"
+							aArea:=GetArea()
+							dbSelectArea("SB2")
+							dbSetOrder(1)
+							dbSeek(cFilAnt + (cAliasTOP)->COD)
+							While !Eof() .And.  B2_FILIAL == cFilAnt .And.  B2_COD == (cAliasTOP)->COD
+								If SB2->B2_LOCAL >= mv_par04 .And.  SB2->B2_LOCAL <= mv_par05
+									nQuant += CalcEst((cAliasTOP)->COD,SB2->B2_LOCAL,dDataBase + 1, B2_FILIAL)[1]
+									If mv_par18==1
+										nQuant2+= CalcEst((cAliasTOP)->COD,SB2->B2_LOCAL,dDataBase + 1, B2_FILIAL)[7]
+									EndIf
+								EndIf
+								dbSkip()
+							EndDo
+							RestArea(aArea)
+						Else
+							nQuant += CalcEst((cAliasTOP)->COD, (cAliasTOP)->LOC, dDataBase+1)[1]
+							If mv_par18==1
+								nQuant2+= CalcEst((cAliasTOP)->COD, (cAliasTOP)->LOC, dDataBase+1)[7]
+							EndIf
+						EndIf
+					next
+				Else
+					If Alltrim((cAliasTOP)->LOC) == "**"
+						aArea:=GetArea()
+						dbSelectArea("SB2")
+						dbSetOrder(1)
+						dbSeek(cSeek:=(cAliasTOP)->FILIAL + (cAliasTOP)->COD)
+						While !Eof() .And.  B2_FILIAL + B2_COD == cSeek
+							If SB2->B2_LOCAL >= mv_par04 .And.  SB2->B2_LOCAL <= mv_par05
+								nQuant += CalcEst((cAliasTOP)->COD,SB2->B2_LOCAL,dDataBase + 1, B2_FILIAL)[1]
+								If mv_par18==1
+									nQuant2+= CalcEst((cAliasTOP)->COD,SB2->B2_LOCAL,dDataBase + 1, B2_FILIAL)[7]
+								EndIf
+							EndIf
+							dbSkip()
+						EndDo
+						RestArea(aArea)
+					Else
+						nQuant := CalcEst((cAliasTOP)->COD, (cAliasTOP)->LOC, dDataBase+1,(cAliasTOP)->FILIAL)[1]
+						If mv_par18==1
+							nQuant2:= CalcEst((cAliasTOP)->COD, (cAliasTOP)->LOC, dDataBase+1,(cAliasTOP)->FILIAL)[7]
+						EndIf
+					EndIf
+				EndIf
+			Else
+				nQuant := If(mv_par15==1,(cAliasTOP)->QATU, (cAliasTOP)->QFIM)
+				If mv_par18==1
+					nQuant2:= If(mv_par15==1,(cAliasTOP)->QTSEGUM, (cAliasTOP)->QFIM2)
+				EndIf
+			EndIf
+
+
+
+
+
+
+			If (mv_par14 == 1 .Or.  ( mv_par14 <> 1 .and.  QtdComp(nQuant) <> QtdComp(0))) .And.  (mv_par16 <> 1 .Or.  ( mv_par16 == 1 .and.  If(mv_par14 <> 1, QtdComp(nQuant) < QtdComp(0),QtdComp(nQuant) <= QtdComp(0) )))
+
+				If  lVEIC
+					oSection:Cell("B1_CODITE"):SetValue((cAliasTOP)->CODITE)
+				EndIf
+				oSection:Cell("B2_COD"):SetValue((cAliasTOP)->COD)
+				oSection:Cell("B1_TIPO"):SetValue((cAliasTOP)->TIPO)
+				oSection:Cell("B1_GRUPO"):SetValue((cAliasTOP)->GRUPO)
+				oSection:Cell("B1_UM"):SetValue((cAliasTOP)->UM)
+				oSection:Cell("B2_FILIAL"):SetValue((cAliasTOP)->FILIAL)
+				oSection:Cell("B2_LOCAL"):SetValue((cAliasTOP)->LOC)
+				oSection:Cell("QUANT"):SetValue(nQuant)
+				If mv_par18==1
+					oSection:Cell("B1_SEGUM"):SetValue((cAliasTop)->SEGUM)
+					oSection:Cell("QUANT2"):SetValue(nQuant2)
+				EndIf
+				If mv_par19 == 1 .And.  mv_par01==1
+					If lVersao
+						oSection:Cell("NNR_DESCRI"):SetValue((cAliasTop)->DESCARM)
+					Else
+						oSection:Cell("B2_LOCALIZ"):SetValue((cAliasTop)->DESCARM)
+					EndIf
+				EndIf
+
+				oSection:PrintLine()
+
+				nQtdProd   ++
+				nTotProd   += nQuant
+				nTotProd2  += nQuant2
+				nTotProdBl += If(SubStr((cAliasTOP)->B2_STATUS,1,1) $"2", nQuant,  0)
+				nTotProdB2 += If(SubStr((cAliasTOP)->B2_STATUS,1,1) $"2", nQuant2, 0)
+				nTotQuebra += nQuant
+				nTotQuebr2 += nQuant2
+
+
+
+
+				cFilOld	   := (cAliasTOP)->FILIAL
+				cCodAnt    := (cAliasTOP)->COD
+				cTipoAnt   := (cAliasTOP)->TIPO
+				cGrupoAnt  := (cAliasTOP)->GRUPO
+
+				If lVEIC
+					cCodite    := (cAliasTop)->CODITE
+				EndIf
+
+			EndIf
+
+			(cAliasTop)->(dbSkip())
+			oReport:IncMeter()
+
+			If  ( (!lVEIC) .and.  (!(cCodAnt == (cAliasTop)->COD)  )) .Or.  ( ( lVEIC) .and.  (!((cCodite + cCodAnt) == (cAliasTop)->(CODITE + cod))))
+				If Alltrim(Str(nOrdem)) $ "1|3"
+					If nQtdProd > 1 .And.  (!(nTotProd==0) .Or. !(nTotProdBl==0))
+						oSection:GetFunction("DISP1"):Enable()
+						oSection:GetFunction("DISP1"):ShowHeader()
+
+						If mv_par18 == 1
+							oSection:GetFunction("DISP2"):Enable()
+							oSection:GetFunction("INDISP2"):Enable()
+							oSection:GetFunction("QT2"):Enable()
+                        EndIf
+
+						oSection:GetFunction("INDISP1"):Enable()
+						oSection:GetFunction("INDISP1"):ShowHeader()
+						oSection:GetFunction("QT1"):Enable()
+						oSection:GetFunction("QT1"):ShowHeader()
+						oBreak:ShowHeader()
+					Else
+						oSection:GetFunction("DISP1"):Disable()
+						oSection:GetFunction("DISP1"):HideHeader()
+
+						If mv_par18 == 1
+							oSection:GetFunction("DISP2"):Disable()
+							oSection:GetFunction("INDISP2"):Disable()
+							oSection:GetFunction("QT2"):Disable()
+	                    EndIf
+
+						oSection:GetFunction("INDISP1"):Disable()
+						oSection:GetFunction("INDISP1"):HideHeader()
+						oSection:GetFunction("QT1"):Disable()
+						oSection:GetFunction("QT1"):HideHeader()
+						oBreak:HideHeader()
+					EndIf
+				EndIf
+
+				nQtdProd   := 0
+				nTotProd   := 0
+				nTotProd2  := 0
+				nTotProdBl := 0
+				nTotProdB2 := 0
+			EndIf
+
+		EndDo
+		oSection:Finish()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SM0->(dbGoto(nRegM0))
+
+If !(cFilAnt==SM0->M0_CODFIL)
+	cFilAnt := SM0->M0_CODFIL
+EndIf
+
+
+
+
+dbSelectArea("SB2")
+dbClearFilter()
+RetIndex("SB2")
+dbSetOrder(1)
+
+dbSelectArea("SB1")
+dbClearFilter()
+RetIndex("SB1")
+dbSetOrder(1)
+
+
+
+
+If File(cNomArqB2 += OrdBagExt())
+	fErase(cNomArqB2)
+EndIf
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MATR240R3()
+
+Local Tamanho    := "M"
+Local Titulo     := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Saldos Em Stock", "Saldos em Estoque" ))
+Local cDesc1     := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Este programa irá emitir um resumo dos saldos, em quantidade,", "Este programa ira' emitir um resumo dos saldos ,em quantidade," ))
+Local cDesc2     := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Dos produtos em stock.", "dos produtos em estoque." ))
+Local cDesc3     := ""
+Local cString    := "SB1"
+Local aOrd       := {OemToAnsi(If( cPaisLoc $ "ANG|PTG", " por código         ", " Por Codigo         " )),OemToAnsi(If( cPaisLoc $ "ANG|PTG", " por tipo           ", " Por Tipo           " )),OemToAnsi(If( cPaisLoc $ "ANG|PTG", " por descrição    ", " Por Descricao    " )),OemToAnsi(If( cPaisLoc $ "ANG|PTG", " por grupo        ", " Por Grupo        " ))}
+Local WnRel      := "MATR240"
+Local nTotQuebra := nTotQuebr2 := 0
+
+
+
+
+Local aArea1	:= Getarea()
+
+
+
+
+Private lVEIC   := UPPER(GETMV("MV_VEICULO"))=="S"
+Private aSB1Cod := {}
+Private aSB1Ite := {}
+Private nCOL1	 := 0
+
+
+
+
+Private aReturn  := {OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" )), 1,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" )), 2, 2, 1, "",1 }
+Private nLastKey := 0
+Private cPerg    := "MTR240"
+
+aSB1Cod	:= TAMSX3("B1_COD")
+aSB1Ite	:= TAMSX3("B1_CODITE")
+
+If lVEIC
+	nCOL1		:= ABS(aSB1Cod[1] - aSB1Ite[1]) + 1 + aSB1Cod[1]
+EndIf
+
+
+
+
+
+AjustaSX1(cPerg,lVeic,aSB1Cod,aSB1Ite)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pergunte(cPerg, .F. )
+
+
+
+
+
+WnRel := SetPrint(cString,WnRel,cPerg,@Titulo,cDesc1,cDesc2,cDesc3, .F. ,aOrd,,Tamanho)
+
+If nLastKey == 27
+	DBSELECTAREA(cString)
+	dbClearFilter()
+	Return Nil
+EndIf
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	DBSELECTAREA(cString)
+	dbClearFilter()
+	Return Nil
+EndIf
+
+RptStatus({|lEnd| C240Imp(aOrd,@lEnd,WnRel,Titulo,Tamanho)},Titulo)
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function C240Imp(aOrd,lEnd,WnRel,Titulo,Tamanho)
+
+
+
+
+
+Local cRodaTxt   := If( cPaisLoc $ "ANG|PTG", "Reg(s)", "REG(S)" )
+Local nCntImpr   := 0
+Local nTipo      := 0
+
+
+
+
+Local lImpr      := .F. 
+Local lVersao	:= (VAL(GetVersao( .F. )) == 11 .And.  GetRpoRelease() >= "R6" .Or.  VAL(GetVersao( .F. ))  > 11)
+Local nSoma      := nSoma2    := 0
+Local nTotSoma   := nTotSoma2 := 0
+Local nX         := 0
+Local nRegM0     := 0
+Local nIndB1     := 0
+Local nIndB2     := 0
+Local nQtdProd   := 0
+Local aSalProd   := {}
+Local cFilialDe  := ""
+Local cQuebra1   := ""
+Local cCampo     := ""
+Local cMens      := ""
+Local aProd      := {}
+Local aProd1     := {}
+Local aArea
+Local cFilOld    := "úú"
+Local cCodAnt    := "úú"
+Local cDesc
+Local lIsCient
+Local cPict
+Local nQtdBlq    := nQtdBlq2 := 0
+Local nQuant     := 0.00
+Local nQuant2    := 0.00
+Local aTamFil	 := {}
+Local nColSV
+
+
+
+
+Local cQuery     := ""
+
+
+
+
+Local cCodite    := ""
+
+
+
+
+PRIVATE XSB1			:= XFILIAL("SB1")
+PRIVATE XSB2			:= XFILIAL("SB2")
+PRIVATE XSB5			:= XFILIAL("SB5")
+
+
+
+
+Private cAliasTOP  := ""
+
+If ( cPaisLoc=="CHI" )
+	cPict   := "@E 999,999,999.99"
+Else
+	cPict	:= PesqPictQt(If(mv_par15==1,"B2_QATU","B2_QFIM"),If(mv_par15==1, TamSX3("B2_QATU")[1], TamSX3("B2_QFIM")[1]))
+EndIf
+
+
+
+Private cQuebra2   := ""
+Private cCond2     := ""
+Private cFiltroB1  := ""
+Private cIndB1     := ""
+Private aFiliais   := {}
+Private cFiltroB2  := ""
+Private cIndB2     := ""
+Private lContinua  := .T. 
+Private cNomArqB1  := ""
+Private cNomArqB2  := ""
+
+
+
+
+
+Private Li         := 80
+Private m_pag      := 1
+
+
+
+
+nTipo := If(aReturn[4]==1,15,18)
+
+
+
+
+If Type("NewHead") # "U"
+	NewHead := AllTrim(NewHead)
+	NewHead += " (" + AllTrim(SubStr(aOrd[aReturn[8]],6,20)) + ")"
+Else
+	Titulo := AllTrim(Titulo)
+	Titulo += " (" + AllTrim(SubStr(aOrd[aReturn[8]],6,20)) + ")"
+EndIf
+
+
+
+
+aTamFil := TAMSX3("B2_FILIAL")
+
+
+If aTamFil[1] = 2
+	cCabec1 := If(mv_par18<>1, OemToAnsi( If( cPaisLoc $ "ANG|PTG", "CÓDIGO                         TP GRUP DESCRIÇÃO                      UM FL AMZ   QUANTIDADE", "CODIGO                         TP GRUP DESCRICAO                      UM FL AMZ   QUANTIDADE" ) ), OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Código          Tp Grup Descrição                      Um Fl Amz Qtde.1ª.u.m.    Um  Qtde.2ª.u.m.", "CODIGO          TP GRUP DESCRICAO                      UM FL AMZ QTDE.1a.U.M.    UM  QTDE.2a.U.M." )))+ IIF(mv_par19==1 .And.  mv_par01==1, "     " + If( cPaisLoc $ "ANG|PTG", "      Descrição Almox.", "      DESCRICAO ALMOX." ),"")
+
+	cCabec2 := ""
+Else
+	cCabec1 := If(mv_par18<>1,"CODIGO          TP GRUP DESCRICAO                      UM FL"+Space(aTamFil[1]-2)+" AMZ   QUANTIDADE   ","CODIGO          TP GRUP DESCRICAO                      UM FL"+Space(aTamFil[1]-2)+" AMZ QTDE.1a.U.M.    UM  QTDE.2a.U.M.")+IIF(mv_par19==1 .And.  mv_par01==1,If( cPaisLoc $ "ANG|PTG", "      Descrição Almox.", "      DESCRICAO ALMOX." ),"")
+
+	cCabec2 := ""
+EndIf
+
+
+
+
+
+
+
+If lVEIC
+	cCabec1 := substr(cCabec1,1,aSB1Cod[1]) + SPACE(nCOL1) + substr(cCabec1,aSB1Cod[1]+1)
+	If !Empty(cCabec2)
+		cCabec2 := substr(cCabec2,1,aSB1Cod[1]) + SPACE(nCOL1) + substr(cCabec2,aSB1Cod[1]+1)
+	EndIf
+EndIf
+
+
+
+aFiliais := {}
+nRegM0   := SM0->(Recno())
+SM0->(DBSeek(cEmpAnt, .T. ))
+while !SM0->(Eof()) .And. SM0->M0_CODIGO==cEmpAnt
+	If SM0->M0_CODFIL >= mv_par02 .And.  SM0->M0_CODFIL <= mv_par03
+		aAdd(aFiliais, SM0->M0_CODFIL)
+	EndIf
+	SM0->(dbSkip())
+EndDo
+SM0->(dbGoto(nRegM0))
+
+
+
+
+
+
+	cAliasTOP := CriaTrab(Nil, .F. )
+
+	If mv_par17 == 1
+		dbSelectArea("SB5")
+		dbSetOrder(1)
+	EndIf
+
+
+
+
+	cQuery := "SELECT SB2.B2_COD COD"
+	cQuery += ", SB1.B1_TIPO TIPO"
+	cQuery += ", SB1.B1_GRUPO GRUPO"
+	cQuery += ", SB1.B1_DESC DESCRI"
+	cQuery += ", SB1.B1_UM UM"
+	If mv_par18 == 1
+		cQuery += ", SB1.B1_SEGUM SEGUM"
+	EndIf
+
+	If lVEIC
+		cQuery += ", SB1.B1_CODITE CODITE"
+	EndIf
+
+	If mv_par01 == 1
+		cQuery += ", SB2.B2_LOCAL LOC, SB2.B2_FILIAL FILIAL"
+	Else
+		cQuery += ", '**' LOC"
+	EndIf
+	If  mv_par01 == 2
+		cQuery += ", SB2.B2_FILIAL FILIAL"
+	EndIf
+	If mv_par01 == 3
+		cQuery += ", '**' FILIAL"
+	EndIf
+	cQuery += ", SUM(SB2.B2_QATU) QATU, SUM(SB2.B2_QFIM) QFIM, SB2.B2_STATUS SITU"
+	cQuery += ", SUM(SB2.B2_QTSEGUM) QTSEGUM, SUM(SB2.B2_QFIM2) QFIM2"
+	If mv_par19 == 1 .And.  mv_par01==1
+		If lVersao
+			cQuery += ", NNR.NNR_DESCRI DESCARM"
+		Else
+			cQuery += ", SB2.B2_LOCALIZ DESCARM"
+		EndIf
+	EndIf
+
+
+
+	If lVersao
+		cQuery += (" FROM "+RetSqlName("SB2")+" SB2, "+RetSqlName("SB1")+" SB1, " + RetSqlName("NNR")+" NNR"  )
+	Else
+		cQuery += (" FROM "+RetSqlName("SB2")+" SB2, "+RetSqlName("SB1")+" SB1")
+	EndIf
+
+
+
+
+
+	cQuery += " WHERE"
+
+	If ! lVEIC
+		cQuery += ("     SB1.B1_COD >= '" + mv_par06 + "'")
+		cQuery += (" AND SB1.B1_COD <= '" + mv_par07 + "'")
+	Else
+		cQuery += ("     SB1.B1_CODITE >= '" + mv_par06 + "'")
+		cQuery += (" AND SB1.B1_CODITE <= '" + mv_par07 + "'")
+	EndIf
+
+	If FWModeAccess("SB1",3) == "E"
+		cQuery += (" AND SB1.B1_FILIAL >= '" + mv_par02 + "'")
+		cQuery += (" AND SB1.B1_FILIAL <= '" + mv_par03 + "'")
+	ElseIf FWModeAccess("SB1",2) == "E"
+		cQuery += (" AND SB1.B1_FILIAL >= '" + PadR(Substr(MV_PAR02,1,Len(FWSM0Layout(,1)) +Len(FWSM0Layout(,2))),FWSizeFilial()) + "'")
+		cQuery += (" AND SB1.B1_FILIAL <= '" + PadR(Substr(MV_PAR03,1,Len(FWSM0Layout(,1)) +Len(FWSM0Layout(,2))),FWSizeFilial()) + "'")
+	ElseIf FWModeAccess("SB1",1) == "E"
+		cQuery += (" AND SB1.B1_FILIAL >= '" + PadR(Substr(MV_PAR02,1,Len(FWSM0Layout(,1))),FWSizeFilial()) + "'")
+		cQuery += (" AND SB1.B1_FILIAL <= '" + PadR(Substr(MV_PAR03,1,Len(FWSM0Layout(,1))),FWSizeFilial()) + "'")
+	Else
+		cQuery += (" AND SB1.B1_FILIAL >= '" + Space(FWSizeFilial()) + "'")
+		cQuery += (" AND SB1.B1_FILIAL <= '" + Space(FWSizeFilial()) + "'")
+	EndIf
+
+	cQuery += (" AND SB1.B1_TIPO  >='" + mv_par08 + "'")
+	cQuery += (" AND SB1.B1_TIPO  <='" + mv_par09 + "'")
+	cQuery += (" AND SB1.B1_GRUPO >='" + mv_par10 + "'")
+	cQuery += (" AND SB1.B1_GRUPO <='" + mv_par11 + "'")
+	cQuery += (" AND SB1.B1_DESC  >='" + mv_par12 + "'")
+	cQuery += (" AND SB1.B1_DESC  <='" + mv_par13 + "'")
+	cQuery += (" AND SB2.B2_LOCAL >='" + mv_par04 + "'")
+	cQuery += (" AND SB2.B2_LOCAL <='" + mv_par05 + "'")
+
+	If mv_par16 == 1 .And.  mv_par01 == 1
+		If mv_par14 == 2
+			If mv_par15 == 1
+				cQuery += " AND (SB2.B2_QATU < 0)"
+			ElseIf mv_par15 == 2
+				cQuery += " AND (SB2.B2_QFIM < 0)"
+			EndIf
+		Else
+			If mv_par15== 1
+				cQuery += " AND (SB2.B2_QATU <= 0)"
+			ElseIf mv_par15 == 2
+				cQuery += " AND (SB2.B2_QFIM <= 0)"
+			EndIf
+		EndIf
+	ElseIf mv_par14 == 2 .And.  mv_par01 == 1
+		If mv_par15 == 1
+			cQuery += " AND (SB2.B2_QATU <> 0)"
+		ElseIf mv_par15 == 2
+			cQuery += " AND (SB2.B2_QFIM <> 0)"
+		EndIf
+	EndIf
+	cQuery +=  " AND SB1.B1_COD  = SB2.B2_COD"
+	If lVersao
+		cQuery +=  " AND SB2.B2_LOCAL  = NNR.NNR_CODIGO"
+		cQuery +=  " AND NNR.D_E_L_E_T_ = ' '"
+	EndIf
+	cQuery +=  " AND SB2.D_E_L_E_T_ = ' '"
+	cQuery +=  " AND SB1.D_E_L_E_T_ = ' '"
+	cQuery += (" AND SB2.B2_FILIAL  >='" + mv_par02 + "'")
+	cQuery += (" AND SB2.B2_FILIAL  <='" + mv_par03 + "'")
+
+	If FWModeAccess("SB1") == "E" .And.  FWModeAccess("SB2") == "E"
+		cQuery += " AND SB1.B1_FILIAL = SB2.B2_FILIAL"
+	EndIf
+
+	If lVersao .And.  FWModeAccess("NNR") == "E" .And.  FWModeAccess("SB2") == "E"
+		cQuery += " AND NNR.NNR_FILIAL = SB2.B2_FILIAL"
+	EndIf
+
+
+
+
+
+	cQuery += " GROUP BY"
+	If ! lVEIC
+		cQuery += " SB2.B2_COD, SB1.B1_TIPO, SB1.B1_GRUPO"
+	Else
+		cQuery += " SB1.B1_CODITE, SB2.B2_COD, SB1.B1_TIPO, SB1.B1_GRUPO"
+	EndIf
+
+	cQuery += ", SB1.B1_DESC"
+	cQuery += ", SB1.B1_UM"
+	If mv_par18 == 1
+		cQuery += ", SB1.B1_SEGUM"
+	EndIf
+	If mv_par01 == 1
+		cQuery += ", SB2.B2_LOCAL, SB2.B2_FILIAL"
+	EndIf
+	If mv_par01 == 2
+		cQuery += ", SB2.B2_FILIAL"
+	EndIf
+	If mv_par01 == 3
+		cQuery += " "
+	EndIf
+	cQuery += ", SB2.B2_STATUS"
+	If mv_par19 == 1 .And.  mv_par01==1
+		If lVersao
+			cQuery += ", NNR.NNR_DESCRI"
+		Else
+			cQuery += ", SB2.B2_LOCALIZ"
+		EndIf
+	EndIf
+
+
+
+
+	cQuery += " ORDER BY"
+
+	If ! lVEIC
+		If aReturn[8] == 4
+			cQuery += " 3, 1"
+			cCampo := "B1_GRUPO"
+			cMens  := OemToAnsi("Grupo.........")
+		ElseIf aReturn[8] == 3
+			cQuery += " 4, 1"
+			cCampo := .T. 
+		ElseIf aReturn[8] == 2
+			cQuery += " 2, 1"
+			cCampo := "B1_TIPO"
+			cMens  := OemToAnsi("Tipo..........")
+		Else
+			cQuery += " 1"
+			cCampo := .T. 
+		EndIf
+	Else
+		If aReturn[8] == 4
+			cQuery += " 3, 6"
+			cCampo := "B1_GRUPO"
+			cMens  := OemToAnsi("Grupo.........")
+		ElseIf aReturn[8] == 3
+			cQuery += " 4, 6"
+			cCampo := .T. 
+		ElseIf aReturn[8] == 2
+			cQuery += " 2, 6"
+			cCampo := "B1_TIPO"
+			cMens  := OemToAnsi("Tipo..........")
+		Else
+			cQuery += " 6"
+			cCampo := .T. 
+		Endif
+
+	EndIf
+	cQuery := ChangeQuery(cQuery)
+	MsAguarde({|| dbUseArea( .T. ,"TOPCONN", TCGenQry(,,cQuery), cAliasTOP, .F. , .T. )}, If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+
+
+	cFilOld		:= (cAliasTop)->FILIAL
+	cCodAnt		:= (cAliasTop)->COD
+	cTipoAnt	:= (cAliasTop)->TIPO
+	cGrupoAnt	:= (cAliasTop)->GRUPO
+
+	If lVEIC
+		cCodite    := (cAliasTop)->CODITE
+	EndIf
+
+	nQtdProd   := 0
+	nTotProd   := 0
+	nTotProd2  := 0
+	nTotProdBl := 0
+	nTotProdB2 := 0
+	nTotQuebra := 0
+	nTotQuebr2 := 0
+	dbSelectArea(cAliasTop)
+	while !(cAliasTop)->(Eof())
+
+
+
+
+		dbSelectArea("SB1")
+		dbsetorder(1)
+		If dbSeek(XSB1 + (cAliasTop)->COD)
+
+			dbSelectArea(cAliasTop)
+
+			If lEnd
+				PrintOut(_PROW()+1,001,OemToAnsi(If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR")),,)
+				Exit
+			EndIf
+
+			nQuant := 0.00
+			nQuant2:= 0.00
+			If mv_par15 == 3
+				If AllTrim((cAliasTop)->FILIAL) == "**"
+					For nX := 1 to Len(aFiliais)
+						cFilAnt := aFiliais[nX]
+						If Alltrim((cAliasTop)->LOC) == "**"
+							aArea:=GetArea()
+							dbSelectArea("SB2")
+							dbSetOrder(1)
+							dbSeek(cFilAnt + (cAliasTOP)->COD)
+							While !Eof() .And.  B2_FILIAL == cFilAnt .And.  B2_COD == (cAliasTOP)->COD
+								If SB2->B2_LOCAL >= mv_par04 .And.  SB2->B2_LOCAL <= mv_par05
+									nQuant += CalcEst((cAliasTOP)->COD,SB2->B2_LOCAL,dDataBase + 1, B2_FILIAL)[1]
+									If mv_par18==1
+										nQuant2+= CalcEst((cAliasTOP)->COD,SB2->B2_LOCAL,dDataBase + 1, B2_FILIAL)[7]
+									EndIf
+								EndIf
+								dbSkip()
+							EndDo
+							RestArea(aArea)
+						Else
+							nQuant += CalcEst((cAliasTop)->COD, (cAliasTop)->LOC, dDataBase+1)[1]
+							If mv_par18==1
+								nQuant2+= CalcEst((cAliasTop)->COD, (cAliasTop)->LOC, dDataBase+1)[7]
+							EndIf
+						EndIf
+					next
+				Else
+					If Alltrim((cAliasTop)->LOC) == "**"
+						aArea:=GetArea()
+						dbSelectArea("SB2")
+						dbSetOrder(1)
+						dbSeek(cSeek:=(cAliasTop)->FILIAL + (cAliasTop)->COD)
+						While !Eof() .And.  B2_FILIAL + B2_COD == cSeek
+							If SB2->B2_LOCAL >= mv_par04 .And.  SB2->B2_LOCAL <= mv_par05
+								nQuant += CalcEst((cAliasTOP)->COD,SB2->B2_LOCAL,dDataBase + 1, B2_FILIAL)[1]
+								If mv_par18==1
+									nQuant2+= CalcEst((cAliasTOP)->COD,SB2->B2_LOCAL,dDataBase + 1, B2_FILIAL)[7]
+								EndIf
+							EndIf
+							dbSkip()
+						EndDo
+						RestArea(aArea)
+					Else
+						nQuant := CalcEst((cAliasTop)->COD, (cAliasTop)->LOC, dDataBase+1,(cAliasTop)->FILIAL)[1]
+						If mv_par18==1
+							nQuant2:= CalcEst((cAliasTop)->COD, (cAliasTop)->LOC, dDataBase+1,(cAliasTop)->FILIAL)[7]
+						EndIf
+					EndIf
+				EndIf
+			Else
+				nQuant := If(mv_par15==1,(cAliasTop)->QATU, (cAliasTop)->QFIM)
+				If mv_par18==1
+					nQuant2:= If(mv_par15==1,(cAliasTop)->QTSEGUM, (cAliasTop)->QFIM2)
+				EndIf
+			EndIf
+
+
+			If (mv_par14 == 1 .OR.  ( mv_par14 <> 1 .and.  alltrim(str(nQuant,16,2)) <> "0.00")) .And.  (mv_par16 <> 1 .Or.  ( mv_par16 == 1 .and.  If(mv_par14 <> 1,alltrim(str(nQuant,16,2)) < "0.00",alltrim(str(nQuant,16,2)) <= "0.00")))
+				If Li > 55
+					Cabec(Titulo,cCabec1,cCabec2,WnRel,Tamanho,nTipo)
+				EndIf
+
+				If ! lVEIC
+					PrintOut(Li,00,SubStr((cAliasTop)->COD,1,30),,)
+				Else
+					PrintOut(Li,00,(cAliasTop)->CODITE+" "+(cAliasTop)->COD,,)
+				EndIf
+
+
+				PrintOut(Li,31+nCOL1,(cAliasTop)->TIPO,,)
+
+				PrintOut(Li,34+nCOL1,(cAliasTop)->GRUPO,,)
+
+				If mv_par17 == 1
+					SB5->(dbSeek(xSB5 + (cAliasTop)->COD))
+					cDesc := Left(SB5->B5_CEME, 30)
+				EndIf
+
+				PrintOut(Li,39+nCOL1,If(Empty(cDesc),Left((cAliasTop)->DESCRI,30),cDesc),,)
+				PrintOut(Li,70+nCOL1,(cAliasTop)->UM,,)
+				PrintOut(Li,73+nCOL1,AllTrim((cAliasTop)->FILIAL),,)
+				nColSV := nCOL1
+				If aTamFil[1] > 2
+					nCOL1  += aTamFil[1]-2
+				EndIF
+				PrintOut(Li,76+nCOL1,AllTrim((cAliasTop)->LOC),,)
+				PrintOut(Li,78+nCOL1,Transform(nQuant,cPict),,)
+				If mv_par18==1
+					PrintOut(Li,81+nCOL1,(cAliasTop)->SEGUM,,)
+					PrintOut(Li,84+nCOL1,nQuant2,cPict,)
+					PrintOut(Li,102+nCOL1,SubStr(If(SubStr((cAliasTop)->SITU,1,1)$"2",If(cPaisLoc$"ANG|PTG","Indisponível ","Indisponivel "),If(cPaisLoc$"ANG|PTG","Disponível   ","Disponivel   ")),1,1),,)
+					If mv_par19 == 1 .And.  mv_par01==1
+						PrintOut(Li,105+nCOL1,(cAliasTop)->DESCARM,,)
+					EndIf
+				Else
+					PrintOut(Li,102+nCOL1,SubStr(If(SubStr((cAliasTop)->SITU,1,1)$"2",If(cPaisLoc$"ANG|PTG","Indisponível ","Indisponivel "),If(cPaisLoc$"ANG|PTG","Disponível   ","Disponivel   ")),1,1),,)
+					If mv_par19 == 1 .And.  mv_par01==1
+						PrintOut(Li,85+nCOL1,(cAliasTop)->DESCARM,,)
+					EndIf
+				EndIf
+				nCOL1 := nColSV
+				Li++
+
+
+
+
+				cFilOld	  := (cAliasTop)->FILIAL
+				cCodAnt    := (cAliasTop)->COD
+				cTipoAnt   := (cAliasTop)->TIPO
+				cGrupoAnt  := (cAliasTop)->GRUPO
+
+				If lVEIC
+					cCodite    := (cAliasTop)->CODITE
+				EndIf
+
+				nQtdProd   ++
+				nTotProd   += nQuant
+				nTotProd2  += nQuant2
+				nTotProdBl += If(SubStr(SITU,1,1) $"2", nQuant, 0)
+				nTotProdB2 += If(SubStr(SITU,1,1) $"2", nQuant2, 0)
+				nTotQuebra += nQuant
+				nTotQuebr2 += nQuant2
+
+			EndIf
+
+		EndIf
+
+		(cAliasTop)->(dbSkip())
+
+
+
+
+
+		If !(nTotQuebra==0) .And.  If(aReturn[8]==4, !(cGrupoAnt==GRUPO) .Or.  ((cAliasTop)->(EOF()) .And. Empty(cGrupoAnt)),If(aReturn[8]==2,!(cTipoAnt==TIPO), .F. )) .Or.  (mv_par01 <> 1 .And.  !(nTotQuebra==0) .And.  !(cFilOld == (cAliasTop)->FILIAL))
+       		nColSV := nCOL1
+        	if aTamFil[1] > 2
+        		nCOL1  += aTamFil[1]-2
+			EndIf
+			PrintOut(Li,nCOL1,If(Empty(cMens),SubStr("Total do ",1,5),"Total do "+cMens),,)
+			PrintOut(Li,78+nCOL1,Transform(nTotQuebra,cPict),,)
+			If mv_par18 == 1
+				PrintOut(Li,81+nCOL1,(cAliasTop)->SEGUM,,)
+				PrintOut(Li,84+nCOL1,Transform(nTotQuebr2,cPict),,)
+			EndIf
+			Li += 2
+			nCOL1 := nColSV
+			nTotQuebra := 0
+			nTotQuebr2 := 0
+		EndIf
+
+
+
+
+
+		If   ( (!lVEIC) .and.  (!(cCodAnt == (cAliasTop)->COD)  )) .Or.  ( ( lVEIC) .and.  (!((cCodite + cCodAnt) == (cAliasTop)->(CODITE + cod))))
+			If nQtdProd > 1 .And.  Alltrim(Str(aReturn[8])) $ "1|3"
+				If (!(nTotProd==0) .Or. !(nTotProdBl==0))
+		       		nColSV := nCOL1
+		        	if aTamFil[1] > 2
+		        		nCOL1  += aTamFil[1]-2
+					EndIf
+					PrintOut(Li,24+nCOL1,"("+SubStr(If(cPaisLoc$"ANG|PTG","Disponível   ","Disponivel   "),1,1)+") = "+OemToAnsi("Qtde. ")+OemToAnsi(If(cPaisLoc$"ANG|PTG","Disponível   ","Disponivel   "))+Replicate(".",14),,)
+					PrintOut(Li,63+nCOL1,Transform((nTotProd-nTotProdBl),cPict),,)
+					If mv_par18 == 1
+						PrintOut(Li,84+nCOL1,Transform((nTotProd2-nTotProdB2),cPict),,)
+					EndIf
+					Li++
+					PrintOut(Li,24+nCOL1,"("+SubStr(If(cPaisLoc$"ANG|PTG","Indisponível ","Indisponivel "),1,1)+") = "+OemToAnsi("Qtde. ")+OemToAnsi(If(cPaisLoc$"ANG|PTG","Indisponível ","Indisponivel "))+Replicate(".",14),,)
+					PrintOut(Li,63+nCOL1,Transform(nTotProdBl,cPict),,)
+					If mv_par18 == 1
+						PrintOut(Li,84+nCOL1,Transform(nTotProdB2,cPict),,)
+					EndIf
+					Li++
+					If ! lVEIC
+						PrintOut(Li,24+nCOL1,OemToAnsi(If(cPaisLoc$"ANG|PTG","Total Do Artigo","Total do Produto"))+Space(1)+AllTrim(Left(cCodAnt,15)),,)
+					Else
+						PrintOut(Li,24,OemToAnsi(If(cPaisLoc$"ANG|PTG","Total Do Artigo","Total do Produto"))+Space(1)+(cCodite+" "+cCodAnt),,)
+					EndIf
+					PrintOut(Li,63+nCOL1,Transform(nTotProd,cPict),,)
+					If mv_par18 == 1
+						PrintOut(Li,84+nCOL1,Transform(nTotProd2,cPict),,)
+					EndIf
+					nCOL1 := nColSV
+					Li += 2
+				EndIf
+			EndIf
+			nQtdProd   := 0
+			nTotProd   := 0
+			nTotProd2  := 0
+			nTotProdBl := 0
+			nTotProdB2 := 0
+		EndIf
+
+	EndDo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+If Li # 80
+	Roda(nCntImpr,cRodaTxt,Tamanho)
+EndIf
+
+
+SM0->(dbGoto(nRegM0))
+
+If !(cFilAnt==SM0->M0_CODFIL)
+	cFilAnt := SM0->M0_CODFIL
+EndIf
+
+
+
+
+dbSelectArea("SB2")
+dbClearFilter()
+RetIndex("SB2")
+dbSetOrder(1)
+
+dbSelectArea("SB1")
+dbClearFilter()
+RetIndex("SB1")
+dbSetOrder(1)
+
+
+
+
+If File(cNomArqB2 += OrdBagExt())
+	fErase(cNomArqB2)
+EndIf
+If File(cNomArqB1 += OrdBagExt())
+	fErase(cNomArqB1)
+EndIf
+
+If aReturn[5] == 1
+	Set( 24, "" )
+	dbCommitAll()
+	OurSpool(WnRel)
+EndIf
+
+Ms_Flush()
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSX1(cPerg,lVeic,aSB1Cod,aSB1Ite)
+
+Local aArea1	:= Getarea()
+Local aHelpPor :={}
+Local aHelpEng :={}
+Local aHelpSpa :={}
+Local nTamSX1  :=Len(SX1->X1_GRUPO)
+
+
+PutSx1("MTR240","18","QTDE. na 2a. U.M. ?","CTD. EN 2a. U.M. ?","QTTY. in 2a. U.M. ?", "mv_chi", "N", 1, 0, 2,"C", "", "", "", "","MV_PAR18","Sim","Si","Yes", "","Nao","No","No", "", "", "", "", "", "", "", "", "", "", "", "", "")
+
+
+Aadd( aHelpPor, "Imprime descricao do Armazem. Sim ou Nao" )
+
+Aadd( aHelpEng, "Print warehouse description. Yes or No  " )
+
+Aadd( aHelpSpa, "Imprime descripcion del almacen. Si o No" )
+
+
+
+PutSx1( "MTR240","19","Imprime descricao do Armazem ?","Imprime descripc. del almacen?","Print warehouse description ?","mv_chj", "N",1,0,2,"C","","","","","mv_par19","Sim","Si","Yes","","Nao","No","No","","","","","","","","","", aHelpPor,aHelpEng,aHelpSpa)
+
+dbSelectArea("SX1")
+dbSetOrder(1)
+dbSeek(PADR(cPerg,nTamSX1))
+If lVEIC
+	while SX1->X1_GRUPO==PADR(cPerg,nTamSX1) .AND. !SX1->(Eof())
+
+		If "PRODU" $ Upper(SX1->X1_PERGUNT) .AND.  Upper(SX1->X1_TIPO) == "C" .AND.  (SX1->X1_TAMANHO <> aSB1Ite[1] .OR.  Upper(SX1->X1_F3) <> "VR4")
+			RECLOCK("SX1", .F. )
+
+			SX1->X1_TAMANHO := aSB1Ite[1]
+			SX1->X1_F3 := "VR4"
+			DBCOMMIT()
+			MSUNLOCK()
+
+		EndIf
+		dbSkip()
+	EndDo
+Else
+	while SX1->X1_GRUPO==PADR(cPerg,nTamSX1) .AND. !SX1->(Eof())
+
+		If "PRODU" $ Upper(SX1->X1_PERGUNT) .AND.  Upper(SX1->X1_TIPO) == "C" .AND.  (SX1->X1_TAMANHO <> aSB1Cod[1] .OR.  Upper(SX1->X1_F3) <> "SB1")
+
+			RECLOCK("SX1", .F. )
+			SX1->X1_TAMANHO := aSB1Cod[1]
+			SX1->X1_F3 := "SB1"
+			DBCOMMIT()
+			MSUNLOCK()
+
+		EndIf
+		dbSkip()
+	EndDo
+Endif
+
+dbSeek(PADR(cPerg,nTamSX1)+"03")
+If Empty(SX1->X1_VALID)
+	RecLock("SX1", .F. )
+	SX1->X1_VALID := "!Vazio()"
+	SX1->(MsUnlock())
+Endif
+
+RestArea(aArea1)
+Return Nil

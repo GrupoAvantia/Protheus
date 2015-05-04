@@ -1,0 +1,399 @@
+#INCLUDE "rwmake.ch"
+#INCLUDE "topconn.ch"
+#INCLUDE "colors.ch"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ARGA001   º Autor ³ Grayson B.Tavares  º Data ³  04/12/08   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescricao ³ Tela para atualizacao do preço de custo dos produtos por   º±±
+±±º          ³ orcamento                                                  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Gestao de Projetos                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+User Function ARGA001(cOrcamento)
+
+	Private nOpc := 1
+	Private nI
+	Private oDlg
+	Private nUsado := 0
+	Private aStruct := {}
+	Private lRefresh := .T.
+	Private aHeader := {}
+	Private aCols := {}
+	Private nOpca := 0
+	Private oSay
+	Private lCheck := .F.
+	Private oCheck1
+	Private aOrig := {}
+	Private aRotina := {{"Pesquisar" ,"AxPesqui", 0, 1},;
+	                    {"Visualizar","AxVisual", 0, 2},;
+	                    {"Incluir"   ,"AxInclui", 0, 3},;
+	                    {"Alterar"   ,"AxAltera", 0, 4},;
+	                    {"Excluir"   ,"AxDeleta", 0, 5}}
+	                    
+	cOrcam   := cOrcamento //space(10)
+	cDescOrc := space(30)
+	nTotIt   := 0
+	nTotSel  := 0
+	cTotIt   := Transform(nTotIt,"@E 9999999")
+	cTotSel  := Transform(nTotSel,"@E 9999999")
+	nEncarg  := 0
+	cFiltro  := space(80)
+	
+	Aadd(aHeader,{"Codigo"  		,"ARG_PRODUT"  ,"@!"               ,15,0,"","","C","",""})
+	Aadd(aHeader,{"Tipo"    		,"ARG_TIPO"    ,"@!"               ,02,0,"","","C","",""})
+	Aadd(aHeader,{"Descricao"	,"ARG_DESC"    ,"@!"               ,30,0,"","","C","",""})
+	Aadd(aHeader,{"U.M."			,"ARG_UM"      ,"@!"               ,02,0,"","","C","",""})
+	Aadd(aHeader,{"Custo"		,"ARG_CUSTD"   ,"@E 999,999,999.99",14,2,"","","N","",""})
+	                                                            
+	oFONTE1:=TFONT():NEW("MONO AS REGULAR",,16,,.T.,,,,.F.,.F.)
+	oFONTE2:=TFONT():NEW("MONO AS REGULAR",,16,,.T.,,,,.F.,.F.)             		
+	
+	aadd(aCols, {space(15), space(2), space(30), space(2), 0, space(12), space(2), .f.})
+	
+	DEFINE MSDIALOG oDlg TITLE "Atualização de Preço de Custo" FROM 00,00 TO 630,1000 PIXEL
+	
+	TSAY():NEW(20,10,{||"Orcamento"},oDlg,,oFONTE1,,,,.T.,)
+	@ 20,50 GET cOrcam SIZE 50,20 PICTURE "@!" When .F.//F3 "AF1" VALID U_ARGNPRJ()
+	@ 20,120 GET cDescOrc SIZE 250,20 PICTURE "@!" When .F.
+	cDescOrc := Posicione("AF1",1,xFilial("AF1")+cOrcam,"AF1_DESCRI")
+	
+	TSAY():NEW(20,410,{||"% Encargo"},oDlg,,oFONTE1,,,,.T.,)
+	@ 20,450 GET nEncarg SIZE 50,20 PICTURE "@e 999.99" VALID Execblock("CleanStatus",.F.,.F.,)
+	nEncarg  := Posicione("AF1",1,xFilial("AF1")+cOrcam,"AF1_ENCARG")
+	
+	TSAY():NEW(40,10,{||"Filtro"},oDlg,,oFONTE1,,,,.T.,)
+	@ 40,50 GET cFiltro SIZE 250,20 PICTURE "@!"
+	oBtnFil := tButton():New(40,310,"Pesquisar",oDlg,{||U_ARGNPRJ(cFiltro),lCheck := .F.},40,10,,,,.T.) 
+
+	oCheck1 := TCheckBox():New(42,370,'Exibir Apenas Produtos Sem Preço',{||lCheck},oDlg,125,210,,,oFONTE1,,,,,.T.,,,)
+	oCheck1:bLClicked := {||IIF(lCheck,lCheck:=.F.,lCheck:=.T.),Execblock("ValorZero",.F.,.F.,)}
+
+	TSAY():NEW(260,10,{||"Status:"},oDlg,,oFONTE1,,,,.T.,)
+	oSay := TSAY():NEW(260,40,{||"                              "},oDlg,,oFONTE1,,,,.T.,)
+				                                      
+	//oGetDados := MSGETDADOS():NEW(35,10,260,500,4,"U_CleanStatus"/*"U_ARGLINOK"*/,/*"U_ARGTDOOK"*/,,.F.,{"ARG_CUSTD"},,.F.,Len(aCols),,,,/*"U_ARGDELOK"*/,oDlg)
+	oGetDados := MSGETDADOS():NEW(55,10,260,500,4,"U_CleanStatus"/*"U_ARGLINOK"*/,/*"U_ARGTDOOK"*/,,.F.,{"ARG_CUSTD"},,.F.,Len(aCols),,,,/*"U_ARGDELOK"*/,oDlg)
+	
+	U_ARGNPRJ("")
+	
+	ACTIVATE MSDIALOG oDlg ON INIT ENCHOICEBAR(ODLG,{||Processa({||OkInc()},"Aguarde...")/*nopca:=1,IIf(U_ARGTDOOK(),oDlg:End(),.t.)*/},{||/*nopca:=0,*/odlg:end()},,)	 
+	
+	
+	/*
+	If nopca=1
+		If U_ARGTDOOK()			
+			Processa({||OkInc()},"Aguarde...")
+		EndIf	
+	Endif
+	*/
+		
+Return
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ FUNÇÃO PARA CARREGAR NOME DO ORCAMENTO E DADOS DA TELA              ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+User Function ARGNPRJ(cPesq)
+
+	aCols := {}
+	
+	cQuery := "SELECT AF3_PRODUT, B1_DESC, B1_UM, MAX(AF3_CUSTD) AS CUSTD "
+	cQUery += "FROM " + RetSqlName("AF3") + " AF3 "
+	cQUery += "INNER JOIN " + RetSqlName("SB1") + " SB1 "
+	cQUery += "ON AF3_PRODUT = B1_COD "
+	cQUery += "WHERE AF3.D_E_L_E_T_ <> '*' "
+	cQUery += "AND SB1.D_E_L_E_T_ <> '*' "
+	cQUery += "AND AF3_RECURS = '' "
+	cQUery += "AND AF3_FILIAL = '" + xFilial("AF3") + "' "
+	cQUery += "AND AF3_ORCAME = '" + cOrcam + "' "
+	IIF(!Empty(cPesq), cQUery += "AND B1_DESC LIKE '%" + AllTrim(cPesq) + "%' ",)
+	cQUery += "GROUP BY AF3_PRODUT, B1_DESC, B1_UM "
+	cQUery += "ORDER BY AF3_PRODUT, B1_DESC, B1_UM "
+	
+	TCQUERY cQuery NEW ALIAS "XFA"
+	
+	dbSelectArea("XFA")                                             	
+	
+	While XFA->(!EOF())
+		aadd(aCols,{XFA->AF3_PRODUT, "PR", XFA->B1_DESC, XFA->B1_UM, XFA->CUSTD, "TAREFA", "IT", .f.})
+		XFA->(dbSkip())
+	EndDo
+	
+	dbSelectArea("XFA")
+	dbCloseArea() 
+	
+	cQuery := "SELECT AF3_RECURS, AE8_DESCRI, MAX(AF3_CUSTHR) AS CUSTD "
+	cQUery += "FROM " + RetSqlName("AF3") + " AF3 "
+	cQUery += "INNER JOIN " + RetSqlName("AE8") + " AE8 "
+	cQUery += "ON AF3_FILIAL = AE8_FILIAL "
+	cQUery += "AND AF3_RECURS = AE8_RECURS "
+	cQUery += "WHERE AF3.D_E_L_E_T_ <> '*' "
+	cQUery += "AND AE8.D_E_L_E_T_ <> '*' "
+	cQUery += "AND AF3_RECURS <> '' "
+	cQUery += "AND AF3_FILIAL = '" + xFilial("AF3") + "' "
+	cQUery += "AND AF3_ORCAME = '" + cOrcam + "' "
+	IIF(!Empty(cPesq), cQUery += "AND AE8_DESCRI LIKE '%" + AllTrim(cPesq) + "%' ",)
+	cQUery += "GROUP BY AF3_RECURS, AE8_DESCRI "
+	cQUery += "ORDER BY AF3_RECURS, AE8_DESCRI "
+	
+	TCQUERY cQuery NEW ALIAS "XFA"
+	
+	dbSelectArea("XFA")                                             	
+	
+	While XFA->(!EOF())
+		aadd(aCols,{XFA->AF3_RECURS, "MO", XFA->AE8_DESCRI, "HR", XFA->CUSTD, "TAREFA", "IT", .f.})
+		XFA->(dbSkip())
+	EndDo
+	
+	dbSelectArea("XFA")
+	dbCloseArea()
+	
+	cQuery := "SELECT AF4_TIPOD, AF4_DESCRI, AF4_UM, AF4_VLRUNI AS CUSTD, AF4_TAREFA, AF4_ITEM "
+	cQUery += "FROM "+RetSqlName("AF4")+" AF4 "
+	cQUery += "WHERE AF4.D_E_L_E_T_ <> '*' "
+	cQUery += "AND AF4_TIPOD <> '' "
+	cQUery += "AND AF4_FILIAL = '"+xFilial("AF4")+"' "
+	cQUery += "AND AF4_ORCAME = '"+cOrcam+"' "
+	IIF(!Empty(cPesq), cQUery += "AND AF4_DESCRI LIKE '%" + AllTrim(cPesq) + "%' ",)
+	cQUery += "ORDER BY AF4_FILIAL, AF4_ORCAME, AF4_TAREFA, AF4_ITEM "
+	
+	TCQUERY cQuery NEW ALIAS "XFA"
+	
+	dbSelectArea("XFA")                                             	
+	
+	While XFA->(!EOF())
+		aadd(aCols,{XFA->AF4_TIPOD, "DE", XFA->AF4_DESCRI, XFA->AF4_UM, XFA->CUSTD, XFA->AF4_TAREFA, XFA->AF4_ITEM,.f.})
+		XFA->(dbSkip())
+	EndDo
+	
+	dbSelectArea("XFA")
+	dbCloseArea()
+	
+	Getdrefresh()
+
+Return
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ FUNÇÃO PARA CONFIRMACAO DA INCLUSAO                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Static Function OkInc
+
+	Local lSemPreco := .F.
+	
+	dbSelectArea("AF3")
+	//cIndexAF3 := CriaTrab(nil,.f.)
+	//IndRegua("AF3",cIndexAF3,"AF3_FILIAL+AF3_ORCAME+AF3_PRODUT",,,"Selecionando Registros...")
+	
+	dbSelectArea("AF1")
+	dbSetOrder(1)
+	AF1->(dbSeek(xFilial("AF1")+cOrcam))
+	
+	RecLock("AF1")
+	Replace AF1->AF1_ENCARG With nEncarg
+	MsUnlock()
+	
+	For i:=1 To Len(aCols)
+		If aCols[i,8] == .F. //.And. aCols[i,5] > 0      	
+			If aCols[i,2] == "PR"
+				dbSelectArea("AF3")
+				dbSetOrder(2)
+				AF3->(dbSeek(xFilial("AF3")+cOrcam+aCols[i,1]))	
+				While AF3->AF3_FILIAL == xFilial("AF3") .And. AF3->AF3_PRODUT == aCols[i,1]
+					RecLock("AF3",.f.)
+					Replace AF3->AF3_CUSTHR  With 0
+					Replace AF3->AF3_CUSTD   With aCols[i,5]
+					IIF(AF3->AF3_CUSTD == 0, lSemPreco:= .T.,)      	
+					MsUnlock()  
+					AF3->(dbSkip())
+				EndDo
+			ElseIf aCols[i,2] == "MO"
+				dbSelectArea("AF3")
+				dbSetOrder(4)
+				AF3->(dbSeek(xFilial("AF3")+aCols[i,1]+cOrcam))
+				While AF3->AF3_FILIAL == xFilial("AF3") .And. AF3->AF3_RECURS == aCols[i,1] .And. AF3->AF3_ORCAME == cOrcam
+					RecLock("AF3",.f.)
+					Replace AF3->AF3_CUSTHR   With aCols[i,5]
+					IIF(AF3->AF3_CUSTHR == 0, lSemPreco:= .T.,)
+					Replace AF3->AF3_CUSTD    With aCols[i,5]+(aCols[i,5]*(nEncarg/100))
+					MsUnlock()  
+					AF3->(dbSkip())
+				EndDo
+			ElseIf aCols[i,2] == "DE"
+				dbSelectArea("AF4")
+				dbSetOrder(1)
+				AF4->(dbSeek(xFilial("AF4")+cOrcam+aCols[i,6]+aCols[i,7]))
+				RecLock("AF4",.f.)
+				Replace AF4->AF4_VLRUNI   With aCols[i,5]
+				Replace AF4->AF4_VALOR    With aCols[i,5]*AF4->AF4_QUANT
+				MsUnlock()  
+	      	EndIf
+		EndIf	
+	Next
+	
+	//Força o recalculo do custo do orcamento
+	// atualiza os custos das tarefas e das edts
+	//PMS100ReCalc() //orcamentos
+	//PMS200Recalc() //projetos
+	
+	Execblock("PMA103FI",.f.,.f.)                           
+	      	
+	//MsgInfo("Custo atualizado!!!","Atenção")
+	
+	oSay:SetText("Edição Gravada com Sucesso.")
+	oSay:CtrlRefresh()
+	
+	IIF(lSemPreco,MsgAlert("O orçamento possui algum Produto ou Mão de Obra sem preço de custo.","Atenção"),)
+
+Return
+              
+                         
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ FUNÇÃO PARA LIMPAR O TEXTO DO STATUS                                ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+User Function CleanStatus()
+
+	oSay:SetText("")
+	oSay:CtrlRefresh()
+
+Return .T.
+
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ FUNÇÃO QUE EXIBE OS PRODUTOS/MATERIAIS/DESPESAS COM VALORES = 0     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+User Function ValorZero()
+
+	Local i := 0
+	Local c := 0
+	
+	If(lCheck)
+		aOrig := aClone(aCols)
+		For i:= 1 to Len(aOrig)
+			If(!Empty(aCols[i]))
+				If(aCols[i][5] > 0)
+					ADel(aCols, i)
+					i--
+					c++
+				EndIf
+			EndIf
+		Next
+		ASize(aCols,Len(aCols)-c)
+	Else
+		aCols := aClone(aOrig)
+	EndIf
+
+	oGetDados:ForceRefresh()
+
+Return
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ FUNÇÃO PARA INVERTER SELECAO                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Static Function Inverte
+
+nTotSel := 0
+
+For i:=1 To Len(aCols)
+ 	If aCols[i,6] == .f.
+ 		aCols[i,6] := .t.
+    	nTotSel--
+    Else
+    	aCols[i,6] := .f.
+    	nTotSel++
+    EndIf	
+Next
+
+If nTotSel < 0
+	nTotSel := 0
+EndIf	
+
+cTotSel := Transform(nTotSel,"@E 9999999")
+ObjectMethod(oTotSel,"SetText('"+cTotSel+"')")
+
+Return
+
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ FUNÇÃO PARA VALIDAR LINHA                                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+User Function ARGLINOK
+
+lRet:=.t.
+/*         
+If aCols[n,5] == .f.
+	If aCols[n,4]<=0
+		Alert("Itens ativos nao podem conter valor menor ou igual a zero","Atenção")
+		lRet:=.f.
+	EndIf
+EndIf	
+*/	
+Return lRet
+
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ FUNÇÃO PARA VALIDAR TODO O ACOLS                                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+User Function ARGTDOOK
+
+lRet:=.t.
+/*
+For i:=1 To Len(aCols)
+	If aCols[i,5] == .f.
+		If aCols[i,4]<=0			
+			lRet:=.f.
+		EndIf
+	EndIf
+Next
+
+If lRet == .f.
+	Alert("Itens ativos nao podem conter valor menor ou igual a zero"+chr(10)+"Verifique os itens","Atenção")
+EndIf	
+*/
+Return lRet
+
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ FUNÇÃO PARA AO DELETAR LINHA                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+User Function ARGDELOK
+
+	lRet:=.t.
+	
+	nTotSel := 0
+	
+	For i:=1 To Len(aCols)
+	 	If aCols[i,6] == .f.
+	    	nTotSel++
+	    Else
+	    	nTotSel--
+	    EndIf	
+	Next
+	
+	If nTotSel < 0
+		nTotSel := 0
+	EndIf	
+	
+	cTotSel := Transform(nTotSel,"@E 9999999")
+	ObjectMethod(oTotSel,"SetText('"+cTotSel+"')")
+                              	
+Return lRet

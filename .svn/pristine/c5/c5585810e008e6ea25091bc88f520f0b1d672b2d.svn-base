@@ -1,0 +1,843 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATR850.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr850.prx"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "PROTHEUS.CH"
+#line 15 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr850.prx"
+Function MATR850
+Local oReport
+
+If FindFunction("TRepInUse") .And.  TRepInUse()
+
+
+
+	oReport:= ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR850R3()
+EndIf
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportDef()
+Local nTamOp  := TamSX3("D3_OP")[1]+2
+Local nTamProd:= TamSX3("C2_PRODUTO")[1]
+Local nTamSld := TamSX3("C2_QUANT")[1]
+Local cPictQtd:= PesqPictQt("C2_QUANT")
+Local aOrdem  := {If( cPaisLoc $ "ANG|PTG", "Por o.p.       ", "Por O.P.       " ),If( cPaisLoc $ "ANG|PTG", "Por produto    ", "Por Produto    " ),If( cPaisLoc $ "ANG|PTG", "Por C. De Custo", "Por C. de Custo" )}
+Local oReport
+Local oOp
+Local cAliasSC2 := ""
+
+	If !TcSrvType() == "AS/400"
+   		cAliasSC2 := GetNextAlias()
+ 	Else
+ 		cAliasSC2 := "SC2"
+ 	EndIf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+oReport:= TReport():New("MATR850",If( cPaisLoc $ "ANG|PTG", "Relação Das Ordens De Produção", "Relacao Das Ordens de Producao" ),"MTR850", {|oReport| ReportPrint(oReport,@cAliasSC2)},If( cPaisLoc $ "ANG|PTG", "Este programa irá imprimir a Relação das Ordens de Produção.", "Este programa ira imprimir a Relaçäo das Ordens de Produçäo." ))
+If nTamProd > 15
+	oReport:SetLandscape()
+EndIf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pergunte(oReport:uParam, .F. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+oOp := TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Ordens de produção", "Ordens de Produção" ),{"SC2","SB1"},aOrdem)
+oOp:SetTotalInLine( .F. )
+
+TRCell():New(oOp,"OP"			,"SC2",If( cPaisLoc $ "ANG|PTG", "Número", "NUMERO" ),	,nTamOp		              ,, {|| (cAliasSC2)->(C2_NUM+C2_ITEM+C2_SEQUEN+C2_ITEMGRD) } )
+TRCell():New(oOp,"C2_PRODUTO"	,"SC2",If( cPaisLoc $ "ANG|PTG", "Produto", "PRODUTO" ),	,TamSX3("C2_PRODUTO")[1]+4,,)
+TRCell():New(oOp,"B1_DESC"		,"SB1",If( cPaisLoc $ "ANG|PTG", "Descrição", "DESCRIÇÃO" ),	,,,)
+TRCell():New(oOp,"C2_CC"		,"SC2",If( cPaisLoc $ "ANG|PTG", "Centro De Custo", "CENTRO CUSTO" ),	,,,)
+TRCell():New(oOp,"C2_EMISSAO"	,"SC2",If( cPaisLoc $ "ANG|PTG", "Emissão", "EMISSÃO" ),	,TamSX3("C2_EMISSAO")[1]+4,,)
+TRCell():New(oOp,"C2_DATPRF"	,"SC2",If( cPaisLoc $ "ANG|PTG", "Dt. prevista", "DT.PREVISTA" ),	,TamSX3("C2_DATPRF")[1]+4 ,,)
+TRCell():New(oOp,"C2_DATRF"		,"SC2",If( cPaisLoc $ "ANG|PTG", "Dt. Real", "DT. REAL" ),	,TamSX3("C2_DATRF")[1]+4  ,,)
+TRCell():New(oOp,"C2_QUANT"		,"SC2",If( cPaisLoc $ "ANG|PTG", "Quant. Original", "QUANT. ORIGINAL" ),	,,,)
+TRCell():New(oOp,"SALDO"		,"SC2",If( cPaisLoc $ "ANG|PTG", "Saldo A Entregar", "SALDO A ENTREGAR" ),cPictQtd		,nTamSld	,,{|| IIf(Empty((cAliasSC2)->C2_DATRF),aSC2Sld(cAliasSC2),0) } )
+If ! __lPyme
+	TRCell():New(oOp,"C2_STATUS","SC2",If( cPaisLoc $ "ANG|PTG", "Estado", "STATUS" ),	,,,)
+	TRCell():New(oOp,"C2_TPOP"	,"SC2",If( cPaisLoc $ "ANG|PTG", "Tipo", "TIPO" ),	,,,)
+EndIf
+
+oOp:SetHeaderPage()
+
+Return(oReport)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportPrint(oReport,cAliasSC2)
+Local oOp 	    := oReport:Section(1)
+Local nOrdem    := oOp:GetOrder()
+Local cFilterUsr:= ""
+Local oBreak
+
+	Local cWhere01:="",cWhere02:="",cWhere03:=""
+	Local cSpace     := Space(TamSx3("C2_DATRF")[1])
+	Local aStrucSC2  := SC2->(dbStruct())
+	Local cSelectUsr := ""
+	Local cSelect    := ""
+	Local aFieldUsr  := {}
+	Local nCnt       := 0
+	Local nPos       := 0
+	Local lAS400	 := TcSrvType() == "AS/400"
+
+
+
+
+
+
+
+
+oReport:SetTitle(oReport:Title()+IIf(nOrdem==1,If( cPaisLoc $ "ANG|PTG", " - Por O.p.", " - Por O.P." ),IIf(nOrdem==2," - Por Produto",If( cPaisLoc $ "ANG|PTG", " - Por Centro De Custo", " - Por Centro de Custo" ))))
+
+
+
+
+If nOrdem == 2
+	oBreak := TRBreak():New(oOp,oOp:Cell("C2_PRODUTO"),"Total ---->", .F. )
+EndIf
+
+If nOrdem == 2
+	TRFunction():New(oOp:Cell("C2_QUANT"	),NIL,"SUM",oBreak,,,, .T. , .F. )
+	TRFunction():New(oOp:Cell("SALDO"		),NIL,"SUM",oBreak,,,, .T. , .F. )
+EndIf
+
+
+
+
+
+	If !lAS400
+		dbSelectArea("SC2")
+		dbSetOrder(nOrdem)
+
+
+
+
+
+		cSelectUsr := "%"
+		cSelect := "C2_FILIAL,C2_PRODUTO,C2_NUM,C2_ITEM,C2_SEQUEN,C2_ITEMGRD,C2_DATRF,C2_CC,C2_EMISSAO,C2_DATPRF,C2_QUANT,"
+		cSelect += "C2_QUJE,C2_PERDA,C2_STATUS,C2_TPOP,SC2.R_E_C_N_O_ SC2RECNO"
+	   	aFieldUsr:= R850UsrSC2(oOP)
+	    For nCnt:=1 To Len(aFieldUsr)
+			If ( nPos:=Ascan(aStrucSC2,{|x| AllTrim(x[1])==aFieldUsr[nCnt]}) ) > 0
+				If aStrucSC2[nPos,2] <> "M"
+		   			If !aStrucSC2[nPos,1] $ cSelectUsr .And.  !aStrucSC2[nPos,1] $ cSelect
+		        		cSelectUsr += ","+aStrucSC2[nPos,1]
+		          	Endif
+		       	EndIf
+			EndIf
+		Next
+	    cSelectUsr += "%"
+
+
+
+
+		cWhere01 := "%"
+		If mv_par10 == 1
+			cWhere01 += "'S'"
+		ElseIf mv_par10 == 2
+			cWhere01 += "'U'"
+		ElseIf mv_par10 == 3
+			cWhere01 += "'S','U','D','N',' '"
+		EndIf
+		cWhere01 += "%"
+
+
+
+		cWhere02 := "%"
+		If mv_par11 == 1
+			cWhere02 += "'F'"
+		ElseIf mv_par11 == 2
+			cWhere02 += "'P'"
+		ElseIf mv_par11 == 3
+			cWhere02 += "'F','P'"
+		EndIf
+		cWhere02 += "%"
+
+
+
+
+		cWhere03 := "%"
+		If mv_par09 == 1
+			cWhere03 += " SC2.C2_DATRF =  '"+cSpace+"' AND "
+		ElseIf mv_par09 == 2
+			cWhere03 += " SC2.C2_DATRF <> '"+cSpace+"' AND "
+		EndIf
+
+		cFilterUsr := oOP:GetSqlExp("SC2")
+		If !Empty(cFilterUsr)
+			cWhere03 := cWhere03 + " (" + cFilterUsr + ")" + " AND "
+		Endif
+		cFilterUsr := oOP:GetSqlExp("SB1")
+		If !Empty(cFilterUsr)
+			cWhere03 := cWhere03 + " (" + cFilterUsr + ")" + " AND "
+		Endif
+		cWhere03 += "%"
+
+
+
+
+		MakeSqlExpr(oReport:uParam)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasSC2," SELECT C2_FILIAL,C2_PRODUTO,C2_NUM,C2_ITEM,C2_SEQUEN,C2_ITEMGRD,C2_DATRF,C2_CC, C2_EMISSAO,C2_DATPRF,C2_QUANT,C2_QUJE,C2_PERDA,C2_STATUS,C2_TPOP, SC2.R_E_C_N_O_ SC2RECNO  "+___SQLGetValue(CSELECTUSR)+" FROM  "+RetSqlName('SC2')+" SC2,  "+RetSqlName('SB1')+" SB1 WHERE SC2.C2_FILIAL =  '" +xFilial('SC2')+"'  AND SB1.B1_FILIAL =  '" +xFilial('SB1')+"'  AND SC2.C2_PRODUTO = SB1.B1_COD AND SC2.C2_NUM||SC2.C2_ITEM||SC2.C2_SEQUEN||SC2.C2_ITEMGRD >=  "+___SQLGetValue(MV_PAR01)+" AND SC2.C2_NUM||SC2.C2_ITEM||SC2.C2_SEQUEN||SC2.C2_ITEMGRD <=  "+___SQLGetValue(MV_PAR02)+" AND SC2.C2_PRODUTO >=  "+___SQLGetValue(MV_PAR03)+" AND SC2.C2_PRODUTO <=  "+___SQLGetValue(MV_PAR04)+" AND SC2.C2_CC >=  "+___SQLGetValue(MV_PAR05)+" AND SC2.C2_CC <=  "+___SQLGetValue(MV_PAR06)+" AND SC2.C2_EMISSAO >=  "+___SQLGetValue(MV_PAR07)+" AND SC2.C2_EMISSAO <=  "+___SQLGetValue(MV_PAR08)+" AND SC2.C2_STATUS IN ( "+___SQLGetValue(CWHERE01)+") AND SC2.C2_TPOP IN ( "+___SQLGetValue(CWHERE02)+") AND  "+___SQLGetValue(CWHERE03)+" SC2.D_E_L_E_T_= ' ' AND SB1.D_E_L_E_T_= ' ' ORDER BY  "+ SqlOrder(SC2->(IndexKey())),{{"C2_DATPRF","D",8,0},{"C2_DATRF","D",8,0},{"C2_EMISSAO","D",8,0}},.F.)
+
+		oReport:Section(1):EndQuery()
+
+
+
+
+		dbSelectArea(cAliasSC2)
+	Else
+
+
+	dbSelectArea("SC2")
+	dbSetOrder(nOrdem)
+
+
+
+
+	MakeAdvplExpr(oReport:uParam)
+
+	If mv_par10 == 1
+		cStatus := "S"
+	ElseIf mv_par10 == 2
+		cStatus := "U"
+	ElseIf mv_par10 == 3
+		cStatus := "SUDN "
+	EndIf
+	cFiltro	:= "SC2->C2_FILIAL == '"+xFilial("SC2")+"' "
+
+	cFiltro += ".And. C2_NUM+C2_ITEM+C2_SEQUEN+C2_ITEMGRD >= '"+mv_par01+"' "
+	cFiltro += ".And. C2_NUM+C2_ITEM+C2_SEQUEN+C2_ITEMGRD <= '"+mv_par02+"' "
+	cFiltro += ".And. C2_PRODUTO >= '"+mv_par03+"' "
+	cFiltro += ".And. C2_PRODUTO <= '"+mv_par04+"' "
+	cFiltro += ".And. C2_CC >= '"+mv_par05+"' "
+	cFiltro += ".And. C2_CC <= '"+mv_par06+"' "
+	cFiltro += ".And. DTOS(C2_EMISSAO) >= '"+DTOS(mv_par07)+"' "
+	cFiltro += ".And. DTOS(C2_EMISSAO) <= '"+DTOS(mv_par08)+"' "
+	cFiltro += ".And. C2_STATUS $ '"+cStatus+"' "
+	If mv_par09 == 1
+		cFiltro += ".And. Empty(C2_DATRF)"
+	ElseIf mv_par09 == 2
+		cFiltro += ".And. !Empty(C2_DATRF)"
+	EndIf
+
+	cFilterUsr := oOP:GetAdvplExp("SC2")
+	If !Empty(cFilterUsr)
+		cFiltro := cFiltro + " .And. " + cFilterUsr
+	Endif
+
+	oReport:Section(1):SetFilter(cFiltro,IndexKey())
+
+	EndIf
+
+
+TRPosition():New(oOp,"SB1",1,{|| xFilial("SB1") + (cAliasSC2)->C2_PRODUTO})
+oOp:SetLineCondition({|| MtrAValOP(mv_par11,"SC2",cAliasSC2) })
+
+
+
+
+oOp:Print()
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MATR850R3()
+Local titulo 	:= If( cPaisLoc $ "ANG|PTG", "Relação Das Ordens De Produção", "Relacao Das Ordens de Producao" )
+Local cString	:= "SC2"
+Local wnrel		:= "MATR850"
+Local cDesc		:= If( cPaisLoc $ "ANG|PTG", "Este programa irá imprimir a Relação das Ordens de Produção.", "Este programa ira imprimir a Relaçäo das Ordens de Produçäo." )
+Local aOrd    	:= {If( cPaisLoc $ "ANG|PTG", "Por o.p.       ", "Por O.P.       " ),If( cPaisLoc $ "ANG|PTG", "Por produto    ", "Por Produto    " ),If( cPaisLoc $ "ANG|PTG", "Por C. De Custo", "Por C. de Custo" )}
+Local tamanho	:= "G"
+Local lRet      := .T. 
+Private aReturn := {If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ),1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 1, 2, 1, "",1 }
+Private cPerg   := "MTR850"
+Private nLastKey:= 0
+
+
+
+
+Pergunte("MTR850", .F. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+wnrel := SetPrint(cString,wnrel,cPerg,@titulo,cDesc,"","", .F. ,aOrd,,Tamanho)
+
+If aReturn[4] == 1 .And.  !tamsx3("B1_COD")[1] > 15
+	Tamanho := "M"
+EndIf
+If nLastKey == 27
+	dbClearFilter()
+	lRet := .F. 
+EndIf
+
+If lRet
+	SetDefault(aReturn,cString)
+EndIf
+
+If lRet .And.  nLastKey == 27
+	dbClearFilter()
+	lRet := .F. 
+EndIf
+
+If lRet
+	RptStatus({|lEnd| R850Imp(@lEnd,wnRel,titulo,tamanho)},titulo)
+EndIf
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R850Imp(lEnd,wnRel,titulo,tamanho)
+
+
+
+
+Local CbTxt
+Local CbCont,cabec1,cabec2
+Local limite   := If(aReturn[4] == 1,132,180)
+Local nomeprog := "MATR850"
+Local nTipo    := 0
+Local cProduto := Space(Len(SC2->C2_PRODUTO))
+Local cStatus,nOrdem,cSeek
+Local cTotal   := "",nTotOri:= 0,nTotSaldo:=0
+Local cQuery   := "",cIndex := CriaTrab("", .F. ),nIndex:=0
+Local lQuery   := .F. 
+Local aStruSC2 := {}
+Local cAliasSC2:= "SC2"
+Local cTPOP    := ""
+Local lTipo    := .F. 
+Local nColAdd	 := 0
+
+	Local nX
+	Local lAS400	 := TcSrvType() == "AS/400"
+
+
+
+
+
+cbtxt   := Space(10)
+cbcont  := 0
+li      := 80
+m_pag   := 1
+
+nTipo   := IIf(aReturn[4]==1,15,18)
+nOrdem  := aReturn[8]
+lTipo   := IIf(!tamsx3("B1_COD")[1] > 15,IIf(aReturn[4]==1, .T. , .F. ), .F. )
+nColadd := iif(TamSx3("B1_COD")[1] > 15,TamSx3("B1_COD")[1]-15,0)
+
+
+
+
+titulo += IIf(nOrdem==1,If( cPaisLoc $ "ANG|PTG", " - Por O.p.", " - Por O.P." ),IIf(nOrdem==2," - Por Produto",If( cPaisLoc $ "ANG|PTG", " - Por Centro De Custo", " - Por Centro de Custo" )))
+
+If !tamsx3("B1_COD")[1] > 15
+	cabec1 := If(!__lPyme, IIf(lTipo,If( cPaisLoc $ "ANG|PTG", "Número         Produto                                 Centro  Emissão  Entrega  Entrega     Quantidade        Saldo A St Tp", "NUMERO         P R O D U T O                                 CENTRO  EMISSAO  ENTREGA  ENTREGA     QUANTIDADE        SALDO A ST TP" ),If( cPaisLoc $ "ANG|PTG", "Número         P R O D U T O                                                  Centro    Emissão      Entrega     Entrega       Quantidade          Saldo A      St Tp", "NUMERO         P R O D U T O                                                  CENTRO    EMISSAO      ENTREGA     ENTREGA       QUANTIDADE          SALDO A      ST TP" )), IIf(lTipo,If( cPaisLoc $ "ANG|PTG", "Número         produto                                 centro  emissão  entrega  entrega     quantidade        saldo a      ", "NUMERO         P R O D U T O                                 CENTRO  EMISSAO  ENTREGA  ENTREGA     QUANTIDADE        SALDO A      " ),If( cPaisLoc $ "ANG|PTG", "Número         p r o d u t o                                                  centro    emissão      entrega     entrega       quantidade          saldo a      ", "NUMERO         P R O D U T O                                                  CENTRO    EMISSAO      ENTREGA     ENTREGA       QUANTIDADE          SALDO A      " )))
+	cabec2 := IIf(lTipo,If( cPaisLoc $ "ANG|PTG", "                                                           De Custo          Prevista     Real       Original       Entregar", "                                                           DE CUSTO          PREVISTA     REAL       ORIGINAL       ENTREGAR" ),If( cPaisLoc $ "ANG|PTG", "                                                                            De Custo                Prevista        Real         Original         Entregar", "                                                                            DE CUSTO                PREVISTA        REAL         ORIGINAL         ENTREGAR" ))
+Else
+	cabec1 := if(!__lPyme, IIF(lTipo,SUBSTR(If( cPaisLoc $ "ANG|PTG", "Número         Produto                                 Centro  Emissão  Entrega  Entrega     Quantidade        Saldo A St Tp", "NUMERO         P R O D U T O                                 CENTRO  EMISSAO  ENTREGA  ENTREGA     QUANTIDADE        SALDO A ST TP" ),1,78)+SPACE(nColadd)+SUBSTR(If( cPaisLoc $ "ANG|PTG", "Número         Produto                                 Centro  Emissão  Entrega  Entrega     Quantidade        Saldo A St Tp", "NUMERO         P R O D U T O                                 CENTRO  EMISSAO  ENTREGA  ENTREGA     QUANTIDADE        SALDO A ST TP" ),79,166),SUBSTR(If( cPaisLoc $ "ANG|PTG", "Número         P R O D U T O                                                  Centro    Emissão      Entrega     Entrega       Quantidade          Saldo A      St Tp", "NUMERO         P R O D U T O                                                  CENTRO    EMISSAO      ENTREGA     ENTREGA       QUANTIDADE          SALDO A      ST TP" ),1,78)+SPACE(nColadd)+SUBSTR(If( cPaisLoc $ "ANG|PTG", "Número         P R O D U T O                                                  Centro    Emissão      Entrega     Entrega       Quantidade          Saldo A      St Tp", "NUMERO         P R O D U T O                                                  CENTRO    EMISSAO      ENTREGA     ENTREGA       QUANTIDADE          SALDO A      ST TP" ),79,166)), IIf(lTipo,SUBSTR(If( cPaisLoc $ "ANG|PTG", "Número         produto                                 centro  emissão  entrega  entrega     quantidade        saldo a      ", "NUMERO         P R O D U T O                                 CENTRO  EMISSAO  ENTREGA  ENTREGA     QUANTIDADE        SALDO A      " ),1,78)+SPACE(nColadd)+SUBSTR(If( cPaisLoc $ "ANG|PTG", "Número         produto                                 centro  emissão  entrega  entrega     quantidade        saldo a      ", "NUMERO         P R O D U T O                                 CENTRO  EMISSAO  ENTREGA  ENTREGA     QUANTIDADE        SALDO A      " ),79,166),SUBSTR(If( cPaisLoc $ "ANG|PTG", "Número         p r o d u t o                                                  centro    emissão      entrega     entrega       quantidade          saldo a      ", "NUMERO         P R O D U T O                                                  CENTRO    EMISSAO      ENTREGA     ENTREGA       QUANTIDADE          SALDO A      " ),1,78)+SPACE(nColadd)+SUBSTR(If( cPaisLoc $ "ANG|PTG", "Número         p r o d u t o                                                  centro    emissão      entrega     entrega       quantidade          saldo a      ", "NUMERO         P R O D U T O                                                  CENTRO    EMISSAO      ENTREGA     ENTREGA       QUANTIDADE          SALDO A      " ),79,166)))
+	cabec2 := IIf(lTipo,SUBSTR(If( cPaisLoc $ "ANG|PTG", "                                                           De Custo          Prevista     Real       Original       Entregar", "                                                           DE CUSTO          PREVISTA     REAL       ORIGINAL       ENTREGAR" ),1,76)+SPACE(nColadd)+SUBSTR(If( cPaisLoc $ "ANG|PTG", "                                                           De Custo          Prevista     Real       Original       Entregar", "                                                           DE CUSTO          PREVISTA     REAL       ORIGINAL       ENTREGAR" ),76,166),SUBSTR(If( cPaisLoc $ "ANG|PTG", "                                                                            De Custo                Prevista        Real         Original         Entregar", "                                                                            DE CUSTO                PREVISTA        REAL         ORIGINAL         ENTREGAR" ),1,76)+SPACE(nColadd)+SUBSTR(If( cPaisLoc $ "ANG|PTG", "                                                                            De Custo                Prevista        Real         Original         Entregar", "                                                                            DE CUSTO                PREVISTA        REAL         ORIGINAL         ENTREGAR" ),76,166))
+EndIf
+
+
+
+
+
+
+
+dbSelectArea("SC2")
+dbSetOrder( nOrdem )
+
+
+
+
+
+	If !lAS400
+		If mv_par10 == 1
+			cStatus := "'S'"
+		ElseIf mv_par10 == 2
+			cStatus := "'U'"
+		ElseIf mv_par10 == 3
+			cStatus := "'S','U','D','N',' '"
+		EndIf
+		If mv_par11 == 1
+			cTPOP := "'F'"
+		ElseIf mv_par11 == 2
+			cTPOP := "'P'"
+		ElseIf mv_par11 == 3
+			cTPOP := "'F','P'"
+		EndIf
+		lQuery 	  := .T. 
+		aStruSC2  := SC2->(dbStruct())
+		cAliasSC2 := "R850IMP"
+		cQuery    := "SELECT SC2.C2_FILIAL,SC2.C2_PRODUTO,SC2.C2_NUM,SC2.C2_ITEM,SC2.C2_SEQUEN,SC2.C2_ITEMGRD, "
+		cQuery    += "SC2.C2_DATRF,SC2.C2_CC,SC2.C2_EMISSAO,SC2.C2_DATPRF,SC2.C2_QUANT,SC2.C2_QUJE,SC2.C2_PERDA, "
+		cQuery    += "SC2.C2_STATUS,SC2.C2_TPOP, "
+		cQuery    += "SC2.R_E_C_N_O_ SC2RECNO "
+		cQuery    += "FROM "
+		cQuery    += RetSqlName("SC2")+" SC2 "
+		cQuery    += "WHERE "
+		cQuery    += "SC2.C2_FILIAL = '"+xFilial("SC2")+"' AND "
+
+
+
+
+		cQuery 	  += "SC2.C2_NUM||SC2.C2_ITEM||SC2.C2_SEQUEN||SC2.C2_ITEMGRD >= '"+mv_par01+"' AND "
+		cQuery 	  += "SC2.C2_NUM||SC2.C2_ITEM||SC2.C2_SEQUEN||SC2.C2_ITEMGRD <= '"+mv_par02+"' AND "
+
+		cQuery    += "SC2.C2_PRODUTO >= '"+mv_par03+"' And SC2.C2_PRODUTO <= '"+mv_par04+"' And "
+		cQuery    += "SC2.C2_CC  >= '"+mv_par05+"' And SC2.C2_CC  <= '"+mv_par06+"' And "
+		cQuery    += "SC2.C2_EMISSAO  >= '"+DtoS(mv_par07)+"' And SC2.C2_EMISSAO  <= '"+DtoS(mv_par08)+"' And "
+		cQuery    += "SC2.C2_STATUS IN ("+cStatus+") And "
+		cQuery    += "SC2.C2_TPOP IN ("+cTPOP+") And "
+		cQuery    += "SC2.D_E_L_E_T_ = ' ' "
+
+		cQuery    += "ORDER BY "+SqlOrder(SC2->(IndexKey()))
+
+		cQuery    := ChangeQuery(cQuery)
+
+		dbUseArea( .T. ,"TOPCONN",TcGenQry(,,cQuery),cAliasSC2, .T. , .T. )
+
+		For nX := 1 To Len(aStruSC2)
+			If ( aStruSC2[nX][2] <> "C" ) .And.  FieldPos(aStruSC2[nX][1]) > 0
+				TcSetField(cAliasSC2,aStruSC2[nX][1],aStruSC2[nX][2],aStruSC2[nX][3],aStruSC2[nX][4])
+			EndIf
+		next
+	Else
+
+	If mv_par10 == 1
+		cStatus := "S"
+	ElseIf mv_par10 == 2
+		cStatus := "U"
+	ElseIf mv_par10 == 3
+		cStatus := "SUDN "
+	EndIf
+	cQuery 	:= "C2_FILIAL=='"+xFilial("SC2")+"'"
+	cQuery  += ".And. C2_NUM+C2_ITEM+C2_SEQUEN+C2_ITEMGRD >= '"+mv_par01+"' "
+	cQuery  += ".And. C2_NUM+C2_ITEM+C2_SEQUEN+C2_ITEMGRD <= '"+mv_par02+"' "
+	cQuery  += ".And.C2_PRODUTO>='"+mv_par03+"'.And.C2_PRODUTO<='"+mv_par04+"'"
+	cQuery  += ".And.C2_STATUS$'"+cStatus+"'"
+	cQuery  += ".And.C2_CC>='"+mv_par05+"'.And.C2_CC<='"+mv_par06+"'"
+	cQuery  += ".And.DtoS(C2_EMISSAO)>='"+DtoS(mv_par07)+"'.And.DtoS(C2_EMISSAO)<='"+DtoS(mv_par08)+"'"
+	dbSelectArea("SC2")
+	dbSetOrder(1)
+	dbSetFilter({|| &cQuery},cQuery)
+	cAliasSC2 := "SC2"
+
+	EndIF
+
+
+SetRegua(RecCount())
+dbGoTop()
+
+While !Eof()
+	IncRegua()
+	If lEnd
+		PrintOut(_PROW()+1,001,If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR"),,)
+		Exit
+	EndIf
+
+	If C2_FILIAL+C2_NUM+C2_ITEM+C2_SEQUEN+C2_ITEMGRD < xFilial("SC2")+mv_par01 .or.  C2_FILIAL+C2_NUM+C2_ITEM+C2_SEQUEN+C2_ITEMGRD > xFilial("SC2")+mv_par02
+		dbSkip()
+		Loop
+	EndIf
+
+	If mv_par09 == 1
+		If !Empty(C2_DATRF)
+			dbSkip()
+			Loop
+		EndIf
+	ElseIf mv_par09 == 2
+		If Empty(C2_DATRF)
+			dbSkip()
+			Loop
+		EndIf
+	EndIf
+
+
+
+		If	! Empty(aReturn[7])
+			SC2->(MsGoTo((cAliasSC2)->SC2RECNO))
+			If SC2->( ! &(aReturn[7]) )
+				(cAliasSC2)->(DbSkip())
+				Loop
+			EndIf
+		EndIf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	cTotal  := IIf(nOrdem==2,xFilial("SC2")+C2_PRODUTO,xFilial("SC2"))
+	nTotOri := nTotSaldo:=0
+	while !Eof() .And. cTotal==IIf(nOrdem==2,C2_FILIAL+C2_PRODUTO,C2_FILIAL)
+		IncRegua()
+
+		If C2_FILIAL+C2_NUM+C2_ITEM+C2_SEQUEN+C2_ITEMGRD < xFilial("SC2")+mv_par01 .or.  C2_FILIAL+C2_NUM+C2_ITEM+C2_SEQUEN+C2_ITEMGRD > xFilial("SC2")+mv_par02
+			dbSkip()
+			Loop
+		EndIf
+
+		If mv_par09 == 1
+			If !Empty(C2_DATRF)
+				dbSkip()
+				Loop
+			EndIf
+		Elseif mv_par09 == 2
+			If Empty(C2_DATRF)
+				dbSkip()
+				Loop
+			EndIf
+		EndIf
+
+
+
+			If	! Empty(aReturn[7])
+				SC2->(MsGoTo((cAliasSC2)->SC2RECNO))
+				If SC2->( ! &(aReturn[7]) )
+					(cAliasSC2)->(DbSkip())
+					Loop
+				EndIf
+			EndIf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		SB1->(dbSetOrder(1))
+		SB1->(dbSeek(xFilial("SB1")+(cAliasSC2)->C2_PRODUTO))
+
+		If li > 58
+			Cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		EndIf
+
+
+		PrintOut(Li,000,C2_NUM+C2_ITEM+C2_SEQUEN+C2_ITEMGRD,,)
+		PrintOut(Li,015,C2_PRODUTO,,)
+		If lTipo
+			PrintOut(Li,032+nColadd,SubStr(SB1->B1_DESC,1,25),,)
+			PrintOut(Li,058+nColadd,C2_CC,,)
+			PrintOut(Li,068+nColadd,C2_EMISSAO,,)
+			PrintOut(Li,077+nColadd,C2_DATPRF,,)
+			PrintOut(Li,086+nColadd,C2_DATRF,,)
+			PrintOut(Li,097+nColadd,C2_QUANT,PesqPictQt("C2_QUANT",15),)
+			PrintOut(Li,112+nColadd,IIf(Empty(C2_DATRF),aSC2Sld(cAliasSC2),0),PesqPictQt("C2_QUANT",15),)
+		Else
+			PrintOut(Li,032+nColadd,SubStr(SB1->B1_DESC,1,40),,)
+			PrintOut(Li,074+nColadd,C2_CC,,)
+			PrintOut(Li,086+nColadd,C2_EMISSAO,,)
+			PrintOut(Li,099+nColadd,C2_DATPRF,,)
+			PrintOut(Li,111+nColadd,C2_DATRF,,)
+			PrintOut(Li,125+nColadd,C2_QUANT,PesqPictQt("C2_QUANT",15),)
+			PrintOut(Li,142+nColadd,IIf(Empty(C2_DATRF),aSC2Sld(cAliasSC2),0),PesqPictQt("C2_QUANT",15),)
+		EndIf
+		If ! __lPyme
+			IF lTipo
+				PrintOut(Li,126+nColadd,C2_STATUS,,)
+				PrintOut(Li,129+nColadd,C2_TPOP,,)
+			Else
+				PrintOut(Li,161+nColadd,C2_STATUS,,)
+				PrintOut(Li,164+nColadd,C2_TPOP,,)
+			EndIf
+		EndIf
+		Li++
+		If nOrdem # 2 .And.  !lTipo
+			PrintOut(Li,0,__PrtThinLine(),,)
+			Li++
+		Else
+			nTotOri	 += C2_QUANT
+			nTotSaldo+= IIf(Empty(C2_DATRF),aSC2Sld(cAliasSC2),0)
+		EndIf
+		dbSkip()
+	EndDo
+	If nOrdem == 2
+		Li++
+		PrintOut(Li,000,"Total ---->",,)
+		PrintOut(Li,015,Substr(cTotal,3),,)
+		If lTipo
+			PrintOut(Li,097+nColadd,nTotOri,PesqPictQt("C2_QUANT",15),)
+			PrintOut(Li,112+nColadd,nTotSaldo,PesqPictQt("C2_QUANT",15),)
+			Li++
+			PrintOut(Li,0,__PrtThinLine(),,)
+		Else
+			PrintOut(Li,125+nColadd,nTotOri,PesqPictQt("C2_QUANT",15),)
+			PrintOut(Li,142+nColadd,nTotSaldo,PesqPictQt("C2_QUANT",15),)
+			Li++
+			PrintOut(Li,0,__PrtThinLine(),,)
+		EndIf
+		Li++
+	EndIf
+EndDo
+
+
+	If lAS400
+		SC2->(dbClearFilter())
+	EndIf
+
+
+
+
+If Li <> 80
+	Roda(cbcont,cbtxt)
+EndIf
+
+If lQuery
+	dbSelectArea(cAliasSC2)
+	dbCloseArea()
+EndIf
+
+dbSelectArea("SC2")
+dbClearFilter()
+dbSetOrder(1)
+
+If File(cIndex+OrdBagExt())
+	Ferase(cIndex+OrdBagExt())
+EndIf
+
+If aReturn[5] == 1
+	Set( 24, "" )
+	OurSpool(wnrel)
+EndIf
+
+MS_FLUSH()
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R850UsrSC2(oObj)
+Local aFieldUsr := {}
+Local nCntFor   := 0
+
+For nCntFor:=1 To Len(oObj:ACell)
+	If oObj:Acell[nCntFor]:lUserField
+		If "C2_" == Left(oObj:Acell[nCntFor]:cName,3)
+			Aadd(aFieldUsr, Alltrim(oObj:Acell[nCntFor]:cName))
+		EndIf
+	EndIf
+next
+
+Return aFieldUsr

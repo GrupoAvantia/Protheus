@@ -1,0 +1,205 @@
+#INCLUDE "MATR056.CH"
+#INCLUDE "FIVEWIN.CH"
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑฺฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฟฑฑ
+ฑฑณFun…o    ณ MATR056  ณ Autor ณ Alexandre Alves Silva ณ Data ณ28/10/2002ณฑฑ
+ฑฑรฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤมฤฤฤฤฤฤฤมฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤมฤฤฤฤฤฤมฤฤฤฤฤฤฤฤฤฤดฑฑ
+ฑฑณDescri…o ณ Programa para imprimir Solicitacoes de NCP                 ณฑฑ
+ฑฑรฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤดฑฑ
+ฑฑณSintaxe   ณ Void MATR056(void)                                         ณฑฑ
+ฑฑภฤฤฤฤฤฤฤฤฤฤมฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤูฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Function MATR056()
+
+Local cString		:= "CT1"
+Local Titulo 		:= FunDesc()
+Local lRet			:= .T.
+
+Private nLastKey 	:= 0
+Private cPerg	 	:= "MTR056"
+Private nomeProg 	:= "MATR056"
+Private wnrel 		:= "MATR056"            //Nome Default do relatorio em Disco
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณAjusta as perguntas no dicionario.ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+AjustaSX1(cPerg)
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Variaveis utilizadas para parametros   ณ
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ mv_par01	// Numero de               ณ
+//ณ mv_par02	// Numero Ate              ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+If Pergunte(cPerg,.T.)
+	MsgRun(STR0001,"",{|| CursorWait(), Mtr056Cfg(Titulo,.F.) ,CursorArrow()}) //"Gerando relatorio, aguarde..."
+Else
+	lRet := .F.
+Endif
+
+Return lRet
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบProgram   ณMATR056   บAuthor ณAlexandre Silva     บ Date ณ  11-01-02   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณConfigura o relatorio para impressao.                       บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUse       ณ SIGACOM                                                    บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Function Mtr056Cfg(Titulo)
+
+Private oArial10	:= TFont():New("Arial",10,10,,.F.,,,,.T.,.F.)
+Private oArial12N	:= TFont():New("Arial",12,12,,.T.,,,,.T.,.F.)
+Private oArial14N	:= TFont():New("Arial",14,14,,.T.,,,,.T.,.F.)
+
+Private oPrint		:= TMSPrinter():New(Titulo )
+Private oPen		:= TPen():New(,7,CLR_BLACK,oPrint)
+
+oPrint:SetPortrait()
+
+Mtr056Det(Titulo)
+
+oPrint:Preview() 	// Visualiza antes de imprimir
+
+Return
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบProgram   ณMTR056Det บAuthor ณAlexandre Silva     บ Date ณ  11-01-02   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณGera o detalhe  para o relatorio                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUse       ณ AP7                                                        บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Function Mtr056Det(Titulo)
+
+Local cValPict	:= PesqPict("SCU","CU_VALMIN", 20)
+Local cSimb 	:= GETMV("MV_SIMB1")
+Local cFornece	:= ""
+Local cMotivo	:= ""
+Local cTexto	:= ""
+Local nLin 		:= 0
+Local nLinhaAtual:= 0
+
+dbSelectArea("SCU")
+dbSetOrder(1)
+
+If dbSeek(xFilial("SCU")+mv_par01,.T.)
+	While CU_NUMERO <= mv_par02 .And. !Eof()
+		nLin := Mt056ICab()
+		cFornece	:= RTrim(Substr(Posicione("SA2",1,xFilial('SA2')+SCU->CU_FORNECE+SCU->CU_LOJA,"A2_NOME"),1,30))
+		cMotivo		:= RTrim(Substr(Posicione("SX5",1,xFilial('SX5')+ 'O1'+ SCU->CU_MOTIVO,RetX5Titulo()),1,30))
+		cTexto	 	:= StrTran(STR0003, "<EMPRESA>", " " + cFornece+ " ")
+		cTexto	 	:= StrTran(cTexto , "<VALOR>"  ,+ cSimb + " " + lTrim(TransForm(SCU->CU_VALMIN,cValPict)))
+		cTexto	 	:= StrTran(cTexto , "<MOTIVO>" ," "+ cMotivo + " ")
+		nLin		+= 250
+        For nLinhaAtual := 1 To MlCount(cTexto,120)
+			oPrint:Say(nLin+=50 ,100,MemoLine(cTexto,120,nLinhaAtual),oArial10)            
+        Next
+		oPrint:Say(nLin+=250 ,100,STR0004 + rTrim(CU_NFISCAL) + iiF(!Empty(CU_SERNF),STR0005 + " " + CU_SERNF,"") + " "+ STR0002 +DtoC(CU_DTNF),oArial10)
+		oPrint:Say(nLin+=300 ,1600,"__________________________",oArial10)		
+		oPrint:Say(nLin+=050 ,1600,STR0006,oArial10)		
+		oPrint:Say(nLin+=050 ,1600,STR0007,oArial10)		
+		oPrint:EndPage() 	 	 				
+		dbSkip()
+	EndDo
+EndIf
+
+Return
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบFuncao    ณMt056ICab บAutor  ณAlexandre Silva     บFecha ณ  01/11/02   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณImprime o cabecalho do relatorio                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ SIGACOM                                                    บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function Mt056ICab()
+
+Local cCGCNome 	:= RTrim(RetTitle("A1_CGC"))+" "  //Retorna o titulo do campo
+Local cEndNome	:= RTrim(RetTitle("A1_END"))+" " 
+Local cCepNome	:= RTrim(RetTitle("A1_CEP"))+" " 
+Local cCidNome	:= RTrim(RetTitle("A1_MUN"))+" " 
+Local cEstNome	:= RTrim(RetTitle("A1_EST"))+" " 
+Local cTelNome	:= RTrim(RetTitle("A1_TEL"))+" " 
+Local cFaxNome	:= RTrim(RetTitle("A1_FAX"))+" " 
+Local nLin	   	:= 20
+
+oPrint:StartPage()
+
+oPrint:Box(nLin,0080,1600 ,2380,oPen)
+oPrint:Say(nLin+=20  ,0100,SM0->M0_NOMECOM,oArial14N)
+oPrint:Say(nLin+=70  ,0100,cCGCNome + TransForm(SM0->M0_CGC,PesqPict("SM0","M0_CGC")),oArial12N)  //"CGC,RUT,RUC,CUIT..."
+oPrint:Say(nLin+=00  ,1780,STR0008  + SCU->CU_NUMERO,oArial12N) //Numero da solicitacao
+oPrint:Say(nLin+=50  ,0100,cEndNome + SM0->M0_ENDENT,oArial12N)
+oPrint:Say(nLin+=00  ,1780,STR0002  + DTOC(SCU->CU_EMISSAO),oArial12N) //"Fecha: "
+oPrint:Say(nLin+=50  ,0100,cCepNome + TransForm(SM0->M0_CEPENT,PesqPict("SM0","M0_CEPENT")) + " - "+ cCidNome + rTrim(SM0->M0_CIDENT) + " - " + cEstNome + SM0->M0_ESTENT,oArial12N)
+oPrint:Say(nLin+=50  ,0100,cTelNome + TransForm(SM0->M0_TEL,PesqPict("SM0","M0_TEL")) + cFaxNome + TransForm(SM0->M0_FAX,PesqPict("SM0","M0_FAX" )),oArial12N ) //"| Telefono : ","     FAX : "
+oPrint:Line(nLin+=90 ,0080,nLin,2380)   	// horizontal
+oPrint:Line(nLin+=10 ,0080,nLin,2380)   	// horizontal
+
+Return nLin
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑฺฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤยฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฟฑฑ
+ฑฑณFun…o    ณ AjustaSX1    ณAutor ณ  Alexandre Silva     ณDataณ 10/10/02 ณฑฑ
+ฑฑรฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤฤมฤฤฤฤฤฤมฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤมฤฤฤฤมฤฤฤฤฤฤฤฤฤฤดฑฑ
+ฑฑณDescri…o ณ Ajusta perguntas do SX1                                    ณฑฑ
+ฑฑภฤฤฤฤฤฤฤฤฤฤมฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤูฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function AjustaSX1(cPerg)
+
+Local aArea := GetArea()
+Local aHelp	:= {}
+
+Aadd(aHelp,{{"Informe o numero da solicitacao	."},;	//Portugues
+	{"Inform the solicitacion number   		."},;	//Ingles
+	{"Informe el numero de la solicitud."}})	//Espanhol
+
+Aadd(aHelp,{{"Informe o numero da solicitacao	."},;	//Portugues
+	{"Inform SolicitaTion number	."},;	//Ingles
+	{"Infome el numero de la solicitud."}})	//Espanhol
+
+PutSx1(cPerg, "01","Numero De?","ฟDe Numero ?","From Number?","mv_ch1","C",06,0,0,;
+	"G","","SCU","","","mv_par05"," "," "," ","",	" "," "," "," "," "," ", " "," "," "," ",;
+	" "," ",aHelp[1][1],aHelp[1][2],aHelp[1][3])
+
+PutSx1(cPerg, "02","Numero Ate?","ฟAte Numero?","To  Number? ","mv_ch2","C",06,0,0,;
+	"G","","SCU","","","mv_par06"," "," "," ",""," "," "," "," "," "," "," "," "," ","","",;
+	"",aHelp[1][1],aHelp[1][2],aHelp[1][3])
+
+RestArea(aArea)
+
+Return
+Static Function RetX5Titulo()
+
+Local cTitulo := "X5_DESCRI"
+
+If __Language=="SPANISH"
+	cTitulo := "X5_DESCSPA"
+ElseIf __Language=="ENGLISH"
+	cTitulo := "X5_DESCENG"
+EndIf
+
+Return cTitulo

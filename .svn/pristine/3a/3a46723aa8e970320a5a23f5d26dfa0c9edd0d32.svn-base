@@ -1,0 +1,2047 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATR660.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr660.prx"
+#line 1 ""
+#line 16 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr660.prx"
+Function MATR660()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And.  TRepInUse()
+
+	oReport := ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR660R3()
+EndIf
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportDef()
+
+Local oReport
+Local cColuna	:= ""
+Local cTitulo	:= If( cPaisLoc $ "ANG|PTG", "Factura  / Serie", "Nota Fiscal/Serie" )
+Local nQuant	:= 0
+Local nPrcVen	:= 0
+Local nTotal	:= 0
+Local nValIpi	:= 0
+Local nQuant1	:= 0
+Local nPrcVen1	:= 0
+Local nTotal1	:= 0
+Local nValIpi1	:= 0
+Local lValadi	:= cPaisLoc == "MEX" .AND.  SD2->(FieldPos("D2_VALADI")) > 0
+
+Private cPerg   :="MTR660    "
+
+
+
+
+
+
+
+
+
+
+
+
+
+oReport:= TReport():New("MATR660",If( cPaisLoc $ "ANG|PTG", "Resumo De Vendas", "Resumo de Vendas" ),"MTR660", {|oReport| ReportPrint(oReport)},If( cPaisLoc $ "ANG|PTG", "Emissão do relatório de resumo de vendas, podendo o mesmo", "Emissao do Relatorio de Resumo de Vendas, podendo o mesmo" ) + " " + If( cPaisLoc $ "ANG|PTG", "Ser Emitido Por Ordem De Tipo De Entrada/saida, Grupo, Tipo", "ser emitido por ordem de Tipo de Entrada/Saida, Grupo, Tipo" ) + " " + If( cPaisLoc $ "ANG|PTG", "De material ou conta contabil.", "de Material ou Conta Contábil." ))
+oReport:SetPortrait( .T. )
+oReport:SetTotalInLine( .F. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+oResumoVen := TRSection():New(oReport,"Resumo",{"TRB"},{If( cPaisLoc $ "ANG|PTG", "Por Tp/Saida + Artigo", "Por Tp/Saida + Produto" ),"Por Tipo","Por Grupo",If( cPaisLoc $ "ANG|PTG", "P/ct.contab.", "P/Ct.Contab." ),If( cPaisLoc $ "ANG|PTG", "Por Artigo", "Por Produto" ),If( cPaisLoc $ "ANG|PTG", "Por Tp/Saída + Série + Factura", "Por Tp/Saida + Serie + Nota" )},,)
+oResumoVen:SetTotalInLine( .F. )
+
+TRCell():New(oResumoVen,"CCOLUNA" ,,cTitulo								,	 			 ,TamSx3("D2_DOC"    )[1]+TamSx3("D2_SERIE")[1]+3,,{|| cColuna  })
+TRCell():New(oResumoVen,"NQUANT"  ,,"|"+CRLF+"|"+RetTitle("D2_QUANT"	)	,PesqPict("SD2","D2_QUANT"	),TamSx3("D2_QUANT"  )[1],,{|| nQuant   },,,"RIGHT")
+TRCell():New(oResumoVen,"NPRCVEN" ,,If( cPaisLoc $ "ANG|PTG", "F A C T U R A Ç Ã O", "F A T U R A M E N T O" )+CRLF+RetTitle("D2_PRCVEN")	,PesqPict("SD2","D2_PRCVEN"	),TamSx3("D2_PRCVEN" )[1],,{|| nPrcVen  },,,"RIGHT")
+If lValadi
+	TRCell():New(oResumoVen,"NVALADI" ,,CRLF+Substr(RetTitle("D2_VALADI"),1,10)	,PesqPict("SD2","D2_VALADI"	),TamSx3("D2_VALADI" )[1],,{|| nValadi  },,,"RIGHT")
+EndIf
+TRCell():New(oResumoVen,"NTOTAL"  ,,CRLF+RetTitle("D2_TOTAL"	)			,PesqPict("SD2","D2_TOTAL"	),TamSx3("D2_TOTAL"  )[1],,{|| nTotal   },,,"RIGHT")
+If cPaisloc == "BRA"
+	TRCell():New(oResumoVen,"NVALIPI" ,,CRLF+RetTitle("D2_VALIPI"	)	,PesqPict("SD2","D2_VALIPI"	),TamSx3("D2_VALIPI" )[1],,{|| nValIPI  },,,"RIGHT")
+Else
+	TRCell():New(oResumoVen,"NVALIPI" ,,CRLF+Substr(RetTitle("D2_VALIMP1"),1,10)	,PesqPict("SD2","D2_VALIPI"	),TamSx3("D2_VALIPI" )[1],,{|| nValIPI  },,,"RIGHT")
+EndIf
+TRCell():New(oResumoVen,"NQUANT1" ,,"|"+CRLF+"|"+RetTitle("D2_QUANT"	)	,PesqPict("SD2","D2_QUANT"	),TamSx3("D2_QUANT"  )[1],,{|| nQuant1  },,,"RIGHT")
+TRCell():New(oResumoVen,"NPRCVEN1",,"O U T R O S   V A L O R E S"+CRLF+RetTitle("D2_PRCVEN")	,PesqPict("SD2","D2_PRCVEN"	),TamSx3("D2_PRCVEN" )[1],,{|| nPrcVen1 },,,"RIGHT")
+TRCell():New(oResumoVen,"NTOTAL1" ,,CRLF+RetTitle("D2_TOTAL"	)			,PesqPict("SD2","D2_TOTAL"		),TamSx3("D2_TOTAL"  )[1],,{|| nTotal1  },,,"RIGHT")
+If cPaisloc == "BRA"
+	TRCell():New(oResumoVen,"NVALIPI1",,CRLF+AllTrim(RetTitle("D2_VALIPI"))+"|",PesqPict("SD2","D2_VALIPI"	),TamSx3("D2_VALIPI" )[1],,{|| nValIPI1 },,,"RIGHT")
+Else
+	TRCell():New(oResumoVen,"NVALIPI1",,CRLF+Substr(RetTitle("D2_VALIMP1"),1,10)+"|"					 ,PesqPict("SD2","D2_VALIPI"	),TamSx3("D2_VALIPI" )[1],,{|| nValIPI1 },,,"RIGHT")
+EndIf
+TRFunction():New(oResumoVen:Cell("NQUANT"	),,"SUM",,,,, .T. , .T. ,)
+If lValadi
+	TRFunction():New(oResumoVen:Cell("NVALADI"	),,"SUM",,,,, .T. , .T. ,)
+EndIf
+TRFunction():New(oResumoVen:Cell("NTOTAL"	),,"SUM",,,,, .T. , .T. ,)
+TRFunction():New(oResumoVen:Cell("NVALIPI"	),,"SUM",,,,, .T. , .T. ,)
+TRFunction():New(oResumoVen:Cell("NQUANT1"	),,"SUM",,,,, .T. , .T. ,)
+TRFunction():New(oResumoVen:Cell("NTOTAL1"	),,"SUM",,,,, .T. , .T. ,)
+TRFunction():New(oResumoVen:Cell("NVALIPI1"	),,"SUM",,,,, .T. , .T. ,)
+
+
+
+
+
+
+
+
+
+oTemp1 := TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Elementos - Facturas de Entrada", "Itens - Notas Fiscais Entrada" ),{"SD1"},{If( cPaisLoc $ "ANG|PTG", "Por Tp/Saida + Artigo", "Por Tp/Saida + Produto" ),"Por Tipo","Por Grupo",If( cPaisLoc $ "ANG|PTG", "P/ct.contab.", "P/Ct.Contab." ),If( cPaisLoc $ "ANG|PTG", "Por Artigo", "Por Produto" ),If( cPaisLoc $ "ANG|PTG", "Por Tp/Saída + Série + Factura", "Por Tp/Saida + Serie + Nota" )},,)
+oTemp1:SetTotalInLine( .F. )
+
+oTemp2 := TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Elementos - Facturas de Saída", "Itens - Notas Fiscais Saída" ),{"SD2","SF2"},{If( cPaisLoc $ "ANG|PTG", "Por Tp/Saida + Artigo", "Por Tp/Saida + Produto" ),"Por Tipo","Por Grupo",If( cPaisLoc $ "ANG|PTG", "P/ct.contab.", "P/Ct.Contab." ),If( cPaisLoc $ "ANG|PTG", "Por Artigo", "Por Produto" ),If( cPaisLoc $ "ANG|PTG", "Por Tp/Saída + Série + Factura", "Por Tp/Saida + Serie + Nota" )},,)
+oTemp2:SetTotalInLine( .F. )
+
+
+
+
+oReport:Section(1):SetHeaderPage()
+
+oReport:Section(2):SetEdit( .F. )
+oReport:Section(2):SetEditCell( .F. )
+oReport:Section(3):SetEditCell( .F. )
+
+
+
+
+AjustaSX1()
+Pergunte(oReport:uParam, .F. )
+
+Return(oReport)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportPrint(oReport)
+
+Local cAliasSD1 := ""
+Local cAliasSD2 := ""
+Local cAliasSF2 := ""
+Local cOrder	:= ""
+Local nCntFor 	:= 0
+Local nVend		:= fa440CntVen()
+Local lImprime 	:= .T. 
+Local cTexto	:= ""
+Local cCampo	:= ""
+Local nY		:= 0
+Local aCampos	:= {}
+Local cIndice 	:= ""
+Local cIndTrab 	:= ""
+Local lVend		:= .F. 
+Local cVend		:= "1"
+Local cEstoq 	:= If( (MV_PAR05 == 1),"S",If( (MV_PAR05 == 2),"N","SN" ) )
+Local cDupli 	:= If( (MV_PAR06 == 1),"S",If( (MV_PAR06 == 2),"N","SN" ) )
+Local cCondicao := ""
+Local cFilSF2   := ""
+Local cFilSD2   := ""
+Local nImpInc   := 0
+Local nAuxImp	:= 0
+Local lValadi	:= cPaisLoc == "MEX" .AND.  SD2->(FieldPos("D2_VALADI")) > 0
+Local cExpAdi	:= Iif(lValadi,"%D2_VALADI,%","%%")
+Local cCposSD2  := ""
+
+
+	Local cWhere	:= ""
+	Local cAliasSD1	:= ""
+
+
+Private nDecs:=msdecimais(mv_par08)
+
+
+
+
+
+
+oReport:Section(1):Cell("CCOLUNA" 	):SetBlock({|| cColuna		})
+oReport:Section(1):Cell("NQUANT" 	):SetBlock({|| nQuant		})
+oReport:Section(1):Cell("NPRCVEN" 	):SetBlock({|| nPrcVen		})
+oReport:Section(1):Cell("NTOTAL" 	):SetBlock({|| nTotal		})
+oReport:Section(1):Cell("NVALIPI" 	):SetBlock({|| nValIpi		})
+oReport:Section(1):Cell("NQUANT1" 	):SetBlock({|| nQuant1		})
+oReport:Section(1):Cell("NPRCVEN1" 	):SetBlock({|| nPrcVen1		})
+oReport:Section(1):Cell("NTOTAL1" 	):SetBlock({|| nTotal1		})
+oReport:Section(1):Cell("NVALIPI1" 	):SetBlock({|| nValIpi1		})
+If lValadi
+	oReport:Section(1):Cell("NVALADI"):SetBlock({|| nValadi		})
+EndIf
+cColuna		:= ""
+nQuant		:= 0
+nPrcVen		:= 0
+nTotal		:= 0
+nValIpi		:= 0
+nQuant1		:= 0
+nPrcVen1	:= 0
+nTotal1		:= 0
+nValIpi1	:= 0
+nValadi		:= 0
+
+
+
+
+
+oReport:SetTitle(oReport:Title() + " - " + IIf(oReport:Section(1):GetOrder() == 1,If( cPaisLoc $ "ANG|PTG", "Por Tp/Saida + Artigo", "Por Tp/Saida + Produto" ),IIF(oReport:Section(1):GetOrder()==2,"Por Tipo",IIF(oReport:Section(1):GetOrder()==3,"Por Grupo",IIF(oReport:Section(1):GetOrder()==4,If( cPaisLoc $ "ANG|PTG", "P/ct.contab.", "P/Ct.Contab." ),IIF(oReport:Section(1):GetOrder()==5,If( cPaisLoc $ "ANG|PTG", "Por Artigo", "Por Produto" ),If( cPaisLoc $ "ANG|PTG", "Por Tp/Saída + Série + Factura", "Por Tp/Saida + Serie + Nota" )))))) + " - " + GetMv("MV_MOEDA"+STR(mv_par08,1)) )
+
+
+
+
+MakeSqlExpr(oReport:uParam)
+
+
+
+
+TRPosition():New(oReport:Section(1),"SB1",1,{|| xFilial("SB1") + TRB->D2_COD })
+
+
+
+
+
+
+
+
+
+
+
+	cWhere := "%"
+
+	If cPaisLoc<>"BRA"
+		cWhere += " AND NOT ("+IsRemito(2,"D1_TIPODOC")+")"
+	Endif
+	cWhere += "%"
+
+	cAliasSD1 := GetNextAlias()
+
+	oReport:Section(2):BeginQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasSD1," SELECT D1_FILIAL,D1_COD,D1_SERIORI,D1_NFORI,D1_ITEMORI,D1_FORNECE,D1_LOJA,D1_DOC,D1_SERIE,D1_LOCAL,D1_TES, D1_TP,D1_GRUPO,D1_CONTA,D1_DTDIGIT,D1_TIPO,D1_QUANT,D1_TOTAL,D1_VALDESC,D1_VALIPI,D1_ITEM,D1_VALIMP1,D1_VUNIT FROM  "+RetSqlName('SD1')+" SD1 WHERE D1_FILIAL =  '" +xFilial('SD1')+"'  AND D1_TIPO = 'D' AND D1_COD >=  "+___SQLGetValue(MV_PAR13)+" AND D1_COD <=  "+___SQLGetValue(MV_PAR14)+" AND D1_DTDIGIT >=  "+___SQLGetValue(DTOS(MV_PAR01))+" AND D1_DTDIGIT <=  "+___SQLGetValue(DTOS(MV_PAR02))+" AND SD1.D_E_L_E_T_= ' '  "+___SQLGetValue(CWHERE),{},.F.)
+	oReport:Section(2):EndQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+cAliasSF2 := "SF2"
+dbSelectArea(cAliasSF2)
+dbSetOrder(1)
+
+
+
+
+
+
+
+
+	cAliasSD2 := GetNextAlias()
+	dbSelectArea("SD2")
+	cWhere := ""
+	cWhere := "% AND NOT ("+IsRemito(2,"D2_TIPODOC")+")"
+	If mv_par04 == 3 .Or.  mv_par11 == 2
+		cWhere += " AND D2_TIPO NOT IN ('B','D','I')"
+	Else
+		cWhere += " AND D2_TIPO NOT IN ('B','I')"
+	EndIf
+	cWhere += "%"
+
+
+
+
+	If oReport:Section(1):GetOrder() = 1 .Or.  oReport:Section(1):GetOrder() = 6
+		cOrder := "%D2_FILIAL,D2_TES,"+IIf(oReport:Section(1):GetOrder()==1,"D2_COD","D2_SERIE,D2_DOC") + "%"
+	ElseIF oReport:Section(1):GetOrder() = 2
+		SD2->(dbSetOrder(2))
+		cOrder := "%" + IndexKey() + "%"
+	ElseIF oReport:Section(1):GetOrder() = 3
+		cOrder := "%D2_FILIAL,D2_GRUPO,D2_COD%"
+	ElseIF oReport:Section(1):GetOrder() = 4
+		cOrder := "%D2_FILIAL,D2_CONTA,D2_COD%"
+	Else
+		cOrder := "%D2_FILIAL,D2_COD,D2_LOCAL,D2_SERIE,D2_DOC%"
+	EndIF
+
+
+
+
+	cCposSD2 := "%"
+	dbSelectArea("SX3")
+	dbSetOrder(2)
+	If dbSeek("D2_VALIMP")
+		While SX3->(!Eof()) .And.  SubStr(SX3->X3_CAMPO,1,9) == "D2_VALIMP"
+			cCposSD2 += ", "+AllTrim(SX3->X3_CAMPO)
+			SX3->(dbSkip())
+		EndDo
+	EndIf
+	cCposSD2 += "%"
+
+	oReport:Section(3):BeginQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasSD2," SELECT D2_FILIAL,D2_COD,D2_LOCAL,D2_SERIE,D2_TES,D2_TP,D2_GRUPO,D2_CONTA,D2_EMISSAO,D2_TIPO,D2_DOC,D2_QUANT,D2_TOTAL, "+___SQLGetValue(CEXPADI)+" D2_VALIPI,D2_PRCVEN,D2_ITEM,D2_CLIENTE,D2_LOJA,F2_MOEDA,F2_TXMOEDA  "+___SQLGetValue(CCPOSSD2)+" FROM  "+RetSqlName('SD2')+" SD2, "+RetSqlName('SF2')+" SF2 WHERE D2_FILIAL =  '" +xFilial('SD2')+"'  AND D2_EMISSAO >=  "+___SQLGetValue(DTOS(MV_PAR01))+" AND D2_EMISSAO <=  "+___SQLGetValue(DTOS(MV_PAR02))+" AND D2_COD >=  "+___SQLGetValue(MV_PAR13)+" AND D2_COD <=  "+___SQLGetValue(MV_PAR14)+" AND D2_ORIGLAN <> 'LF' AND SF2.F2_FILIAL =  '" +xFilial('SF2')+"'  AND SF2.F2_DOC = SD2.D2_DOC AND SF2.F2_SERIE = SD2.D2_SERIE AND SF2.F2_CLIENTE = SD2.D2_CLIENTE AND SF2.F2_LOJA = SD2.D2_LOJA AND SD2.D_E_L_E_T_= ' ' AND SF2.D_E_L_E_T_= ' '  "+___SQLGetValue(CWHERE)+" ORDER BY  "+___SQLGetValue(CORDER),{},.F.)
+	oReport:Section(3):EndQuery()
+	dbGoTop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+cIndice := CriaTrab("", .F. )
+cIndTrab := SubStr(cIndice,1,7)+"A"
+dbSelectArea("SD2")
+aTam := TamSx3("D2_FILIAL")
+Aadd(aCampos,{"D2_FILIAL","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_COD")
+Aadd(aCampos,{"D2_COD","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_LOCAL")
+Aadd(aCampos,{"D2_LOCAL","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_SERIE")
+Aadd(aCampos,{"D2_SERIE","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_TES")
+Aadd(aCampos,{"D2_TES","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_TP")
+Aadd(aCampos,{"D2_TP","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_GRUPO")
+Aadd(aCampos,{"D2_GRUPO","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_CONTA")
+Aadd(aCampos,{"D2_CONTA","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_EMISSAO")
+Aadd(aCampos,{"D2_EMISSAO","D",aTam[1],aTam[2]})
+aTam := TamSx3("D2_TIPO")
+Aadd(aCampos,{"D2_TIPO","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_DOC")
+Aadd(aCampos,{"D2_DOC","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_QUANT")
+Aadd(aCampos,{"D2_QUANT","N",aTam[1],aTam[2]})
+aTam := TamSx3("D2_TOTAL")
+Aadd(aCampos,{"D2_TOTAL","N",aTam[1],aTam[2]})
+If lValadi
+	aTam := TamSx3("D2_VALADI")
+	Aadd(aCampos,{"D2_VALADI","N",aTam[1],aTam[2]})
+EndIf
+
+If cPaisloc<>"BRA"
+	aTam := TamSx3("D2_VALIMP1")
+	Aadd(aCampos,{"D2_VALIMP1","N",aTam[1],aTam[2]})
+else
+	aTam := TamSx3("D2_VALIPI")
+	Aadd(aCampos,{"D2_VALIPI","N",aTam[1],aTam[2]})
+EndIf
+
+aTam := TamSx3("D2_PRCVEN")
+Aadd(aCampos,{"D2_PRCVEN","N",aTam[1],aTam[2]})
+aTam := TamSx3("D2_ITEM")
+Aadd(aCampos,{"D2_ITEM","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_CLIENTE")
+Aadd(aCampos,{"D2_CLIENTE","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_LOJA")
+Aadd(aCampos,{"D2_LOJA","C",aTam[1],aTam[2]})
+
+
+aTam := TamSx3("F2_MOEDA")
+Aadd(aCampos,{"D2_MOEDA","N",aTam[1],aTam[2]})
+aTam := TamSx3("F2_TXMOEDA")
+Aadd(aCampos,{"D2_TXMOEDA","N",aTam[1],aTam[2]})
+
+cArqTrab := CriaTrab(aCampos)
+dbUseArea(.T.,,cArqTrab ,"TRB" , if(.F. .or. .T., !.T., NIL),.F. )
+
+If oReport:Section(1):GetOrder() = 1 .Or.  oReport:Section(1):GetOrder() = 6
+	cVaria := "D2_TES"
+	IndRegua("TRB",cIndTrab,"D2_FILIAL+D2_TES+"+IIf(oReport:Section(1):GetOrder()==1,"D2_COD","D2_SERIE+D2_DOC"),,,If( cPaisLoc $ "ANG|PTG", "A seleccionar registos...", "Selecionando Registros..." ))
+ElseIF oReport:Section(1):GetOrder() = 2
+	cVaria := "D2_TP"
+	IndRegua("TRB",cIndTrab,SD2->(IndexKey(2)),,,If( cPaisLoc $ "ANG|PTG", "A seleccionar registos...", "Selecionando Registros..." ))
+ElseIF oReport:Section(1):GetOrder() = 3
+	cVaria := "D2_GRUPO"
+	IndRegua("TRB",cIndTrab,"D2_FILIAL+D2_GRUPO+D2_COD",,,If( cPaisLoc $ "ANG|PTG", "A seleccionar registos...", "Selecionando Registros..." ))
+ElseIF oReport:Section(1):GetOrder() = 4
+	cVaria := "D2_CONTA"
+	IndRegua("TRB",cIndTrab,"D2_FILIAL+D2_CONTA+D2_COD",,,If( cPaisLoc $ "ANG|PTG", "A seleccionar registos...", "Selecionando Registros..." ))
+Else
+	cVaria := "D2_COD"
+	IndRegua("TRB",cIndTrab,"D2_FILIAL+D2_COD+D2_LOCAL+D2_SERIE+D2_DOC",,,If( cPaisLoc $ "ANG|PTG", "A seleccionar registos...", "Selecionando Registros..." ))
+EndIF
+
+
+
+
+
+
+
+
+If len(oReport:Section(3):GetAdvplExp("SF2")) > 0
+	cFilSF2 := oReport:Section(3):GetAdvplExp("SF2")
+EndIf
+
+If len(oReport:Section(3):GetAdvplExp("SD2")) > 0
+	cFilSD2 := oReport:Section(3):GetAdvplExp("SD2")
+EndIf
+
+dbSelectArea(cAliasSD2)
+dbGoTop()
+oReport:SetMeter(RecCount())
+While !oReport:Cancel() .And.  !(cAliasSD2)->(Eof()) .And.  D2_FILIAL == xFilial("SD2")
+
+
+
+
+
+
+		If !Empty(cFilSF2) .And.  !(&cFilSF2)
+	   		dbSkip()
+			Loop
+		EndIf
+
+		dbselectarea(cAliasSF2)
+		dbSeek(xFilial("SF2")+(cAliasSD2)->D2_DOC+(cAliasSD2)->D2_SERIE+(cAliasSD2)->D2_CLIENTE+(cAliasSD2)->D2_LOJA)
+		dbSelectArea(cAliasSD2)
+
+
+		For nCntFor := 1 To nVend
+			cVendedor := (cAliasSF2)->(FieldGet((cAliasSF2)->(FieldPos("F2_VEND"+cVend))))
+			If cVendedor >= mv_par09 .and.  cVendedor <= mv_par10
+				lVend := .T. 
+				Exit
+			EndIf
+			cVend := Soma1(cVend,1)
+		next
+		cVend := "1"
+
+		If lVend
+			dbSelectArea("TRB")
+			Reclock("TRB", .T. )
+			_FIELD->TRB->D2_FILIAL := (cAliasSD2)->D2_FILIAL
+			_FIELD->TRB->D2_COD := (cAliasSD2)->D2_COD
+			_FIELD->TRB->D2_LOCAL := (cAliasSD2)->D2_LOCAL
+			_FIELD->TRB->D2_SERIE := (cAliasSD2)->D2_SERIE
+			_FIELD->TRB->D2_TES := (cAliasSD2)->D2_TES
+			_FIELD->TRB->D2_TP := (cAliasSD2)->D2_TP
+			_FIELD->TRB->D2_GRUPO := (cAliasSD2)->D2_GRUPO
+			_FIELD->TRB->D2_CONTA := (cAliasSD2)->D2_CONTA
+			_FIELD->TRB->D2_EMISSAO := (cAliasSD2)->D2_EMISSAO
+			_FIELD->TRB->D2_TIPO := (cAliasSD2)->D2_TIPO
+			_FIELD->TRB->D2_DOC := (cAliasSD2)->D2_DOC
+			_FIELD->TRB->D2_QUANT := (cAliasSD2)->D2_QUANT
+
+			if cPaisloc<>"BRA"
+			    _FIELD->TRB->D2_PRCVEN := (cAliasSD2)->D2_PRCVEN
+                _FIELD->TRB->D2_TOTAL := ((cAliasSD2)->D2_TOTAL-Iif(lValadi,(cAliasSD2)->D2_VALADI,0))
+                If lValadi
+                	_FIELD->TRB->D2_VALADI := ((cAliasSD2)->D2_VALADI)
+                EndIf
+
+				aImpostos:=TesImpInf((cAliasSD2)->D2_TES)
+
+				For nY:=1 to Len(aImpostos)
+					cCampImp:=(cAliasSD2) + "->" + (aImpostos[nY][2])
+					If ( aImpostos[nY][3]=="1" )
+						nImpInc     += &cCampImp
+					EndIf
+				Next
+
+				_FIELD->TRB->D2_VALImP1 := nImpInc
+				nImpInc:=0
+			else
+			    If (cAliasSD2)->D2_TIPO <> "P"
+			       _FIELD->TRB->D2_PRCVEN := (cAliasSD2)->D2_PRCVEN
+			       _FIELD->TRB->D2_TOTAL := (cAliasSD2)->D2_TOTAL
+                Endif
+				_FIELD->TRB->D2_VALIPI := (cAliasSD2)->D2_VALIPI
+			endif
+
+			_FIELD->TRB->D2_ITEM := (cAliasSD2)->D2_ITEM
+			_FIELD->TRB->D2_CLIENTE := (cAliasSD2)->D2_CLIENTE
+			_FIELD->TRB->D2_LOJA := (cAliasSD2)->D2_LOJA
+
+
+			_FIELD->TRB->D2_MOEDA := (cAliasSF2)->F2_MOEDA
+			_FIELD->TRB->D2_TXMOEDA := (cAliasSF2)->F2_TXMOEDA
+
+			MsUnlock()
+			lVend := .F. 
+		EndIf
+	dbSelectArea(cAliasSD2)
+	dbSkip()
+	oReport:IncMeter()
+
+EndDo
+
+
+
+
+If mv_par04 == 2
+
+	SF1->(dbsetorder(1))
+
+	dbSelectArea(cAliasSD1)
+	dbGoTop()
+	oReport:SetMeter(RecCount())
+	While !oReport:Cancel() .And.  !(cAliasSD1)->(Eof()) .And.  D1_FILIAL == xFilial("SD1")
+
+
+
+
+		    dbselectarea(cAliasSF2)
+            If cPaisLoc == "BRA"
+            	dbSeek(xFilial()+(cAliasSD1)->D1_NFORI+(cAliasSD1)->D1_SERIORI)
+		    Else
+		    	dbSeek(xFilial()+(cAliasSD1)->D1_NFORI+(cAliasSD1)->D1_SERIORI+(cAliasSD1)->D1_FORNECE+(cAliasSD1)->D1_LOJA)
+			EndIf
+
+
+			If !Empty(cFilSF2) .And.  !(&cFilSF2)
+				dbSelectArea(cAliasSD1)
+		   		dbSkip()
+				Loop
+			EndIf
+
+
+			If !Empty(cFilSD2)
+				dbSelectArea("SD2")
+				dbSetOrder(3)
+				If dbseek(xFilial()+(cAliasSD1)->D1_NFORI+(cAliasSD1)->D1_SERIORI+(cAliasSD1)->D1_FORNECE+(cAliasSD1)->D1_LOJA+(cAliasSD1)->D1_COD+(cAliasSD1)->D1_ITEMORI)
+					If !(&cFilSD2)
+						dbSelectArea(cAliasSD1)
+		   				dbSkip()
+						Loop
+					EndIf
+				EndIf
+			EndIf
+
+			If (cAliasSF2)->(Found())
+				For nCntFor := 1 To nVend
+					cVendedor := (cAliasSF2)->(FieldGet((cAliasSF2)->(FieldPos("F2_VEND"+cVend))))
+					If cVendedor >= mv_par09 .and.  cVendedor <= mv_par10
+						lVend := .T. 
+						Exit
+					EndIf
+					cVend := Soma1(cVend,1)
+				next
+				cVend := "1"
+            EndIf
+
+			If lVend
+				SF1->(dbseek((cAliasSD1)->D1_FILIAL+(cAliasSD1)->D1_DOC+(cAliasSD1)->D1_SERIE+(cAliasSD1)->D1_FORNECE+(cAliasSD1)->D1_LOJA))
+		        dbSelectArea("TRB")
+				Reclock("TRB", .T. )
+				_FIELD->TRB->D2_FILIAL := (cAliasSD1)->D1_FILIAL
+				_FIELD->TRB->D2_COD := (cAliasSD1)->D1_COD
+				_FIELD->TRB->D2_LOCAL := (cAliasSD1)->D1_LOCAL
+				_FIELD->TRB->D2_SERIE := If(mv_par12==1,(cAliasSD1)->D1_SERIORI,(cAliasSD1)->D1_SERIE)
+				_FIELD->TRB->D2_TES := (cAliasSD1)->D1_TES
+				_FIELD->TRB->D2_TP := (cAliasSD1)->D1_TP
+				_FIELD->TRB->D2_GRUPO := (cAliasSD1)->D1_GRUPO
+				_FIELD->TRB->D2_CONTA := (cAliasSD1)->D1_CONTA
+				_FIELD->TRB->D2_EMISSAO := (cAliasSD1)->D1_DTDIGIT
+				_FIELD->TRB->D2_TIPO := (cAliasSD1)->D1_TIPO
+				_FIELD->TRB->D2_DOC := If(mv_par12==1,(cAliasSD1)->D1_NFORI,(cAliasSD1)->D1_DOC)
+				_FIELD->TRB->D2_QUANT := -(cAliasSD1)->D1_QUANT
+				_FIELD->TRB->D2_TOTAL := -((cAliasSD1)->D1_TOTAL-(cAliasSD1)->D1_VALDESC)
+				If lValadi
+					_FIELD->TRB->D2_VALADI := 0
+				EndIf
+
+				If cPaisloc<>"BRA"
+					_FIELD->TRB->D2_VALIMP1 := -(cAliasSD1)->D1_VALIMP1
+				Else
+					_FIELD->TRB->D2_VALIPI := -(cAliasSD1)->D1_VALIPI
+				Endif
+
+				_FIELD->TRB->D2_PRCVEN := (cAliasSD1)->D1_VUNIT
+				_FIELD->TRB->D2_ITEM := (cAliasSD1)->D1_ITEM
+				_FIELD->TRB->D2_CLIENTE := (cAliasSD1)->D1_FORNECE
+				_FIELD->TRB->D2_LOJA := (cAliasSD1)->D1_LOJA
+
+
+				_FIELD->TRB->D2_MOEDA := SF1->F1_MOEDA
+				_FIELD->TRB->D2_TXMOEDA := SF1->F1_TXMOEDA
+
+				MsUnlock()
+				lVend := .F. 
+			EndIf
+		dbSelectArea(cAliasSD1)
+		dbSkip()
+		oReport:IncMeter()
+	EndDo
+EndIf
+
+
+dbSelectArea("TRB")
+dbGoTop()
+oReport:Section(1):Init()
+oReport:SetMeter(RecCount())
+While !oReport:Cancel() .And.  !TRB->(Eof()) .And.  lImprime
+
+	cColuna := TRB->D2_DOC + "/" + TRB->D2_SERIE
+	cTexto	:= ""
+	If oReport:Section(1):GetOrder() = 1 .Or.  oReport:Section(1):GetOrder() = 6
+		dbSelectArea("SF4")
+		dbSeek(xFilial()+TRB->D2_TES)
+		dbSelectArea("TRB")
+		If mv_par07 == 1
+			cTexto  := "TES: " + TRB->D2_TES + " - " +  SF4->F4_TEXTO
+		Else
+			cColuna := TRB->D2_TES + " - " +  SF4->F4_TEXTO
+		EndIf
+		dbSelectArea("TRB")
+		cCpo := TRB->D2_TES
+	Elseif oReport:Section(1):GetOrder() = 2
+		If mv_par07 == 1
+			cTexto  := "TIPO DE PRODUTO: " + TRB->D2_TP
+		Else
+			cColuna := TRB->D2_TP
+		EndIf
+		cCpo := TRB->D2_TP
+	Elseif oReport:Section(1):GetOrder() = 3
+		dbSelectArea("SBM")
+		dbSeek(xFilial()+TRB->D2_GRUPO)
+		dbSelectArea("TRB")
+		If mv_par07 == 1
+			cTexto  := "GRUPO: " + TRB->D2_GRUPO + " - " + SBM->BM_DESC
+		Else
+			cColuna := TRB->D2_GRUPO + " - " + SBM->BM_DESC
+		EndIf
+		cCpo := TRB->D2_GRUPO
+	Elseif oReport:Section(1):GetOrder() = 4
+		dbSelectArea("SI1")
+		dbSetOrder(1)
+		dbSeek(xFilial()+TRB->D2_CONTA)
+		dbSelectArea("TRB")
+		If mv_par07 == 1
+			cTexto  := "CONTA: " + TRB->D2_CONTA + SI1->I1_DESC
+		Else
+			cColuna := TRB->D2_CONTA
+		EndIf
+		cCpo := TRB->D2_CONTA
+	Else
+		If mv_par07 == 1
+			cTexto  := "PRODUTO: " + TRB->D2_COD
+		Else
+			cColuna := TRB->D2_COD
+		EndIf
+		dbSelectArea("TRB")
+		cCpo := TRB->D2_COD
+	Endif
+	cCampo 	:= "cCpo"
+	nQuant	:=0 ;nTotal:=0 ;nValIpi:=0 ;nValadi:=0
+	nQuant1	:=0 ;nTotal1:=0 ;nValIpi1:=0
+
+	If mv_par07 == 1
+		oReport:PrintText(cTexto)
+	EndIf
+
+	dbSelectArea("TRB")
+	While &cCampo = &cVaria .And.  !Eof() .And.  lImprime
+
+
+
+
+		nDevQtd	:=0 ;nDevVal:=0 ;nDevIPI:=0
+		nDevQtd1:=0 ;nDevVal1:=0
+
+		If mv_par04 == 1
+			CalcDevR4(cDupli,cEstoq)
+		EndIf
+
+		dbSelectArea("TRB")
+		If AvalTes(TRB->D2_TES,cEstoq,cDupli)
+			oReport:Section(1):Cell("NQUANT"	):Show()
+			oReport:Section(1):Cell("NTOTAL"	):Show()
+			oReport:Section(1):Cell("NVALIPI"	):Show()
+
+			If mv_par07 == 1
+				oReport:Section(1):Cell("NPRCVEN"	):Show()
+				oReport:Section(1):Cell("NQUANT1"	):Hide()
+				oReport:Section(1):Cell("NPRCVEN1"	):Hide()
+				oReport:Section(1):Cell("NTOTAL1"	):Hide()
+				oReport:Section(1):Cell("NVALIPI1"	):Hide()
+
+				cColuna := TRB->D2_DOC + "/" + TRB->D2_SERIE
+				nQuant 	:= TRB->D2_QUANT - nDevQtd
+				nTotal 	:= xMoeda(TRB->D2_TOTAL,TRB->D2_MOEDA,mv_par08,TRB->D2_EMISSAO,nDecs+1,TRB->D2_TXMOEDA)  - nDevVal
+				nQuant1 := nPrcVen1 := nTotal1 := nValIPI1 := nValadi := 0
+			Else
+				oReport:Section(1):Cell("NPRCVEN"	):Hide()
+				oReport:Section(1):Cell("NQUANT1"	):Show()
+				oReport:Section(1):Cell("NPRCVEN1"	):Hide()
+				oReport:Section(1):Cell("NTOTAL1"	):Show()
+				oReport:Section(1):Cell("NVALIPI1"	):Show()
+
+				nQuant 	+= (TRB->D2_QUANT - nDevQtd)
+				nTotal 	+= (xMoeda(TRB->D2_TOTAL,TRB->D2_MOEDA,mv_par08,TRB->D2_EMISSAO,nDecs+1,TRB->D2_TXMOEDA)  - nDevVal)
+			EndIf
+
+			nPrcVen := xMoeda(TRB->D2_PRCVEN,TRB->D2_MOEDA,mv_par08,TRB->D2_EMISSAO,nDecs+1,TRB->D2_TXMOEDA)
+			If cPaisloc<>"BRA"
+				nValIPI  += xMoeda(TRB->D2_VALIMP1,TRB->D2_MOEDA,mv_par08,TRB->D2_EMISSAO,nDecs+1,TRB->D2_TXMOEDA)  - nDevIpi
+			Else
+				nValIPI  += xMoeda(TRB->D2_VALIPI ,1,mv_par08,TRB->D2_EMISSAO) -  nDevIpi
+			Endif
+
+			If mv_par07 == 1
+				If cPaisloc<>"BRA"
+					nValIPI := xMoeda(TRB->D2_VALIMP1 ,TRB->D2_MOEDA,mv_par08,TRB->D2_EMISSAO,nDecs+1,TRB->D2_TXMOEDA) - nDevIpi
+				Else
+					nValIPI :=  xMoeda(TRB->D2_VALIPI,1,mv_par08,TRB->D2_EMISSAO)- nDevIpi
+				Endif
+			EndIf
+
+		Else
+
+			If mv_par07 == 1
+				oReport:Section(1):Cell("NQUANT"	):Hide()
+				oReport:Section(1):Cell("NTOTAL"	):Hide()
+				oReport:Section(1):Cell("NVALIPI"	):Hide()
+				oReport:Section(1):Cell("NPRCVEN1"	):Show()
+
+				cColuna := TRB->D2_DOC + "/" + TRB->D2_SERIE
+				nQuant1 := TRB->D2_QUANT - nDevQtd1
+				nQuant := nPrcVen := nTotal := nValIPI := nValadi := 0
+			Else
+				oReport:Section(1):Cell("NQUANT"	):Show()
+				oReport:Section(1):Cell("NTOTAL"	):Show()
+				oReport:Section(1):Cell("NVALIPI"	):Show()
+				oReport:Section(1):Cell("NPRCVEN1"	):Hide()
+
+				nQuant1 += (TRB->D2_QUANT - nDevQtd1)
+			EndIf
+			oReport:Section(1):Cell("NPRCVEN"	):Hide()
+			oReport:Section(1):Cell("NQUANT1"	):Show()
+			oReport:Section(1):Cell("NTOTAL1"	):Show()
+			oReport:Section(1):Cell("NVALIPI1"	):Show()
+
+			If D2_TIPO <> "P"
+				nTotal1  += xMoeda(TRB->D2_TOTAL,TRB->D2_MOEDA,mv_par08,TRB->D2_EMISSAO,nDecs+1,TRB->D2_TXMOEDA) - nDevVal1
+			EndIf
+
+			If cPaisloc<>"BRA"
+				nValIPI1 += xMoeda(TRB->D2_VALIMP1,TRB->D2_MOEDA,mv_par08,TRB->D2_EMISSAO,nDecs+1,TRB->D2_TXMOEDA) - nDevIpi
+			Else
+				nValIPI1 += xMoeda(TRB->D2_VALIPI,1,mv_par08,TRB->D2_EMISSAO) - nDevIpi
+			Endif
+
+			If mv_par07 == 1
+				If D2_TIPO <> "P"
+					nPrcVen1 := xMoeda(TRB->D2_PRCVEN,TRB->D2_MOEDA,mv_par08,TRB->D2_EMISSAO,nDecs+1,TRB->D2_TXMOEDA)
+					nTotal1  := xMoeda(TRB->D2_TOTAL,TRB->D2_MOEDA,mv_par08,TRB->D2_EMISSAO,nDecs+1,TRB->D2_TXMOEDA)- nDevVal1
+				Else
+					nPrcVen1 := 0
+					nTotal1  := 0
+				EndIf
+
+				If cPaisloc<>"BRA"
+					nValIPI1 := xMoeda(TRB->D2_VALIMP1,TRB->D2_MOEDA,mv_par08,TRB->D2_EMISSAO,nDecs+1,TRB->D2_TXMOEDA) - nDevIpi
+				Else
+					nValIPI1 := xMoeda(TRB->D2_VALIPI,TRB->D2_MOEDA,mv_par08,TRB->D2_EMISSAO) - nDevIpi
+				Endif
+			EndIf
+		EndIf
+
+		If lValadi
+			nValadi	+= xMoeda(TRB->D2_VALADI,TRB->D2_MOEDA,mv_par08,TRB->D2_EMISSAO,nDecs+1,TRB->D2_TXMOEDA)
+		EndIf
+
+		If mv_par07 == 1
+			oReport:Section(1):PrintLine()
+		EndIf
+
+		dbSelectArea("TRB")
+		dbSkip()
+		oReport:IncMeter()
+
+	End
+
+	If mv_par07 == 1
+		oReport:Section(1):SetTotalText(If( cPaisLoc $ "ANG|PTG", "Total", "TOTAL" ) + " " + AllTrim(RetTitle(cVaria)) + " " + &cCampo)
+		oReport:Section(1):Finish()
+		oReport:Section(1):Init()
+	Else
+		oReport:Section(1):PrintLine()
+		oReport:ThinLine()
+	EndIf
+
+
+	dbSelectArea("TRB")
+End
+
+oReport:Section(1):SetPageBreak()
+
+
+	If mv_par04 # 3
+		(cAliasSD1)->(dbCloseArea())
+	EndIf
+	(cAliasSF2)->(dbCloseArea())
+	(cAliasSD2)->(dbCloseArea())
+
+
+
+
+
+
+
+
+
+
+
+TRB->(dbCloseArea())
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function CalcDevR4(cDup,cEst)
+
+dbSelectArea("SD1")
+If dbSeek(xFilial()+TRB->D2_COD+TRB->D2_SERIE+TRB->D2_DOC+TRB->D2_ITEM)
+
+
+
+
+	If TRB->D2_CLIENTE+TRB->D2_LOJA == D1_FORNECE+D1_LOJA
+		If !(D1_ORIGLAN == "LF")
+			If AvalTes(D1_TES,cEst,cDup)
+				If AvalTes(D1_TES,cEst) .And.  (cEst == "S" .Or.  cEst == "SN" )
+					nDevQtd+= D1_QUANT
+				Endif
+				nDevVal +=xMoeda((D1_TOTAL-D1_VALDESC),TRB->D2_MOEDA,mv_par08,D1_DTDIGIT,nDecs+1,TRB->D2_TXMOEDA)
+				If cPaisLoc<>"BRA"
+					nDevipi += xMoeda(D1_VALIMP1,TRB->D2_MOEDA,mv_par08,D1_DTDIGIT,nDecs+1,TRB->D2_TXMOEDA)
+				Else
+					nDevipi += xMoeda(D1_VALIPI,1,mv_par08,D1_DTDIGIT)
+				Endif
+			Else
+				If AvalTes(D1_TES,cEst) .And.  (cEst == "S" .Or.  cEst == "SN" )
+					nDevQtd1+= D1_QUANT
+				Endif
+				nDevVal1 +=xMoeda((D1_TOTAL-D1_VALDESC),TRB->D2_MOEDA,mv_par08,D1_DTDIGIT,nDecs+1,TRB->D2_TXMOEDA)
+			Endif
+		Endif
+	Endif
+Endif
+Return .T. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function Matr660R3()
+
+
+
+LOCAL CbTxt
+LOCAL cString:= "SD2"
+LOCAL CbCont,cabec1,cabec2,wnrel
+LOCAL titulo := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Resumo De Vendas", "Resumo de Vendas" ))
+LOCAL cDesc1 := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Emissão do relatório de resumo de vendas, podendo o mesmo", "Emissao do Relatorio de Resumo de Vendas, podendo o mesmo" ))
+LOCAL cDesc2 := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Ser Emitido Por Ordem De Tipo De Entrada/saida, Grupo, Tipo", "ser emitido por ordem de Tipo de Entrada/Saida, Grupo, Tipo" ))
+LOCAL cDesc3 := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "De material ou conta contabil.", "de Material ou Conta Contábil." ))
+LOCAL tamanho:= "M"
+LOCAL limite := 132
+LOCAL lImprime := .T. 
+cGrtxt := SPACE(11)
+PRIVATE aReturn := { If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ), 1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 1, 2, 1, "",1 }
+PRIVATE nomeprog:="MATR660"
+PRIVATE nLastKey := 0
+PRIVATE cPerg   :="MTR660    "
+
+
+
+
+cbtxt    := SPACE(10)
+cbcont   := 00
+li       := 80
+m_pag    := 01
+If cPaisloc == "MEX"
+	tamanho:= "G"
+EndIf
+
+
+
+AjustaSX1()
+pergunte("MTR660", .F. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+wnrel:="MATR660"
+
+aOrd :={If( cPaisLoc $ "ANG|PTG", "Por Tp/Saida + Artigo", "Por Tp/Saida + Produto" ),If( cPaisLoc $ "ANG|PTG", "Por tipo    ", "Por Tipo    " ),If( cPaisLoc $ "ANG|PTG", "Por grupo  ", "Por Grupo  " ),If( cPaisLoc $ "ANG|PTG", "P/ct.contab.", "P/Ct.Contab." ),If( cPaisLoc $ "ANG|PTG", "Por Artigo ", "Por Produto " ),If( cPaisLoc $ "ANG|PTG", "Por tp/saída + série + fact. ", "Por Tp/Salida + Serie + Nota " )}
+
+wnrel:=SetPrint(cString,wnrel,cPerg,titulo,cDesc1,cDesc2,cDesc3, .F. ,aOrd,,Tamanho)
+
+If nLastKey==27
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey==27
+	dbClearFilter()
+	Return
+Endif
+
+RptStatus({|lEnd| C660Imp(@lEnd,wnRel,cString)},Titulo)
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function C660Imp(lEnd,WnRel,cString)
+
+LOCAL CbCont,cabec1,cabec2
+LOCAL titulo := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Resumo De Vendas", "Resumo de Vendas" ))
+LOCAL cDesc1 := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Emissão do relatório de resumo de vendas, podendo o mesmo", "Emissao do Relatorio de Resumo de Vendas, podendo o mesmo" ))
+LOCAL cDesc2 := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Ser Emitido Por Ordem De Tipo De Entrada/saida, Grupo, Tipo", "ser emitido por ordem de Tipo de Entrada/Saida, Grupo, Tipo" ))
+LOCAL cDesc3 := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "De material ou conta contabil.", "de Material ou Conta Contábil." ))
+LOCAL tamanho:= "M"
+LOCAL limite := 132
+LOCAL lImprime := .T. 
+LOCAL lContinua:= .T. 
+LOCAL nQuant1:=0,nValor1:=0,nValIpi:=0
+LOCAL nTotQtd1:=0,nTotVal1:=0,nTotIpi:=0
+LOCAL nQuant2:=0,nValor2:=0,nValIpi2:=0
+LOCAL nTotQtd2:=0,nTotVal2:=0,nTotIpi2:=0,nIndex:=0
+LOCAL lColGrup:= .T. 
+LOCAL lFirst:= .T. 
+Local cArqSD1,cKeySD1,cFilSD1,cFilSD2:=""
+Local cEstoq := If( (MV_PAR05 == 1),"S",If( (MV_PAR05 == 2),"N","SN" ) )
+Local cDupli := If( (MV_PAR06 == 1),"S",If( (MV_PAR06 == 2),"N","SN" ) )
+Local cArqTrab, cIndTrab
+Local aCampos := {}, aTam := {}
+Local nVend:= fa440CntVen()
+Local lVend:= .F. 
+Local cVend:= "1"
+Local cVendedor := ""
+Local nCntFor := 1
+Local cIndice := ""
+Local nImpInc:=0
+Local nY:=0
+Local cCampImp := ""
+Local aImpostos:={}
+Local aColuna  := Iif(cPaisloc <> "MEX",{18,19,31,44,61,74,131,18,74,76,88,101,119,131,42,99},{27,28,40,53,70,83,140,27,83,85,97,111,128,140,51,109})
+Local lValadi  := cPaisLoc == "MEX" .AND.  SD2->(FieldPos("D2_VALADI")) > 0
+PRIVATE nDevQtd1:=0,nDevVal1:=0,nDevIPI :=0
+PRIVATE nDevQtd2:=0,nDevVal2:=0
+
+Private nDecs:=msdecimais(mv_par08)
+
+nOrdem := aReturn[8]
+
+
+
+
+cbtxt    := SPACE(10)
+cbcont   := 00
+li       := 80
+m_pag    := 01
+If cPaisloc == "MEX"
+	tamanho:= "G"
+EndIf
+
+IF nOrdem = 1 .Or.  nOrdem = 6
+	cVaria := "D2_TES"
+	If mv_par07 == 1
+		cDescr1 := If( cPaisLoc $ "ANG|PTG", "   tipo saida    ", "   TIPO SAIDA    " )
+		cDescr2 := If( cPaisLoc $ "ANG|PTG", "Factura  /serie", "NOTA FISCAL/SERIE" )
+	Else
+		cDescr1 := If( cPaisLoc $ "ANG|PTG", "      ordem      ", "      ORDEM      " )
+		cDescr2 := If( cPaisLoc $ "ANG|PTG", "     tipo saida  ", "     TIPO SAIDA  " )
+	EndIf
+ElseIF nOrdem = 2
+	cVaria := "D2_TP"
+	If mv_par07 == 1
+		cDescr1 := If( cPaisLoc $ "ANG|PTG", "   tipo artigo  ", "   TIPO PRODUTO  " )
+		cDescr2 := If( cPaisLoc $ "ANG|PTG", "Factura  /serie", "NOTA FISCAL/SERIE" )
+	Else
+		cDescr1 := If( cPaisLoc $ "ANG|PTG", "      ordem      ", "      ORDEM      " )
+		cDescr2 := If( cPaisLoc $ "ANG|PTG", "   tipo artigo  ", "   TIPO PRODUTO  " )
+	EndIf
+ElseIF nOrdem = 3
+	cVaria := "D2_GRUPO"
+	If mv_par07 == 1
+		cDescr1 := If( cPaisLoc $ "ANG|PTG", "    g r u p o    ", "    G R U P O    " )
+		cDescr2 := If( cPaisLoc $ "ANG|PTG", "Factura  /serie", "NOTA FISCAL/SERIE" )
+	Else
+		cDescr1 := If( cPaisLoc $ "ANG|PTG", "      ordem      ", "      ORDEM      " )
+		cDescr2 := If( cPaisLoc $ "ANG|PTG", "    g r u p o    ", "    G R U P O    " )
+	EndIf
+ElseIF nOrdem = 4
+	cVaria := "D2_CONTA"
+	If mv_par07 == 1
+		cDescr1 := If( cPaisLoc $ "ANG|PTG", "    c o n t a    ", "    C O N T A    " )
+		cDescr2 := If( cPaisLoc $ "ANG|PTG", "Factura  /serie", "NOTA FISCAL/SERIE" )
+	Else
+		cDescr1 := If( cPaisLoc $ "ANG|PTG", "      ordem      ", "      ORDEM      " )
+		cDescr2 := If( cPaisLoc $ "ANG|PTG", "    c o n t a    ", "    C O N T A    " )
+	EndIf
+Else
+	cVaria := "D2_COD"
+	If mv_par07 == 1
+		cDescr1 := If( cPaisLoc $ "ANG|PTG", "  a r t i g o  ", "  P R O D U T O  " )
+		cDescr2 := If( cPaisLoc $ "ANG|PTG", "Factura  /serie", "NOTA FISCAL/SERIE" )
+	Else
+		cDescr1 := If( cPaisLoc $ "ANG|PTG", "      ordem      ", "      ORDEM      " )
+		cDescr2 := If( cPaisLoc $ "ANG|PTG", "  a r t i g o  ", "  P R O D U T O  " )
+	EndIf
+EndIF
+
+If mv_par04 # 3
+	dbSelectArea( "SD1" )
+	cArqSD1 := CriaTrab( NIL, .F.  )
+	cKeySD1 := "D1_FILIAL+D1_COD+D1_SERIORI+D1_NFORI+D1_ITEMORI"
+	cFilSD1 := 'D1_FILIAL=="'+xFilial("SD1")+'".And.D1_TIPO=="D"'
+	cFilSD1 += ".And. D1_COD>='"+MV_PAR13+"'.And. D1_COD<='"+MV_PAR14+"'"
+	cFilSD1 += ".And. !("+IsRemito(2,"D1_TIPODOC")+")"
+	If (MV_PAR04 == 2)
+		cFilSD1 +=".And.DTOS(D1_DTDIGIT)>='"+DTOS(MV_PAR01)+"'.And.DTOS(D1_DTDIGIT)<='"+DTOS(MV_PAR02)+"'"
+	EndIf
+	IndRegua("SD1",cArqSD1,cKeySD1,,cFilSD1,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+	nIndex := RetIndex("SD1")
+
+
+
+	dbSetOrder(nIndex+1)
+	SetRegua(RecCount())
+	dbGotop()
+Endif
+
+
+
+
+dbSelectArea("SF2")
+dbSetOrder(1)
+
+dbSelectArea("SD2")
+aTam := TamSx3("D2_FILIAL")
+Aadd(aCampos,{"D2_FILIAL","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_COD")
+Aadd(aCampos,{"D2_COD","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_LOCAL")
+Aadd(aCampos,{"D2_LOCAL","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_SERIE")
+Aadd(aCampos,{"D2_SERIE","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_TES")
+Aadd(aCampos,{"D2_TES","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_TP")
+Aadd(aCampos,{"D2_TP","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_GRUPO")
+Aadd(aCampos,{"D2_GRUPO","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_CONTA")
+Aadd(aCampos,{"D2_CONTA","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_EMISSAO")
+Aadd(aCampos,{"D2_EMISSAO","D",aTam[1],aTam[2]})
+aTam := TamSx3("D2_TIPO")
+Aadd(aCampos,{"D2_TIPO","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_DOC")
+Aadd(aCampos,{"D2_DOC","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_QUANT")
+Aadd(aCampos,{"D2_QUANT","N",aTam[1],aTam[2]})
+aTam := TamSx3("D2_TOTAL")
+Aadd(aCampos,{"D2_TOTAL","N",aTam[1],aTam[2]})
+
+if cPaisloc<>"BRA"
+	aTam := TamSx3("D2_VALIMP1")
+	Aadd(aCampos,{"D2_VALIMP1","N",aTam[1],aTam[2]})
+else
+	aTam := TamSx3("D2_VALIPI")
+	Aadd(aCampos,{"D2_VALIPI","N",aTam[1],aTam[2]})
+endif
+
+aTam := TamSx3("D2_PRCVEN")
+Aadd(aCampos,{"D2_PRCVEN","N",aTam[1],aTam[2]})
+aTam := TamSx3("D2_ITEM")
+Aadd(aCampos,{"D2_ITEM","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_CLIENTE")
+Aadd(aCampos,{"D2_CLIENTE","C",aTam[1],aTam[2]})
+aTam := TamSx3("D2_LOJA")
+Aadd(aCampos,{"D2_LOJA","C",aTam[1],aTam[2]})
+
+
+aTam := TamSx3("F2_MOEDA")
+Aadd(aCampos,{"D2_MOEDA","N",aTam[1],aTam[2]})
+aTam := TamSx3("F2_TXMOEDA")
+Aadd(aCampos,{"D2_TXMOEDA","N",aTam[1],aTam[2]})
+
+cArqTrab := CriaTrab(aCampos)
+dbUseArea(.T.,,cArqTrab ,"TRB" , if(.F. .or. .T., !.T., NIL),.F. )
+
+DbSelectArea("SD2")
+If !Empty(DbFilter())
+	cFilSD2 :="("+DbFilter()+").And."
+EndIf
+cFilSD2 += "D2_FILIAL == '"+xFilial("SD2")+"'.And."
+cFilSD2 += "DTOS(D2_EMISSAO) >='"+DTOS(mv_par01)+"'.And.DTOS(D2_EMISSAO)<='"+DTOS(mv_par02)+"'"
+cFilSD2 += ".And. D2_COD>='"+MV_PAR13+"'.And. D2_COD<='"+MV_PAR14+"'"
+cFilSD2 += ".And. !("+IsRemito(2,"D2_TIPODOC")+")"
+cFilSD2 += ".And.!(D2_ORIGLAN$'LF')"
+If mv_par04==3 .Or.  mv_par11 == 2
+	cFilSD2 += ".And.!(D2_TIPO$'BDI')"
+Else
+	cFilSD2 += ".And.!(D2_TIPO$'BI')"
+EndIf
+
+
+
+
+cIndice := CriaTrab("", .F. )
+If nOrdem = 1 .Or.  nOrdem = 6
+	IndRegua("SD2",cIndice,"D2_FILIAL+D2_TES+"+IIf(nOrdem==1,"D2_COD","D2_SERIE+D2_DOC"),,cFilSD2,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+	cIndTrab := SubStr(cIndice,1,7)+"A"
+	IndRegua("TRB",cIndTrab,"D2_FILIAL+D2_TES+"+IIf(nOrdem==1,"D2_COD","D2_SERIE+D2_DOC"),,,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+ElseIF nOrdem = 2
+	dbSetOrder(2)
+	cIndTrab := SubStr(cIndice,1,7)+"A"
+	IndRegua("TRB",cIndTrab,SD2->(IndexKey()),,,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+ElseIF nOrdem = 3
+	IndRegua("SD2",cIndice,"D2_FILIAL+D2_GRUPO+D2_COD",,cFilSD2,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+	cIndTrab := SubStr(cIndice,1,7)+"A"
+	IndRegua("TRB",cIndTrab,"D2_FILIAL+D2_GRUPO+D2_COD",,,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+ElseIF nOrdem = 4
+	IndRegua("SD2",cIndice,"D2_FILIAL+D2_CONTA+D2_COD",,cFilSD2,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+	cIndTrab := SubStr(cIndice,1,7)+"A"
+	IndRegua("TRB",cIndTrab,"D2_FILIAL+D2_CONTA+D2_COD",,,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+Else
+	IndRegua("SD2",cIndice,"D2_FILIAL+D2_COD+D2_LOCAL+D2_SERIE+D2_DOC",,cFilSD2,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+	cIndTrab := SubStr(cIndice,1,7)+"A"
+	IndRegua("TRB",cIndTrab,"D2_FILIAL+D2_COD+D2_LOCAL+D2_SERIE+D2_DOC",,,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+EndIF
+nIndex := RetIndex("SD2")
+If nOrdem <> 2
+
+
+
+	dbSetOrder(nIndex+1)
+EndIf
+SetRegua(RecCount())
+dbGoTop()
+
+While !Eof() .And.  D2_FILIAL == xFilial("SD2")
+
+		IF nOrdem = 2 .and.  !(&cFILSD2)
+			dbSkip()
+			Loop
+		EndIf
+
+
+
+
+		dbselectarea("SF2")
+		dbSeek(xFilial()+SD2->D2_DOC+SD2->D2_SERIE+SD2->D2_CLIENTE+SD2->D2_LOJA)
+
+		For nCntFor := 1 To nVend
+			cVendedor := SF2->(FieldGet(SF2->(FieldPos("F2_VEND"+cVend))))
+			If cVendedor >= mv_par09 .and.  cVendedor <= mv_par10
+				lVend := .T. 
+				Exit
+			EndIf
+			cVend := Soma1(cVend,1)
+		next
+		cVend := "1"
+
+		If lVend
+			Reclock("TRB", .T. )
+			_FIELD->TRB->D2_FILIAL := SD2->D2_FILIAL
+			_FIELD->TRB->D2_COD := SD2->D2_COD
+			_FIELD->TRB->D2_LOCAL := SD2->D2_LOCAL
+			_FIELD->TRB->D2_SERIE := SD2->D2_SERIE
+			_FIELD->TRB->D2_TES := SD2->D2_TES
+			_FIELD->TRB->D2_TP := SD2->D2_TP
+			_FIELD->TRB->D2_GRUPO := SD2->D2_GRUPO
+			_FIELD->TRB->D2_CONTA := SD2->D2_CONTA
+			_FIELD->TRB->D2_EMISSAO := SD2->D2_EMISSAO
+			_FIELD->TRB->D2_TIPO := SD2->D2_TIPO
+			_FIELD->TRB->D2_DOC := SD2->D2_DOC
+			_FIELD->TRB->D2_QUANT := SD2->D2_QUANT
+
+
+			if cPaisloc<>"BRA"
+			    _FIELD->TRB->D2_PRCVEN := SD2->D2_PRCVEN
+                _FIELD->TRB->D2_TOTAL := SD2->D2_TOTAL-Iif(lValadi,SD2->D2_VALADI,0)
+
+				aImpostos:=TesImpInf(SD2->D2_TES)
+
+				For nY:=1 to Len(aImpostos)
+					cCampImp:="SD2->"+(aImpostos[nY][2])
+					If ( aImpostos[nY][3]=="1" )
+						nImpInc     += &cCampImp
+					EndIf
+				Next
+
+				_FIELD->TRB->D2_VALImP1 := nImpInc
+				nImpInc:=0
+			else
+			    If D2_TIPO <> "P"
+			       _FIELD->TRB->D2_PRCVEN := SD2->D2_PRCVEN
+			       _FIELD->TRB->D2_TOTAL := SD2->D2_TOTAL
+                Endif
+				_FIELD->TRB->D2_VALIPI := SD2->D2_VALIPI
+			endif
+
+			_FIELD->TRB->D2_ITEM := SD2->D2_ITEM
+			_FIELD->TRB->D2_CLIENTE := SD2->D2_CLIENTE
+			_FIELD->TRB->D2_LOJA := SD2->D2_LOJA
+
+
+			_FIELD->TRB->D2_MOEDA := SF2->F2_MOEDA
+			_FIELD->TRB->D2_TXMOEDA := SF2->F2_TXMOEDA
+
+			MsUnlock()
+			lVend := .F. 
+		EndIf
+	dbSelectArea("SD2")
+	dbSkip()
+EndDo
+
+If mv_par04 == 2
+
+	dbSelectArea("SD2")
+	RetIndex("SD2")
+	dbClearFilter()
+
+
+	cFilSD2 :=""
+	If !Empty(DbFilter())
+		cFilSD2 :="("+DbFilter()+")"
+	EndIf
+	SF1->(dbsetorder(1))
+	dbSelectArea("SD1")
+	dbGoTop()
+	While !Eof() .And.  D1_FILIAL == xFilial("SD1")
+
+
+			If !Empty(cFilSD2)
+				dbSelectArea("SD2")
+				dbSetOrder(3)
+				If dbseek(xFilial("SD2")+SD1->D1_NFORI+SD1->D1_SERIORI+SD1->D1_FORNECE+SD1->D1_LOJA+SD1->D1_COD+SD1->D1_ITEMORI)
+					If !(&cFILSD2)
+						dbSelectArea("SD1")
+		   				dbSkip()
+						Loop
+					EndIf
+				EndIf
+			EndIf
+
+
+
+
+		    dbselectarea("SF2")
+            If cPaisLoc == "BRA"
+            	dbSeek(xFilial()+SD1->D1_NFORI+SD1->D1_SERIORI)
+		    Else
+		    	dbSeek(xFilial()+SD1->D1_NFORI+SD1->D1_SERIORI+SD1->D1_FORNECE+SD1->D1_LOJA)
+			EndIf
+
+
+			If SF2->(Found())
+				For nCntFor := 1 To nVend
+					cVendedor := SF2->(FieldGet(SF2->(FieldPos("F2_VEND"+cVend))))
+					If cVendedor >= mv_par09 .and.  cVendedor <= mv_par10
+						lVend := .T. 
+						Exit
+					EndIf
+					cVend := Soma1(cVend,1)
+				next
+				cVend := "1"
+			EndIf
+
+	        dbSelectArea("SD1")
+
+			If lVend
+				SF1->(dbseek(SD1->D1_FILIAL+SD1->D1_DOC+SD1->D1_SERIE+SD1->D1_FORNECE+SD1->D1_LOJA))
+				Reclock("TRB", .T. )
+				_FIELD->TRB->D2_FILIAL := SD1->D1_FILIAL
+				_FIELD->TRB->D2_COD := SD1->D1_COD
+				_FIELD->TRB->D2_LOCAL := SD1->D1_LOCAL
+				_FIELD->TRB->D2_SERIE := If(mv_par12==1,SD1->D1_SERIORI,SD1->D1_SERIE)
+				_FIELD->TRB->D2_TES := SD1->D1_TES
+				_FIELD->TRB->D2_TP := SD1->D1_TP
+				_FIELD->TRB->D2_GRUPO := SD1->D1_GRUPO
+				_FIELD->TRB->D2_CONTA := SD1->D1_CONTA
+				_FIELD->TRB->D2_EMISSAO := SD1->D1_DTDIGIT
+				_FIELD->TRB->D2_TIPO := SD1->D1_TIPO
+				_FIELD->TRB->D2_DOC := If(mv_par12==1,SD1->D1_NFORI,SD1->D1_DOC)
+				_FIELD->TRB->D2_QUANT := -SD1->D1_QUANT
+				_FIELD->TRB->D2_TOTAL := -(SD1->D1_TOTAL-SD1->D1_VALDESC)
+
+				If cPaisloc<>"BRA"
+					_FIELD->TRB->D2_VALIMP1 := -SD1->D1_VALIMP1
+				Else
+					_FIELD->TRB->D2_VALIPI := -SD1->D1_VALIPI
+				Endif
+
+				_FIELD->TRB->D2_PRCVEN := SD1->D1_VUNIT
+				_FIELD->TRB->D2_ITEM := SD1->D1_ITEM
+				_FIELD->TRB->D2_CLIENTE := SD1->D1_FORNECE
+				_FIELD->TRB->D2_LOJA := SD1->D1_LOJA
+
+
+				_FIELD->TRB->D2_MOEDA := SF1->F1_MOEDA
+				_FIELD->TRB->D2_TXMOEDA := SF1->F1_TXMOEDA
+
+				MsUnlock()
+				lVend := .F. 
+			EndIf
+		dbSelectArea("SD1")
+		dbSkip()
+	EndDo
+EndIf
+
+
+
+nTipo  := IIF(aReturn[4]==1,GetMV("MV_COMP"),GetMV("MV_NORM"))
+
+titulo := If( cPaisLoc $ "ANG|PTG", "Resumo De Vendas", "Resumo de Vendas" ) + " - " + GetMv("MV_MOEDA" + STR(mv_par08,1))
+If cPaisLoc == "BRA"
+	cabec1 := " " + cDescr1 + "|" + If( cPaisLoc $ "ANG|PTG", "                 f a c t u r a ç ã o                   |               o u t r o s   v a l o r e s              |", "                 F A T U R A M E N T O                 |               O U T R O S   V A L O R E S              |" )
+	cabec2 := " " + cDescr2 + "|" + If( cPaisLoc $ "ANG|PTG", "   Quant.     Val. Unit.    Val.mercad.     Valor Ipi  | Quantidade  Valor Unitario  Valor Mercadoria  Valor Ipi|", "   QUANT.     VAL. UNIT.    VAL.MERCAD.     VALOR IPI  | QUANTIDADE  VALOR UNITARIO  VALOR MERCADORIA  VALOR IPI|" )
+Else
+	If cPaisLoc <> "MEX"
+		cabec1 := " " + cDescr1 + "|" + If( cPaisLoc $ "ANG|PTG", "                 f a c t u r a ç ã o                   |               o u t r o s   v a l o r e s              |", "                 F A T U R A M E N T O                 |               O U T R O S   V A L O R E S              |" )
+		cabec2 := " " + cDescr2 + "|" + If( cPaisLoc $ "ANG|PTG", "   Quant.     Val. Unit.    Val.mercad.     Valor Imp. | Quantidade  Valor Unitario  Valor Mercadoria  Valor Imp|", "   QUANT.     VAL. UNIT.    VAL.MERCAD.     VALOR IMP. | QUANTIDADE  VALOR UNITARIO  VALOR MERCADORIA  VALOR IMP|" )
+	Else
+		cabec1 := " " + cDescr1 + "         |" + If( cPaisLoc $ "ANG|PTG", "                 f a c t u r a ç ã o                   |               o u t r o s   v a l o r e s              |", "                 F A T U R A M E N T O                 |               O U T R O S   V A L O R E S              |" )
+		cabec2 := " " + cDescr2 + "         |" + If( cPaisLoc $ "ANG|PTG", "   Quant.     Val. Unit.    Val.mercad.     Valor Imp. | Quantidade  Valor Unitario  Valor Mercadoria  Valor Imp|", "   QUANT.     VAL. UNIT.    VAL.MERCAD.     VALOR IMP. | QUANTIDADE  VALOR UNITARIO  VALOR MERCADORIA  VALOR IMP|" )
+	EndIf
+EndIf
+dbSelectArea("TRB")
+dbGoTop()
+
+SetRegua(RecCount())
+
+While !Eof() .And.  lImprime
+
+	IncRegua()
+
+	IF lEnd
+		PrintOut(_PROW()+1,001,If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR"),,)
+		Exit
+	Endif
+
+	IF nOrdem = 1 .Or.  nOrdem = 6
+		cTesalfa := D2_TES
+		dbSelectArea("SF4")
+		dbSeek(xFilial()+TRB->D2_TES)
+		If mv_par07 == 1
+			cCfText := F4_TEXTO
+		Else
+			cCfText := Subs(F4_TEXTO,1,13)
+		EndIf
+		dbSelectArea("TRB")
+		cTesa := cTesalfa
+		cCampo:= "cTesa"
+	Elseif nOrdem = 2
+		cTpProd := D2_TP
+		cCampo  := "cTpProd"
+	Elseif nOrdem = 3
+		cSubtot := SubStr(D2_GRUPO,1,4)
+		cTotal  := SubStr(D2_GRUPO,1,1)
+		cGrupo  := D2_GRUPO
+		cCampo  := "cGrupo"
+		dbSelectArea("SBM")
+		dbSeek(xFilial()+TRB->D2_GRUPO)
+		If mv_par07 == 1
+			IF Found()
+				cGrTxt := Substr(Trim(SBM->BM_DESC),1,16)
+			Else
+				cGrTxt := SPACE(11)
+			Endif
+		Else
+			IF Found()
+				cGrTxt := Trim(SBM->BM_DESC)
+			Else
+				cGrTxt := SPACE(11)
+			Endif
+		EndIf
+		dbSelectArea("TRB")
+	Elseif nOrdem = 4
+		cSubtot := SubStr(D2_CONTA,1,4)
+		cTotal  := SubStr(D2_CONTA,1,1)
+		cConta  := D2_CONTA
+		dbSelectArea("SI1")
+		dbSetOrder(1)
+		dbSeek(xFilial()+TRB->D2_CONTA)
+		cCampo  := "cConta"
+	Else
+		cCodPro := D2_COD
+		cCampo  := "cCodPro"
+	Endif
+
+	nQuant1:=0 ;nValor1:=0 ;nValIpi:=0
+	nQuant2:=0 ;nValor2:=0 ;nValIpi2:=0
+	lFirst:= .T. 
+
+	dbSelectArea("TRB")
+
+	While &cCampo = &cVaria .And.  !Eof() .And.  lImprime
+
+		IF lEnd
+			PrintOut(_PROW()+1,001,If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR"),,)
+			lImprime := .F. 
+			Exit
+		Endif
+
+		IncRegua()
+
+		If li > 58
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		Endif
+
+
+
+
+		nDevQtd1:=0 ;nDevVal1:=0 ;nDevIPI:=0
+		nDevQtd2:=0 ;nDevVal2:=0
+
+		If mv_par04 == 1
+			CalcDev(cDupli,cEstoq)
+		EndIf
+
+		dbSelectArea("TRB")
+
+		nQuant1 -=nDevQtd1
+		nQuant2 -=nDevQtd2
+		If mv_par07 == 1 .And.  lFirst
+			lFirst:= .F. 
+			If nOrdem = 1 .Or.  nOrdem = 6
+				PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Tes: ","TES: "),,)
+				PrintOut(li,005,cTesa,,)
+				PrintOut(li,008,"-",,)
+				PrintOut(li,009,AllTrim(cCftext),,)
+			Elseif nOrdem = 3
+				PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Grupo: ","GRUPO: "),,)
+				PrintOut(li,007,cGrupo,,)
+				PrintOut(li,012,"-",,)
+				PrintOut(li,013,Substr(cGrTxt,1,12),,)
+			ElseIf nOrdem = 4
+				PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Conta: ","CONTA: "),,)
+				PrintOut(li,008,TRIM(cConta),,)
+				PrintOut(li,030,AllTrim(SI1->I1_DESC),,)
+			Elseif nOrdem = 2
+				PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Tipo de Artigo: ","TIPO DE PRODUTO: "),,)
+				PrintOut(li,017,cTpprod,,)
+			Else
+				PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Artigo: ","PRODUTO: "),,)
+				SB1->(dbSeek(xFilial("SB1")+cCodPro))
+				PrintOut(li,011,Trim(cCodPro)+" "+SB1->B1_DESC,,)
+			EndIf
+		Endif
+
+		If AvalTes(D2_TES,cEstoq,cDupli)
+			lColGrup:= .T. 
+			If mv_par07 == 1
+				li++
+				PrintOut(li,000,D2_DOC+" / "+D2_SERIE,,)
+				PrintOut(li,aColuna[1],"|",,)
+				PrintOut(li,aColuna[2],(D2_QUANT-nDevQtd1),PesqPictQt("D2_QUANT",11),)
+			EndIf
+
+			nQuant1  += D2_QUANT
+
+			nValor1  += xMoeda(D2_TOTAL ,D2_MOEDA,mv_par08,D2_EMISSAO,nDecs+1,D2_TXMOEDA)- nDevVal1
+
+			If cPaisloc<>"BRA"
+				nValIPI  += xMoeda(D2_VALImp1,D2_MOEDA,mv_par08,D2_EMISSAO,nDecs+1,D2_TXMOEDA)  - nDevIpi
+			Else
+				nValIPI  += xMoeda(D2_VALIPI ,1,mv_par08,D2_EMISSAO) -  nDevIpi
+			Endif
+
+			If mv_par07 == 1
+
+				PrintOut(li,aColuna[3],xMoeda(D2_PRCVEN,D2_MOEDA,mv_par08,D2_EMISSAO,nDecs+1,D2_TXMOEDA),PesqPict("SD2","D2_TOTAL",12,mv_par08),)
+				PrintOut(li,aColuna[4],xMoeda(D2_TOTAL,D2_MOEDA,mv_par08,D2_EMISSAO,nDecs+1,D2_TXMOEDA)-nDevVal1,PesqPict("SD2","D2_TOTAL",16,mv_par08),)
+
+				If cPaisloc<>"BRA"
+					PrintOut(li,aColuna[5],xMoeda(D2_VALIMP1,D2_MOEDA,mv_par08,D2_EMISSAO,nDecs+1,D2_TXMOEDA)-nDevIpi,PesqPict("SD2","D2_VALIMP1",12,mv_par08),)
+				Else
+					PrintOut(li,aColuna[5],xMoeda(D2_VALIPI,1,mv_par08,D2_EMISSAO)-nDevIpi,PesqPict("SD2","D2_VALIPI",11),)
+				Endif
+
+				PrintOut(li,aColuna[6],"|",,)
+				PrintOut(li,aColuna[7],"|",,)
+			EndIf
+		Else
+			lColGrup:= .F. 
+			If mv_par07 == 1
+				li++
+				PrintOut(li,000,D2_DOC+" / "+D2_SERIE,,)
+				PrintOut(li,aColuna[8],"|",,)
+				PrintOut(li,aColuna[9],"|",,)
+				PrintOut(li,aColuna[10],(D2_QUANT-nDevQtd2),PesqPictQt("D2_QUANT",11),)
+			EndIf
+
+			nQuant2  += D2_QUANT
+
+			If D2_TIPO <> "P"
+				nValor2  += xMoeda(D2_TOTAL   ,D2_MOEDA,mv_par08,D2_EMISSAO,nDecs+1,D2_TXMOEDA) - nDevVal2
+			EndIf
+
+			If cPaisloc<>"BRA"
+				nValIPI2 += xMoeda(D2_VALIMP1 ,D2_MOEDA,mv_par08,D2_EMISSAO,nDecs+1,D2_TXMOEDA) - nDevIpi
+			Else
+				nValIPI2 += xMoeda(D2_VALIPI,1,mv_par08,D2_EMISSAO) - nDevIpi
+			Endif
+
+			If mv_par07 == 1
+				If D2_TIPO <> "P"
+					PrintOut(li,aColuna[11],xMoeda(D2_PRCVEN,D2_MOEDA,mv_par08,D2_EMISSAO,nDecs+1,D2_TXMOEDA),PesqPict("SD2","D2_TOTAL",12,mv_par08),)
+					PrintOut(li,aColuna[12],xMoeda(D2_TOTAL,D2_MOEDA,mv_par08,D2_EMISSAO,nDecs+1,D2_TXMOEDA)-nDevVal2,PesqPict("SD2","D2_TOTAL",16,mv_par08),)
+				Else
+					PrintOut(li,aColuna[3],0,PesqPict("SD2","D2_TOTAL",12,mv_par08),)
+					PrintOut(li,aColuna[4],0,PesqPict("SD2","D2_TOTAL",16,mv_par08),)
+				EndIf
+
+				If cPaisloc<>"BRA"
+					PrintOut(li,aColuna[13],xMoeda(D2_VALIMP1,D2_MOEDA,mv_par08,D2_EMISSAO,nDecs+1,D2_TXMOEDA)-nDevIpi,PesqPict("SD2","D2_VALIMP1",12,mv_par08),)
+				Else
+					PrintOut(li,aColuna[13],xMoeda(D2_VALIPI,D2_MOEDA,mv_par08,D2_EMISSAO)-nDevIpi,PesqPict("SD2","D2_VALIPI",11,mv_par08),)
+				Endif
+
+				PrintOut(li,aColuna[14],"|",,)
+			EndIf
+		EndIf
+		dbSkip()
+		If li > 58
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		Endif
+	End
+	dbSelectArea("TRB")
+	IF li > 58
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+	Endif
+
+	If nQuant1 # 0 .Or.  nQuant2 # 0 .Or.  nValor1 # 0 .Or.  nValor2 # 0 .Or.  &cCampo <> &cVaria
+		If !lFirst
+			li++
+		EndIf
+
+		IF nOrdem = 1.Or. nOrdem = 6
+			If mv_par07 == 1
+				PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Total da tes --->","TOTAL DA TES --->"),,)
+			Else
+				PrintOut(li,000,cTesa,,)
+				PrintOut(li,003,"-",,)
+				PrintOut(li,004,AllTrim(cCftext),,)
+			EndIf
+		Elseif nOrdem = 3
+			If mv_par07 == 1
+				PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Total do grupo ->","TOTAL DO GRUPO ->"),,)
+			Else
+				PrintOut(li,000,cGrupo,,)
+				PrintOut(li,005,"-",,)
+				If nOrdem = 3
+					PrintOut(li,006,Substr(cGrTxt,1,12),,)
+				Endif
+			EndIf
+		ElseIf nOrdem = 4
+			If mv_par07 == 1
+				PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Total da conta ->","TOTAL DA CONTA ->"),,)
+			Else
+				PrintOut(li,000,cConta,,)
+			EndIf
+		Elseif nOrdem = 2
+			If mv_par07 == 1
+				PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Total do tipo -->","TOTAL DO TIPO -->"),,)
+			Else
+				PrintOut(li,009,cTpprod,,)
+			EndIf
+		Else
+			If mv_par07 == 1
+				PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Total do Artg.-->","TOTAL DO PROD.-->"),,)
+			Else
+				PrintOut(li,000,cCodPro,,)
+			EndIf
+		Endif
+		If mv_par07 == 2
+			PrintOut(li,aColuna[1],"|",,)
+		EndIf
+		If nOrdem = 1
+			If lColGrup
+				If nQuant1 # 0
+					PrintOut(li,aColuna[2],nQuant1,PesqPictQt("D2_QUANT",11),)
+				EndIf
+
+				PrintOut(li,aColuna[15],nValor1,PesqPict("SD2","D2_TOTAL",18,mv_par08),)
+
+				If cPaisLoc<>"BRA"
+					PrintOut(li,aColuna[5],nValIpi,PesqPict("SD2","D2_VALIMP1",12,mv_par08),)
+				Else
+					PrintOut(li,aColuna[5],nValIpi,PesqPict("SD2","D2_VALIPI",11),)
+				Endif
+				PrintOut(li,aColuna[6],"|",,)
+			Else
+				PrintOut(li,aColuna[6],"|",,)
+				If nQuant2 # 0
+					PrintOut(li,aColuna[10],nQuant2,PesqPictQt("D2_QUANT",11),)
+				EndIf
+				PrintOut(li,aColuna[16],nValor2,PesqPict("SD2","D2_TOTAL",18,mv_par08),)
+
+				If cPaisloc<>"BRA"
+					PrintOut(li,aColuna[13],nValIpi2,PesqPict("SD2","D2_VALIMP1",12,mv_par08),)
+				Else
+					PrintOut(li,aColuna[13],nValIpi2,PesqPict("SD2","D2_VALIPI",11),)
+				Endif
+
+			EndIf
+		Else
+			If nQuant1 # 0
+				PrintOut(li,aColuna[2],nQuant1,PesqPictQt("D2_QUANT",11),)
+			EndIf
+			PrintOut(li,aColuna[15],nValor1,PesqPict("SD2","D2_TOTAL",18,mv_par08),)
+
+			If cPaisLoc<>"BRA"
+				PrintOut(li,aColuna[5],nValIpi,PesqPict("SD2","D2_VALIMP1",12,mv_par08),)
+			Else
+				PrintOut(li,aColuna[5],nValIpi,PesqPict("SD2","D2_VALIPI",11),)
+			Endif
+
+			PrintOut(li,aColuna[6],"|",,)
+			If nQuant2 # 0
+				PrintOut(li,aColuna[10],nQuant2,PesqPictQt("D2_QUANT",11),)
+			EndIf
+			PrintOut(li,aColuna[16],nValor2,PesqPict("SD2","D2_TOTAL",18,mv_par08),)
+
+			If cpaisloc<>"BRA"
+				PrintOut(li,aColuna[13],nValIpi2,PesqPict("SD2","D2_VALIMP1",12,mv_par08),)
+			Else
+				PrintOut(li,aColuna[13],nValIpi2,PesqPict("SD2","D2_VALIPI",11),)
+			Endif
+
+		EndIf
+		PrintOut(li,aColuna[14],"|",,)
+		li++
+		PrintOut(li,000,__PrtFatLine(),,)
+		li++
+		nTotQtd1  += nQuant1
+		nTotVal1  += nValor1
+		nTotIpi   += nValIpi
+		nTotQtd2  += nQuant2
+		nTotVal2  += nValor2
+		nTotIpi2  += nValIpi2
+
+	Endif
+	dbSelectArea("TRB")
+End
+
+If li <> 80
+	li++
+	PrintOut(li,000,If(cPaisLoc$"ANG|PTG","T o t a l  -->","T O T A L  -->"),,)
+	PrintOut(li,aColuna[1],"|",,)
+	PrintOut(li,aColuna[2],nTotQtd1,PesqPictQt("D2_QUANT",11),)
+
+	If cPaisloc<>"BRA"
+		PrintOut(li,aColuna[15],nTotVal1,PesqPict("SD2","D2_TOTAL",18,mv_par08),)
+		PrintOut(li,aColuna[5],nTotIpi,PesqPict("SD2","D2_VALIMP1",12,mv_par08),)
+	Else
+		PrintOut(li,aColuna[15],nTotVal1,PesqPict("SD2","D2_TOTAL",18),)
+		PrintOut(li,aColuna[5],nTotIpi,PesqPict("SD2","D2_VALIPI",12),)
+	Endif
+
+	PrintOut(li,aColuna[9],"|",,)
+	PrintOut(li,aColuna[10],nTotQtd2,PesqPictQt("D2_QUANT",11),)
+	PrintOut(li,aColuna[16],nTotVal2,PesqPict("SD2","D2_TOTAL",18,mv_par08),)
+
+	If cPaisLoc<>"BRA"
+		PrintOut(li,aColuna[13],nTotIpi2,PesqPict("SD2","D2_VALIMP1",12,mv_par08),)
+	Else
+		PrintOut(li,aColuna[13],nTotIpi2,PesqPict("SD2","D2_VALIPI",11),)
+	Endif
+
+	PrintOut(li,aColuna[14],"|",,)
+	li++
+	PrintOut(li,00,__PrtFatLine(),,)
+
+	roda(cbcont,cbtxt,tamanho)
+EndIF
+
+
+IF nOrdem <> 2
+	RetIndex("SD2")
+	dbClearFilter()
+	IF File(cIndice+OrdBagExt())
+		Ferase(cIndice+OrdBagExt())
+	Endif
+Endif
+
+If mv_par04 <> 3
+	dbSelectArea( "SD1" )
+	RetIndex("SD1")
+	dbClearFilter()
+	IF File(cArqSD1+OrdBagExt())
+		Ferase(cArqSD1+OrdBagExt())
+	Endif
+	dbSetOrder(1)
+Endif
+
+dbSelectArea("TRB")
+cExt := OrdBagExt()
+dbCloseArea()
+If File(cArqTrab+GetDBExtension())
+	FErase(cArqTrab+GetDBExtension())
+Endif
+If File(cIndTrab + cExt)
+	FErase(cIndTrab+cExt)
+Endif
+
+dbSelectArea("SD1")
+dbClearFilter()
+dbSetOrder(1)
+dbSelectArea("SD2")
+dbClearFilter()
+dbSetOrder(1)
+
+If aReturn[5] = 1
+	Set( 24, "" )
+	dbCommitAll()
+	ourspool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function CalcDev(cDup,cEst)
+
+dbSelectArea("SD1")
+If dbSeek(xFilial()+TRB->D2_COD+TRB->D2_SERIE+TRB->D2_DOC+TRB->D2_ITEM)
+
+
+
+	If TRB->D2_CLIENTE+TRB->D2_LOJA == D1_FORNECE+D1_LOJA
+		If !(D1_ORIGLAN == "LF")
+			If AvalTes(D1_TES,cEst,cDup)
+				If AvalTes(D1_TES,cEst) .And.  (cEst == "S" .Or.  cEst == "SN" )
+					nDevQtd1+= D1_QUANT
+				Endif
+				nDevVal1 +=xMoeda((D1_TOTAL-D1_VALDESC),TRB->D2_MOEDA,mv_par08,D1_DTDIGIT,nDecs+1,TRB->D2_TXMOEDA)
+				If cPaisLoc<>"BRA"
+					nDevipi += xMoeda(D1_VALIMP1,TRB->D2_MOEDA,mv_par08,D1_DTDIGIT,nDecs+1,TRB->D2_TXMOEDA)
+				Else
+					nDevipi += xMoeda(D1_VALIPI,1,mv_par08,D1_DTDIGIT)
+				Endif
+
+			Else
+				If AvalTes(D1_TES,cEst) .And.  (cEst == "S" .Or.  cEst == "SN" )
+					nDevQtd2+= D1_QUANT
+				Endif
+				nDevVal2 +=xMoeda((D1_TOTAL-D1_VALDESC),TRB->D2_MOEDA,mv_par08,D1_DTDIGIT,nDecs+1,TRB->D2_TXMOEDA)
+			Endif
+		Endif
+	Endif
+Endif
+Return .T. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSX1()
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe se deve ser impresso o numero   " )
+Aadd( aHelpPor, "da nota original (saida) ou o numero da " )
+Aadd( aHelpPor, "nota de devolucao (entrada)             " )
+
+Aadd( aHelpEng, "Enter whether the number of the         " )
+Aadd( aHelpEng, "(outflow) original invoice must be      " )
+Aadd( aHelpEng, "printed or the number of the (inflow)   " )
+Aadd( aHelpEng, "invoice of return                       " )
+
+Aadd( aHelpSpa, "Informe si debe ser impreso el numero   " )
+Aadd( aHelpSpa, "de la factura original (salida) o el nu-" )
+Aadd( aHelpSpa, "me de la factura de devolucion (entrada)" )
+
+
+PutSx1( cPerg, "12","Imprime Documento      ?","¿Imprime documento      ?","Print Document         ?","mv_chc","N",1,0,1,"C","","","","", "mv_par12","Original","Original","Original","","Devolucao","Devolucion","Return","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd( aHelpPor, "Informar o codigo do produto inicial    " )
+Aadd( aHelpPor, "para filtro.                            " )
+Aadd( aHelpEng, "Enter the initial product code          " )
+Aadd( aHelpEng, "for filter.                             " )
+Aadd( aHelpSpa, "Informar el codigo del producto inicial " )
+Aadd( aHelpSpa, "para filtro.                            " )
+
+
+PutSx1(cPerg,"13","Produto De  ?","De Producto ?","From Product?","mv_chd","C",30,0,0,"G","","SB1","","S", "mv_par13","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd( aHelpPor, "Informar o codigo do produto final para " )
+Aadd( aHelpPor, "filtro.                                 " )
+Aadd( aHelpEng, "Enter the final product code for        " )
+Aadd( aHelpEng, "filter.                                 " )
+Aadd( aHelpSpa, "Informar el codigo del producto final   " )
+Aadd( aHelpSpa, "para filtro.                            " )
+
+
+PutSx1(cPerg,"14","Produto Ate ?","A Producto  ?","To Product  ?","mv_che","C",30,0,0,"G","","SB1","","S", "mv_par14","","","","ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+If SX1->( dbSeek("MTR660    13")) .And.  ( !("030" $ SX1->X1_GRPSXG) .OR.  SX1->X1_TAMANHO <> TamSX3("B1_COD")[1] )
+	RecLock("SX1", .F. )
+	SX1->X1_GRPSXG := "030"
+	SX1->X1_TAMANHO := TamSX3("B1_COD")[1]
+	MsUnlock()
+EndIf
+
+If SX1->( dbSeek("MTR660    14")) .And.  ( !("030" $ SX1->X1_GRPSXG) .OR.  SX1->X1_TAMANHO <> TamSX3("B1_COD")[1] )
+	RecLock("SX1", .F. )
+	SX1->X1_GRPSXG := "030"
+	SX1->X1_TAMANHO := TamSX3("B1_COD")[1]
+	MsUnlock()
+EndIf
+
+Return Nil

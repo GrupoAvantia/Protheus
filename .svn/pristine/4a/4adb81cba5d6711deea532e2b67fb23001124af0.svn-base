@@ -1,0 +1,1378 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATR126.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr126.prw"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "PROTHEUS.CH"
+#line 18 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr126.prw"
+Function Matr126( cAlias, nReg )
+
+Local oReport
+
+PRIVATE lAuto     := (nReg<>Nil)
+PRIVATE lExisteCC := SC3->(FieldPos("C3_CC")) > 0
+
+If FindFunction("TRepInUse") .And.  TRepInUse()
+
+
+
+	oReport:= ReportDef(nReg)
+	oReport:PrintDialog()
+Else
+	MATR126R3( cAlias, nReg )
+EndIf
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportDef(nReg)
+
+Local oReport
+Local oSection1
+Local oCell
+Local oBreak
+Local cTitle := If( cPaisLoc $ "ANG|PTG", "Mapa de contratos de parceria demonstrado ", "Mapa de Contratos de Parceria Demonstrado " )
+
+
+	Local cAliasSC3 := GetNextAlias()
+
+
+
+
+AjustaSx1()
+AjustaSx2()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pergunte("MTR126", .F. )
+
+
+
+
+
+
+
+
+
+
+
+oReport := TReport():New("MTR126",cTitle,If(lAuto,Nil,"MTR126"), {|oReport| ReportPrint(oReport,cAliasSC3,nReg)},If( cPaisLoc $ "ANG|PTG", "Emite um mapa para rastreio dos contratos ", "Emite um mapa para rastreamento dos contratos " )+" "+If( cPaisLoc $ "ANG|PTG", "De Parceria Até Aos Títulos Emitidos No Se2.", "de parceria ate os titulos emitidos no SE2." ))
+oReport:SetLandscape()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+oSection1:= TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Contrato De Parceria", "Contrato de Parceria" ),{"SC3","SA2","SC7","SF1","SD1","SE2"},)
+oSection1:SetHeaderPage()
+
+oSection1:SetNoFilter("SA2")
+oSection1:SetNoFilter("SC7")
+oSection1:SetNoFilter("SF1")
+oSection1:SetNoFilter("SD1")
+oSection1:SetNoFilter("SE2")
+
+TRCell():New(oSection1,"C3_NUM"    ,"SC3",,,,,)
+TRCell():New(oSection1,"C3_EMISSAO","SC3",,,,,)
+TRCell():New(oSection1,"A2_COD"    ,"SA2",,,,,)
+TRCell():New(oSection1,"A2_LOJA"   ,"SA2",,,,,)
+TRCell():New(oSection1,"A2_NREDUZ" ,"SA2",,,,,)
+TRCell():New(oSection1,"C3_ITEM"   ,"SC3",,,,,)
+TRCell():New(oSection1,"C3_QUANT"  ,"SC3",,,,,)
+TRCell():New(oSection1,"C3_TOTAL"  ,"SC3",,,,,)
+TRCell():New(oSection1,"C7_NUM"    ,"SC7",,,,,)
+TRCell():New(oSection1,"NREDUZSC7" ,"SA2","Fornecedor","@!",20,,)
+TRCell():New(oSection1,"C7_QUANT"  ,"SC7",,,,,)
+TRCell():New(oSection1,"C7_TOTAL"  ,"SC7",,,,,)
+TRCell():New(oSection1,"D1_SERIE"  ,"SD1",,,,,)
+TRCell():New(oSection1,"D1_DOC"    ,"SD1",,,,,)
+TRCell():New(oSection1,"E2_PREFIXO","SE2",,,,,)
+TRCell():New(oSection1,"E2_NUM"    ,"SE2",,,,,)
+TRCell():New(oSection1,"E2_PARCELA","SE2",,,,,)
+TRCell():New(oSection1,"E2_TIPO"   ,"SE2",,,,,)
+TRCell():New(oSection1,"E2_VENCTO" ,"SE2",,,,,)
+TRCell():New(oSection1,"SaldoSE2"  ,"SE2","Saldo","@E 999,999,999.99",14,,)
+
+oBreak := TRBreak():New(oSection1,oSection1:Cell("C3_NUM"),If( cPaisLoc $ "ANG|PTG", "Totais", "TOTAIS" ), .F. )
+TRFunction():New(oSection1:Cell("C7_QUANT"),NIL,"SUM",oBreak,,,, .F. , .F. )
+TRFunction():New(oSection1:Cell("C7_TOTAL"),NIL,"SUM",oBreak,,,, .F. , .F. )
+TRFunction():New(oSection1:Cell("SaldoSE2"),NIL,"SUM",oBreak,,,, .F. , .F. )
+
+Return(oReport)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportPrint(oReport,cAliasSC3,nReg)
+
+Local oSection1 := oReport:Section(1)
+Local nOrdem    := oReport:Section(1):GetOrder()
+Local nVlrAbat  := 0
+Local nSaldoSE2 := 0
+Local cPrefixo  := ""
+
+
+	Local cQuery := ""
+
+
+
+
+dbSelectArea("SC3")
+dbSetOrder(1)
+
+
+
+If lAuto
+	dbSelectArea("SC3")
+	dbGoto(nReg)
+	mv_par01 := SC3->C3_EMISSAO
+	mv_par02 := SC3->C3_EMISSAO
+	mv_par03 := SC3->C3_NUM
+	mv_par04 := SC3->C3_NUM
+	mv_par05 := SC3->C3_FORNECE
+	mv_par06 := SC3->C3_FORNECE
+	mv_par07 := SC3->C3_LOJA
+	mv_par08 := SC3->C3_LOJA
+	mv_par09 := 1
+	mv_par10 := SC3->C3_CC
+	mv_par11 := SC3->C3_CC
+EndIf
+
+If mv_par09 == 1
+	oReport:SetTitle(oReport:Title() + OemToAnsi(" - Todos"))
+ElseIf mv_par09 == 2
+	oReport:SetTitle(oReport:Title() + OemToAnsi(" - Pendentes"))
+ElseIf mv_par09 == 3
+	oReport:SetTitle(oReport:Title() + OemToAnsi(" - Atendidos"))
+ElseIf mv_par09 == 4
+	oReport:SetTitle(oReport:Title() + OemToAnsi(" - Parcialmente Atendidos"))
+Endif
+
+
+
+
+
+
+
+
+	If !lAuto
+		MakeSqlExpr(oReport:uParam)
+	Endif
+
+
+
+	oReport:Section(1):BeginQuery()
+
+	cQuery :="%"
+	If mv_par09 == 2
+		cQuery += "AND C3_QUJE = 0 "
+	ElseIf mv_par09 == 3
+		cQuery += "AND C3_QUJE >= C3_QUANT "
+	ElseIf mv_par09 == 4
+		cQuery += "AND C3_QUJE <> 0 AND C3_QUJE < C3_QUANT "
+	Endif
+	cQuery +="%"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasSC3," SELECT SC3.* FROM  "+RetSqlName('SC3')+" SC3 WHERE C3_FILIAL =  '" +xFilial('SC3')+"'  AND C3_EMISSAO >=  "+___SQLGetValue(DTOS(MV_PAR01))+" AND C3_EMISSAO <=  "+___SQLGetValue(DTOS(MV_PAR02))+" AND C3_NUM >=  "+___SQLGetValue(MV_PAR03)+" AND C3_NUM <=  "+___SQLGetValue(MV_PAR04)+" AND C3_FORNECE >=  "+___SQLGetValue(MV_PAR05)+" AND C3_FORNECE <=  "+___SQLGetValue(MV_PAR06)+" AND C3_LOJA >=  "+___SQLGetValue(MV_PAR07)+" AND C3_LOJA <=  "+___SQLGetValue(MV_PAR08)+" AND C3_CC >=  "+___SQLGetValue(MV_PAR10)+" AND C3_CC <=  "+___SQLGetValue(MV_PAR11)+" AND SC3.D_E_L_E_T_= ' '  "+___SQLGetValue(CQUERY)+" ORDER BY  "+ SqlOrder(SC3->(IndexKey())),{},.F.)
+
+
+
+
+
+
+
+
+
+	oReport:Section(1):EndQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+cIndSC7 := CriaTrab(, .F. )
+IndRegua( "SC7", cIndSC7, "C7_FILIAL+C7_NUMSC+C7_ITEMSC" )
+nOrderSC7 := RetIndex("SC7") + 1
+
+
+
+
+
+
+
+cIndSD1 := CriaTrab(, .F. )
+IndRegua( "SD1", cIndSD1, "D1_FILIAL+D1_PEDIDO+D1_ITEMPC" )
+nOrderSD1 := RetIndex("SD1") + 1
+
+
+
+
+oReport:SetMeter(SC3->(LastRec()))
+oSection1:Init()
+
+dbSelectArea(cAliasSC3)
+While !oReport:Cancel() .And.  !(cAliasSC3)->(Eof())
+
+	If oReport:Cancel()
+		Exit
+	EndIf
+
+	oReport:IncMeter()
+
+	oSection1:Cell("C3_NUM"):Show()
+	oSection1:Cell("C3_EMISSAO"):Show()
+	oSection1:Cell("A2_COD"):Show()
+	oSection1:Cell("A2_LOJA"):Show()
+	oSection1:Cell("A2_NREDUZ"):Show()
+	oSection1:Cell("C3_ITEM"):Show()
+	oSection1:Cell("C3_QUANT"):Show()
+	oSection1:Cell("C3_TOTAL"):Show()
+	oSection1:Cell("C7_NUM"):Show()
+	oSection1:Cell("NREDUZSC7"):Show()
+	oSection1:Cell("C7_QUANT"):Show()
+	oSection1:Cell("C7_TOTAL"):Show()
+	oSection1:Cell("D1_SERIE"):Show()
+	oSection1:Cell("D1_DOC"):Show()
+	oSection1:Cell("E2_PREFIXO"):Show()
+	oSection1:Cell("E2_NUM"):Show()
+	oSection1:Cell("E2_PARCELA"):Show()
+	oSection1:Cell("E2_TIPO"):Show()
+	oSection1:Cell("E2_VENCTO"):Show()
+	oSection1:Cell("SaldoSE2"):Show()
+
+	oSection1:Cell("C7_QUANT"):SetValue(0)
+	oSection1:Cell("C7_TOTAL"):SetValue(0)
+	oSection1:Cell("SaldoSE2"):SetValue(0)
+
+	SA2->(dbSetOrder(1))
+	SA2->(dbSeek(xFilial("SA2")+(cAliasSC3)->C3_FORNECE+(cAliasSC3)->C3_LOJA))
+	oSection1:Cell("NREDUZSC7"):SetValue(SA2->A2_NREDUZ)
+
+
+
+
+	dbSelectArea("SC7")
+	SC7->(dbSetOrder(nOrderSC7))
+	If SC7->(dbSeek(xFilial("SC7")+(cAliasSC3)->C3_NUM+(cAliasSC3)->C3_ITEM))
+
+		While SC7->(!Eof()) .And.  SC7->C7_NUMSC+SC7->C7_ITEMSC == (cAliasSC3)->C3_NUM+(cAliasSC3)->C3_ITEM
+
+
+
+
+			If SC7->C7_TIPO == 2
+
+				oSection1:Cell("C7_NUM"):Show()
+				oSection1:Cell("NREDUZSC7"):Show()
+				oSection1:Cell("C7_QUANT"):Show()
+				oSection1:Cell("C7_TOTAL"):Show()
+
+				SA2->(dbSetOrder(1))
+				SA2->(dbSeek(xFilial("SA2")+SC7->C7_FORNECE+SC7->C7_LOJA))
+
+				oSection1:Cell("NREDUZSC7"):SetValue(SA2->A2_NREDUZ)
+
+
+
+
+				oSection1:Cell("C7_QUANT"):SetValue( SC7->C7_QUANT )
+				oSection1:Cell("C7_TOTAL"):SetValue( SC7->C7_TOTAL )
+
+
+
+
+				dbSelectArea("SD1")
+				SD1->(dbSetOrder(nOrderSD1))
+				If SD1->(dbSeek(xFilial("SD1")+SC7->C7_NUM+SC7->C7_ITEM))
+					While SD1->(!Eof()) .And.  SD1->D1_PEDIDO+SD1->D1_ITEMPC == SC7->C7_NUM+SC7->C7_ITEM
+
+						oSection1:Cell("D1_SERIE"):Show()
+						oSection1:Cell("D1_DOC"):Show()
+
+
+
+
+						dbSelectArea("SF1")
+						SF1->(dbSetOrder(1))
+						SF1->(dbSeek(xFilial("SF1")+SD1->D1_DOC+SD1->D1_SERIE+SD1->D1_FORNECE+SD1->D1_LOJA))
+
+						cPrefixo := If(Empty(SF1->F1_PREFIXO),&(GetMV("MV_2DUPREF")),SF1->F1_PREFIXO)
+
+
+
+
+						dbSelectArea("SE2")
+						SE2->(dbSetOrder(6))
+						If SE2->(dbSeek(xFilial("SE2")+SF1->F1_FORNECE+SF1->F1_LOJA+cPrefixo+SF1->F1_DOC))
+
+
+							While SE2->(!Eof()) .And.  xFilial("SE2")+SF1->F1_FORNECE+SF1->F1_LOJA+cPrefixo+SF1->F1_DOC == SE2->E2_FILIAL+SE2->E2_FORNECE+SE2->E2_LOJA+SE2->E2_PREFIXO+SE2->E2_NUM
+
+								oSection1:Cell("E2_PREFIXO"):Show()
+								oSection1:Cell("E2_NUM"):Show()
+								oSection1:Cell("E2_PARCELA"):Show()
+								oSection1:Cell("E2_TIPO"):Show()
+								oSection1:Cell("E2_VENCTO"):Show()
+
+								If SE2->E2_TIPO == PadR(MVNOTAFIS,Len(SE2->E2_TIPO))
+
+									nVlrAbat := FaAbatCP(SE2->E2_PREFIXO,SE2->E2_NUM,SE2->E2_PARCELA,SE2->E2_FORNECE,SE2->E2_LOJA,SE2->E2_MOEDA,"S",dDataBase)
+									nSaldoSE2:= Max(SE2->E2_SALDO - nVlrAbat,0)
+
+									oSection1:Cell("SaldoSE2"):SetValue(nSaldoSE2)
+
+									oSection1:PrintLine()
+
+									oSection1:Cell("C3_NUM"):Hide()
+									oSection1:Cell("C3_EMISSAO"):Hide()
+									oSection1:Cell("A2_COD"):Hide()
+									oSection1:Cell("A2_LOJA"):Hide()
+									oSection1:Cell("A2_NREDUZ"):Hide()
+									oSection1:Cell("C3_ITEM"):Hide()
+									oSection1:Cell("C3_QUANT"):Hide()
+									oSection1:Cell("C3_TOTAL"):Hide()
+									oSection1:Cell("C7_NUM"):Hide()
+									oSection1:Cell("NREDUZSC7"):Hide()
+									oSection1:Cell("C7_QUANT"):Hide()
+									oSection1:Cell("C7_TOTAL"):Hide()
+									oSection1:Cell("D1_SERIE"):Hide()
+									oSection1:Cell("D1_DOC"):Hide()
+
+									oSection1:Cell("C7_QUANT"):SetValue( 0 )
+									oSection1:Cell("C7_TOTAL"):SetValue( 0 )
+
+								EndIf
+
+								dbSelectArea("SE2")
+								dbSkip()
+
+							EndDo
+
+						Else
+							oSection1:PrintLine()
+
+							oSection1:Cell("C3_NUM"):Hide()
+							oSection1:Cell("C3_EMISSAO"):Hide()
+							oSection1:Cell("A2_COD"):Hide()
+							oSection1:Cell("A2_LOJA"):Hide()
+							oSection1:Cell("A2_NREDUZ"):Hide()
+							oSection1:Cell("C3_ITEM"):Hide()
+							oSection1:Cell("C3_QUANT"):Hide()
+							oSection1:Cell("C3_TOTAL"):Hide()
+							oSection1:Cell("C7_NUM"):Hide()
+							oSection1:Cell("NREDUZSC7"):Hide()
+							oSection1:Cell("C7_QUANT"):Hide()
+							oSection1:Cell("C7_TOTAL"):Hide()
+
+							oSection1:Cell("C7_QUANT"):SetValue( 0 )
+							oSection1:Cell("C7_TOTAL"):SetValue( 0 )
+
+						EndIf
+
+						dbSelectArea("SD1")
+						dbSkip()
+
+					EndDo
+
+				Else
+
+					oSection1:Cell("E2_PREFIXO"):Hide()
+					oSection1:Cell("E2_NUM"):Hide()
+					oSection1:Cell("E2_PARCELA"):Hide()
+					oSection1:Cell("E2_TIPO"):Hide()
+					oSection1:Cell("E2_VENCTO"):Hide()
+					oSection1:Cell("SaldoSE2"):Hide()
+
+					oSection1:PrintLine()
+
+					oSection1:Cell("C3_NUM"):Hide()
+					oSection1:Cell("C3_EMISSAO"):Hide()
+					oSection1:Cell("A2_COD"):Hide()
+					oSection1:Cell("A2_LOJA"):Hide()
+					oSection1:Cell("A2_NREDUZ"):Hide()
+					oSection1:Cell("C3_ITEM"):Hide()
+					oSection1:Cell("C3_QUANT"):Hide()
+					oSection1:Cell("C3_TOTAL"):Hide()
+
+				EndIf
+
+			EndIf
+
+			dbSelectArea("SC7")
+			dbSkip()
+
+		EndDo
+
+	Else
+
+		SA2->(dbSetOrder(1))
+		SA2->(dbSeek(xFilial("SA2")+(cAliasSC3)->C3_FORNECE+(cAliasSC3)->C3_LOJA))
+
+		oSection1:Cell("C7_NUM"):Hide()
+		oSection1:Cell("NREDUZSC7"):Hide()
+		oSection1:Cell("C7_QUANT"):Hide()
+		oSection1:Cell("C7_TOTAL"):Hide()
+		oSection1:Cell("D1_SERIE"):Hide()
+		oSection1:Cell("D1_DOC"):Hide()
+		oSection1:Cell("E2_PREFIXO"):Hide()
+		oSection1:Cell("E2_NUM"):Hide()
+		oSection1:Cell("E2_PARCELA"):Hide()
+		oSection1:Cell("E2_TIPO"):Hide()
+		oSection1:Cell("E2_VENCTO"):Hide()
+		oSection1:Cell("SaldoSE2"):Hide()
+
+		oSection1:PrintLine()
+
+	EndIf
+
+	dbSelectArea(cAliasSC3)
+	dbSkip()
+
+EndDo
+
+oSection1:Finish()
+
+RetIndex("SC7")
+dbSelectArea("SC7")
+dbSetOrder(1)
+
+RetIndex("SD1")
+dbSelectArea("SD1")
+dbSetOrder(1)
+
+dbSelectArea("SE2")
+dbSetOrder(1)
+
+If File(cIndSC7+OrdBagExt())
+	Ferase(cIndSC7+OrdBagExt())
+Endif
+
+If File(cIndSD1+OrdBagExt())
+	Ferase(cIndSD1+OrdBagExt())
+Endif
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MATR126R3( cAlias, nReg )
+
+
+
+
+Local Titulo  := If( cPaisLoc $ "ANG|PTG", "Mapa de contratos de parceria demonstrado ", "Mapa de Contratos de Parceria Demonstrado " )
+Local cDesc1  := If( cPaisLoc $ "ANG|PTG", "Emite um mapa para rastreio dos contratos ", "Emite um mapa para rastreamento dos contratos " )
+Local cDesc2  := If( cPaisLoc $ "ANG|PTG", "De Parceria Até Aos Títulos Emitidos No Se2.", "de parceria ate os titulos emitidos no SE2." )
+Local cDesc3  := ""
+Local cString := "SC3"
+Local wnrel   := "MATR126"
+Local nomeprog:= "MATR126"
+Local lDic    := .F. 
+Local lComp   := .F. 
+Local lFiltro := .T. 
+
+Private Tamanho := "G"
+Private Limite  := 220
+Private cPerg   := "MTR126"
+Private aReturn := { If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ), 1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 1, 2, 1, "",1 }
+
+Private lEnd    := .F. 
+Private m_pag   := 1
+Private nLastKey:= 0
+Private lAuto	:= (nReg<>Nil)
+Private lExisteCC:=SC3->(FieldPos("C3_CC")) > 0
+
+
+
+
+AjustaSx1()
+Pergunte(cPerg, .F. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+wnrel:=SetPrint(cString,wnrel,If(lAuto,Nil,cPerg),@titulo,cDesc1,cDesc2,cDesc3,lDic,,lComp,Tamanho,,!lAuto)
+
+If ( nLastKey==27 )
+	dbSelectArea(cString)
+	dbSetOrder(1)
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If ( nLastKey==27 )
+	dbSelectArea(cString)
+	dbSetOrder(1)
+	dbClearFilter()
+	Return
+Endif
+
+RptStatus({|lEnd| R126Imp(@lEnd,wnRel,cString,nomeprog,Titulo,nReg)},Titulo)
+
+Return( .T. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R126Imp(lEnd,wnrel,cString,nomeprog,Titulo,nReg)
+
+Local cAliasSC3 := "SC3"
+Local cbtxt     := ""
+Local cCabec1   := ""
+Local cCabec2   := ""
+Local cCondicao := ""
+Local cQuebra   := ""
+Local cPrefixo  := ""
+Local cIndSC3   := ""
+Local cIndSC7   := ""
+Local cIndSD1   := ""
+Local nOrderSC3 := 0
+Local nOrderSC7 := 0
+Local nOrderSD1 := 0
+Local cbCont    := 0
+Local nVlrAbat  := 0
+Local nSaldoSE2 := 0
+Local nTSaldoSE2:= 0
+Local nTotalAE  := 0
+Local nTotalQAE := 0
+Local li        := 100
+Local lQuery    := .F. 
+Local lRodape   := .F. 
+Local nOrdem    := aReturn[8]
+
+	Local cQuery:= ""
+	Local nX    := 1
+
+
+Titulo := AllTrim(Titulo)+" - "+If( cPaisLoc $ "ANG|PTG", "Por Número", "Por Numero" )
+cCabec1:= If( cPaisLoc $ "ANG|PTG", "Contrato de parceria                                                                                 autorização de entrega                                   facturas       títulos                                           ", "CONTRATO DE PARCERIA                                                                                 AUTORIZACAO DE ENTREGA                                   NOTAS       TITULOS                                           " )
+cCabec2:= If( cPaisLoc $ "ANG|PTG", "Número Emissão    Fornecedor/Loja              Nome Reduzido        Elem.  Quantidade      Vlr.Total Número Fornecedor             Quantidade    Valor Total  Ser.Número  Prx   Número Parc.Tipo Vencimento            Saldo", "Numero Emissao    Fornecedor/Loja              Nome Reduzido        Item   Quantidade      Vlr.Total Numero Fornecedor             Quantidade    Valor Total  Ser.Numero  Prx   Numero Parc Tipo Vencimento            Saldo" )
+
+
+
+
+
+
+
+If lAuto
+	dbSelectArea("SC3")
+	dbGoto(nReg)
+	mv_par01 := SC3->C3_EMISSAO
+	mv_par02 := SC3->C3_EMISSAO
+	mv_par03 := SC3->C3_NUM
+	mv_par04 := SC3->C3_NUM
+	mv_par05 := SC3->C3_FORNECE
+	mv_par06 := SC3->C3_FORNECE
+	mv_par07 := SC3->C3_LOJA
+	mv_par08 := SC3->C3_LOJA
+	mv_par09 := 1
+	If lExisteCC
+		mv_par10:=SC3->C3_CC
+		mv_par11:=SC3->C3_CC
+	EndIf
+Endif
+
+If mv_par09 == 1
+	Titulo += " - Todos"
+ElseIf mv_par09 == 2
+	Titulo += " - Pendentes"
+ElseIf mv_par09 == 3
+	Titulo += " - Atendidos"
+ElseIf mv_par09 == 4
+	Titulo += " - Parcialmente Atendidos"
+Endif
+
+dbSelectArea("SC3")
+dbSetOrder(1)
+SetRegua(SC3->(LastRec()))
+
+
+    If TcSrvType()<>"AS/400"
+	    lQuery := .T. 
+		cAliasSC3 := "QRYSC3"
+		aStruSC3  := SC3->(dbStruct())
+		cQuery := "SELECT * "
+		cQuery += "FROM "+RetSqlName("SC3")+" "
+		cQuery += "WHERE C3_FILIAL='"+xFilial("SC3")+"' AND "
+		cQuery += "C3_EMISSAO>='"+Dtos(mv_par01)+"' AND "
+		cQuery += "C3_EMISSAO<='"+Dtos(mv_par02)+"' AND "
+		cQuery += "C3_NUM>='"+mv_par03+"' AND "
+		cQuery += "C3_NUM<='"+mv_par04+"' AND "
+		cQuery += "C3_FORNECE>='"+mv_par05+"' AND "
+		cQuery += "C3_FORNECE<='"+mv_par06+"' AND "
+		cQuery += "C3_LOJA>='"+mv_par07+"' AND "
+		cQuery += "C3_LOJA<='"+mv_par08+"' AND "
+		If mv_par09 == 2
+			cQuery += "C3_QUJE = 0 AND "
+		ElseIf mv_par09 == 3
+			cQuery += "C3_QUJE >= C3_QUANT AND "
+		ElseIf mv_par09 == 4
+			cQuery += "C3_QUJE <> 0 AND C3_QUJE < C3_QUANT AND "
+		Endif
+
+		If lExisteCC
+			cQuery += "C3_CC>='"+mv_par10+"' AND "
+			cQuery += "C3_CC<='"+mv_par11+"' AND "
+		EndIf
+
+		cQuery += "D_E_L_E_T_ = ' ' "
+		cQuery += "ORDER BY "+SqlOrder(SC3->(IndexKey()))
+
+		cQuery := ChangeQuery(cQuery)
+		dbUseArea( .T. ,"TOPCONN",TcGenQry(,,cQuery),cAliasSC3)
+
+		For nX := 1 To len(aStruSC3)
+			If aStruSC3[nX][2] <> "C" .And.  FieldPos(aStruSC3[nX][1])<>0
+				TcSetField(cAliasSC3,aStruSC3[nX][1],aStruSC3[nX][2],aStruSC3[nX][3],aStruSC3[nX][4])
+			EndIf
+		next
+		dbSelectArea(cAliasSC3)
+	Else
+
+	    cIndSC3   := CriaTrab(NIL, .F. )
+	    cCondicao := 'C3_FILIAL=="'+xFilial("SC3")+'".And.'
+	   	cCondicao += 'DTOS(C3_EMISSAO)>="'+DTOS(mv_par01)+'".And.DTOS(C3_EMISSAO)<="'+DTOS(mv_par02)+'" '
+	   	cCondicao += '.And.C3_NUM>="'+mv_par03+'".And.C3_NUM<="'+mv_par04+'" '
+	   	cCondicao += '.And.C3_FORNECE>="'+mv_par05+'".And.C3_FORNECE<="'+mv_par06+'" '
+	   	cCondicao += '.And.C3_LOJA>="'+mv_par07+'".And.C3_LOJA<="'+mv_par08+'" '
+		If mv_par09 == 2
+			cCondicao += ".And.C3_QUJE=0 "
+		ElseIf mv_par09 == 3
+			cCondicao += ".And.C3_QUJE>=C3_QUANT "
+		ElseIf mv_par09 == 4
+			cCondicao += ".And.C3_QUJE<>0.And.C3_QUJE<C3_QUANT "
+		Endif
+
+		If lExisteCC
+			cCondicao += '.And. C3_CC >="'+mv_par10+'".And.'
+			cCondicao += 'C3_CC<="'+mv_par11+'"'
+		EndIf
+
+	    IndRegua(cAliasSC3,cIndSC3,SC3->(IndexKey()),,cCondicao)
+	    nOrderSC3 := RetIndex("SC3")
+
+
+
+		dbSelectArea("SC3")
+	    dbSetOrder(nOrderSC3+1)
+
+	    dbSelectArea(cAliasSC3)
+	    ProcRegua(LastRec())
+	    dbGoTop()
+
+	Endif
+
+
+
+
+
+cIndSC7 := CriaTrab(, .F. )
+IndRegua( "SC7", cIndSC7, "C7_FILIAL+C7_NUMSC+C7_ITEMSC" )
+nOrderSC7 := RetIndex("SC7") + 1
+
+
+
+
+
+
+
+cIndSD1 := CriaTrab(, .F. )
+IndRegua( "SD1", cIndSD1, "D1_FILIAL+D1_PEDIDO+D1_ITEMPC" )
+nOrderSD1 := RetIndex("SD1") + 1
+
+
+
+
+dbSelectArea(cAliasSC3)
+cQuebra := (cAliasSC3)->C3_NUM
+While !(cAliasSC3)->(Eof())
+
+	IncRegua()
+
+
+
+
+	If !Empty(aReturn[7]) .And.  !&(aReturn[7])
+		(cAliasSC3)->(dbSkip())
+		cQuebra := (cAliasSC3)->C3_NUM
+		Loop
+	EndIf
+
+	If lEnd
+		PrintOut(_PROW()+1,001,If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR"),,)
+		Exit
+	EndIf
+
+
+
+
+	If ( li > 58 )
+		li := cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15)
+		li++
+	Endif
+
+
+
+
+	SA2->(dbSetOrder(1))
+	SA2->(dbSeek(xFilial("SA2")+(cAliasSC3)->C3_FORNECE+(cAliasSC3)->C3_LOJA))
+
+	PrintOut(Li,000,(cAliasSC3)->C3_NUM,,)
+	PrintOut(Li,007,Dtoc((cAliasSC3)->C3_EMISSAO),,)
+	PrintOut(Li,018,SA2->A2_COD+" - "+SA2->A2_LOJA,,)
+	PrintOut(Li,047,SA2->A2_NREDUZ,,)
+	PrintOut(Li,068,(cAliasSC3)->C3_ITEM,,)
+	PrintOut(Li,073,(cAliasSC3)->C3_QUANT,"@E 999999999.99",)
+	PrintOut(Li,086,(cAliasSC3)->C3_TOTAL,"@E 999,999,999.99",)
+
+
+
+
+	dbSelectArea("SC7")
+	SC7->(dbSetOrder(nOrderSC7))
+	SC7->(dbSeek(xFilial("SC7")+(cAliasSC3)->C3_NUM+(cAliasSC3)->C3_ITEM))
+	While SC7->(!Eof()) .And.  SC7->C7_NUMSC+SC7->C7_ITEMSC == (cAliasSC3)->C3_NUM+(cAliasSC3)->C3_ITEM
+
+
+
+
+		If SC7->C7_TIPO == 2
+
+
+
+
+			If ( li > 58 )
+				li := cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15)
+				li++
+			Endif
+
+			SA2->(dbSetOrder(1))
+			SA2->(dbSeek(xFilial("SA2")+SC7->C7_FORNECE+SC7->C7_LOJA))
+
+			PrintOut(Li,101,SC7->C7_NUM,,)
+			PrintOut(Li,108,SA2->A2_NREDUZ,,)
+			PrintOut(Li,129,SC7->C7_QUANT,"@E 999999999.99",)
+			PrintOut(Li,142,SC7->C7_TOTAL,"@E 999,999,999.99",)
+
+
+
+			nTotalAE += SC7->C7_TOTAL
+			nTotalQAE += SC7->C7_QUANT
+
+
+
+			dbSelectArea("SD1")
+			SD1->(dbSetOrder(nOrderSD1))
+			SD1->(dbSeek(xFilial("SD1")+SC7->C7_NUM+SC7->C7_ITEM))
+			While SD1->(!Eof()) .And.  SD1->D1_PEDIDO+SD1->D1_ITEMPC == SC7->C7_NUM+SC7->C7_ITEM
+
+
+
+
+				If ( li > 58 )
+					li := cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15)
+					li++
+				Endif
+
+				PrintOut(Li,158,SD1->D1_SERIE,,)
+				PrintOut(Li,162,SD1->D1_DOC,,)
+
+
+
+
+				dbSelectArea("SF1")
+				SF1->(dbSetOrder(1))
+				SF1->(dbSeek(xFilial("SF1")+SD1->D1_DOC+SD1->D1_SERIE+SD1->D1_FORNECE+SD1->D1_LOJA))
+
+				cPrefixo := If(Empty(SF1->F1_PREFIXO),&(GetMV("MV_2DUPREF")),SF1->F1_PREFIXO)
+
+
+
+
+				dbSelectArea("SE2")
+				SE2->(dbSetOrder(6))
+				SE2->(dbSeek(xFilial("SE2")+SF1->F1_FORNECE+SF1->F1_LOJA+cPrefixo+SF1->F1_DOC))
+
+
+				While SE2->(!Eof()) .And.  xFilial("SE2")+SF1->F1_FORNECE+SF1->F1_LOJA+cPrefixo+SF1->F1_DOC == SE2->E2_FILIAL+SE2->E2_FORNECE+SE2->E2_LOJA+SE2->E2_PREFIXO+SE2->E2_NUM
+
+
+
+
+					If ( li > 58 )
+						li := cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15)
+			 					li++
+					Endif
+
+					If SE2->E2_TIPO == PadR(MVNOTAFIS,Len(SE2->E2_TIPO))
+
+						nVlrAbat := FaAbatCP(SE2->E2_PREFIXO,SE2->E2_NUM,SE2->E2_PARCELA,SE2->E2_FORNECE,SE2->E2_LOJA,SE2->E2_MOEDA,"S",dDataBase)
+						nSaldoSE2:= Max(SE2->E2_SALDO - nVlrAbat,0)
+						nTSaldoSE2+= Max(SE2->E2_SALDO - nVlrAbat,0)
+
+						PrintOut(Li,172,SE2->E2_PREFIXO,,)
+						PrintOut(Li,176,SE2->E2_NUM,,)
+						PrintOut(Li,186,SE2->E2_PARCELA,,)
+						PrintOut(Li,188,SE2->E2_TIPO,,)
+						PrintOut(Li,193,SE2->E2_VENCTO,,)
+						PrintOut(Li,203,nSaldoSE2,"@E 99,999,999,999.99",)
+					EndIf
+
+					dbSelectArea("SE2")
+					dbSkip()
+
+					If xFilial("SF1")+SF1->F1_FORNECE+SF1->F1_LOJA+cPrefixo+SF1->F1_DOC == SE2->E2_FILIAL+SE2->E2_FORNECE+SE2->E2_LOJA+SE2->E2_PREFIXO+SE2->E2_NUM .And.  SE2->E2_TIPO == PadR(MVNOTAFIS,Len(SE2->E2_TIPO))
+						li++
+					EndIf
+
+				EndDo
+
+				dbSelectArea("SD1")
+				dbSkip()
+
+				If SD1->D1_PEDIDO+SD1->D1_ITEMPC == SC7->C7_NUM+SC7->C7_ITEM
+					li++
+				EndIf
+
+			EndDo
+
+		EndIf
+
+		dbSelectArea("SC7")
+		dbSkip()
+
+		If ( SC7->C7_NUMSC+SC7->C7_ITEMSC == (cAliasSC3)->C3_NUM+(cAliasSC3)->C3_ITEM ) .And.  SC7->C7_TIPO == 2
+			li++
+		EndIf
+
+	EndDo
+
+	li++
+
+	dbSelectArea(cAliasSC3)
+	dbSkip()
+
+	If cQuebra <> (cAliasSC3)->C3_NUM
+
+
+
+		If ( li > 58 )
+			li := cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15)
+			li++
+		Endif
+
+
+
+		PrintOut(Li,000,OemToAnsi(If(cPaisLoc$"ANG|PTG","Totais","TOTAIS")),,)
+		PrintOut(Li,129,nTotalQAE,"@E 999999999.99",)
+		PrintOut(Li,142,nTotalAE,"@E 999,999,999.99",)
+		PrintOut(Li,203,nTSaldoSE2,"@E 99,999,999,999.99",)
+		li++
+		PrintOut(li,000,__PrtThinLine(),,)
+		li++
+
+
+
+		nTotalQAE :=0
+		nTotalAE  :=0
+		nTSaldoSE2:=0
+		cQuebra := (cAliasSC3)->C3_NUM
+	Endif
+
+	cbCont++
+	lRodape := .T. 
+
+EndDo
+
+If lRodape
+	Roda(cbcont,cbtxt,tamanho)
+EndIf
+
+
+
+If lQuery
+	dbSelectArea(cAliasSC3)
+	dbCloseArea()
+Else
+  	dbSelectArea("SC3")
+	RetIndex("SC3")
+	dbClearFilter()
+	Ferase(cIndSC3+OrdBagExt())
+EndIf
+
+RetIndex("SC7")
+dbSelectArea("SC7")
+dbSetOrder(1)
+
+RetIndex("SD1")
+dbSelectArea("SD1")
+dbSetOrder(1)
+
+dbSelectArea("SE2")
+dbSetOrder(1)
+
+If File(cIndSC7+OrdBagExt())
+	Ferase(cIndSC7+OrdBagExt())
+Endif
+
+If File(cIndSD1+OrdBagExt())
+	Ferase(cIndSD1+OrdBagExt())
+Endif
+
+Set( 20, "SCREEN" )
+Set( 24, "" )
+If ( aReturn[5] = 1 )
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+MS_FLUSH()
+
+Return( .T. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSX1()
+Local aArea	    := GetArea()
+Local aAreaSX1	:= SX1->(GetArea())
+Local aAreaSX3	:= SX3->(GetArea())
+Local aSXB		:= {}
+Local nTamSX1   := Len(SX1->X1_GRUPO)
+Local nTamSXB   := Len(SXB->XB_ALIAS)
+Local aEstrut	:= {"XB_ALIAS","XB_TIPO","XB_SEQ","XB_COLUNA","XB_DESCRI","XB_DESCSPA","XB_DESCENG","XB_CONTEM"}
+Local i			:= 1
+Local j			:= 1
+Local aHelpPor  :={}
+Local aHelpEng  :={}
+Local aHelpSpa  :={}
+
+
+Aadd( aHelpPor, "Informe a Data Emissao Inicial para a   " )
+Aadd( aHelpPor, "geracao do relatorio                    " )
+
+Aadd( aHelpEng, "Enter initial issue date to generate    " )
+Aadd( aHelpEng, "report.                                 " )
+
+Aadd( aHelpSpa, "Informe la fecha de emision inicial para" )
+Aadd( aHelpSpa, " generacion del informe.                " )
+
+
+
+PutSx1( "MTR126","01","Emissao De ?","Emissao De","Emissao De","mv_ch1", "D",8,0,0,"G","","","","","mv_par01","","","","","","","","","","","","","", aHelpPor,aHelpEng,aHelpSpa)
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+
+Aadd( aHelpPor, "Informe a Data Emissao Final para a     " )
+Aadd( aHelpPor, "geracao do relatorio                    " )
+
+Aadd( aHelpEng, "Enter final issue date to generate      " )
+Aadd( aHelpEng, "report.                                 " )
+
+Aadd( aHelpSpa, "Informe la fecha de emision final para  " )
+Aadd( aHelpSpa, "la generacion del informe.              " )
+
+
+
+PutSx1( "MTR126","02","Emissao Ate ?","Emissao Ate ?","Emissao Ate ?","mv_ch2", "D",8,0,0,"G","","","","","mv_par02","","","","","","","","","","","","","", aHelpPor,aHelpEng,aHelpSpa)
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+
+Aadd( aHelpPor, "Informe o numero do Contrato Inicial.   " )
+Aadd( aHelpEng, "Enter initial contract number.          " )
+Aadd( aHelpSpa, "Informe el numero de contrato inicial.  " )
+
+
+
+PutSx1( "MTR126","03","Contrato De  ?","Contrato De  ?","Contrato De  ?","mv_ch3", "C",6,0,0,"G","","SC3","","","mv_par03","","","","","","","","","","","","","", aHelpPor,aHelpEng,aHelpSpa)
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+
+Aadd( aHelpPor, "Informe o numero do Contrato Final.     " )
+Aadd( aHelpEng, "Enter final contract number.            " )
+Aadd( aHelpSpa, "Informe el numero de contrato final.    " )
+
+
+
+PutSx1( "MTR126","04","Contrato Ate ?","Contrato Ate ?","Contrato Ate ?","mv_ch4", "C",6,0,0,"G","","SC3","","","mv_par04","","","","","","","","","","","","","", aHelpPor,aHelpEng,aHelpSpa)
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+
+Aadd( aHelpPor, "Informe o numero do Fornecedor Inicial. " )
+Aadd( aHelpEng, "Enter initial supplier number.          " )
+Aadd( aHelpSpa, "Informe el numero del proveedor inicial." )
+
+
+
+PutSx1( "MTR126","05","Fornecedor De  ?","Fornecedor De  ?","Fornecedor De  ?","mv_ch5", "C",6,0,0,"G","","SA2","","","mv_par05","","","","","","","","","","","","","", aHelpPor,aHelpEng,aHelpSpa)
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+
+Aadd( aHelpPor, "Informe o numero do Fornecedor Final.   " )
+Aadd( aHelpEng, "Enter final supplier number.            " )
+Aadd( aHelpSpa, "Informe el numero de proveedor final.   " )
+
+
+
+PutSx1( "MTR126","06","Fornecedor Ate ?","Fornecedor Ate ?","Fornecedor Ate ?","mv_ch6", "C",6,0,0,"G","","SA2","","","mv_par06","","","","","","","","","","","","","", aHelpPor,aHelpEng,aHelpSpa)
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+
+Aadd( aHelpPor, "Informe a Loja Inicial do Fornecedor.   " )
+Aadd( aHelpEng, "Enter supplier initial store.           " )
+Aadd( aHelpSpa, "Informe la tienda inicial del proveedor." )
+
+
+
+PutSx1( "MTR126","07","Loja De  ?","Loja De  ?","Loja De  ?","mv_ch7", "C",2,0,0,"G","","","","","mv_par07","","","","","","","","","","","","","", aHelpPor,aHelpEng,aHelpSpa)
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+
+Aadd( aHelpPor, "Informe a Loja Final do Fornecedor.     " )
+Aadd( aHelpEng, "Enter supplier final store.             " )
+Aadd( aHelpSpa, "Informe la tienda final del proveedor.  " )
+
+
+
+PutSx1( "MTR126","08","Loja Ate ?","Loja Ate ?","Loja Ate ?","mv_ch8", "C",2,0,0,"G","","","","","mv_par08","","","","","","","","","","","","","", aHelpPor,aHelpEng,aHelpSpa)
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+
+Aadd( aHelpPor, "Informe o tipo de Contrato p/ impressao " )
+Aadd( aHelpEng, "Enter contract type to print.           " )
+Aadd( aHelpSpa, "Informe el tipo de contrato p/impresion." )
+
+
+
+
+PutSx1( "MTR126","09","Imprime Contratos ?","Imprime Contratos ?","Imprime Contratos ?","mv_ch9", "N",1,0,1,"C","","","","","mv_par09","Todos","Todos","Todos","", "Em Aberto","Em Aberto","Em Aberto","Atendidos","Atendidos","Atendidos","Parcialm.Atend.","Parcialm.Atend.","Part. Attend.","","","", aHelpPor,aHelpEng,aHelpSpa)
+
+dbSelectArea("SX1")
+dbSetOrder(1)
+If dbSeek(PADR("MTR126",nTamSX1)+"09") .And.  Empty(X1_DEF04)
+	RecLock("SX1", .F. )
+	_FIELD->X1_DEF04 := "Parcialm.Atend."
+	_FIELD->X1_DEFSPA4 := "Parcialm.Atend."
+	_FIELD->X1_DEFENG4 := "Part. Attend.  "
+	MsUnLock()
+	PutSX1Help("P.MTR12609.",aHelpPor,aHelpEng,aHelpSpa)
+EndIf
+
+If lExisteCC
+
+	Aadd( aHelpPor, "Informe o centro de custos inicial.     " )
+	Aadd( aHelpEng, "Enter initial cost center.              " )
+	Aadd( aHelpSpa, "Informe el centro de costos inicial.    " )
+
+
+	PutSx1("MTR126","10","Centro de Custos de","¿De Centro de Costo?","From Cost Center?","mv_cha", "C", 9,0,0,"G","","","","","mv_par10","","","","","","","","","","","","","", aHelpPor,aHelpEng,aHelpSpa)
+	aHelpPor :={}
+	aHelpEng :={}
+	aHelpSpa :={}
+
+	Aadd( aHelpPor, "Informe o centro de custos final.       " )
+	Aadd( aHelpEng, "Enter final cost center.                " )
+	Aadd( aHelpSpa, "Informe el centro de costos final.      " )
+
+
+	PutSx1("MTR126","11","Centro de Custos ate","¿A Centro de Costo?","To Cost Center?","mv_chb", "C",9,0,0,"G","","","","","mv_par11","","","","","","","","","","","","","", aHelpPor,aHelpEng,aHelpSpa)
+EndIf
+
+
+Aadd(aSXB,{"SC7CP","1","01","DB"	,"Contrato de Parceria"	,"Contrato de sociedad"	,"Partnership Contract"	,"SC7"       })
+Aadd(aSXB,{"SC7CP","2","01","01"	,"Numero"				,"Numero"				,"Number"				,""          })
+Aadd(aSXB,{"SC7CP","4","01","01"	,"Numero"				,"Numero"				,"Number"				,"C7_NUM"    })
+Aadd(aSXB,{"SC7CP","4","01","02"	,"Item"					,"Item"					,"Item"					,"C7_ITEM"   })
+Aadd(aSXB,{"SC7CP","4","01","03"	,"Fornecedor"			,"Proveedor"			,"Supplier"				,"C7_FORNECE"})
+Aadd(aSXB,{"SC7CP","4","01","04"	,"Produto"				,"Producto"				,"Product"				,"C7_PRODUTO"})
+Aadd(aSXB,{"SC7CP","4","01","05"	,"Saldo"				,"Saldo"				,"Balance"				,"IF(Empty(C7_RESIDUO),C7_QUANT-C7_QUJE,0)"})
+Aadd(aSXB,{"SC7CP","4","01","06"	,"Entrega"				,"Entrega"				,"Delivery"				,"C7_DATPRF" })
+Aadd(aSXB,{"SC7CP","5","01",""		,""						,""						,""						,"SC7->C7_NUM"})
+Aadd(aSXB,{"SC7CP","6","01",""		,""						,""						,""						,"SC7->C7_TIPO==2"})
+
+dbSelectArea("SXB")
+dbSetOrder(1)
+For i := 1 To Len(aSXB)
+	If !Empty(aSXB[i][1])
+		If !dbSeek(PADR(aSXB[i,1],nTamSXB)+aSXB[i,2]+aSXB[i,3]+aSXB[i,4])
+			lSXB := .T. 
+			RecLock("SXB", .T. )
+			For j:=1 To Len(aSXB[i])
+				If !Empty(FieldName(FieldPos(aEstrut[j])))
+					FieldPut(FieldPos(aEstrut[j]),aSXB[i,j])
+				EndIf
+			next
+			dbCommit()
+			MsUnLock()
+		EndIf
+	EndIf
+next
+
+
+
+
+dbSelectArea("SX1")
+dbSetOrder(1)
+If dbSeek(PADR("MTR441",nTamSX1)+"10") .And.  Empty(SX1->X1_F3)
+	RecLock("SX1", .F. )
+	_FIELD->X1_F3 := "SC7CP"
+	MsUnLock()
+EndIf
+If dbSeek(PADR("MTR441",nTamSX1)+"11") .And.  Empty(SX1->X1_F3)
+	RecLock("SX1", .F. )
+	_FIELD->X1_F3 := "SC7CP"
+	MsUnLock()
+EndIf
+If dbSeek(PADR("MTR125",nTamSX1)+"01") .And.  Empty(SX1->X1_F3)
+	RecLock("SX1", .F. )
+	_FIELD->X1_F3 := "SC7CP"
+	MsUnLock()
+EndIf
+If dbSeek(PADR("MTR125",nTamSX1)+"02") .And.  Empty(SX1->X1_F3)
+	RecLock("SX1", .F. )
+	_FIELD->X1_F3 := "SC7CP"
+	MsUnLock()
+EndIf
+If dbSeek(PADR("MTR126",nTamSX1)+"03") .And.  Empty(SX1->X1_F3)
+	RecLock("SX1", .F. )
+	_FIELD->X1_F3 := "SC7CP"
+	MsUnLock()
+EndIf
+If dbSeek(PADR("MTR126",nTamSX1)+"04") .And.  Empty(SX1->X1_F3)
+	RecLock("SX1", .F. )
+	_FIELD->X1_F3 := "SC7CP"
+	MsUnLock()
+EndIf
+If dbSeek(PADR("MTR952",nTamSX1)+"03") .And.  Empty(SX1->X1_F3)
+	RecLock("SX1", .F. )
+	_FIELD->X1_F3 := "SC7CP"
+	MsUnLock()
+EndIf
+If dbSeek(PADR("MTR952",nTamSX1)+"04") .And.  Empty(SX1->X1_F3)
+	RecLock("SX1", .F. )
+	_FIELD->X1_F3 := "SC7CP"
+	MsUnLock()
+EndIf
+RestArea(aAreaSX1)
+RestArea(aAreaSX3)
+RestArea(aArea)
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSX2()
+Local aArea := GetArea()
+
+dbSelectArea("SX2")
+dbSetOrder(1)
+If dbSeek("SC7") .And.  X2_NOME <> "Pedido de Com / Contrato Parc"
+	RecLock("SX2", .F. )
+	_FIELD->X2_NOME := "Pedido de Com / Contrato Parc"
+	MsUnLock()
+	RestArea(aArea)
+EndIf
+
+Return

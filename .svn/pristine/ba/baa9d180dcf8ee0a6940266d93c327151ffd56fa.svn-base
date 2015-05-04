@@ -1,0 +1,245 @@
+#INCLUDE "REPORT.CH"
+#INCLUDE "PROTHEUS.CH"    
+#INCLUDE "FATR102.CH"    
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณFATR102   บAutor  ณFelipe Caiado       บ Data ณ  24/04/08   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Relatorio de Oportunidades Entrantes                       บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ CRM                                                        บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Function FATR102()
+Local oReport	//Objeto relatorio TReport (Release 4)
+
+	Pergunte("FATR102",.F.)
+
+	oReport := Ftr102RptDef()
+	oReport:PrintDialog()
+
+Return(.T.)   
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณFtr102RptDefบAutor  ณFelipe Caiado       บ Data ณ  24/04/08   บฑฑ
+ฑฑฬออออออออออุออออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Relatorio de Oportunidades Entrantes                         บฑฑ
+ฑฑบ          ณ                                                              บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ CRM                                                          บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function Ftr102RptDef()
+Local oReport				//Objeto relatorio TReport (Release 4)
+Local oSection1 			//Objeto secao 1 do relatorio (Cabecalho, campos da tabela SU7) 
+Local oSection2  			//Objeto secao 2 do relatorio (detalhes, campos das tabelas "SU7","SU0","SX5") 
+
+Local cAlias1 := "QRYORIG"		//Alias da consulta Embedded SQL
+
+#IFDEF TOP
+	cAlias1		:= GetNextAlias()						// Pega o proximo Alias Disponivel
+#ENDIF
+
+DEFINE REPORT oReport NAME "FATR102" TITLE STR0001 PARAMETER "FATR102" ACTION {|oReport| Ftr102PrtRpt( oReport, cAlias1 )} DESCRIPTION STR0001
+oReport:SetPortrait() 
+
+DEFINE SECTION oSection1 OF oReport TITLE STR0002 TABLES "QRYORIG"      // "ORIGEM"
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณDefine as celulas que irao aparecer na secao1ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+
+
+DEFINE CELL NAME "AD1_CANAL"		OF oSection1 ALIAS "QRYORIG" SIZE 10
+DEFINE CELL NAME "ADK_NOME"		OF oSection1 ALIAS "QRYORIG"
+
+
+DEFINE SECTION oSection2 OF oSection1 TITLE STR0003 TABLES "QRYORIG"      // "STATUS"
+
+DEFINE CELL NAME "STATUS1"		OF oSection2 ALIAS "QRYORIG" TITLE STR0003 SIZE 15
+DEFINE CELL NAME "JANEIRO"		OF oSection2 ALIAS "QRYORIG"
+DEFINE CELL NAME "FEVEREIRO"	OF oSection2 ALIAS "QRYORIG"
+DEFINE CELL NAME "MARCO"		OF oSection2 ALIAS "QRYORIG"
+DEFINE CELL NAME "ABRIL"		OF oSection2 ALIAS "QRYORIG"
+DEFINE CELL NAME "MAIO"			OF oSection2 ALIAS "QRYORIG"
+DEFINE CELL NAME "JUNHO"		OF oSection2 ALIAS "QRYORIG"
+DEFINE CELL NAME "JULHO"		OF oSection2 ALIAS "QRYORIG"
+DEFINE CELL NAME "AGOSTO"		OF oSection2 ALIAS "QRYORIG"
+DEFINE CELL NAME "SETEMBRO"		OF oSection2 ALIAS "QRYORIG"
+DEFINE CELL NAME "OUTUBRO"		OF oSection2 ALIAS "QRYORIG"
+DEFINE CELL NAME "NOVEMBRO"		OF oSection2 ALIAS "QRYORIG"
+DEFINE CELL NAME "DEZEMBRO"		OF oSection2 ALIAS "QRYORIG"
+DEFINE CELL NAME "TOTAL"		OF oSection2 ALIAS "QRYORIG"
+
+oSection1:SetTotalInLine(.F.)
+oReport:SetTotalInLine(.F.)
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณDefine a secao2 do relatorio, informando que o arquivo principal ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+
+DEFINE FUNCTION FROM oSection2:Cell("JANEIRO") 		OF oSection1 FUNCTION SUM TITLE STR0004
+DEFINE FUNCTION FROM oSection2:Cell("FEVEREIRO") 	OF oSection1 FUNCTION SUM TITLE STR0005
+DEFINE FUNCTION FROM oSection2:Cell("MARCO") 		OF oSection1 FUNCTION SUM TITLE STR0006
+DEFINE FUNCTION FROM oSection2:Cell("ABRIL") 		OF oSection1 FUNCTION SUM TITLE STR0007
+DEFINE FUNCTION FROM oSection2:Cell("MAIO") 		OF oSection1 FUNCTION SUM TITLE STR0008
+DEFINE FUNCTION FROM oSection2:Cell("JUNHO") 		OF oSection1 FUNCTION SUM TITLE STR0009
+DEFINE FUNCTION FROM oSection2:Cell("JULHO") 		OF oSection1 FUNCTION SUM TITLE STR0010
+DEFINE FUNCTION FROM oSection2:Cell("AGOSTO") 		OF oSection1 FUNCTION SUM TITLE STR0011
+DEFINE FUNCTION FROM oSection2:Cell("SETEMBRO") 	OF oSection1 FUNCTION SUM TITLE STR0012
+DEFINE FUNCTION FROM oSection2:Cell("OUTUBRO") 		OF oSection1 FUNCTION SUM TITLE STR0013
+DEFINE FUNCTION FROM oSection2:Cell("NOVEMBRO") 	OF oSection1 FUNCTION SUM TITLE STR0014
+DEFINE FUNCTION FROM oSection2:Cell("DEZEMBRO") 	OF oSection1 FUNCTION SUM TITLE STR0015
+DEFINE FUNCTION FROM oSection2:Cell("TOTAL") 		OF oSection1 FUNCTION SUM TITLE STR0016
+
+Return oReport
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณFtr102PrtRptบAutor  ณFelipe Caiado       บ Data ณ  24/04/08   บฑฑ
+ฑฑฬออออออออออุออออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Relatorio de Oportunidades Entrantes                         บฑฑ
+ฑฑบ          ณ                                                              บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ CRM                                                          บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function Ftr102PrtRpt(oReport, cAlias1)
+Local oSection1 := oReport:Section(1)		//Objeto secao 1 do relatorio (Cabecalho, campos da tabela SU7) 
+Local oSection2 := oSection1:Section(1) 	//Objeto secao 2 do relatorio (detalhes, campos das tabelas "SU7","SU0","SX5") 
+Local cFiltro	:= ""      					//String contendo o filtro de busca a ser utilizado com DBF
+Local aVend := {}  
+Local cVend := ""
+Local cVendFil := ""
+Local nI := 0
+
+cVend := Posicione("SA3",7,xFilial("SA3")+Alltrim(__CUserId),"A3_COD")
+aVend := Ft320Time( cVend )
+
+For nI := 1 To Len(aVend)
+
+	If aVend[nI] >= MV_PAR02 .And. aVend[nI] <= MV_PAR03
+		If MV_PAR03 == MV_PAR04
+			cVendFil += (aVend[nI])
+			Exit
+		EndIf
+		If nI == 1
+			If Len(aVend) == 1
+				cVendFil += (aVend[nI])
+			Else
+				cVendFil += (aVend[nI] + "'" + ",")
+			EndIf
+		ElseIf nI == Len(aVend)
+			cVendFil += ("'" + aVend[nI])
+		Else
+			cVendFil += ("'" + aVend[nI] + "'" + ",")
+		EndIf
+	EndIf
+Next
+
+BEGIN REPORT QUERY oSection1 
+ 	BeginSQL alias cAlias1
+		SELECT 
+		   AD1_CANAL,
+		   ADK_NOME,
+		   (CASE AD1_STATUS
+		      WHEN '1' THEN 'EM ANDAMENTO'
+		      ELSE 'GANHA'
+		   END) STATUS1,
+		   SUM(CASE 
+		      WHEN AD1_DATA >= %exp:mv_par01% || '0101' AND AD1_DATA <= %exp:mv_par01% || '0131' THEN 1
+		      ELSE 0
+		   END) JANEIRO,
+		   SUM(CASE 
+		      WHEN AD1_DATA >= %exp:mv_par01% || '0201' AND AD1_DATA <= %exp:mv_par01% || '0231' THEN 1
+		      ELSE 0
+		   END) FEVEREIRO,
+		   SUM(CASE 
+		      WHEN AD1_DATA >= %exp:mv_par01% || '0301' AND AD1_DATA <= %exp:mv_par01% || '0331' THEN 1
+		      ELSE 0
+		   END) MARCO,
+		   SUM(CASE 
+		      WHEN AD1_DATA >= %exp:mv_par01% || '0401' AND AD1_DATA <= %exp:mv_par01% || '0431' THEN 1
+		      ELSE 0
+		   END) ABRIL,
+		   SUM(CASE 
+		      WHEN AD1_DATA >= %exp:mv_par01% || '0501' AND AD1_DATA <= %exp:mv_par01% || '0531' THEN 1
+		      ELSE 0
+		   END) MAIO,
+		   SUM(CASE 
+		      WHEN AD1_DATA >= %exp:mv_par01% || '0601' AND AD1_DATA <= %exp:mv_par01% || '0631' THEN 1
+		      ELSE 0
+		   END) JUNHO,
+		   SUM(CASE 
+		      WHEN AD1_DATA >= %exp:mv_par01% || '0701' AND AD1_DATA <= %exp:mv_par01% || '0731' THEN 1
+		      ELSE 0
+		   END) JULHO,
+		   SUM(CASE 
+		      WHEN AD1_DATA >= %exp:mv_par01% || '0801' AND AD1_DATA <= %exp:mv_par01% || '0831' THEN 1
+		      ELSE 0
+		   END) AGOSTO,
+		   SUM(CASE 
+		      WHEN AD1_DATA >= %exp:mv_par01% || '0901' AND AD1_DATA <= %exp:mv_par01% || '0931' THEN 1
+		      ELSE 0
+		   END) SETEMBRO,
+		   SUM(CASE 
+		      WHEN AD1_DATA >= %exp:mv_par01% || '1001' AND AD1_DATA <= %exp:mv_par01% || '1031' THEN 1
+		      ELSE 0
+		   END) OUTUBRO,
+		   SUM(CASE 
+		      WHEN AD1_DATA >= %exp:mv_par01% || '1101' AND AD1_DATA <= %exp:mv_par01% || '1131' THEN 1
+		      ELSE 0
+		   END) NOVEMBRO,
+		   SUM(CASE 
+		      WHEN AD1_DATA >= %exp:mv_par01% || '1201' AND AD1_DATA <= %exp:mv_par01% || '1231' THEN 1
+		      ELSE 0
+		   END) DEZEMBRO,
+			SUM(CASE 
+		      WHEN AD1_DATA >= %exp:mv_par01% || '0101' AND AD1_DATA <= %exp:mv_par01% || '1231' THEN 1
+		      ELSE 0
+		   END) TOTAL
+		FROM 
+		   %table:AD1% AD1, %table:ADK% ADK, %table:SA3% SA3
+		WHERE
+		   AD1.AD1_FILIAL = %xfilial:AD1% AND
+		   AD1.AD1_CANAL = ADK.ADK_COD AND
+   		   AD1.AD1_VEND = SA3.A3_COD AND
+		   AD1.AD1_VEND IN (%exp:cVendFil%) AND
+		   AD1.%notDel% AND
+		   ADK.%notDel% AND
+		   SA3.%notDel%
+		GROUP BY
+		   AD1_CANAL, ADK_NOME, AD1_STATUS
+		ORDER BY
+		   AD1_CANAL, ADK_NOME, AD1_STATUS
+	EndSql 
+END REPORT QUERY oSection1      
+
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณQuebra a linha, caso existam muitas colunasณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+
+	oSection2:SetParentQuery()
+	oSection2:SetParentFilter({|cParam| (cAlias1)->AD1_CANAL == cParam},{|| (cAlias1)->AD1_CANAL })
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณExecuta a impressao dos dados, de acordo com o filtro ou queryณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+oSection1:Print()
+
+Return(.T.)

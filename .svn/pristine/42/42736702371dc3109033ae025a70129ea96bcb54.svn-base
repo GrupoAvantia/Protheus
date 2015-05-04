@@ -1,0 +1,849 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Matr980.ch"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr980.prx"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "PROTHEUS.CH"
+#line 24 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr980.prx"
+Function Matr980()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And.  TRepInUse()
+
+
+
+	oReport	:= ReportDef()
+	oReport:PrintDialog()
+Else
+	Matr980R3()
+EndIf
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportDef()
+
+Local oReport
+Local oUf
+Local oCep
+Local oMun
+Local oNfs
+Local oTeste
+
+
+
+
+oReport := TReport():New("MATR980",If( cPaisLoc $ "ANG|PTG", "** relação das operações com retenção de icms por distrito **", "** RELACAO DAS OPERACOES COM RETENCAO DE ICMS POR ESTADO **" ),"MTR980", {|oReport| ReportPrint(oReport,oNfs,oMun,oUf)},If( cPaisLoc $ "ANG|PTG", "Emissão dos documentos fiscais que obtiveram retenção de ", "Emissao dos Documentos Fiscais que obtiveram retencao de " )+" "+If( cPaisLoc $ "ANG|PTG", "Icms que cada distrito emissor.                            ", "ICMS que cada estado emissor.                            " ))
+oReport:SetTotalInLine( .F. )
+oReport:SetLandscape()
+Pergunte("MTR980", .F. )
+
+
+
+
+oUf := TRSection():New(oReport,"U.F",{"SA1"},,,)
+oUf:SetTotalInLine( .F. )
+oUf:SetTotalText("TOTAL DO ESTADO")
+TRCell():New(oUf,"A1_EST","SA1", "ESTADO",,,,)
+
+
+
+
+oMun := TRSection():New(oUF,"Municipio",{"SA1"},,,)
+oMun:SetTotalInLine( .F. )
+oMun:SetEdit( .F. )
+oMun:SetTotalText("TOTAL DO MUNICIPIO")
+TRCell():New(oMun,"A1_MUN","SA1","MUNICIPIO",,,,)
+
+
+
+
+oCep := TRSection():New(oMun,"Cep",{"SA1"},,,)
+oCep:SetTotalInLine( .F. )
+oCep:SetEdit( .F. )
+oCep:SetTotalText("TOTAL DO CEP")
+TRCell():New(oCep,"A1_CEP","SA1","CEP",,,,)
+
+
+
+
+oNfs:= TRSection():New(oCep,"Notas Fiscais",{"SF3","SA1"},,,)
+oNfs:SetTotalInLine( .F. )
+oNfs:SetEdit( .F. )
+oNfs:SetTotalText("TOTAL DO CEP")
+TRCell():New(oNfs,"A1_NOME"		,"SA1"	,"RAZAO SOCIAL",,15,,)
+TRCell():New(oNfs,"A1_INSCR"	,"SA1"	,"INSC.EST.","@!",12,,)
+TRCell():New(oNfs,"F3_NFISCAL"	,"SF3"	,"NOTA"+Chr(13)+Chr(10)+"FISCAL","@!",9,,)
+TRCell():New(oNfs,"F3_SERIE"	,"SF3"	,"SERIE",,3,,)
+TRCell():New(oNfs,"F3_EMISSAO"	,"SF3"	,"DATA DE "+Chr(13)+Chr(10)+"EMISSAO ",,10,,)
+TRCell():New(oNfs,"F3_BASERET"	,"SF3"	,"BASE ICMS"+Chr(13)+Chr(10)+"RETIDO","@E 99,999,999.99",13,,)
+TRCell():New(oNfs,"F3_BSRET"	,"SF3"	,"BASE ICMS"+Chr(13)+Chr(10)+"RETIDO DEVOL.","@E 999,999,999.99",14,,)
+TRCell():New(oNfs,"F3_ICMSRET"	,"SF3"	,"VALOR ICMS"+Chr(13)+Chr(10)+"RETIDO","@E 999,999,999.99",14,,)
+TRCell():New(oNfs,"F3_ICRET"	,"SF3"	,"VALOR ICMS"+Chr(13)+Chr(10)+"RETIDO DEVOL.","@E 999,999,999.99",14,,)
+TRCell():New(oNfs,"F3_BASEICM"	,"SF3"	,"BASE ICMS"+Chr(13)+Chr(10)+"NORMAL","@E 999,999,999.99",14,,)
+TRCell():New(oNfs,"F3_BSICM"	,"SF3"	,"BASE ICMS"+Chr(13)+Chr(10)+"NORMAL DEVOL.","@E 999,999,999.99",14,,)
+TRCell():New(oNfs,"F3_VALICM"	,"SF3"	,"VALOR ICMS"+Chr(13)+Chr(10)+"NORMAL","@E 999,999,999.99",14,,)
+TRCell():New(oNfs,"F3_VLICM"	,"SF3"	,"VALOR ICMS"+Chr(13)+Chr(10)+"NORMAL DEVOL.","@E 999,999,999.99",14,,)
+
+Return(oReport)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportPrint(oReport,oNfs,oMun,oUf)
+
+Local cUF		:=	""
+Local cCEP		:=	""
+Local cMun	    :=	""
+Local cAliasSF3	:= "SF3"
+Local cWhere    :=  ""
+Local lquery	:= .F. 
+Local aQuery := {}
+Local oFunction
+Local oFunction1
+Local oFunction2
+
+
+
+
+
+
+If mv_par06 == 1
+
+
+
+	TRFunction():New(oNfs:Cell("F3_BASERET"),,"SUM",,,"@E 999,999,999.99",,, .F. ,)
+	TRFunction():New(oNfs:Cell("F3_BSRET")	 ,,"SUM",,,"@E 999,999,999.99",,, .F. ,)
+	TRFunction():New(oNfs:Cell("F3_ICMSRET"),,"SUM",,,"@E 999,999,999.99",,, .F. ,)
+	TRFunction():New(oNfs:Cell("F3_ICRET")  ,,"SUM",,,"@E 999,999,999.99",,, .F. ,)
+	TRFunction():New(oNfs:Cell("F3_BASEICM"),,"SUM",,,"@E 999,999,999.99",,, .F. ,)
+	TRFunction():New(oNfs:Cell("F3_BSICM")  ,,"SUM",,,"@E 999,999,999.99",,, .F. ,)
+	TRFunction():New(oNfs:Cell("F3_VALICM") ,,"SUM",,,"@E 999,999,999.99",,, .F. ,)
+	TRFunction():New(oNfs:Cell("F3_VLICM")  ,,"SUM",,,"@E 999,999,999.99",,, .F. ,)
+
+	oFunction:=TRFunction():New(oNfs:Cell("F3_BASERET")  ,,"SUM",,,"@E 999,999,999.99",{|| oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BASERET"):GetValue( .T. )-oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BSRET"):GetValue( .T. )}, .T. , .F. ,)
+	oFunction:SetTitle("VALOR LIQUIDO (SAIDAS - DEVOLUCOES)")
+	oFunction:ShowHeader()
+	TRFunction():New(oNfs:Cell("F3_BSRET")    ,,"SUM",,,"@E 999,999,999.99",{|| 0 },, .F. ,)
+	TRFunction():New(oNfs:Cell("F3_ICMSRET")  ,,"SUM",,,"@E 999,999,999.99",{|| oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_ICMSRET"):GetValue( .T. )-oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_ICRET"):GetValue( .T. )},, .F. ,)
+	TRFunction():New(oNfs:Cell("F3_ICRET")    ,,"SUM",,,"@E 999,999,999.99",{|| 0},, .F. ,)
+	TRFunction():New(oNfs:Cell("F3_BASEICM")  ,,"SUM",,,"@E 999,999,999.99",{|| oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BASEICM"):GetValue( .T. )-oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BSICM"):GetValue( .T. )},, .F. ,)
+	TRFunction():New(oNfs:Cell("F3_BSICM")    ,,"SUM",,,"@E 999,999,999.99",{|| 0},, .F. ,)
+	TRFunction():New(oNfs:Cell("F3_VALICM")   ,,"SUM",,,"@E 999,999,999.99",{|| oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_VALICM"):GetValue( .T. )-oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_VLICM"):GetValue( .T. )},, .F. ,)
+	TRFunction():New(oNfs:Cell("F3_VLICM")    ,,"SUM",,,"@E 999,999,999.99",{|| 0},, .F. ,)
+
+
+
+
+	TRFunction():New(oNfs:Cell("F3_BASERET"),,"SUM",,,"@E 999,999,999.99",,, .F. ,,oMun)
+	TRFunction():New(oNfs:Cell("F3_BSRET")	 ,,"SUM",,,"@E 999,999,999.99",,, .F. ,,oMun)
+	TRFunction():New(oNfs:Cell("F3_ICMSRET"),,"SUM",,,"@E 999,999,999.99",,, .F. ,,oMun)
+	TRFunction():New(oNfs:Cell("F3_ICRET")  ,,"SUM",,,"@E 999,999,999.99",,, .F. ,,oMun)
+	TRFunction():New(oNfs:Cell("F3_BASEICM"),,"SUM",,,"@E 999,999,999.99",,, .F. ,,oMun)
+	TRFunction():New(oNfs:Cell("F3_BSICM")  ,,"SUM",,,"@E 999,999,999.99",,, .F. ,,oMun)
+	TRFunction():New(oNfs:Cell("F3_VALICM") ,,"SUM",,,"@E 999,999,999.99",,, .F. ,,oMun)
+	TRFunction():New(oNfs:Cell("F3_VLICM")  ,,"SUM",,,"@E 999,999,999.99",,, .F. ,,oMun)
+
+	oFunction1:=TRFunction():New(oNfs:Cell("F3_BASERET")  ,,"SUM",,,"@E 999,999,999.99",{|| oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BASERET"):GetValue( .T. )-oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BSRET"):GetValue( .T. )}, .T. , .F. ,,oMun)
+	oFunction1:SetTitle("VALOR LIQUIDO (SAIDAS - DEVOLUCOES)")
+	oFunction1:ShowHeader()
+	TRFunction():New(oNfs:Cell("F3_BSRET")    ,,"SUM",,,"@E 999,999,999.99",{|| 0 },, .F. ,,oMun)
+	TRFunction():New(oNfs:Cell("F3_ICMSRET")  ,,"SUM",,,"@E 999,999,999.99",{|| oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_ICMSRET"):GetValue( .T. )-oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_ICRET"):GetValue( .T. )},, .F. ,,oMun)
+	TRFunction():New(oNfs:Cell("F3_ICRET")    ,,"SUM",,,"@E 999,999,999.99",{|| 0},, .F. ,,oMun)
+	TRFunction():New(oNfs:Cell("F3_BASEICM")  ,,"SUM",,,"@E 999,999,999.99",{|| oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BASEICM"):GetValue( .T. )-oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BSICM"):GetValue( .T. )},, .F. ,,oMun)
+	TRFunction():New(oNfs:Cell("F3_BSICM")    ,,"SUM",,,"@E 999,999,999.99",{|| 0},, .F. ,,oMun)
+	TRFunction():New(oNfs:Cell("F3_VALICM")   ,,"SUM",,,"@E 999,999,999.99",{|| oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_VALICM"):GetValue( .T. )-oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_VLICM"):GetValue( .T. )},, .F. ,,oMun)
+	TRFunction():New(oNfs:Cell("F3_VLICM")    ,,"SUM",,,"@E 999,999,999.99",{|| 0},, .F. ,,oMun)
+
+
+
+
+	oUf:SetTotalInLine( .F. )
+	TRFunction():New(oNfs:Cell("F3_BASERET"),,"SUM",,,"@E 999,999,999.99",,,,,oUf)
+	TRFunction():New(oNfs:Cell("F3_BSRET")	 ,,"SUM",,,"@E 999,999,999.99",,,,,oUf)
+	TRFunction():New(oNfs:Cell("F3_ICMSRET"),,"SUM",,,"@E 999,999,999.99",,,,,oUf)
+	TRFunction():New(oNfs:Cell("F3_ICRET")  ,,"SUM",,,"@E 999,999,999.99",,,,,oUf)
+	TRFunction():New(oNfs:Cell("F3_BASEICM"),,"SUM",,,"@E 999,999,999.99",,,,,oUf)
+	TRFunction():New(oNfs:Cell("F3_BSICM")  ,,"SUM",,,"@E 999,999,999.99",,,,,oUf)
+	TRFunction():New(oNfs:Cell("F3_VALICM") ,,"SUM",,,"@E 999,999,999.99",,,,,oUf)
+	TRFunction():New(oNfs:Cell("F3_VLICM")  ,,"SUM",,,"@E 999,999,999.99",,,,,oUf)
+
+	oFunction2:=TRFunction():New(oNfs:Cell("F3_BASERET")  ,,"SUM",,,"@E 999,999,999.99",{|| oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BASERET"):GetValue( .T. )-oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BSRET"):GetValue( .T. )},, .T. ,,oUf)
+	oFunction2:SetTitle("VALOR LIQUIDO (SAIDAS - DEVOLUCOES)")
+	oFunction2:ShowHeader()
+	TRFunction():New(oNfs:Cell("F3_BSRET")    ,,"SUM",,,"@E 999,999,999.99",{|| 0 },, .T. ,,oUf)
+	TRFunction():New(oNfs:Cell("F3_ICMSRET")  ,,"SUM",,,"@E 999,999,999.99",{|| oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_ICMSRET"):GetValue( .T. )-oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_ICRET"):GetValue( .T. )},, .T. ,,oUf)
+	TRFunction():New(oNfs:Cell("F3_ICRET")    ,,"SUM",,,"@E 999,999,999.99",{|| 0},, .T. ,,oUf)
+	TRFunction():New(oNfs:Cell("F3_BASEICM")  ,,"SUM",,,"@E 999,999,999.99",{|| oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BASEICM"):GetValue( .T. )-oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BSICM"):GetValue( .T. )},, .T. ,,oUf)
+	TRFunction():New(oNfs:Cell("F3_BSICM")    ,,"SUM",,,"@E 999,999,999.99",{|| 0},, .T. ,,oUf)
+	TRFunction():New(oNfs:Cell("F3_VALICM")   ,,"SUM",,,"@E 999,999,999.99",{|| oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_VALICM"):GetValue( .T. )-oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_VLICM"):GetValue( .T. )},, .T. ,,oUf)
+	TRFunction():New(oNfs:Cell("F3_VLICM")    ,,"SUM",,,"@E 999,999,999.99",{|| 0},, .T. ,,oUf)
+Else
+	oUf:SetTotalInLine( .T. )
+	TRFunction():New(oNfs:Cell("F3_BASERET"),,"SUM",,"BASE ICMS RETIDO","@E 999,999,999.99",,, .F. , .F. ,oUf)
+	TRFunction():New(oNfs:Cell("F3_BSRET")	 ,,"SUM",,"BASE ICMS RETIDO DEVOL.","@E 999,999,999.99",,, .F. , .F. ,oUf)
+	TRFunction():New(oNfs:Cell("F3_ICMSRET"),,"SUM",,"VALOR ICMS RETIDO","@E 999,999,999.99",,, .F. , .F. ,oUf)
+	TRFunction():New(oNfs:Cell("F3_ICRET")  ,,"SUM",,"VALOR ICMS RETIDO DEVOL.","@E 999,999,999.99",,, .F. , .F. ,oUf)
+	TRFunction():New(oNfs:Cell("F3_BASEICM"),,"SUM",,"BASE ICMS NORMAL","@E 999,999,999.99",,, .F. , .F. ,oUf)
+	TRFunction():New(oNfs:Cell("F3_BSICM")  ,,"SUM",,"BASE ICMS NORMAL DEVOL.","@E 999,999,999.99",,, .F. , .F. ,oUf)
+	TRFunction():New(oNfs:Cell("F3_VALICM") ,,"SUM",,"VALOR ICMS NORMAL","@E 999,999,999.99",,, .F. , .F. ,oUf)
+	TRFunction():New(oNfs:Cell("F3_VLICM")  ,,"SUM",,"VALOR ICMS NORMAL DEVOL.","@E 999,999,999.99",,, .F. , .F. ,oUf)
+EndIf
+
+
+cWhere := "%"
+If MV_PAR05 <> "*"
+	cWhere += " AND F3_NRLIVRO = '" +(MV_PAR05) +"' "
+EndIf
+cWhere += "%"
+
+
+
+
+dbSelectArea("SF3")
+
+
+    lquery := .T. 
+
+
+
+	MakeSqlExpr(oReport:uParam)
+
+
+
+	oReport:Section(1):BeginQuery()
+
+	cAliasSF3 := GetNextAlias()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasSF3," SELECT A1_EST, A1_MUN, A1_CEP, F3_FILIAL,F3_CLIEFOR,F3_LOJA, F3_NFISCAL, F3_SERIE, F3_EMISSAO, F3_BASERET, F3_ICMSRET, F3_BASEICM, F3_VALICM, F3_ENTRADA, F3_TIPO, F3_CFO, F3_NRLIVRO, A1_NOME, A1_INSCR FROM  "+RetSqlName('SF3')+" SF3,  "+RetSqlName('SA1')+" SA1 WHERE F3_FILIAL =  '" +xFilial('SF3')+"'  AND F3_ENTRADA >=  "+___SQLGetValue(DTOS(MV_PAR01))+" AND F3_ENTRADA <=  "+___SQLGetValue(DTOS(MV_PAR02))+" AND F3_DTCANC = ' ' AND F3_ICMSRET >0 AND ( (SUBSTRING(SF3.F3_CFO,1,1) >= '5' AND F3_TIPO <> 'D') OR (SUBSTRING(SF3.F3_CFO,1,1) <= '4' AND F3_TIPO = 'D' )) AND A1_FILIAL =  '" +xFilial('SA1')+"'  AND A1_LOJA = F3_LOJA AND A1_COD = F3_CLIEFOR AND A1_EST >=  "+___SQLGetValue((MV_PAR03))+" AND A1_EST <=  "+___SQLGetValue((MV_PAR04))+" AND SF3.D_E_L_E_T_= ' ' AND SA1.D_E_L_E_T_= ' '  "+___SQLGetValue(CWHERE)+" ORDER BY A1_EST, A1_MUN, A1_CEP, F3_FILIAL,F3_EMISSAO, F3_NFISCAL, F3_SERIE, F3_CLIEFOR, F3_LOJA",{},.F.)
+
+	aQuery := GetLastQuery()
+
+
+
+
+
+
+
+
+	oReport:Section(1):EndQuery()
+
+ 	oReport:Section(1):Section(1):SetParentQuery()
+	oReport:Section(1):Section(1):SetParentFilter( { |cParam| (cAliasSF3)->A1_EST == cParam},{ || (cAliasSF3)->A1_EST })
+	oReport:Section(1):Section(1):Section(1):SetParentQuery()
+	oReport:Section(1):Section(1):Section(1):SetParentFilter( { |cParam| (cAliasSF3)->A1_EST+(cAliasSF3)->A1_MUN ==cParam},{ || (cAliasSF3)->A1_EST+(cAliasSF3)->A1_MUN })
+	oReport:Section(1):Section(1):Section(1):Section(1):SetParentQuery()
+	oReport:Section(1):Section(1):Section(1):Section(1):SetParentFilter( { |cParam| (cAliasSF3)->A1_EST+(cAliasSF3)->A1_MUN+(cAliasSF3)->A1_CEP == cParam},{ || (cAliasSF3)->A1_EST+(cAliasSF3)->A1_MUN+(cAliasSF3)->A1_CEP})
+	oReport:Section(1):Section(1):Section(1):Section(1):SetLineCondition({|| !((cAliasSF3)->F3_TIPO $ "SL") .OR.  !(VAL(substr((cAliasSF3)->F3_CFO,1,1)) < 5 .And.  (cAliasSF3)->F3_TIPO <> "D")})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BASERET"):SetBlock({|| Iif((cAliasSF3)->F3_TIPO<>"D" .And.  ((cAliasSF3)->F3_TIPO<>"B" .And.  !((cAliasSF3)->F3_CFO $ "2918#1918")),(cAliasSF3)->F3_BASERET,0)})
+oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BSRET"):SetBlock({|| Iif((cAliasSF3)->F3_TIPO<>"D" .And.  ((cAliasSF3)->F3_TIPO<>"B" .And.  !((cAliasSF3)->F3_CFO $ "2918#1918")),0,(cAliasSF3)->F3_BASERET)})
+oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_ICMSRET"):SetBlock({|| Iif((cAliasSF3)->F3_TIPO<>"D" .And.  ((cAliasSF3)->F3_TIPO<>"B" .And.  !((cAliasSF3)->F3_CFO $ "2918#1918")),(cAliasSF3)->F3_ICMSRET,0)})
+oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_ICRET"):SetBlock({|| Iif((cAliasSF3)->F3_TIPO<>"D" .And.  ((cAliasSF3)->F3_TIPO<>"B" .And.  !((cAliasSF3)->F3_CFO $ "2918#1918")),0,(cAliasSF3)->F3_ICMSRET)})
+oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BASEICM"):SetBlock({|| Iif((cAliasSF3)->F3_TIPO<>"D" .And.  ((cAliasSF3)->F3_TIPO<>"B" .And.  !((cAliasSF3)->F3_CFO $ "2918#1918")),(cAliasSF3)->F3_BASEICM,0)})
+oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_BSICM"):SetBlock({|| Iif((cAliasSF3)->F3_TIPO<>"D" .And.  ((cAliasSF3)->F3_TIPO<>"B" .And.  !((cAliasSF3)->F3_CFO $ "2918#1918")),0,(cAliasSF3)->F3_BASEICM)})
+oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_VALICM"):SetBlock({|| Iif((cAliasSF3)->F3_TIPO<>"D" .And.  ((cAliasSF3)->F3_TIPO<>"B" .And.  !((cAliasSF3)->F3_CFO $ "2918#1918")),(cAliasSF3)->F3_VALICM,0)})
+oReport:Section(1):Section(1):Section(1):Section(1):Cell("F3_VLICM"):SetBlock({|| Iif((cAliasSF3)->F3_TIPO<>"D" .And.  ((cAliasSF3)->F3_TIPO<>"B" .And.  !((cAliasSF3)->F3_CFO $ "2918#1918")),0,(cAliasSF3)->F3_VALICM)})
+
+If mv_par06 == 2
+	oReport:Section(1):Section(1):SetHeaderSection( .F. )
+	oReport:Section(1):Section(1):Hide()
+	oReport:Section(1):Section(1):Section(1):SetHeaderSection( .F. )
+	oReport:Section(1):Section(1):Section(1):Hide()
+	oReport:Section(1):Section(1):Section(1):Section(1):SetHeaderSection( .F. )
+	oReport:Section(1):Section(1):Section(1):Section(1):Hide()
+	oReport:Section(1):Print()
+Else
+	oReport:Section(1):Print()
+EndIf
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MATR980R3
+
+
+
+LOCAL cabec1,cabec2,cabec3,wnrel
+LOCAL Titulo  		:=If( cPaisLoc $ "ANG|PTG", "** relação das operações com retenção de icms por distrito **", "** RELACAO DAS OPERACOES COM RETENCAO DE ICMS POR ESTADO **" )
+LOCAL cDesc1  		:=If( cPaisLoc $ "ANG|PTG", "Emissão dos documentos fiscais que obtiveram retenção de ", "Emissao dos Documentos Fiscais que obtiveram retencao de " )
+LOCAL cDesc2  		:=If( cPaisLoc $ "ANG|PTG", "Icms que cada distrito emissor.                            ", "ICMS que cada estado emissor.                            " )
+LOCAL cDesc3  		:=""
+PRIVATE Tamanho		:=	"G"
+PRIVATE cString		:=	"SF3"
+PRIVATE aReturn		:=	{ If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ), 1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 2, 2, 1, "",1 }
+PRIVATE aLinha		:=	{}
+PRIVATE	nomeprog	:="MATR980"
+PRIVATE	nLastKey 	:= 0
+PRIVATE	cPerg  		:=	"MTR980"
+
+
+
+
+
+
+
+
+
+
+
+
+Pergunte(cPerg, .F. )
+
+
+
+wnrel	:=	"MATR980"
+wnrel	:=	SetPrint(cString,wnrel,cPerg,Titulo,cDesc1,cDesc2,cDesc3, .F. ,"",,Tamanho)
+
+If nLastKey == 27
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	Return
+Endif
+
+RptStatus({|lEnd| R980Imp(@lEnd,wnRel,titulo)},titulo)
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R980Imp(lEnd,WnRel,titulo)
+Local CbCont
+Local CbTxt
+Local cUF  			:=	""
+Local nPagina  		:= 	0
+Local Li  			:= 	80
+Local aBaseRet 		:= 	{}
+Local aBaseRetD 	:= 	{}
+Local aValRet		:= 	{}
+Local aValRetD 		:= 	{}
+Local aBase 		:= 	{}
+Local aBaseD 		:= 	{}
+Local aValICM 		:= 	{}
+Local aValICMD 		:= 	{}
+Local aLqBasRet		:=	{}
+Local aLqValRet		:=	{}
+Local aLqBase		:=	{}
+Local aLqICMS		:=	{}
+Local nI			:=	0
+Local cFilterUser	:= aReturn[7]
+
+
+
+
+
+
+
+For nI := 1 to 4
+	aAdd(aBaseRet,0)
+	aAdd(aBaseRetD,0)
+	aAdd(aValRet,0)
+	aAdd(aValRetD,0)
+	aAdd(aBase,0)
+	aAdd(aBaseD,0)
+	aAdd(aValICM,0)
+	aAdd(aValICMD,0)
+	aAdd(aLqBasRet,0)
+	aAdd(aLqValRet,0)
+	aAdd(aLqBase,0)
+	aAdd(aLqICMS,0)
+Next
+
+
+
+Cabec1  :=If( cPaisLoc $ "ANG|PTG", "RAZÃO SOCIAL                           CONCELHO       DIST. INSC. DISTRITAL     FACT.      SÉRIE DATA DE       BASE ICMS     BASE ICMS      VALOR ICMS     VALOR ICMS      BASE ICMS      BASE ICMS     VALOR ICMS    VALOR ICMS", "RAZAO SOCIAL                           MUNICIPIO       UF INSC. ESTADUAL     NOTA      SERIE DATA DE       BASE ICMS     BASE ICMS      VALOR ICMS     VALOR ICMS      BASE ICMS      BASE ICMS     VALOR ICMS    VALOR ICMS" )
+Cabec2  :=If( cPaisLoc $ "ANG|PTG", "                                                                             FISCAL          EMISSÃO          RETIDO  RETIDO DEVOL.         RETIDO  RETIDO DEVOL.         NORMAL  NORMAL DEVOL.         NORMAL NORMAL DEVOL.", "                                                                             FISCAL          EMISSAO          RETIDO  RETIDO DEVOL.         RETIDO  RETIDO DEVOL.         NORMAL  NORMAL DEVOL.         NORMAL NORMAL DEVOL." )
+
+
+
+
+
+
+cUF      := ""
+nPagina  := 0
+cbcont   := 0
+m_pag    := 1
+cbtxt    := Space(10)
+nTipo    := 15
+
+dbSelectArea("SF3")
+
+cNomeArq1:=	CriaTrab("", .F. )
+cFiltro	:=	"F3_FILIAL=='"+xFilial("SF3")+"' .and. empty(F3_DTCANC) .And. F3_ICMSRET > 0"
+If mv_par05<>"*"
+	cFiltro	+=	".And.SF3->F3_NRLIVRO=='"+mv_par05+"'"
+Endif
+If !Empty(cFilterUser)
+	cFiltro := "(" + Alltrim(cFiltro) + ") .And. (" + Alltrim(cFilterUser) + ")"
+Endif
+IndRegua("SF3",cNomeArq1,"F3_FILIAL+F3_CLIEFOR+F3_LOJA",,cFiltro,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+dbGoTop()
+
+dbSelectArea("SA1")
+cNomeArq2:= Subs(cNomeArq1,1,6)+"A"
+cFiltro	:=	"A1_FILIAL=='"+xFilial()+"'.And.A1_EST>='"+mv_par03+"'.And.A1_EST<='"+mv_par04+"'"
+IndRegua("SA1",cNomeArq2,"A1_EST+A1_MUN+A1_CEP",,cFiltro,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+dbGotop()
+
+
+
+SetRegua(LastRec())
+
+
+
+While !Eof()
+	If lEnd
+		PrintOut(_PROW()+1,001,If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR"),,)
+		Exit
+	EndIf
+	aBaseRet[01]	:= 0
+	aBaseRetD[01]	:= 0
+	aValRet[01]		:= 0
+	aValRetD[01]	:= 0
+	aBase[01]		:= 0
+	aBaseD[01]		:= 0
+	aValICM[01]		:= 0
+	aValICMD[01]	:= 0
+	aLqBasRet[01]	:= 0
+	aLqValRet[01]	:= 0
+	aLqBase[01]		:= 0
+	aLqICMS[01]		:= 0
+	cEst			:= A1_EST
+	While !Eof() .And. cEst==A1_EST
+		aBaseRet[02]	:= 0
+		aBaseRetD[02]	:= 0
+		aValRet[02]		:= 0
+		aValRetD[02]	:= 0
+		aBase[02]		:= 0
+		aBaseD[02]		:= 0
+		aValICM[02]		:= 0
+		aValICMD[02]	:= 0
+		aLqBasRet[02]	:= 0
+		aLqValRet[02]	:= 0
+		aLqBase[02]		:= 0
+		aLqICMS[02]		:= 0
+		cMun 			:= A1_MUN
+		While !Eof() .And. cEst+cMun == A1_EST+A1_MUN
+			aBaseRet[03]	:= 0
+			aBaseRetD[03]	:= 0
+			aValRet[03]		:= 0
+			aValRetD[03]	:= 0
+			aBase[03]		:= 0
+			aBaseD[03]		:= 0
+			aValICM[03]		:= 0
+			aValICMD[03]	:= 0
+			aLqBasRet[03]	:= 0
+			aLqValRet[03]	:= 0
+			aLqBase[03]		:= 0
+			aLqICMS[03]		:= 0
+			cCep			:= A1_CEP
+			While !Eof() .And. cEst+cMun+cCep == A1_EST+A1_MUN+A1_CEP
+				IncRegua()
+				dbSelectArea("SF3")
+				cChave:=xFilial("SF3")+SA1->A1_COD+SA1->A1_LOJA
+				dbSeek(cChave)
+				While !Eof() .And.  cChave==F3Filial("SF3")+F3_CLIEFOR+F3_LOJA
+
+
+					If (SF3->F3_ENTRADA < mv_par01 .or.  SF3->F3_ENTRADA > mv_par02) .OR.  SF3->F3_TIPO $ "SL" .OR.  (VAL(substr(SF3->F3_CFO,1,1)) < 5 .And.  SF3->F3_TIPO <> "D") .OR.  SF3->F3_ICMSRET == 0.00
+						dbSkip()
+						Loop
+					Endif
+
+
+					If li > 55
+						cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+						li	:=	_PROW()
+					EndIF
+					If mv_par06 == 1
+						li++
+						PrintOut(li,000,Alltrim(SA1->A1_NOME),,)
+						PrintOut(li,039,SA1->A1_MUN,,)
+						PrintOut(li,055,SA1->A1_EST,,)
+						PrintOut(li,058,SA1->A1_INSCR,,)
+						PrintOut(li,077,SF3->F3_NFISCAL,,)
+						PrintOut(li,087,SF3->F3_SERIE,,)
+						PrintOut(li,093,SF3->F3_EMISSAO,,)
+						PrintOut(li,101,Iif(SF3->F3_TIPO<>"D",SF3->F3_BASERET,0),PesqPict("SF3","F3_BASERET",14),)
+						PrintOut(li,116,Iif(SF3->F3_TIPO<>"D",0,SF3->F3_BASERET),PesqPict("SF3","F3_BASERET",14),)
+						PrintOut(li,131,Iif(SF3->F3_TIPO<>"D",SF3->F3_ICMSRET,0),PesqPict("SF3","F3_ICMSRET",14),)
+						PrintOut(li,146,Iif(SF3->F3_TIPO<>"D",0,SF3->F3_ICMSRET),PesqPict("SF3","F3_ICMSRET",14),)
+						PrintOut(li,161,Iif(SF3->F3_TIPO<>"D",SF3->F3_BASEICM,0),PesqPict("SF3","F3_BASEICM",14),)
+						PrintOut(li,176,Iif(SF3->F3_TIPO<>"D",0,SF3->F3_BASEICM0),PesqPict("SF3","F3_BASEICM",14),)
+						PrintOut(li,191,Iif(SF3->F3_TIPO<>"D",SF3->F3_VALICM,0),PesqPict("SF3","F3_VALICM",14),)
+						PrintOut(li,206,Iif(SF3->F3_TIPO<>"D",0,SF3->F3_VALICM),PesqPict("SF3","F3_VALICM",14),)
+					Endif
+					aBaseRet[03]	+= Iif(SF3->F3_TIPO<>"D",SF3->F3_BASERET,0)
+					aBaseRetD[03]	+= Iif(SF3->F3_TIPO<>"D",0,SF3->F3_BASERET)
+					aValRet[03]		+= Iif(SF3->F3_TIPO<>"D",SF3->F3_ICMSRET,0)
+					aValRetD[03]	+= Iif(SF3->F3_TIPO<>"D",0,SF3->F3_ICMSRET)
+					aBase[03]		+= Iif(SF3->F3_TIPO<>"D",SF3->F3_BASEICM,0)
+					aBaseD[03]		+= Iif(SF3->F3_TIPO<>"D",0,SF3->F3_BASEICM)
+					aValICM[03]		+= Iif(SF3->F3_TIPO<>"D",SF3->F3_VALICM,0)
+					aValICMD[03]	+= Iif(SF3->F3_TIPO<>"D",0,SF3->F3_VALICM)
+					aLqBasRet[03]	+= Iif(SF3->F3_TIPO<>"D",SF3->F3_BASERET,SF3->F3_BASERET * -1)
+					aLqValRet[03]	+= Iif(SF3->F3_TIPO<>"D",SF3->F3_ICMSRET,SF3->F3_ICMSRET * -1)
+					aLqBase[03]		+= Iif(SF3->F3_TIPO<>"D",SF3->F3_BASEICM,SF3->F3_BASEICM * -1)
+					aLqICMS[03]		+= Iif(SF3->F3_TIPO<>"D",SF3->F3_VALICM,SF3->F3_VALICM * -1)
+					dbSkip()
+				EndDo
+				dbSelectArea("SA1")
+				dbSkip()
+			EndDo
+
+
+
+			If Abs((aBaseRet[03] + aBaseRetD[03] + aValRet[03] + aValRetD[03] + aBase[03] + aBaseD[03] + aValICM[03] + aValICMD[03])) > 0
+				If li > 55
+					cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+					li	:=	_PROW()
+				Endif
+				If mv_par06 == 1
+					li++
+					PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Total do cep -> ","Total do Cep -> ")+cCep,,)
+					PrintOut(li,101,aBaseRet[03],PesqPict("SF3","F3_BASERET",14),)
+					PrintOut(li,116,aBaseRetD[03],PesqPict("SF3","F3_BASERET",14),)
+					PrintOut(li,131,aValRet[03],PesqPict("SF3","F3_ICMSRET",14),)
+					PrintOut(li,146,aValRetD[03],PesqPict("SF3","F3_ICMSRET",14),)
+					PrintOut(li,161,aBase[03],PesqPict("SF3","F3_BASEICM",14),)
+					PrintOut(li,176,aBaseD[03],PesqPict("SF3","F3_BASEICM",14),)
+					PrintOut(li,191,aValICM[03],PesqPict("SF3","F3_VALICM",14),)
+					PrintOut(li,206,aValICMD[03],PesqPict("SF3","F3_VALICM",14),)
+					li++
+
+
+
+					PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Valor Líquido (saídas - Devoluções)","Valor Liquido (SAIDAS - DEVOLUCOES)"),,)
+					PrintOut(li,101,aLqBasRet[03],PesqPict("SF3","F3_BASERET",14),)
+					PrintOut(li,116,0,PesqPict("SF3","F3_BASERET",14),)
+					PrintOut(li,131,aLqValRet[03],PesqPict("SF3","F3_ICMSRET",14),)
+					PrintOut(li,146,0,PesqPict("SF3","F3_ICMSRET",14),)
+					PrintOut(li,161,aLqBase[03],PesqPict("SF3","F3_BASEICM",14),)
+					PrintOut(li,176,0,PesqPict("SF3","F3_BASEICM",14),)
+					PrintOut(li,191,aLqICMS[03],PesqPict("SF3","F3_VALICM",14),)
+					PrintOut(li,206,0,PesqPict("SF3","F3_VALICM",14),)
+					li++
+					PrintOut(li,000,Repli("-",220),,)
+				Endif
+			Endif
+			aBaseRet[02] 	+= aBaseRet[03]
+			aBaseRetD[02] 	+= aBaseRetD[03]
+			aValRet[02] 	+= aValRet[03]
+			aValRetD[02] 	+= aValRetD[03]
+			aBase[02]  		+= aBase[03]
+			aBaseD[02] 		+= aBaseD[03]
+			aValICM[02] 	+= aValICM[03]
+			aValICMD[02] 	+= aValICMD[03]
+			aLqBasRet[02]	+= aLqBasRet[03]
+			aLqValRet[02] 	+= aLqValRet[03]
+			aLqBase[02] 	+= aLqBase[03]
+			aLqICMS[02] 	+= aLqICMS[03]
+		EndDo
+
+
+
+		If Abs((aBaseRet[02] + aBaseRetD[02] + aValRet[02] + aValRetD[02] + aBase[02] + aBaseD[02] + aValICM[02] + aValICMD[02])) > 0 .And.  mv_par06 == 1
+			IF li > 55
+				cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+				li	:=	_PROW()
+			EndIF
+			li++
+			PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Total do municipo -> ","Total do Municipo -> ")+cMun,,)
+			PrintOut(li,101,aBaseRet[02],PesqPict("SF3","F3_BASERET",14),)
+			PrintOut(li,116,aBaseRetD[02],PesqPict("SF3","F3_BASERET",14),)
+			PrintOut(li,131,aValRet[02],PesqPict("SF3","F3_ICMSRET",14),)
+			PrintOut(li,146,aValRetD[02],PesqPict("SF3","F3_ICMSRET",14),)
+			PrintOut(li,161,aBase[02],PesqPict("SF3","F3_BASEICM",14),)
+			PrintOut(li,176,aBaseD[02],PesqPict("SF3","F3_BASEICM",14),)
+			PrintOut(li,191,aValICM[02],PesqPict("SF3","F3_VALICM",14),)
+			PrintOut(li,206,aValICMD[02],PesqPict("SF3","F3_VALICM",14),)
+			li++
+
+
+
+			PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Valor Líquido (saídas - Devoluções)","Valor Liquido (SAIDAS - DEVOLUCOES)"),,)
+			PrintOut(li,101,aLqBasRet[02],PesqPict("SF3","F3_BASERET",14),)
+			PrintOut(li,116,0,PesqPict("SF3","F3_BASERET",14),)
+			PrintOut(li,131,aLqValRet[02],PesqPict("SF3","F3_ICMSRET",14),)
+			PrintOut(li,146,0,PesqPict("SF3","F3_ICMSRET",14),)
+			PrintOut(li,161,aLqBase[02],PesqPict("SF3","F3_BASEICM",14),)
+			PrintOut(li,176,0,PesqPict("SF3","F3_BASEICM",14),)
+			PrintOut(li,191,aLqICMS[02],PesqPict("SF3","F3_VALICM",14),)
+			PrintOut(li,206,0,PesqPict("SF3","F3_VALICM",14),)
+			li++
+			PrintOut(li,000,Repli("-",220),,)
+		Endif
+		aBaseRet[01] 	+= aBaseRet[02]
+		aBaseRetD[01] 	+= aBaseRetD[02]
+		aValRet[01] 	+= aValRet[02]
+		aValRetD[01] 	+= aValRetD[02]
+		aBase[01]  		+= aBase[02]
+		aBaseD[01] 		+= aBaseD[02]
+		aValICM[01] 	+= aValICM[02]
+		aValICMD[01] 	+= aValICMD[02]
+		aLqBasRet[01]	+= aLqBasRet[02]
+		aLqValRet[01] 	+= aLqValRet[02]
+		aLqBase[01] 	+= aLqBase[02]
+		aLqICMS[01] 	+= aLqICMS[02]
+	EndDo
+
+
+
+	If Abs((aBaseRet[01] + aBaseRetD[01] + aValRet[01] + aValRetD[01] + aBase[01] + aBaseD[01] + aValICM[01] + aValICMD[01])) > 0
+		IF li > 55
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+			li	:=	_PROW()
+		EndIF
+		li++
+		PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Total do distrito -> ","Total do Estado -> ")+cEst,,)
+		PrintOut(li,101,aBaseRet[01],PesqPict("SF3","F3_BASERET",14),)
+		PrintOut(li,116,aBaseRetD[01],PesqPict("SF3","F3_BASERET",14),)
+		PrintOut(li,131,aValRet[01],PesqPict("SF3","F3_ICMSRET",14),)
+		PrintOut(li,146,aValRetD[01],PesqPict("SF3","F3_ICMSRET",14),)
+		PrintOut(li,161,aBase[01],PesqPict("SF3","F3_BASEICM",14),)
+		PrintOut(li,176,aBaseD[01],PesqPict("SF3","F3_BASEICM",14),)
+		PrintOut(li,191,aValICM[01],PesqPict("SF3","F3_VALICM",14),)
+		PrintOut(li,206,aValICMD[01],PesqPict("SF3","F3_VALICM",14),)
+		li++
+
+
+
+		PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Valor Líquido (saídas - Devoluções)","Valor Liquido (SAIDAS - DEVOLUCOES)"),,)
+		PrintOut(li,101,aLqBasRet[01],PesqPict("SF3","F3_BASERET",14),)
+		PrintOut(li,116,0,PesqPict("SF3","F3_BASERET",14),)
+		PrintOut(li,131,aLqValRet[01],PesqPict("SF3","F3_ICMSRET",14),)
+		PrintOut(li,146,0,PesqPict("SF3","F3_ICMSRET",14),)
+		PrintOut(li,161,aLqBase[01],PesqPict("SF3","F3_BASEICM",14),)
+		PrintOut(li,176,0,PesqPict("SF3","F3_BASEICM",14),)
+		PrintOut(li,191,aLqICMS[01],PesqPict("SF3","F3_VALICM",14),)
+		PrintOut(li,206,0,PesqPict("SF3","F3_VALICM",14),)
+		li++
+		PrintOut(li,000,Repli("-",220),,)
+	Endif
+	aBaseRet[04] 	+= aBaseRet[01]
+	aBaseRetD[04] 	+= aBaseRetD[01]
+	aValRet[04] 	+= aValRet[01]
+	aValRetD[04] 	+= aValRetD[01]
+	aBase[04]  		+= aBase[01]
+	aBaseD[04] 		+= aBaseD[01]
+	aValICM[04] 	+= aValICM[01]
+	aValICMD[04] 	+= aValICMD[01]
+	aLqBasRet[04]	+= aLqBasRet[01]
+	aLqValRet[04] 	+= aLqValRet[01]
+	aLqBase[04] 	+= aLqBase[01]
+	aLqICMS[04] 	+= aLqICMS[01]
+EndDo
+
+
+
+If Abs((aBaseRet[04] + aBaseRetD[04] + aValRet[04] + aValRetD[04] + aBase[04] + aBaseD[04] + aValICM[04] + aValICMD[04])) > 0
+	IF li > 55
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		li	:=	_PROW()
+	EndIF
+	li++
+	PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Total geral ->","Total Geral ->"),,)
+	PrintOut(li,101,aBaseRet[04],PesqPict("SF3","F3_BASERET",14),)
+	PrintOut(li,116,aBaseRetD[04],PesqPict("SF3","F3_BASERET",14),)
+	PrintOut(li,131,aValRet[04],PesqPict("SF3","F3_ICMSRET",14),)
+	PrintOut(li,146,aValRetD[04],PesqPict("SF3","F3_ICMSRET",14),)
+	PrintOut(li,161,aBase[04],PesqPict("SF3","F3_BASEICM",14),)
+	PrintOut(li,176,aBaseD[04],PesqPict("SF3","F3_BASEICM",14),)
+	PrintOut(li,191,aValICM[04],PesqPict("SF3","F3_VALICM",14),)
+	PrintOut(li,206,aValICMD[04],PesqPict("SF3","F3_VALICM",14),)
+	li++
+
+
+
+	PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Valor Líquido (saídas - Devoluções)","Valor Liquido (SAIDAS - DEVOLUCOES)"),,)
+	PrintOut(li,101,aLqBasRet[04],PesqPict("SF3","F3_BASERET",14),)
+	PrintOut(li,116,0,PesqPict("SF3","F3_BASERET",14),)
+	PrintOut(li,131,aLqValRet[04],PesqPict("SF3","F3_ICMSRET",14),)
+	PrintOut(li,146,0,PesqPict("SF3","F3_ICMSRET",14),)
+	PrintOut(li,161,aLqBase[04],PesqPict("SF3","F3_BASEICM",14),)
+	PrintOut(li,176,0,PesqPict("SF3","F3_BASEICM",14),)
+	PrintOut(li,191,aLqICMS[04],PesqPict("SF3","F3_VALICM",14),)
+	PrintOut(li,206,0,PesqPict("SF3","F3_VALICM",14),)
+	li++
+	PrintOut(li,000,Repli("=",220),,)
+Endif
+If li < 60
+	roda(cbcont,cbtxt,Tamanho)
+Endif
+
+dbSelectArea("SF2")
+dbClearFilter()
+dbSetOrder(1)
+
+dbSelectArea("SA1")
+dbClearFilter()
+RetIndex("SA1")
+dbSetOrder(1)
+
+dbSelectArea("SF3")
+dbClearFilter()
+RetIndex("SF3")
+dbSetOrder(1)
+
+If File(cNomeArq1+OrdBagExt())
+	fErase(cNomeArq1+OrdBagExt())
+Endif
+
+If File(cNomeArq2+OrdBagExt())
+	fErase(cNomeArq2+OrdBagExt())
+Endif
+
+If aReturn[5] == 1
+	Set( 24, "" )
+	dbcommitAll()
+	ourspool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return

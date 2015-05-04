@@ -1,0 +1,1251 @@
+#INCLUDE "MATR230.CH"
+#INCLUDE "PROTHEUS.CH"
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR230  ³ Autor ³ Nereu Humberto Junior ³ Data ³ 21/06/06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Requisicoes para consumo                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function MATR230()
+Local oReport
+
+If FindFunction("TRepInUse") .And. TRepInUse()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Interface de impressao                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport := ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR230R3()
+EndIf
+
+Return
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportDef ³ Autor ³Nereu Humberto Junior  ³ Data ³21.06.2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpO1: Objeto do relatório                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+Local oReport 
+Local oSection1
+Local oSection2 
+Local oCell         
+Local aOrdem := {}
+#IFNDEF TOP
+	Local cAliasSD3 := "SD3"	
+#ELSE
+	Local cAliasSD3 := GetNextAlias()
+#ENDIF
+Local lVEIC    := Upper(GetMv("MV_VEICULO"))=="S"
+Local cTamVlr  := TamSX3('D3_CUSTO1' )[1]
+Local cPictVl  := X3Picture('D3_CUSTO1')
+Local cTamDesc := TamSX3('I3_DESC' )[1]
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Ajusta o Grupo de Perguntas                                            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AjustaSX1(lVEIC)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao do componente de impressao                                      ³
+//³                                                                        ³
+//³TReport():New                                                           ³
+//³ExpC1 : Nome do relatorio                                               ³
+//³ExpC2 : Titulo                                                          ³
+//³ExpC3 : Pergunte                                                        ³
+//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+//³ExpC5 : Descricao                                                       ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:= TReport():New("MATR230",STR0001,"MTR230", {|oReport| ReportPrint(oReport,cAliasSD3,lVEIC)},STR0002+" "+STR0003+" "+STR0004) //"Requisicoes para Consumo"##"Emite a relacao das requisicoes feitas para consumo , dividindo por"##"Centro de Custo requisitante ou Conta Contabil.Este relatorio e' um"##"pouco demorado porque ele cria o arquivo de indice na hora."
+oReport:SetTotalInLine(.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                         ³
+//³ mv_par01     // De  Centro de Custo                          ³
+//³ mv_par02     // Ate Centro de Custo                          ³
+//³ mv_par03     // Moeda Selecionada ( 1 a 5 )                  ³
+//³ mv_par04     // De  Local                                    ³
+//³ mv_par05     // Ate Local                                    ³
+//³ mv_par06     // Da  Data                                     ³
+//³ mv_par07     // Ate Data                                     ³
+//³ mv_par08     // Do  Produto                                  ³
+//³ mv_par09     // Ate Produto                                  ³
+//³ mv_par10     // Do  Tipo                                     ³
+//³ mv_par11     // Ate Tipo                                     ³
+//³ mv_par12     // Do  Grupo                                    ³
+//³ mv_par13     // Ate Grupo                                    ³
+//³ mv_par14     // Da  Conta Contabil                           ³
+//³ mv_par15     // Ate Conta Contabil                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Pergunte("MTR230",.F.)
+
+Aadd( aOrdem, STR0005 ) // " Centro Custo "
+Aadd( aOrdem, STR0006 ) // " Cta.Contabil "
+
+oSection1 := TRSection():New(oReport,STR0026,{"SD3","SB1"},aOrdem) //"Itens de Movimentação Interna"
+oSection1 :SetTotalInLine(.F.)
+
+TRCell():New(oSection1,"D3_EMISSAO"	,"SD3",/*Titulo*/			,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D3_CC"		,"SD3",/*Titulo*/			,/*Picture*/,9			,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"cDescCC"	,"   ",STR0021				,"@!"		,cTamDesc	,/*lPixel*/,/*{|| code-block de impressao }*/) //Descricao
+TRCell():New(oSection1,"D3_CONTA"	,"SD3",/*Titulo*/			,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"cDesCont"	,"   ",STR0021				,"@!"		,25			,/*lPixel*/,/*{|| code-block de impressao }*/) //Descricao
+TRCell():New(oSection1,"nAc2"		,"   ",STR0022				,cPictVl	,cTamVlr	,/*lPixel*/,/*{|| code-block de impressao }*/) //"Valor"
+TRCell():New(oSection1,"B1_COD"		,"SB1",/*Titulo*/			,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"B1_CODITE"	,"SB1",/*Titulo*/			,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| SB1->B1_CODITE+' '+SB1->B1_COD })
+TRCell():New(oSection1,"B1_DESC"	,"SB1",/*Titulo*/			,/*Picture*/,25			,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"B1_UM"		,"SB1",/*Titulo*/			,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"nAp1"		,"   ",/*Titulo*/			,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,"RIGHT")
+oSection1:Cell("nAp1"):GetFieldInfo("D3_QUANT")
+TRCell():New(oSection1,"nUnit"		,"   ",STR0023+CRLF+STR0024,cPictVl		,cTamVlr	,/*lPixel*/,/*{|| code-block de impressao }*/,,,"RIGHT") //"Custo"##"Unitario"
+TRCell():New(oSection1,"nAp2"		,"   ",STR0023+CRLF+STR0025,cPictVl		,cTamVlr	,/*lPixel*/,/*{|| code-block de impressao }*/,,,"RIGHT") //"Custo"##"Total"
+TRCell():New(oSection1,"D3_GRUPO"	,"SD3",/*Titulo*/			,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+
+Return(oReport)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrin³ Autor ³Nereu Humberto Junior  ³ Data ³21.06.2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatório                           ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport,cAliasSD3,lVEIC)
+
+Local oSection1 := oReport:Section(1) 
+Local nOrdem   := oReport:Section(1):GetOrder() 
+Local cTitulo  := ""
+Local cOrder   := ""
+Local cCampoCus:= ""
+Local lImprime := .T.
+Local lLista   := .F.
+Local nAp1     := 0
+Local nAp2     := 0
+Local nUnit    := 0
+Local aEntCt   := If(CtbInUse(), { "CT1", "CTT" }, { "SI1", "SI3" })
+Local oBreak
+Local oBreak2
+Local dEmissao
+Local cProd		:= ""
+#IFNDEF TOP
+	Local cCondicao := ""
+#ELSE
+	Local cWhere := ""
+#ENDIF
+Private XSB1   := XFILIAL("SB1")
+
+If nOrdem == 1
+	oBreak  := TRBreak():New(oSection1,{|| oSection1:Cell('D3_CC'):GetValue()+ oSection1:Cell('D3_GRUPO'):GetValue() },STR0014,.F.) //"Total do Grupo "
+	oBreak2 := TRBreak():New(oSection1,oSection1:Cell("D3_CC"),STR0015,.F.) //"Total Centro de Custo "
+
+	TRFunction():New(oSection1:Cell("nAp1"),NIL,"SUM",oBreak,"",/*cPicture*/,/*uFormula*/,.F.,.F.) 
+	TRFunction():New(oSection1:Cell("nAp2"),NIL,"SUM",oBreak,"",/*cPicture*/,/*uFormula*/,.F.,.F.) 
+	
+	TRFunction():New(oSection1:Cell("nAp1"),NIL,"SUM",oBreak2,"",/*cPicture*/,/*uFormula*/,.F.,.T.) 
+	TRFunction():New(oSection1:Cell("nAp2"),NIL,"SUM",oBreak2,"",/*cPicture*/,/*uFormula*/,.F.,.T.) 
+
+	cTitulo  := " (Por "+AllTrim(STR0005)+" ,em "+AllTrim(GetMv("MV_SIMB"+LTrim(Str(mv_par03))))+")"
+	oReport:SetTitle( oReport:Title()+cTitulo) 
+	
+	oSection1:Cell("D3_EMISSAO"):Disable()
+	oSection1:Cell("D3_CONTA"):Disable()
+	oSection1:Cell("cDesCont"):Disable()
+	oSection1:Cell("nAc2"):Disable()
+	
+ElseIf nOrdem == 2
+
+	oBreak  := TRBreak():New(oSection1,oSection1:Cell("D3_CONTA"),STR0018,.F.) //"Total da Conta --> "
+	
+	TRFunction():New(oSection1:Cell("nAc2"),NIL,"SUM",oBreak,"",/*cPicture*/,/*uFormula*/,.F.,.T.) 
+
+	cTitulo  := " (Por "+AllTrim(STR0006)+" ,em "+AllTrim(GetMv("MV_SIMB"+LTrim(Str(mv_par03))))+")"
+	oReport:SetTitle( oReport:Title()+cTitulo) 
+
+	oSection1:Cell("B1_COD"):Disable()
+	oSection1:Cell("B1_DESC"):Disable()
+	oSection1:Cell("B1_UM"):Disable()
+	oSection1:Cell("nAp1"):Disable()
+	oSection1:Cell("nUnit"):Disable()
+	oSection1:Cell("nAp2"):Disable()
+	oSection1:Cell("D3_GRUPO"):Disable()
+
+Endif
+
+dbSelectArea("SD3")
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Filtragem do relatório                                                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+#IFDEF TOP
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Transforma parametros Range em expressao SQL                            ³	
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	MakeSqlExpr(oReport:uParam)
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Query do relatório da secao 1                                           ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:Section(1):BeginQuery()	
+	
+	cWhere :="%"
+	If ! lVEIC
+		cWhere += "AND D3_COD >= '"+mv_par08+"' AND D3_COD <= '"+mv_par09+"'"	
+	Endif
+	cWhere +="%"	
+	
+	cOrder := "%"
+	If nOrdem == 1
+		cOrder += " D3_FILIAL, D3_CC, D3_GRUPO, D3_COD  "
+	Else
+		cOrder += " D3_FILIAL, D3_CONTA, D3_CC, D3_COD  "
+	EndIf
+	cOrder += "%"
+
+	BeginSql Alias cAliasSD3
+
+	SELECT SD3.*
+	
+	FROM %table:SD3% SD3
+	
+	WHERE D3_FILIAL = %xFilial:SD3% AND 
+		  D3_CC >= %Exp:mv_par01% AND 
+		  D3_CC <= %Exp:mv_par02% AND 	 	  
+		  D3_LOCAL >= %Exp:mv_par04% AND 
+		  D3_LOCAL <= %Exp:mv_par05% AND 	 	  		  
+		  D3_TIPO >= %Exp:mv_par10% AND 
+		  D3_TIPO <= %Exp:mv_par11% AND 	 	  
+		  D3_CONTA >= %Exp:mv_par14% AND 
+		  D3_CONTA <= %Exp:mv_par15% AND
+		  D3_EMISSAO >= %Exp:mv_par06% AND
+		  D3_EMISSAO <= %Exp:mv_par07% AND 
+		  D3_GRUPO >= %Exp:mv_par12% AND
+		  D3_GRUPO <= %Exp:mv_par13% AND	 	  
+		  D3_ESTORNO = ' ' AND
+		  SD3.%NotDel% 
+		  %Exp:cWhere%
+		  
+	ORDER BY %Exp:cOrder%
+			
+	EndSql 
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Metodo EndQuery ( Classe TRSection )                                    ³
+	//³                                                                        ³
+	//³Prepara o relatório para executar o Embedded SQL.                       ³
+	//³                                                                        ³
+	//³ExpA1 : Array com os parametros do tipo Range                           ³
+	//³                                                                        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
+
+#ELSE
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Transforma parametros Range em expressao Advpl                          ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	MakeAdvplExpr(oReport:uParam)
+
+	cCondicao := 'D3_FILIAL == "'+xFilial("SD3")+'".And.' 
+	cCondicao += 'D3_CC >= "'+mv_par01+'".And.D3_CC <="'+mv_par02+'".And.'
+	cCondicao += 'D3_LOCAL >= "'+mv_par04+'".And.D3_LOCAL <="'+mv_par05+'".And.'
+	If ! lVEIC
+		cCondicao += 'D3_COD >= "'+mv_par08+'".And.D3_COD <="'+mv_par09+'".And.'
+	Endif	
+	cCondicao += 'D3_TIPO >= "'+mv_par10+'".And.D3_TIPO <="'+mv_par11+'".And.'
+	cCondicao += 'D3_CONTA >= "'+mv_par14+'".And.D3_CONTA <="'+mv_par15+'".And.'
+	cCondicao += '.And. DTOS(D3_EMISSAO) >= "'+DTOS(mv_par06)+'" .AND. DTOS(D3_EMISSAO) <= "'+DTOS(mv_par07)+'"'
+	cCondicao += '.And. D3_GRUPO >= "'+mv_par12+'" .AND. D3_GRUPO <= "'+mv_par13+'"'
+	cCondicao += 'D3_ESTORNO=" "'	
+	
+	If nOrdem == 1
+		cOrder += "D3_FILIAL+D3_CC+D3_GRUPO+D3_COD"
+	Else
+		cOrder += "D3_FILIAL+D3_CONTA+D3_CC+D3_COD"
+	EndIf
+	
+	oReport:Section(1):SetFilter(cCondicao,cOrder)
+#ENDIF		
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Metodo TrPosition()                                                     ³
+//³                                                                        ³
+//³Posiciona em um registro de uma outra tabela. O posicionamento será     ³
+//³realizado antes da impressao de cada linha do relatório.                ³
+//³                                                                        ³
+//³                                                                        ³
+//³ExpO1 : Objeto Report da Secao                                          ³
+//³ExpC2 : Alias da Tabela                                                 ³
+//³ExpX3 : Ordem ou NickName de pesquisa                                   ³
+//³ExpX4 : String ou Bloco de código para pesquisa. A string será macroexe-³
+//³        cutada.                                                         ³
+//³                                                                        ³				
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+TRPosition():New(oSection1,"SB1",1,{|| xFilial("SB1") + cProd})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define o campo a ser impresso no valor de acordo com a moeda selecionada ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cCampoCus := "D3_CUSTO"+Str(mv_par03,1)
+If ! lVEIC
+	oSection1:Cell("B1_CODITE"):Disable()
+Else
+	oSection1:Cell("B1_COD"):Disable()
+Endif
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Inicio da impressao do fluxo do relatório                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:SetMeter(SD3->(LastRec()))
+
+Do Case
+
+		Case nOrdem == 1
+			oSection1:Init()
+			dbSelectArea(cAliasSD3)
+			While !oReport:Cancel() .And. (cAliasSD3)->(!Eof()) 
+
+				If oReport:Cancel()
+					Exit
+				EndIf
+	
+				cCcant := (cAliasSD3)->D3_CC
+				oSection1:Cell("D3_CC"):SetValue(cCcant)
+				lImprime := .T.
+
+				While !oReport:Cancel() .And. (cAliasSD3)->(!Eof()) .And. (cAliasSD3)->D3_FILIAL+(cAliasSD3)->D3_CC == xFilial("SD3")+cCCAnt
+					cGrupant := (cAliasSD3)->D3_GRUPO
+					oSection1:Cell("D3_GRUPO"):SetValue(cGrupant)
+					While !oReport:Cancel() .And. (cAliasSD3)->(!Eof()) .And. (cAliasSD3)->D3_FILIAL+(cAliasSD3)->D3_CC+(cAliasSD3)->D3_GRUPO == xFilial("SD3")+cCCAnt+cGrupAnt
+						
+						If lVEIC
+							lT := .T.
+						   	dbSelectArea("SB1")
+						   	dbSeek( XSB1 + (cAliasSD3)->D3_COD )
+						   	If !Eof()
+						    	If (SB1->B1_CODITE >= mv_par08 .And. SB1->B1_CODITE <= mv_par09)
+		      				   		lT := .F.
+								Endif
+							Endif
+						   	dbSelectArea(cAliasSD3)
+						   	If lT
+								dbSkip()
+							   	Loop
+						   	Endif
+						Endif   
+						
+						cProd	 := (cAliasSD3)->D3_COD
+						cD3Local := (cAliasSD3)->D3_LOCAL
+						Store 0 To nAp1,nAp2
+						While !oReport:Cancel() .And. (cAliasSD3)->(!Eof()) .And. (cAliasSD3)->D3_FILIAL+(cAliasSD3)->D3_CC+(cAliasSD3)->D3_GRUPO+(cAliasSD3)->D3_COD+(cAliasSD3)->D3_LOCAL == xFilial("SD3")+cCCAnt+cGrupAnt+cProd+cD3Local
+
+							oReport:IncMeter()
+							
+							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+							//³ So' entra requisicao e devolucao                      ³
+							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+							If SubStr((cAliasSD3)->D3_CF,2,1) != "E"
+								dbSkip()
+								Loop
+							EndIf
+							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+							//³ Se tiver numero de OP nao e' para consumo , portanto  ³
+							//³ nao deve entrar                                       ³
+							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+							If Substr((cAliasSD3)->D3_OP,7,2) # "OS" .And. !Empty((cAliasSD3)->D3_OP)
+								dbSkip()
+								Loop
+							EndIf
+							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+							//³Eu estou somando as requisicoes e subtraindo as  devolucoes ³
+							//³porque este mapa tem o objetivo de totalizar os movimentos  ³
+							//³internos,nao tem sentido mostrar um monte de valores negati-³
+							//³vos ,sendo que as requisicoes normalmente serao maiores  que³
+							//³as devolucoes.                                              ³
+							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+							If (cAliasSD3)->D3_TM <= "500"
+								nAp1 -= (cAliasSD3)->D3_QUANT
+								nAp2 -= (cAliasSD3)->&(cCampoCus)
+							Else
+								nAp1 += (cAliasSD3)->D3_QUANT
+								nAp2 += (cAliasSD3)->&(cCampoCus)
+							EndIf
+							dbSkip()
+						EndDo
+						If nAp1 != 0 .Or. nAp2 != 0
+
+							SB1->(dbSeek(xFilial("SB1")+cProd))
+							IF nAp1 = 0
+								nUnit := nAp2
+							Else
+								nUnit := nAp2/nAp1
+							EndIf
+							oSection1:Cell("cDescCC"):SetValue(DescCC(cCcant, mv_par03))
+							oSection1:Cell("nAp1"):SetValue(nAp1)
+							oSection1:Cell("nUnit"):SetValue(nUnit)
+							oSection1:Cell("nAp2"):SetValue(nAp2)
+
+							If lImprime
+								oSection1:Cell("D3_CC"):Show()
+								oSection1:Cell("cDescCC"):Show()
+								lImprime := .F.
+							Else
+								oSection1:Cell("D3_CC"):Hide()
+								oSection1:Cell("cDescCC"):Hide()
+							EndIf
+							oSection1:PrintLine()
+						EndIf
+					EndDo
+				EndDo
+			EndDo
+			oSection1:Finish()
+
+		Case nOrdem == 2
+
+			oSection1:Init()
+			dbSelectArea(cAliasSD3)
+			While !oReport:Cancel() .And. (cAliasSD3)->(!Eof()) 
+				cContant := (cAliasSD3)->D3_CONTA                                 		
+				oSection1:Cell("D3_CONTA"):SetValue(cContant)
+				While !oReport:Cancel() .And. (cAliasSD3)->(!Eof()) .And. (cAliasSD3)->D3_FILIAL+(cAliasSD3)->D3_CONTA == xFilial("SD3")+cContant
+					dbSelectArea(cAliasSD3)
+					cCcant := (cAliasSD3)->D3_CC
+					oSection1:Cell("D3_CC"):SetValue(cCcant)
+					Store 0 To nAc2
+					lLista:=.F.                                      
+					While !oReport:Cancel() .And. (cAliasSD3)->(!Eof()) .And. (cAliasSD3)->D3_FILIAL+(cAliasSD3)->D3_CONTA+(cAliasSD3)->D3_CC == xFilial("SD3")+cContant+cCCAnt
+						
+						If oReport:Cancel()
+							Exit
+						EndIf
+						
+						oReport:IncMeter()
+		
+					    dbSelectArea(cAliasSD3)
+						If lVEIC
+							lT := .T.
+						   	dbSelectArea("SB1")
+						   	dbSeek( XSB1 + (cAliasSD3)->D3_COD )
+						   	If !Eof()
+						    	If (SB1->B1_CODITE >= mv_par08 .And. SB1->B1_CODITE <= mv_par09)
+		      				   		lT := .F.
+								Endif
+							Endif
+						   	dbSelectArea(cAliasSD3)
+						   	If lT
+								dbSkip()
+							   	Loop
+						   	Endif
+						Endif   
+						
+						//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+						//³ So' entra requisicao e devolucao                      ³
+						//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+						If SubStr((cAliasSD3)->D3_CF,2,1) != "E"
+							dbSkip()
+							Loop
+						EndIf
+						//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+						//³ Se tiver numero de OP nao e' para consumo , portanto  ³
+						//³ nao deve entrar                                       ³
+						//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+						If Substr((cAliasSD3)->D3_OP,7,2) # "OS" .And. !Empty((cAliasSD3)->D3_OP)
+							dbSkip()
+							Loop
+						EndIf
+						lLista:=.T.
+						//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+						//³Eu estou somando as requisicoes e subtraindo as  devolucoes ³
+						//³porque este mapa tem o objetivo de totalizar os movimentos  ³
+						//³internos,nao tem sentido mostrar um monte de valores negati-³
+						//³vos ,sendo que as requisicoes normalmente serao maiores  que³
+						//³as devolucoes.                                              ³
+						//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+						If D3_TM <= "500"
+							nAc2 -= (cAliasSD3)->&(cCampoCus)
+						Else
+							nAc2 += (cAliasSD3)->&(cCampoCus)
+						EndIf
+						dEmissao := (cAliasSD3)->D3_EMISSAO
+						oSection1:Cell("cDescCC"):SetValue(DescCC(cCcant, mv_par03))
+						oSection1:Cell("D3_EMISSAO"):SetValue(dEmissao)
+						
+						dbSkip()
+					EndDo
+					If lLista
+
+						dbSelectArea(aEntCt[1])
+						dbSeek(xFilial()+cContant)
+					 
+						dbSelectArea(cAliasSD3)
+						oSection1:Cell("cDesCont"):SetValue(SubStr(If(aEntCt[1] = "CT1", &("CT1->CT1_DESC" + StrZero(mv_par03, 2)),AllTrim(SI1->I1_DESC)),1,25))
+						oSection1:Cell("nAc2"):SetValue(nAc2)
+						
+						oSection1:PrintLine()
+
+					EndIf
+				EndDo
+			EndDo
+			oSection1:Finish()
+EndCase			
+
+Return NIL
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³MATR230R3 ³ Autor ³ Eveli Morasco         ³ Data ³ 02/03/93 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Requisicoes para consumo (Antigo)                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Marcelo Pim.³05/12/97³09882A³Incl.perg.(Dt.Emiss.,Cod.Prod.,Tipo,Grupo)³±±
+±±³Cesar       ³30/03/99³XXXXXX³Manutencao na SetPrint()                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Marcos Hirak³05/02/04³XXXXXX³Imprimir B1_CODITE quando for gestao de   ³±±
+±±³            ³        ³      ³Concessionarias ( MV_VEICULO = "S").      ³±±
+±±³            ³        ³      ³foi retirado a variavel "cProdant"        ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function MATR230R3()
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis obrigatorias dos programas de relatorio            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL Tamanho  := "M"
+LOCAL titulo   := STR0001 	//"Requisicoes para Consumo"
+LOCAL cDesc1   := STR0002	//"Emite a relacao das requisicoes feitas para consumo , dividindo por"
+LOCAL cDesc2   := STR0003	//"Centro de Custo requisitante ou Conta Contabil.Este relatorio e' um"
+LOCAL cDesc3   := STR0004	//"pouco demorado porque ele cria o arquivo de indice na hora."
+LOCAL cString  := "SD3"
+LOCAL aOrd     := {OemToAnsi(STR0005),OemToAnsi(STR0006)}    //" Centro Custo "###" Cta.Contabil "
+LOCAL wnrel    := "MATR230"
+LOCAL cX3_F3   := If(CtbInUse(),"CT1","SI1")
+LOCAL nTamSX1  := Len(SX1->X1_GRUPO)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis tipo Local para SIGAVEI, SIGAPEC e SIGAOFI         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local aArea1	:= Getarea() 
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis tipo Private para SIGAVEI, SIGAPEC e SIGAOFI       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Private lVEIC		:= UPPER(GETMV("MV_VEICULO"))=="S"
+Private aSB1Cod	:= {}
+Private aSB1Ite	:= {}
+Private nCOL1		:= 0
+Private nCOL2		:= 0
+Private XSB1		:= XFILIAL("SB1")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis tipo Private padrao de todos os relatorios         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+PRIVATE aReturn:= {OemToAnsi(STR0007),1,OemToAnsi(STR0008), 2, 2, 1, "",1}    //"Zebrado"###"Administracao"
+PRIVATE nLastKey:= 0 ,cPerg := "MTR230"
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+PutSX1("MTR230","14","Da Conta Contabil  ?","¿De Cuenta Contable?","From Account       ?","mv_che","C",20,0,0,"G","",cX3_F3,"","","mv_par14","","","","","","","","","","","","","","","","",{"Conta contabil inicial a ser considerado","no filtro do cadastro de movimentacoes","internas (SD3)."},{"Cuenta contable inicial que se","considerara en el filtro del archivo","de movimientos internos (SD3)."},{"Initial ledger account to be considered","by the internal transactions file filter","SD3)."}) 
+PutSX1("MTR230","15","Ate Conta Contabil ?","¿A Cuenta Contable ?","To   Account       ?","mv_chf","C",20,0,0,"G","",cX3_F3,"","","mv_par15","","","","ZZZZZZZZZZZZZZZZZZZZ","","","","","","","","","","","","",{"Conta contabil final a ser considerado","no filtro do cadastro de movimentacoes","internas (SD3)."},{"Cuenta contable final que se","considerara en el filtro del archivo","de movimientos internos (SD3)."},{"Final ledger account to be considered by","the internal transactions file filter","SD3)."}) 
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                         ³
+//³ mv_par01     // De  Centro de Custo                          ³
+//³ mv_par02     // Ate Centro de Custo                          ³
+//³ mv_par03     // Moeda Selecionada ( 1 a 5 )                  ³
+//³ mv_par04     // De  Local                                    ³
+//³ mv_par05     // Ate Local                                    ³
+//³ mv_par06     // Da  Data                                     ³
+//³ mv_par07     // Ate Data                                     ³
+//³ mv_par08     // Do  Produto                                  ³
+//³ mv_par09     // Ate Produto                                  ³
+//³ mv_par10     // Do  Tipo                                     ³
+//³ mv_par11     // Ate Tipo                                     ³
+//³ mv_par12     // Do  Grupo                                    ³
+//³ mv_par13     // Ate Grupo                                    ³
+//³ mv_par14     // Da  Conta Contabil                           ³
+//³ mv_par15     // Ate Conta Contabil                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Ajustar o SX1 para SIGAVEI, SIGAPEC e SIGAOFI                ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+aSB1Cod	:= TAMSX3("B1_COD")
+aSB1Ite	:= TAMSX3("B1_CODITE")
+
+if lVEIC
+   DBSELECTAREA("SX1")
+   DBSETORDER(1)
+   DBSEEK(PADR(cPerg,nTamSX1))
+   DO WHILE SX1->X1_GRUPO == PADR(cPerg,nTamSX1) .AND. !SX1->(EOF())
+      IF "PRODU" $ UPPER(SX1->X1_PERGUNT) .AND. UPPER(SX1->X1_TIPO) == "C" .AND. ;
+      (SX1->X1_TAMANHO <> aSB1Ite[1] .OR. UPPER(SX1->X1_F3) <> "VR4")
+
+         RECLOCK("SX1",.F.)
+         SX1->X1_TAMANHO := aSB1Ite[1]
+         SX1->X1_F3 := "VR4"
+         DBCOMMIT()
+         MSUNLOCK()
+         
+      ENDIF
+      DBSKIP()
+   ENDDO
+   DBCOMMITALL()
+   RESTAREA(aArea1)
+else
+   DBSELECTAREA("SX1")
+   DBSETORDER(1)
+   DBSEEK(PADR(cPerg,nTamSX1))
+   DO WHILE SX1->X1_GRUPO == PADR(cPerg,nTamSX1) .AND. !SX1->(EOF())
+      IF "PRODU" $ UPPER(SX1->X1_PERGUNT) .AND. UPPER(SX1->X1_TIPO) == "C" .AND. ;
+      (SX1->X1_TAMANHO <> aSB1Cod[1] .OR. UPPER(SX1->X1_F3) <> "SB1")
+
+         RECLOCK("SX1",.F.)
+         SX1->X1_TAMANHO := aSB1Cod[1]
+         SX1->X1_F3 := "SB1"
+         DBCOMMIT()
+         MSUNLOCK()
+         
+      ENDIF
+      DBSKIP()
+   ENDDO
+   DBCOMMITALL()
+   RESTAREA(aArea1)
+endif
+
+pergunte(cPerg,.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Envia controle para a funcao SETPRINT                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.F.,aOrd,,Tamanho)
+
+if lVEIC .and. aReturn[8] == 1
+	Tamanho  := "G"
+	nCOL1		:= ABS(aSB1Cod[1] - aSB1Ite[1]) + 1 +  aSB1Cod[1]
+Endif
+
+If nLastKey = 27
+	Set Filter to
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey = 27
+	Set Filter to
+	Return
+Endif
+
+RptStatus({|lEnd| C230Imp(aOrd,@lEnd,wnRel,titulo,Tamanho)},titulo)
+
+Return NIL
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ C230IMP  ³ Autor ³ Rodrigo de A. Sartorio³ Data ³ 07.12.95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Chamada do Relatorio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR230  			                                      ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function C230Imp(aOrd,lEnd,WnRel,titulo,Tamanho)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis locais exclusivas deste programa                   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL nTipo    	:= 0
+LOCAL cRodaTxt 	:= OemToAnsi(STR0009)   //"REGISTRO(S)"
+LOCAL nCntImpr 	:= 0
+LOCAL nAc1:=0,nAc2:=0,nAg1:=0,nAg2:=0,nAt1:=0,nAt2:=0,nAp1:=0,nAp2:=0
+LOCAL	lLista:=.F.
+LOCAL dEmissao ,lImprime,nUnit:=0,cCcant,cGrupant,cContant
+LOCAL cCampoCus,lContinua,lPassou1,lPassou2,lPassou3
+LOCAL cCond 	:= 'D3_FILIAL=="'+xFilial("SD3")+'" .And. D3_CC >= "'+mv_par01+'"'
+Local aEntCt    := If(CtbInUse(), { "CT1", "CTT" }, { "SI1", "SI3" })
+
+LOCAL cProd, cD3Local
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis tipo Local para SIGAVEI, SIGAPEC e SIGAOFI         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL nAux1
+LOCAL nI
+LOCAL nLenc
+Local nIndr
+Local lT
+Local nTamI3DESC := TamSX3('I3_DESC')[1]  // I3_DESC e' o limite para tamanho da descricao do CC.
+
+cCond += '.And. D3_CC <= "'+mv_par02+'" .And. D3_LOCAL >= "'+mv_par04+'"'
+cCond += '.And. D3_LOCAL <= "'+mv_par05+'"'
+
+if ! lVEIC
+	cCond += '.And. D3_COD >= "'+mv_par08+'" .And. D3_COD <= "'+mv_par09+'"'
+endif	
+
+cCond += '.And. D3_TIPO >= "'+mv_par10+'" .And. D3_TIPO <= "'+mv_par11+'"'
+cCond += '.And. D3_CONTA >= "'+mv_par14+'" .And. D3_CONTA <= "'+mv_par15+'"'
+cCond += '.And. DTOS(D3_EMISSAO) >= "'+DTOS(mv_par06)+'" .AND. DTOS(D3_EMISSAO) <= "'+DTOS(mv_par07)+'"'
+cCond += '.And. D3_GRUPO >= "'+mv_par12+'" .AND. D3_GRUPO <= "'+mv_par13+'"'
+cCond += '.And. D3_ESTORNO == " "'
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Contadores de linha e pagina                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+PRIVATE li := 80 ,m_pag := 1
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis locais exclusivas deste programa                   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+PRIVATE cNomArq
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Adiciona o filtro de usuario na condicao da IndRegua        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If !Empty(aReturn[7])
+	cCond+=".And."+aReturn[7]
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa os codigos de caracter Comprimido/Normal da impressora ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+nTipo  := IIF(aReturn[4]==1,15,18)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Adiciona a ordem escolhida ao titulo do relatorio          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If Type("NewHead")#"U"
+	NewHead += " (Por "+AllTrim(aOrd[aReturn[8]])+" ,em "+AllTrim(GetMv("MV_SIMB"+LTrim(Str(mv_par03))))+")"
+Else
+	Titulo  += " (Por "+AllTrim(aOrd[aReturn[8]])+" ,em "+AllTrim(GetMv("MV_SIMB"+LTrim(Str(mv_par03))))+")"
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define o campo a ser impresso no valor de acordo com a moeda selecionada ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cCampoCus := "SD3->D3_CUSTO"+Str(mv_par03,1)
+
+lContinua := .T.
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa variaveis para controlar cursor de progressao     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SB1")
+dbSetOrder(1)
+dbSelectArea("SD3")
+SetRegua(LastRec())
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Pega o nome do arquivo de indice de trabalho             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cNomArq := CriaTrab("",.F.)
+
+If aReturn[8] == 1
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Cria o indice de trabalho                                ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	IndRegua("SD3",cNomArq,"D3_FILIAL+D3_CC+D3_GRUPO+D3_COD+D3_LOCAL",,cCond,OemToAnsi(STR0010))   //"Selecionando Registros..."
+	nIndr	:=	RetIndex("SD3")
+	#IFNDEF TOP
+		dbSetIndex(cNomArq+OrdBagExt())
+	#ENDIF
+	dbSetOrder(nIndr + 1)
+
+	dbGoTop()
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Cria o cabecalho de acordo com a ordem selecionada       ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	cabec1 :=OemToAnsi(STR0011)   	//"C.C       DESCRICAO                 CODIGO PRODUTO  DESCRICAO                UM       QUANTIDADE          CUSTO        C U S T O"
+	cabec2 :=OemToAnsi(STR0012)   	//"                                                                                                       UNITARIO        T O T A L"
+ 									//123456789 1234567890123456789012345 123456789012345 1234567890123456789012345 12 9999999999999.99 99999999999.99 9999999999999.99
+									//0         1         2         3         4         5         6         7         8         9        10        11        12        13
+									//0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
+	if lVEIC
+		// Codigo do Produto NAO E' A Primeira coluna.
+		nAux1	:= AT('PRODU',UPPER(cabec1))
+		nLenc	:= LEN(cabec1)
+		IF nAux1 > 0
+	   	FOR nI := nAux1 TO nLenc
+	      	IF SUBStr(cabec1,nI, 1 ) == ' '
+	         	exit
+		      endif
+		   NEXT nI
+			cabec1  := substr(cabec1 ,1, nI-1) + SPACE(nCOL1) + substr(cabec1 ,nI)
+			IF !EMPTY(cabec2)
+				cabec2  := substr(cabec2 ,1, nI-1) + SPACE(nCOL1) + substr(cabec2 ,nI)
+			ENDIF	
+		ENDIF	
+
+	endif	
+	Store 0 To nAt1,nAt2
+	lPassou3 := .F.
+	While lContinua .And. !EOF()
+		cCcant := D3_CC
+		Store 0 To nAc1,nAc2
+		lImprime := .T.
+		lPassou2 := .F.
+		While lContinua .And. !EOF() .And. D3_FILIAL+D3_CC == cFilial+cCCAnt
+			cGrupant := D3_GRUPO
+			Store 0 To nAg1,nAg2
+			lPassou1 := .F.
+			While lContinua .And. !EOF() .And. D3_FILIAL+D3_CC+D3_GRUPO == cFilial+cCCAnt+cGrupAnt
+				if lVEIC
+				   lT := .T.
+				   DBSELECTAREA("SB1")
+				   DBSEEK( XSB1 + SD3->D3_COD )
+				   IF !EOF()
+				      IF (SB1->B1_CODITE >= mv_par08 .and. SB1->B1_CODITE <= mv_par09)
+      				   lT := .F.
+						ENDIF
+					ENDIF
+				   DBSELECTAREA("SD3")
+					if lT
+					   DBSKIP()
+					   LOOP
+				   endif
+				endif   
+				cProd		:= D3_COD
+				cD3Local	:= D3_LOCAL
+				Store 0 To nAp1,nAp2
+				// While lContinua .And. !EOF() .And. D3_FILIAL+D3_CC+D3_GRUPO+D3_COD+D3_LOCAL == cFilial+cCCAnt+cGrupAnt+cProdAnt
+				DO While lContinua .And. !EOF() .And. D3_FILIAL+D3_CC+D3_GRUPO+D3_COD+D3_LOCAL == cFilial+cCCAnt+cGrupAnt+cProd+cD3Local
+					If lEnd
+						@ PROW()+1,001 PSay OemToAnsi(STR0013)    //"CANCELADO PELO OPERADOR"
+						lContinua := .F.
+						Exit
+					EndIf
+					IncRegua()
+					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+					//³ So' entra requisicao e devolucao                      ³
+					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+					If SubStr(D3_CF,2,1) != "E"
+						dbSkip()
+						Loop
+					EndIf
+					
+					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+					//³ Se tiver numero de OP nao e' para consumo , portanto  ³
+					//³ nao deve entrar                                       ³
+					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+					If Substr(D3_OP,7,2) # "OS" .And. !Empty(D3_OP)
+						dbSkip()
+						Loop
+					EndIf
+					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+					//³Eu estou somando as requisicoes e subtraindo as  devolucoes ³
+					//³porque este mapa tem o objetivo de totalizar os movimentos  ³
+					//³internos,nao tem sentido mostrar um monte de valores negati-³
+					//³vos ,sendo que as requisicoes normalmente serao maiores  que³
+					//³as devolucoes.                                              ³
+					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+					If D3_TM <= "500"
+						nAp1 -= D3_QUANT
+						nAp2 -= &(cCampoCus)
+					Else
+						nAp1 += D3_QUANT
+						nAp2 += &(cCampoCus)
+					EndIf
+					dbSkip()
+				EndDo
+				If nAp1 != 0 .Or. nAp2 != 0
+					IF li > 58
+						cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+						lImprime := .T.
+					EndIf
+					If lImprime
+						@ li,000 PSay SubStr(cCcant,1,9)
+						@ li,010 PSay DescCC(cCcant, mv_par03)
+						If nTamI3DESC > 25
+						   li++ 
+						EndIf
+						lImprime := .F.
+					EndIf
+					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+					//³ Adiciona 1 ao contador de registros impressos         ³
+					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+					nCntImpr++
+					dbSelectArea("SB1")
+					dbSeek(cFilial+cProd)
+					if ! lVEIC
+						@li,036 PSay B1_COD
+					ELSE
+						@li,036 PSay B1_CODITE + ' ' + B1_COD
+					ENDIF
+					@li,052 + nCOL1 PSay Substr(B1_DESC,1,25)
+					@li,078 + nCOL1 PSay B1_UM
+					@li,081 + nCOL1 PSay nAp1 Picture PesqPictQt("D3_QUANT",16)
+					dbSelectArea("SD3")
+					IF nAp1 = 0
+						nUnit := nAp2
+					Else
+						nUnit := nAp2/nAp1
+					EndIf
+					@li, 98 + nCOL1 PSay nUnit PicTure tm(nUnit,14)
+					@li,113 + nCOL1 PSay nAp2  PicTure tm(nAp2,16)
+					li++
+					nAg1 += nAp1
+					nAg2 += nAp2
+					lPassou1 := .T.
+					dbSelectArea("SD3")
+				EndIf
+			EndDo
+			If lPassou1
+				Li++
+				IF li > 58
+					cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+				EndIf
+				@li,030 + nCOL1 PSay OemToAnsi(STR0014)+cGrupant+Replicate(".",19)    //"Total do Grupo "
+				@li,081 + nCOL1 PSay nAg1 Picture PesqPictQt("D3_QUANT",16)
+				@li,113 + nCOL1 PSay nAg2 PicTure tm(nAg2,16)
+				li++;li++
+				nAc1 += nAg1
+				nAc2 += nAg2
+				lPassou2 := .T.
+			EndIf
+		EndDo
+		If lPassou2
+			IF li > 58
+				cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+			EndIf
+			@li,030 + nCOL1 PSay OemToAnsi(STR0015)+Padl(Alltrim(cCcant),20)+"."    //"Total Centro de Custo "
+			@li,081 + nCOL1 PSay nAc1 Picture PesqPictQt("D3_QUANT",16)
+			@li,113 + nCOL1 PSay nAc2 PicTure tm(nAc2,16)
+			li++;li++
+			nAt1 += nAc1
+			nAt2 += nAc2
+			lPassou3 := .T.
+		EndIf
+	EndDo
+	If lPassou3
+		IF li > 58
+			cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+		EndIf
+		@ li,030 + nCOL1 PSay OemToAnsi(STR0016) //"TOTAL GERAL....................."
+		@ li,081 + nCOL1 PSay nAt1 Picture PesqPictQt("D3_QUANT",16)
+		@ li,113 + nCOL1 PSay nAt2 PicTure tm(nAt2,16)
+		li++
+	EndIf
+ElseIf aReturn[8] == 2
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Cria o indice de trabalho                                ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	IndRegua("SD3",cNomArq,"D3_FILIAL+D3_CONTA+D3_CC+D3_COD",,cCond,OemToAnsi(STR0010))   //"Selecionando Registros..."
+	nIndr	:=	RetIndex("SD3")
+	#IFNDEF TOP
+		dbSetIndex(cNomArq+OrdBagExt())
+	#ENDIF
+	dbSetOrder(nIndr + 1)
+	dbGoTop()
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Cria o cabecalho de acordo com a ordem selecionada       ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	cabec1 := OemToAnsi(STR0017)	//" D A T A    CENTRO     DESCRICAO                  CONTA CONTABIL        DESCRICAO                         V A L O R"
+	cabec2 := OemToAnsi(STR0020)	//"            DE CUSTO                                                                                               "
+									// 1234567890  123456789  1234567890123456789012345  12345678901234567890  1234567890123456789012345  9999999999999.99
+									// 0         1         2         3         4         5         6         7         8         9        10        11        12        13
+									// 0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
+	lPassou3 := .F.
+	While lContinua .And. !EOF()
+		cContant := D3_CONTA                                 		
+		Store 0 To nAc1                                      
+		lPassou2 := .F.		
+		While lContinua .And. !EOF() .And. D3_FILIAL+D3_CONTA == cFilial+cContant
+			DBSELECTAREA("SD3")
+			cCcant := D3_CC
+			Store 0 To nAc2
+			lLista:=.F.                                      
+			While lContinua .And. !EOF() .And. D3_FILIAL+D3_CONTA+D3_CC == cFilial+cContant+cCCAnt
+				If lEnd
+					@ PROW()+1,001 PSay OemToAnsi(STR0013)  //"CANCELADO PELO OPERADOR"
+					lContinua := .F.
+					Exit
+				EndIf
+				IncRegua()
+
+			   DBSELECTAREA("SD3")
+				if lVEIC
+				   lT := .T.
+				   DBSELECTAREA("SB1")
+				   DBSEEK( XSB1 + SD3->D3_COD )
+				   IF !EOF()
+				      IF (SB1->B1_CODITE >= mv_par08 .and. SB1->B1_CODITE <= mv_par09)
+      				   lT := .F.
+						ENDIF
+					ENDIF
+				   DBSELECTAREA("SD3")
+					if lT
+					   DBSKIP()
+					   LOOP
+				   endif
+				endif   
+
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ So' entra requisicao e devolucao                      ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				If SubStr(D3_CF,2,1) != "E"
+					dbSkip()
+					Loop
+				EndIf
+								
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Se tiver numero de OP nao e' para consumo , portanto  ³
+				//³ nao deve entrar                                       ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				If Substr(D3_OP,7,2) # "OS" .And. !Empty(D3_OP)
+					dbSkip()
+					Loop
+				EndIf
+				lLista:=.T.
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Eu estou somando as requisicoes e subtraindo as  devolucoes ³
+				//³porque este mapa tem o objetivo de totalizar os movimentos  ³
+				//³internos,nao tem sentido mostrar um monte de valores negati-³
+				//³vos ,sendo que as requisicoes normalmente serao maiores  que³
+				//³as devolucoes.                                              ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				If D3_TM <= "500"
+					nAc2 -= &(cCampoCus)
+				Else
+					nAc2 += &(cCampoCus)
+				EndIf
+				dEmissao := D3_EMISSAO
+				dbSkip()
+			EndDo
+			If lLista
+				IF li > 58
+					cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+				EndIf
+				
+				dbSelectArea(aEntCt[1])
+				dbSeek(cFilial+cContant)
+				dbSelectArea("SD3")
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Adiciona 1 ao contador de registros impressos         ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				nCntImpr++
+				@ li,000 PSay dEmissao
+				@ li,012 PSay SubStr(cCcant,1,9)
+				@ li,023 PSay SubStr(DescCC(cCcant, mv_par03),1,25)
+				@ li,050 PSay cContant
+				@ li,072 PSay SubStr(If(aEntCt[1] = "CT1", &("CT1->CT1_DESC" + StrZero(mv_par03, 2)),AllTrim(SI1->I1_DESC)),1,25)
+				@ li,099 PSay nAc2 Picture TM(nAc2,18)
+				nAc1 += nAc2
+				lPassou2 := .T.				
+				li++
+			EndIf
+		EndDo
+		If lPassou2
+			@ li,000 PSay OemToAnsi(STR0018)+cContant   //"Total da Conta --> "
+			@ li,099 PSay nAc1 PicTure TM(nAc1,18)
+			li += 2
+			nAg1 += nAc1
+			lPassou3 := .T.
+  		EndIf
+	EndDo
+	If lPassou3 
+		IF li > 58
+			cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+			lImprime := .T.
+		EndIf
+		@ li,000 PSay OemToAnsi(STR0019)  //"T O T A L --->"
+		@ li,099 PSay nAg1 PicTure TM(nAg1,18)
+	EndIf
+EndIf
+
+IF li != 80
+	Roda(nCntImpr,cRodaTxt,Tamanho)
+EndIF
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Devolve as ordens originais do arquivo                       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SD3")
+Set Filter to
+RetIndex("SD3")
+dbSetOrder(1)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Apaga indice de trabalho                                     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cNomArq += OrdBagExt()
+if file(cNomArq)
+	ferase(cNomArq)
+endif	
+
+If aReturn[5] = 1
+	Set Printer To
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+return nil
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºFuncao    ³DescCC    ºAutor  ³Fernando Joly       º Data ³  08/13/03   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Retorna a Descricao do Centro de Custo                     º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ AP                                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function DescCC(cCC, nMoeda)
+
+Local aAreaAnt   := GetArea()
+Local aAreaCC    := {}
+Local cRet       := Replicate('*', Len(SI3->I3_DESC))
+Local cSeekCC    := ''
+Local cAliasCC   := If(CtbInUse(),'CTT','SI3')
+
+Default cCC        := ''
+Default nMoeda     := 1
+
+dbSelectArea(cAliasCC)
+aAreaCC := GetArea()
+dbSetOrder(1)
+If MsSeek(cSeekCC:=xFilial(cAliasCC)+cCC, .F.)
+	If cAliasCC == 'CTT'
+		cRet := Left(&('CTT_DESC'+StrZero(nMoeda, 2)), Len(SI3->I3_DESC)) //-- Do mesmo tamanho do I3_DESC, para manter a compatibilidade
+	ElseIf cAliasCC == 'SI3'
+		Do While !Eof() .And. cSeekCC==I3_FILIAL+I3_CUSTO
+			If I3_MOEDA$' ú0' //-- " " ou "0" indica registro de CADASTRO no arquivo SI3
+				cRet := I3_DESC
+				Exit
+			EndIf
+			dbSkip()
+		EndDo
+	EndIf
+EndIf
+RestArea(aAreaCC)
+RestArea(aAreaAnt)
+
+Return cRet
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³AjustaSX1 ³ Autor ³ Nereu Humberto Jr     ³ Data ³26.06.2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Cria as perguntas necesarias para o programa                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao Efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function AjustaSX1(lVEIC)
+
+Local aSB1Cod := TamSX3("B1_COD")
+Local aSB1Ite := TamSX3("B1_CODITE")
+Local cX3_F3  := If(CtbInUse(),"CT1","SI1")
+Local cPerg   := "MTR230"
+Local nTamSX1 := Len(SX1->X1_GRUPO)
+
+PutSX1("MTR230","14","Da Conta Contabil  ?","¿De Cuenta Contable?","From Account       ?","mv_che","C",20,0,0,"G","",cX3_F3,"","","mv_par14","","","","","","","","","","","","","","","","",{"Conta contabil inicial a ser considerado","no filtro do cadastro de movimentacoes","internas (SD3)."},{"Cuenta contable inicial que se","considerara en el filtro del archivo","de movimientos internos (SD3)."},{"Initial ledger account to be considered","by the internal transactions file filter","SD3)."}) 
+PutSX1("MTR230","15","Ate Conta Contabil ?","¿A Cuenta Contable ?","To   Account       ?","mv_chf","C",20,0,0,"G","",cX3_F3,"","","mv_par15","","","","ZZZZZZZZZZZZZZZZZZZZ","","","","","","","","","","","","",{"Conta contabil final a ser considerado","no filtro do cadastro de movimentacoes","internas (SD3)."},{"Cuenta contable final que se","considerara en el filtro del archivo","de movimientos internos (SD3)."},{"Final ledger account to be considered by","the internal transactions file filter","SD3)."}) 
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Ajustar o SX1 para SIGAVEI, SIGAPEC e SIGAOFI                ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If lVEIC
+   dbSelectArea("SX1")
+   dbSetOrder(1)
+   dbSeek(PADR(cPerg,nTamSX1))
+   Do While SX1->X1_GRUPO == PADR(cPerg,nTamSX1) .AND. !SX1->(Eof())
+      If "PRODU" $ Upper(SX1->X1_PERGUNT) .AND. Upper(SX1->X1_TIPO) == "C" .AND. ;
+      (SX1->X1_TAMANHO <> aSB1Ite[1] .OR. Upper(SX1->X1_F3) <> "VR4")
+
+         RECLOCK("SX1",.F.)
+         SX1->X1_TAMANHO := aSB1Ite[1]
+         SX1->X1_F3 := "VR4"
+         DBCOMMIT()
+         MSUNLOCK()
+         
+      Endif
+      dbSkip()
+   EndDO
+   DBCOMMITALL()
+Else
+   dbSelectArea("SX1")
+   dbSetorder(1)
+   dbSeek(PADR(cPerg,nTamSx1))
+   Do While SX1->X1_GRUPO == PADR(cPerg,nTamSX1) .AND. !SX1->(Eof())
+      If "PRODU" $ Upper(SX1->X1_PERGUNT) .AND. Upper(SX1->X1_TIPO) == "C" .AND. ;
+      (SX1->X1_TAMANHO <> aSB1Cod[1] .OR. Upper(SX1->X1_F3) <> "SB1")
+
+         RECLOCK("SX1",.F.)
+         SX1->X1_TAMANHO := aSB1Cod[1]
+         SX1->X1_F3 := "SB1"
+         DBCOMMIT()
+         MSUNLOCK()
+         
+      Endif
+      dbSkip()
+   EndDO
+   DBCOMMITALL()
+Endif
+
+Return Nil

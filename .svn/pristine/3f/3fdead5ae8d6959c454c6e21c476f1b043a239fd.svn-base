@@ -1,0 +1,811 @@
+#INCLUDE "MATR180.CH"
+#INCLUDE "FIVEWIN.CH"
+#INCLUDE "SIGAWIN.CH" 
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR180  ³ Autor ³ Nereu Humberto Junior ³ Data ³ 29.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Emiss„o da rela‡„o das Devolucoes                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ MATR180(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ ATUALIZACOES SOFRIDAS DESDE A CONSTRUCAO INICIAL.                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ PROGRAMADOR  ³ DATA   ³ BOPS ³  MOTIVO DA ALTERACAO                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³              ³        ³      ³                                        ³±±
+±±³              ³        ³      ³                                        ³±±
+±±³              ³        ³      ³                                        ³±±
+±±³              ³        ³      ³                                        ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function MATR180()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And. TRepInUse()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Interface de impressao                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport := ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR180R3()
+EndIf
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportDef ³ Autor ³Nereu Humberto Junior  ³ Data ³29.05.2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpO1: Objeto do relatório                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef(nReg)
+
+Local oReport 
+Local oSection1
+Local oSection2 
+Local oCell         
+Local oBreak
+
+#IFNDEF TOP
+	Local cAliasNFS := "SF2"	
+#ELSE
+	Local cAliasNFS := GetNextAlias()
+#ENDIF
+
+AjustaSX1()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao do componente de impressao                                      ³
+//³                                                                        ³
+//³TReport():New                                                           ³
+//³ExpC1 : Nome do relatorio                                               ³
+//³ExpC2 : Titulo                                                          ³
+//³ExpC3 : Pergunte                                                        ³
+//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+//³ExpC5 : Descricao                                                       ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:= TReport():New("MATR180",STR0003,"MTR180", {|oReport| ReportPrint(oReport,cAliasNFS)},STR0001+" "+STR0002) ////"Relacao das Devolucoes de Compras"##"Este relat¢rio ir  imprimir a rela‡„o de itens"##//"referentes as devolu‡¢es de compras."
+oReport:SetLandscape()    
+
+Pergunte("MTR180",.F.)
+
+oSection1 := TRSection():New(oReport,STR0019,{"SF2","SD2","SB1","SA2"}) ////"Relacao das Devolucoes de Compras"
+oSection1 :SetTotalInLine(.F.)
+oSection1 :SetHeaderPage()
+
+TRCell():New(oSection1,"D2_DOC","SD2",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D2_COD","SD2",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"B1_DESC","SB1",/*Titulo*/,/*Picture*/,20,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D2_QUANT","SD2",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"B1_UM","SB1",STR0022,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D2_PRCVEN","SD2",STR0034,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D2_IPI","SD2",STR0023,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D2_TOTAL","SD2",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D2_PICM","SD2",STR0024,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D2_CLIENTE","SD2",STR0017,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/) //Codigo
+TRCell():New(oSection1,"A2_NOME","SA2",/*Titulo*/,/*Picture*/,15,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D2_TIPO","SD2",STR0025,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D2_TES","SD2",STR0026,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D2_TP","SD2",STR0027,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D2_GRUPO","SD2",STR0028,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"dEmissao","   ",STR0018,/*Picture*/,/*Tamanho*/,/*lPixel*/,{||IIF(cPaisLoc <>"BRA",(cAliasNFS)->F2_DTDIGIT,(cAliasNFS)->F2_EMISSAO)}) //"Dt.Digitacao"
+TRCell():New(oSection1,"D2_CUSTO1","SD2",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D2_NFORI","SD2",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D2_SERIORI","SD2",STR0030,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"F2_VALBRUT","SF2"," ",/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"nTotNot","   "," ",PesqPict("SF2","F2_VALBRUT"),/*Tamanho*/,/*lPixel*/,{|| nTotNot })
+
+oBreak := TRBreak():New(oSection1,oSection1:Cell("D2_DOC"),STR0011,.T.) //"TOTAL NOTA FISCAL --> "
+TRFunction():New(oSection1:Cell("F2_VALBRUT"),/* cID */,"MAX",oBreak,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F.,.F.) 
+TRFunction():New(oSection1:Cell("nTotNot"),/* cID */,"SUM",/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F.,.T.) 
+oSection1 :SetTotalText(STR0008) //"TOTAL GERAL       --> "
+
+oSection2 := TRSection():New(oReport,STR0020,{"SE2"}) //"Relacao das Devolucoes de Compras"
+
+
+TRCell():New(oSection2,"E2_PREFIXO","SE2",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"E2_NUM","SE2",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"E2_PARCELA","SE2",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"E2_VENCTO","SE2",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"E2_SALDO","SE2",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+
+Return(oReport)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrin³ Autor ³Nereu Humberto Junior  ³ Data ³29.05.2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatório                           ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport,cAliasNFS)
+
+Local oSection1 := oReport:Section(1) 
+Local oSection2 := oReport:Section(2)
+Local cAliasSE2 := GetNextAlias()
+Local lFirst := .T.
+#IFNDEF TOP
+	Local cCondicao := ""
+#ELSE
+	Local cQuery := ""
+#ENDIF
+Local cCliente := ""
+Local cLoja    := ""
+Local cSerie   := ""
+Local cNFOri   := ""
+Local cDoc     := ""
+Local cSer     := ""
+
+dbSelectArea("SD2")
+dbSetOrder(3)
+
+dbSelectArea("SF2")
+dbSetOrder(1)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Filtragem do relatório                                                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+#IFDEF TOP
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Transforma parametros Range em expressao SQL                            ³	
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	MakeSqlExpr(oReport:uParam)
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Query do relatório da secao 1                                           ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:Section(1):BeginQuery()	
+
+	cQuery :="%"
+	If cPaisLoc <>"BRA"
+	    cQuery += "AND F2_DTDIGIT>='"+Dtos(mv_par01)+"' "
+	    cQuery += "AND F2_DTDIGIT<='"+Dtos(mv_par02)+"' "
+	Else
+	    cQuery += "AND F2_EMISSAO>='"+Dtos(mv_par01)+"' "
+	    cQuery += "AND F2_EMISSAO<='"+Dtos(mv_par02)+"' "
+	Endif
+	cQuery +="%"	
+
+	BeginSql Alias cAliasNFS
+
+	SELECT F2_DOC, F2_SERIE, F2_CLIENTE, F2_LOJA, F2_EMISSAO, F2_DTDIGIT, F2_VALBRUT, F2_TIPODOC, D2_DOC, D2_SERIE, D2_COD, D2_QUANT, D2_PRCVEN, D2_IPI, 
+	       D2_TOTAL, D2_PICM, D2_CLIENTE, D2_TIPO, D2_TES, D2_TP, D2_GRUPO, D2_CUSTO1, D2_NFORI, D2_SERIORI
+	
+	FROM %table:SF2% SF2, %table:SD2% SD2
+	
+	WHERE F2_FILIAL = %xFilial:SF2% AND 
+  		  F2_TIPO = 'D' AND
+  		  SF2.%NotDel% 
+		  %Exp:cQuery% AND
+		  D2_FILIAL = %xFilial:SD2% AND 
+		  F2_DOC = D2_DOC AND
+		  F2_SERIE = D2_SERIE AND
+		  F2_CLIENTE = D2_CLIENTE AND
+		  F2_LOJA = D2_LOJA AND
+		  SD2.%NotDel% 
+		  
+	ORDER BY %Order:SF2% 
+			
+	EndSql 
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Metodo EndQuery ( Classe TRSection )                                    ³
+	//³                                                                        ³
+	//³Prepara o relatório para executar o Embedded SQL.                       ³
+	//³                                                                        ³
+	//³ExpA1 : Array com os parametros do tipo Range                           ³
+	//³                                                                        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+	oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
+	
+	Begin REPORT QUERY oReport:Section(2)
+	BeginSql Alias cAliasSE2 
+		SELECT E2_PREFIXO, E2_NUM, E2_PARCELA, E2_VENCTO, E2_SALDO
+			FROM %table:SE2%
+			WHERE E2_FILIAL  = %xFilial:SE2%
+			  AND E2_FORNECE = %report_param:cCliente%
+			  AND E2_LOJA    = %report_param:cLoja%
+			  AND E2_PREFIXO = %report_param:cSerie%
+			  AND E2_NUM     = %report_param:cNFOri%
+			  AND %NotDel%
+	EndSql 
+	End REPORT QUERY oReport:Section(2)
+
+	TRPosition():New(oSection1,"SA2",1,{|| xFilial("SA2") + (cAliasNFS)->F2_CLIENTE+(cAliasNFS)->F2_LOJA})
+	TRPosition():New(oSection1,"SB1",1,{|| xFilial("SB1") + (cAliasNFS)->D2_COD})	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Inicio da impressao do fluxo do relatório                               ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:SetMeter(SF2->(LastRec()))
+	oSection1:Init()
+	
+	dbSelectArea(cAliasNFS)
+	While !oReport:Cancel() .And. !(cAliasNFS)->(Eof())
+	
+		If oReport:Cancel()
+			Exit
+		EndIf
+		
+		If IsRemito(1,"F2_TIPODOC")
+			(cAliasNFS)->(dbSkip())
+			Loop
+		Endif
+		
+		oReport:IncMeter()
+		oSection1:Cell("F2_VALBRUT"):Hide()
+		oSection1:Cell("nTotNot"):Hide()
+		
+		If lFirst 
+			cCliente := (cAliasNFS)->F2_CLIENTE
+			cLoja    := (cAliasNFS)->F2_LOJA   
+			cNFOri   := (cAliasNFS)->D2_NFORI
+			cSerie   := (cAliasNFS)->D2_SERIORI	
+			nTotNot  := (cAliasNFS)->F2_VALBRUT	
+			lFirst := .F.
+		Else
+			nTotNot  := 0
+		Endif
+		
+		cDoc := (cAliasNFS)->F2_DOC
+		cSer := (cAliasNFS)->F2_SERIE  
+		
+		oSection1:PrintLine()
+	
+		dbSkip()
+		
+		If (cAliasNFS)->F2_DOC+(cAliasNFS)->F2_SERIE <> cDoc+cSer 
+			oReport:SkipLine()
+			oReport:PrintText(STR0012) //"Duplicatas da Nota Fiscal de Entrada"
+			oSection2:ExecSQL()
+			If !(cAliasSE2)->(Eof())
+				oSection2:Init()
+				While !(cAliasSE2)->(Eof())
+					oSection2:PrintLine()
+					(cAliasSE2)->(dbSkip())
+				EndDo
+				oSection2:Finish()
+			EndIf
+			lFirst := .T.
+		Endif
+		dbSelectArea(cAliasNFS)
+	EndDo
+	oSection1:Finish()
+	
+#ELSE
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Transforma parametros Range em expressao Advpl                          ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	MakeAdvplExpr(oReport:uParam)
+	
+	cCondicao := 'F2_FILIAL == "'+xFilial("SF2")+'".And.' 
+	If cPaisLoc <>"BRA"
+		cCondicao += 'Dtos(F2_DTDIGIT) >= "'+Dtos(mv_par01)+'".And.Dtos(F2_DTDIGIT) <="'+Dtos(mv_par02)+'".And.'
+	Else	
+		cCondicao += 'Dtos(F2_EMISSAO) >= "'+Dtos(mv_par01)+'".And.Dtos(F2_EMISSAO) <="'+Dtos(mv_par02)+'".And.'
+	Endif	
+	cCondicao += 'F2_TIPO == "D" '	
+
+	oReport:Section(1):SetFilter(cCondicao,IndexKey())
+
+	TRPosition():New(oSection1,"SA2",1,{|| xFilial("SA2") + (cAliasNFS)->F2_CLIENTE+(cAliasNFS)->F2_LOJA})
+	TRPosition():New(oSection1,"SB1",1,{|| xFilial("SB1") + SD2->D2_COD})
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Inicio da impressao do fluxo do relatório                               ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:SetMeter(SF2->(LastRec()))
+	oSection1:Init()
+	
+	dbSelectArea(cAliasNFS)
+	While !oReport:Cancel() .And. !(cAliasNFS)->(Eof())
+	
+		If oReport:Cancel()
+			Exit
+		EndIf
+	    
+		If IsRemito(1,"F2_TIPODOC")
+			(cAliasNFS)->(dbSkip())
+			Loop
+		Endif
+		
+		oReport:IncMeter()
+		oSection1:Cell("F2_VALBRUT"):Hide()
+		oSection1:Cell("nTotNot"):Hide()
+		
+		SD2->(dbSeek(xFilial("SD2")+(cAliasNFS)->F2_DOC+(cAliasNFS)->F2_SERIE))
+		cNFOri:=SD2->D2_NFORI
+		cSerie:=SD2->D2_SERIORI
+	    
+		While SD2->(!Eof()) .And. SD2->D2_FILIAL+SD2->D2_DOC+SD2->D2_SERIE==xFilial("SD2")+(cAliasNFS)->F2_DOC+(cAliasNFS)->F2_SERIE
+			If lFirst 
+				nTotNot  := (cAliasNFS)->F2_VALBRUT	
+				lFirst := .F.
+			Else
+				nTotNot  := 0
+			Endif
+			oSection1:PrintLine()
+			SD2->(dbSkip())
+		EndDo	
+		
+		SE2->(dbSetOrder(6))
+		cSeek:=xFilial("SE2")+(cAliasNFS)->F2_CLIENTE+(cAliasNFS)->F2_LOJA+cSerie+cNFOri
+		If SE2->(dbSeek(cSeek,.F.))
+			oReport:SkipLine()
+			oReport:PrintText(STR0012) //"Duplicatas da Nota Fiscal de Entrada"
+			oSection2:Init()
+			While SE2->(!Eof()) .And. cSeek==SE2->E2_FILIAL+SE2->E2_FORNECE+SE2->E2_LOJA+SE2->E2_PREFIXO+SE2->E2_NUM
+				oSection2:PrintLine()
+				SE2->(dbSkip())
+			EndDo
+			oSection2:Finish()
+		Endif
+		lFirst := .T.
+		dbSelectArea(cAliasNFS)
+		dbSkip()
+	EndDo
+	oSection1:Finish()
+	
+#ENDIF		
+
+Return NIL
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³MATR180R3 ³ Autor ³ Claudinei M. Benzi    ³ Data ³ 18.05.93 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Emiss„o da rela‡„o das Devolucoes (Antigo)                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ MATR180(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ ATUALIZACOES SOFRIDAS DESDE A CONSTRUCAO INICIAL.                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ PROGRAMADOR  ³ DATA   ³ BOPS ³  MOTIVO DA ALTERACAO                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Marcos Simidu ³25/06/98³XXXXXX³Acerto lay-out nro. NFs p/12 bytes.     ³±±
+±±³ Edson  M.    ³21/10/98³SHELL ³Incluido IFDEF SHELL                    ³±±
+±±³ Edson  M.    ³04/11/98³xxxxxx³Suporte ao ano 2000.                    ³±±
+±±³ Patricia Sal.³21/12/99³xxxxxx³Acerto LayOut, Fornec. com 20 pos.      ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function Matr180R3()
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL wnrel
+LOCAL limite :=220
+LOCAL cDesc1 :=STR0001	//"Este relat¢rio ir  imprimir a rela‡„o de itens"
+LOCAL cDesc2 :=STR0002	//"referentes as devolu‡¢es de compras."
+LOCAL cDesc3 :=""
+LOCAL cString:="SF2"
+LOCAL nIncCol:=0
+
+STATIC aTamSXG
+
+PRIVATE titulo :=STR0003	//"Relacao das Devolucoes de Compras"
+PRIVATE tamanho :="G"
+PRIVATE cPerg   := "MTR180"
+PRIVATE aReturn := { STR0004, 1,STR0005, 1, 2, 1, "",1 }		//"Zebrado"###"Administracao"
+PRIVATE nomeprog:= "MATR180",nLastKey := 0
+PRIVATE aLinha  := {}
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica conteudo da variavel Grupo de Fornecedor (001)      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+aTamSXG := If(aTamSXG == NIL, TamSXG("001"), aTamSXG)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica se Tamanho do LayOut sera Max. (Forn. com 20 pos.)  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+If aTamSXG[1] != aTamSXG[3]
+	If cPaisLoc == "MEX"
+		nIncCol	:= 8
+		cabec1	:= STR0032
+	Else
+		cabec1	:= STR0016	//"NOTA         PRODUTO         DESCRICAO                   QUANTIDADE UM    PR.UNITARIO IPI             VALOR  ICM   CODIGO               RAZAO SOCIAL         TP TE  TIPO  GRUPO DT.DIGITACAO         CUSTO   NF ORIG    SER"
+	EndIf
+	//              	     999999999999 123456789012345 123456789012345678901234 99,999,999.99 12 999,999,999.99 99,99 9,999,999,999,99 99.99 12345678901234567890 12345678901234567890 xx xxx  xx   xxxx  99/99/9999  999,999,999.99 999999999999 XXX
+	//                  	 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+	//                       0         1         2         3         4         5         6         7         8         9         0         1         2         3         4         5         6         7         8         9         0         1         2
+	
+Else
+	If cPaisLoc == "MEX"
+		cabec1	:= STR0031
+		nIncCol	:= 8
+	Else
+		cabec1	:= STR0006	//"NOTA         PRODUTO         DESCRICAO                   QUANTIDADE UM    PR.UNITARIO IPI             VALOR  ICM   CODIGO RAZAO SOCIAL                       TP TE  TIPO GRUPO DT.DIGITACAO         CUSTO   NF ORIG    SER"
+	EndIf
+	//   	                999999       xxxxxxxxxxxxxxx 123456789012345678901234 99,999,999.99 xx 999,999,999.99 99.99 9,999,999,999,99 99.99 123456 1234567890123456789012345678901234 xx xxx  xx   xxxx 99/99/9999  999,999,999.99 999999999999 xxx
+	//      	            0         1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16        17        18        19        20        21        22
+	//          	        01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+	
+Endif
+cabec2:= ""
+
+wnrel := "MATR180"
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AjustaSX1()
+Pergunte("MTR180",.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                         ³
+//³ mv_par01             // Data digitacao De         	        ³
+//³ mv_par02             // Data digitacao Ate                   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Envia controle para a funcao SETPRINT                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.F.,"",.f.,Tamanho)
+
+If nLastKey == 27
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	dbClearFilter()
+	Return
+Endif
+
+RptStatus({|lEnd| R180Imp(@lEnd,wnRel,cString,nIncCol)},titulo)
+
+Return .T.
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ R180IMP  ³ Autor ³ Cristina M. Ogura     ³ Data ³ 09.11.95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Chamada do Relatorio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR180			                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function R180Imp(lEnd,WnRel,cString,nIncCol)
+LOCAL cNFOri, cSerie,CbCont
+LOCAL nTotal := 0
+LOCAL nPosNome := 122
+LOCAL nTamNome := 34
+Local dEmissao	:=dDataBase
+cbcont:= 00
+Li    := 80
+m_pag := 01
+
+nTipo := IIF(aReturn[04]==1,15,18)
+
+SetRegua(RecCount())
+
+dbSelectArea("SD2")
+dbSetOrder(3)
+
+dbSelectArea("SF2")
+dbGoTop()
+dbSeek(xFilial(),.F.)
+
+// Se LayOut maximo verifica conteudo das variaveis
+If aTamSXG[1]!= aTamSXG[3]
+	nPosNome += (aTamSXG[4] - aTamSXG[3])
+	nTamNome -= (aTamSXG[4] - aTamSXG[3])
+Endif
+
+While !Eof() .And. xFilial()==SF2->F2_FILIAL
+	If lEnd
+		@PROW()+1,001 PSAY STR0007	//"CANCELADO PELO OPERADOR"
+		Exit
+	Endif
+	
+	IncRegua()
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Notas Canceladas   --  SHELL                        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	
+	#IFDEF SHELL
+		IF F2_CANCEL == "S"
+			dbSkip()
+			Loop
+		EndIf
+	#ENDIF
+	
+	If cPaisLoc <>"BRA" .and. SF2->(FieldPos("F2_DTDIGIT") )> 0  .and. !Empty(F2_DTDIGIT)
+		If  F2_DTDIGIT < mv_par01 .Or. F2_DTDIGIT > mv_par02 .Or. F2_TIPO != "D"
+			dbSkip()
+			Loop
+		EndIf	
+	ElseIf  F2_EMISSAO < mv_par01 .Or. F2_EMISSAO > mv_par02 .Or. F2_TIPO != "D"
+		dbSkip()
+		Loop
+	Endif
+	If cPaisLoc <>"BRA" .and. SF2->(FieldPos("F2_DTDIGIT") )> 0  .and. !Empty(F2_DTDIGIT)
+		dEmissao:= F2_DTDIGIT                                                                 
+	Else
+		dEmissao:= F2_EMISSAO
+	EndIf
+	
+	If IsRemito(1,"F2_TIPODOC")
+		dbSkip()
+		Loop
+	Endif
+	
+	If Li > 60
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+	Endif
+	
+	dbSelectArea("SD2")
+	dbSeek(xFilial()+SF2->F2_DOC+SF2->F2_SERIE)
+	cNFOri:=D2_NFORI
+	cSerie:=D2_SERIORI
+	
+	While !Eof() .And. D2_FILIAL+D2_DOC+D2_SERIE==xFilial()+SF2->F2_DOC+SF2->F2_SERIE
+		
+		If lEnd
+			@PROW()+1,001 PSAY STR0007	//"CANCELADO PELO OPERADOR"
+			Exit
+		Endif
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Notas Canceladas   --  SHELL                        ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		
+		#IFDEF SHELL
+			IF D2_CANCEL == "S"
+				dbSkip()
+				Loop
+			EndIf
+		#ENDIF
+		
+		If Li > 60
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		Endif
+		@ Li,000 PSAY D2_DOC
+		@ Li,013+nIncCol PSAY D2_COD
+		
+		dbSelectArea("SB1")
+		dbSeek(xFilial()+SD2->D2_COD)
+		
+		@ Li,029+nIncCol PSAY Subs(B1_DESC,1,24)
+		
+		dbSelectArea("SD2")
+		
+		@ Li,054+nIncCol PSAY D2_QUANT		Picture Tm(D2_QUANT,13)
+		@ Li,068+nIncCol PSAY SB1->B1_UM	Picture "@!"
+		@ Li,071+nIncCol PSAY D2_PRCVEN		Picture Tm(D2_PRCVEN,14)
+		@ Li,086+nIncCol PSAY D2_IPI			Picture PesqPict("SD2","D2_IPI")
+		@ Li,092+nIncCol PSAY D2_TOTAL		Picture Tm(D2_TOTAL,16)
+		@ Li,109+nIncCol PSAY D2_PICM		Picture PesqPict("SD2","D2_PICM")
+		@ Li,115+nIncCol PSAY D2_CLIENTE
+		
+		dbSelectArea("SA2")
+		dbSeek(xFilial()+SD2->D2_CLIENTE+SD2->D2_LOJA)
+		
+		@ Li,nPosNome+nIncCol PSAY Subs(A2_NOME,1,nTamNome-(nIncCol*2))
+		
+		dbSelectArea("SD2")
+		
+		@ Li,157-nIncCol PSAY D2_TIPO			Picture "@!"
+		@ Li,160-nIncCol PSAY D2_TES				Picture "@!"
+		@ Li,165-nIncCol PSAY D2_TP				Picture "@!"
+		@ Li,170-nIncCol PSAY D2_GRUPO			Picture "@!"
+		@ Li,176-nIncCol PSAY dEmissao
+		@ Li,188-nIncCol PSAY D2_CUSTO1			Picture Tm(D2_CUSTO1,14)
+		@ Li,203-nIncCol PSAY D2_NFORI			Picture "@!"
+		@ Li,216 PSAY D2_SERIORI		Picture "@!"
+		
+		Li++
+		dbSkip()
+		
+	EndDo
+	
+	nTotal += ImpTotN(titulo)
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Imprime duplicatas geradas pela NF.            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	ImpDupl(cNFOri,cSerie,nIncCol)
+	@ Li,00 PSAY __PrtThinLine()
+	Li++
+	
+	dbSelectArea("SF2")
+	dbSkip()
+EndDo
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Imprime total geral do relatorio.      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If Li != 80
+	If nTotal != 0
+		If Li > 60
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		Endif
+		
+		Li++
+		@ Li,170  PSAY STR0008	//"TOTAL GERAL       --> "
+		@ Li,200  PSAY nTotal Picture tm(nTotal,14)
+		Li++
+		
+		If lEnd
+			@ Li+1,000 PSAY STR0009	//"ABORTADO PELO OPERADOR"
+		EndIf
+		
+		Roda(CbCont,STR0010,"G")		//"NOTAS"
+		
+	Endif
+	
+Endif
+
+dbSelectArea("SF2")
+dbClearFilter()
+dbSetOrder(1)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Se em disco, desvia para Spool                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If aReturn[5] == 1
+	Set Printer To
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ ImpTotN  ³ Autor ³ Claudinei M. Benzi    ³ Data ³ 18.05.93 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Imprime Total da Nota Fiscal                               ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR180                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ImpTotN(titulo)
+LOCAL nTotNota:=0
+
+If Li > 60
+	cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+Endif
+nTotNota:= SF2->F2_VALBRUT
+@ Li,170 PSAY STR0011	//"TOTAL NOTA FISCAL --> "
+@ Li,200 PSAY nTotNota Picture tm(nTotNota,14)
+Li+=1
+
+Return nTotNota
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ ImpDupl  ³ Autor ³ Claudinei M. Benzi    ³ Data ³ 18.05.93 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Imprime Todas duplicatas da Nota Fiscal de Entrada         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ ImpDupl(ExpC1,ExpC2,ExpN1)								  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpC1: numero da NF Origem      	                          ³±±
+±±³          ³ ExpC2: serei da NF Origem                                  ³±±
+±±³          ³ ExpN1: incremento na coluna devido tam.do campo documento  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR180                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ImpDupl(cNFOri,cSerie,nIncCol)
+LOCAL cSeek := ""
+Local i     := 0
+Local nStep := If(cPaisLoc == "MEX",58,50)
+Local nTo	:= If(cPaisLoc == "MEX",117,101)
+
+dbSelectArea("SE2")
+dbSetOrder(6)
+cSeek:=xFilial()+SF2->F2_CLIENTE+SF2->F2_LOJA+cSerie+cNFOri
+If dbSeek(cSeek,.F.)
+	@ Li,53 PSAY STR0012	//"Duplicatas da Nota Fiscal de Entrada"
+	Li++
+	For i := 1 To nTo Step nStep
+		@ Li,i PSAY If(cPaisLoc == "MEX",STR0033,STR0014)	//"Prf Numero Parc.  Venc.           Saldo"
+	Next i
+	Li++
+	While !Eof() .And. cSeek==E2_FILIAL+E2_FORNECE+E2_LOJA+E2_PREFIXO+E2_NUM
+		For i := 1 To nTo Step nStep
+			@ Li,i    PSAY E2_PREFIXO
+			@ Li,i+4  PSAY E2_NUM
+			@ Li,i+19+nIncCol PSAY E2_PARCELA
+			@ Li,i+20+nIncCol PSAY E2_VENCTO
+			@ Li,i+33+nIncCol PSAY E2_SALDO Picture "@E 999,999,999.99"
+			dbSkip()
+			IF cSeek!=E2_FILIAL+E2_FORNECE+E2_LOJA+E2_PREFIXO+E2_NUM
+				Exit
+			Endif
+		Next i
+		Li++
+	EndDo
+Else
+	@ Li,53 PSAY STR0015		//"Nao houve titulos gerados na entrada"
+EndIf
+Li++
+
+Return
+
+
+/*
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³AjustaSX1  ³ Autor ³ Felipe Toledo Bittar ³ Data ³ 22.04.08 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Funcao utilizada para ajustar o dicionario SX1             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ Nenhum                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MTR180	                                                  ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function AjustaSX1()
+
+Local cPergSpa  := "¿De Fecha registro ?"
+Local cPerg 	:= "MTR180"         
+Local nTamSX1   := Len(SX1->X1_GRUPO)
+
+dbSelectArea("SX1")
+dbSetOrder(1)
+If dbSeek(PADR(cPerg,nTamSX1)+"01") .And. Trim(Upper(SX1->X1_PERSPA)) != Upper(cPergSpa)
+	RecLock("SX1",.F.)
+	Replace X1_PERSPA	with cPergSpa
+	MsUnLock()
+EndIf
+
+Return

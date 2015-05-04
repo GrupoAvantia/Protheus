@@ -1,0 +1,283 @@
+#include "protheus.ch"
+#include "TopConn.ch"
+#include "Matr992.ch"
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³MatR992 ¦ Autor ¦ Rafael de Paula Goncalves¦ Data ¦ 15.12.09     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³Programa que Imprime certificado de rentencao de fonte por renda.³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±± 
+±±³Parametros³alDados: Recebe os dados dos fornecedores da rotina FISA015, de  ³±±
+±±³			 ³acordo com os parametros preenchido pelo usuario.				   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³FISA015(Colombia)											       ³±±
+±±³          ³                   							                   ³±± 
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÃÄÄÄÄÄÄÄÄÃÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Laura Medina³13/03/13³TFVWHC³ Se agrego leyenda en el pie del certificado.  ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Function MatR992(alDados)
+
+    
+	Local olReport	:= NIL
+	
+	If TRepInUse()	//verifica se relatorios personalizaveis esta disponivel
+		olReport := GeraReport(alDados)
+		olReport:PrintDialog()
+	Endif
+
+	
+
+Return
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³GeraReport ¦ Autor ¦ Rafael de Paula Goncalves¦ Data ¦ 15.12.09	³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³Gera o objeto olReport, retornando objeto olReport.             	³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³alDados: Recebe os dados dos fornecedores da rotina FISA015, de	³±±
+±±³			 ³acordo com os parametros preenchido pelo usuario.				 	³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³Chamado na funcao MatR992.	    							   	³±±
+±±³          ³								                                   	³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Static Function GeraReport(alDados)
+
+	Local olReport	:= TReport():New("Matr992",,,{|olReport|PrintReport(olReport,alDados)},"")
+	olReport:LHEADERVISIBLE		:= .F. 	// Nao imprime cabecalho do protheus
+	olReport:LFOOTERVISIBLE  	:= .F.	// Nao imprime rodape do protheus
+	olReport:LPARAMPAGE			:= .F.	// Nao imprime pagina de parametros
+	olReport:oPage:NPAPERSIZE	:= 9 	// Impressao em papel A4 
+		
+Return olReport
+/*
+####################
+# Lista de Strings # 
+####################
+	STR0001 "CERTIFICADO DE RETENCIÓN EN LA FUENTE POR RENTA"
+ 	STR0002 "Fecha de Expedición"
+ 	STR0003 "DIA MES AÑO"
+ 	STR0004 "AÑO FISCAL"
+ 	STR0005	"Ciudad donde se consigna la retención"
+ 	STR0006 "Nombre o razón socíal a quien se el practica la retención"
+ 	STR0007 "C.C o NIT"
+ 	STR0008 "Razón social completa o Nombres del Agente retenedor"
+ 	STR0009 "Dirección del Agente Retenedor"
+ 	STR0010 "Municipio"
+ 	STR0011 "Departamento"
+ 	STR0012 "Concepto"
+ 	STR0013 "No. Factura"
+ 	STR0014 "Período"
+ 	STR0015 "Monto Total"
+ 	STR0016 "Valor Retención"
+*/
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³PrintReport ¦ Autor ¦ Rafael de Paula Goncalves¦ Data ¦ 15.12.09	³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³Impressao do certificado de retencao na fonte.		   			³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±± 
+±±³Parametros³olReport: Recebe o objeto gerado na funcao GeraReport.		 	³±±
+±±³			 ³alDados : Recebe os dados dos fornecedores da rotina FISA015, de	³±±
+±±³			 ³acordo com os parametros preenchido pelo usuario.				 	³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³Chamado na funcao GeraReport. 		 						  	³±±
+±±³          ³								                                   	³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Static Function PrintReport(olReport,alDados)
+    
+    Local clData	:= ""
+    Local nlLin		:= 0
+    Local nlI		:= 0
+    Local nlX		:= 0
+    Local olFontN 	:= TFont():New("Courier New",,-16,,.T.)
+    Local olFontI 	:= TFont():New("Courier New",,-14,,,,,,,,.T.)
+    Local olFont 	:= TFont():New("Courier New",,-12,,)
+    Local nlChave	:= TamSx3("X5_CHAVE")[1]
+	Local nlForn	:= TamSx3("F3_CLIEFOR")[1]
+	Local nlLoja	:= TamSx3("F3_LOJA")[1]
+	Local nlNota	:= TamSx3("F3_NFISCAL")[1]
+	Local nlSerie	:= TamSx3("F3_SERIE")[1]
+	Local clForn	:= ""
+	Local clLoja	:= ""
+	Local nlPags	:= 1
+    Local nlCont	:= 0
+    Local alFornPag	:= {}
+	Local nlPos		:= 0
+
+	For nlI	:= 1 to Len(alDados)
+	    	    	    
+		clData	:= SubStr(DtoS(dDataBase),7,2)+"."+SubStr(DtoS(dDataBase),5,2)+"."+SubStr(DtoS(dDataBase),1,4)
+		
+		olReport:Box(0300,0050,3050,2425)
+		
+		//Fecha de Expedición 
+		olReport:Say(0350,1790,STR0002,olFont,10,,)
+		
+		//DIA MES AÑO
+		olReport:Say(0430,1890,STR0003,olFont,10,,)
+		olReport:Say(0480,1910,clData ,olFont,10,,)
+		 
+		//CERTIFICADO DE RETENCIÓN EN LA FUENTE POR RENTA	
+		olReport:Say(0550,0300,MemoLine(STR0001,37,1,2,.T.),olFontN,10,,)
+	    olReport:Say(0610,0680,MemoLine(STR0001,37,2,2,.T.),olFontN,10,,)
+	    olReport:Line(0300,1600,1000,1600)
+	    olReport:Line(0700,1600,0700,2425)
+	    
+	    //AÑO FISCAL
+	    olReport:Say(0750,1880,STR0004 						 	,olFontN,10,,)
+	    olReport:Say(0850,1950,Alltrim(Str(Year(dDataBase)))	,olFontN,10,,)
+	    olReport:Line(1000,0050,1000,2425)                  	
+	    
+	    //Ciudad donde se consigna la retención
+	    olReport:Say(1030,0080,STR0005 						  	,olFontI,10,,)
+	    olReport:Say(1100,0120,Alltrim(SM0->M0_CIDENT)			,olFont,10,,)
+	    olReport:Line(1170,0050,1170,2425)
+		olReport:Line(1170,1930,1680,1930)
+		
+	    //Nombre o razón socíal a quien se el practica la retención 
+	    olReport:Say(1200,0080,STR0006 						 	,olFontI,10,,)
+	    //C.C o NIT
+	    olReport:Say(1200,1960,STR0007				 			,olFontI,10,,)
+	    
+	    DbSelectArea("SA2")
+	    if DbSeek(xFilial("SA2")+PadR(alDados[nlI,3],nlForn)+PadR(alDados[nlI,4],nlLoja))
+	    	olReport:Say(1270,0120,Alltrim(SA2->A2_NOME),olFont ,10,,)
+	    	olReport:Say(1270,1960,Alltrim(SA2->A2_CGC) ,olFont ,10,,)
+	    Endif
+	    
+	    olReport:Line(1340,0050,1340,2425)
+     
+	    // Razón social completa o Nombres del Agente retenedor
+	    olReport:Say(1370,0080,STR0008				 	,olFontI,10,,)
+	    olReport:Say(1440,0120,Alltrim(SM0->M0_NOMECOM),olFont ,10,,)
+	    olReport:Line(1510,0050,1510,2425)
+	    
+	    //C.C o NIT
+	    olReport:Say(1370,1960,STR0007				 	,olFontI,10,,)
+	    olReport:Say(1440,1960,Alltrim(SM0->M0_CGC)	,olFont ,10,,)    
+	    
+	    //Dirección del Agente Retenedor
+	    olReport:Say(1540,0080,STR0009				 	,olFontI,10,,)
+	    olReport:Say(1610,0120,Alltrim(SM0->M0_ENDENT)	,olFont ,10,,)
+	    olReport:Line(1680,0050,1680,2425)
+	    
+	    //Municipio
+	    olReport:Say(1540,1480,STR0010				 	,olFontI,10,,)
+	    olReport:Say(1610,1500,Alltrim(SM0->M0_CIDENT)	,olFont ,10,,)
+	    
+	    //Departamento
+	    olReport:Say(1540,2020,STR0011				 			,olFontI,10,,)
+	    
+	    //Concepto
+	    olReport:Say(1710,0080,STR0012				 			,olFontI,10,,)
+	    olReport:Line(1680,1130,2700,1130)
+	    
+	    //No. Factura
+	    olReport:Say(1710,1160,STR0013				 			,olFontI,10,,)
+	    olReport:Line(1680,1470,2700,1470)
+	    
+	    //Período
+	    olReport:Say(1710,1480,STR0014				 			,olFontI,10,,)
+	    olReport:Line(1680,1670,2700,1670)
+	    
+	    //Monto Total
+	    olReport:Say(1710,1790,MemoLine(STR0015,5,1,2,.T.)		,olFontI,10,,)
+	    olReport:Say(1750,1790,MemoLine(STR0015,5,2,2,.T.)		,olFontI,10,,)
+	    olReport:Line(1680,2050,2700,2050)
+	    
+	    //Valor Retención
+	    olReport:Say(1710,2160,MemoLine(STR0016,5,1,2,.T.)		,olFontI,10,,)
+	    olReport:Say(1750,2140,MemoLine(STR0016,9,2,2,.T.)		,olFontI,10,,)
+		olReport:Line(1820,0050,1820,2425)
+		
+		nlLin	:= 1830           
+		clForn	:= alDados[nlI,3]
+		clLoja	:= alDados[nlI,4]
+
+		DbSelectArea("SF3")
+		DbSetOrder(4)
+		//Impressao dos dados do mesmo fornecedor
+		While alDados[nlI,3] == clForn .and. clLoja	 == alDados[nlI,4]	        
+	        
+			if nlLin <= 2630
+				olReport:Say(nlLin,0060,Tabela("YH",PadR(alDados[nlI,13],nlChave),.F.) 	,olFontI,10,,)
+				olReport:Say(nlLin,1135,alDados[nlI,6]							   			,olFontI,10,,)
+				if DbSeek(xFilial("SF3")+PadR(alDados[nlI,3],nlForn)+PadR(alDados[nlI,4],nlLoja)+PadR(alDados[nlI,6],nlNota)+PadR(alDados[nlI,7],nlSerie))
+					clData	:= SubStr(DtoS(SF3->F3_ENTRADA),5,2)+"/"+SubStr(DtoS(SF3->F3_ENTRADA),1,4)
+					olReport:Say(nlLin,1480,clData											,olFontI,10,,)
+				Endif
+				olReport:Say(nlLin,1680,Transform(alDados[nlI,8] ,"@E 999,999,999.99") 	,olFontI,10,,)
+				olReport:Say(nlLin,2060,Transform(alDados[nlI,12],"@E 999,999,999.99") 	,olFontI,10,,)
+				nlLin	+= 50
+				nlX++	//Conta quantas faturas foram impressas por pagina.								
+			EndIf
+			nlI++
+			nlCont++  //Conta quantas faturas o mesmo fornecedor tem.       
+	        if nlI > Len(alDados)
+	        	Exit
+	        Endif
+ 
+		EndDo
+
+		olReport:Line(2700,0050,2700,2425)
+		
+		//Leyenda
+	    olReport:Say(2720,0080,STR0017				 			,olFontI,10,,)
+	    olReport:Say(2790,0080,STR0018				 			,olFontI,10,,)
+		
+		
+        nlI		:= nlX  //Volta para a ultima fatura impressa.        
+	
+		nlPos	:= aScan(alFornPag,{|aX| aX[1] == clForn .and. aX[2] == clLoja})
+		If nlPos == 0			
+			nlPags	:= Int(nlCont/17)
+			If nlPags == 0
+				nlPags	:= 1			
+			ElseIf nlCont%17 > 0
+				nlPags++
+			EndIf
+
+			aAdd(alFornPag,{clForn,clLoja,1,nlPags})
+					
+		Else			
+			alFornPag[nlPos,3]++
+		Endif
+		nlCont	:= 0
+
+	    DbSelectArea("SFB")
+	    DbSetOrder(1)
+	    if DbSeek(xFilial("SFB")+"RF0")
+	    	olReport:Say(2750,0110,MemoLine(SFB->FB_CERTIF,16,1,3,.T.),olFont,10,,)
+	    	olReport:Say(2850,0110,MemoLine(SFB->FB_CERTIF,17,2,3,.T.),olFont,10,,)
+		    olReport:Say(2950,0110,MemoLine(SFB->FB_CERTIF,38,2,3,.T.),olFont,10,,)
+	    Endif
+	    
+	    nlPos	:= aScan(alFornPag,{|aX| aX[1] == clForn .and. aX[2] == clLoja})
+		If nlPos > 0
+	    	olReport:Say(2950,2170,Alltrim(Str(alFornPag[nlPos,3]))+" / "+Alltrim(Str(alFornPag[nlPos,4])),olFont,10,,)
+		Endif
+		
+	    olReport:EndPage()
+	    
+	Next nlI
+Return

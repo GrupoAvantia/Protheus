@@ -1,0 +1,752 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Protheus.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "Protheus.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "Protheus.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "Protheus.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "Protheus.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "Protheus.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "Protheus.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "Protheus.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "Protheus.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "Protheus.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "Protheus.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "Protheus.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr825.prx"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATR825.CH"
+#line 15 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr825.prx"
+Function MATR825()
+Local oReport
+
+Private cTpHr     := GetMV("MV_TPHR")
+Private cAliasSH6 := "SH6"
+Private bConv     := {|x| A680ConvHora(x,"C",cTpHr) }
+
+If FindFunction("TRepInUse") .And.  TRepInUse()
+
+
+
+	oReport:= ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR825R3()
+EndIf
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportDef()
+Local oReport
+Local oApont
+Local aOrdem   := {If( cPaisLoc $ "ANG|PTG", "Por Op", "Por OP" ),"Por Recurso","Por Motivo","Por Data","Por Operador"}
+Local cPictH6  := If(cTpHr == "C","@R 999.99","")
+Local cPictHr  := If(cTpHr == "C","@R 99.99","")
+Local cPicTotH := If(cTpHr == "C","@R " +Replicate("9",TamSX3("H6_TEMPO")[1]-3) +".99","")
+
+
+
+
+
+
+
+
+
+
+
+
+oReport:= TReport():New("MATR825",OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Relatório De Horas Improdutivas / Produtivas", "Relatorio de Horas Improdutivas / Produtivas" )),"MTR826", {|oReport| ReportPrint(oReport,aOrdem)},OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Relação  de horas improdutivas / produtivas apontadas, de acordo", "Relacao  de Horas Improdutivas / Produtivas apontadas, de acordo" ))+" "+OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Com a ordem selecionada pelo utilizador.", "com a ordem selecionada pelo usuario." )))
+oReport:SetLandscape()
+oReport:SetTotalText(If( cPaisLoc $ "ANG|PTG", "Motivos que criaram horas improdutivas", "Motivos que geraram horas improdutivas" ))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pergunte(oReport:uParam, .F. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+oApont := TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Registo De Produção Pcp", "Apontamento de produção PCP" ),{"SH6","SH1","SH4"},aOrdem)
+oApont:SetHeaderPage()
+oApont:SetTotalInLine( .T. )
+
+TRCell():New(oApont,"H6_TIPO"   ,"SH6","TIPO",,,,)
+TRCell():New(oApont,"H6_OP"     ,"SH6","O.P.",,15,,)
+TRCell():New(oApont,"H6_TEMPO"  ,"SH6","TEMPO",cPictH6    ,,, {|| TimeH6(Nil,Nil,cAliasSH6) })
+TRCell():New(oApont,"H6_RECURSO","SH6",,,,,)
+TRCell():New(oApont,"H1_DESCRI" ,"SH1","",,,,)
+TRCell():New(oApont,"H6_FERRAM" ,"SH6",,,,,)
+TRCell():New(oApont,"H4_DESCRI" ,"SH4","",,,,)
+TRCell():New(oApont,"H6_MOTIVO" ,"SH6","Motivo",,,,)
+TRCell():New(oApont,"X5_DESCRI" ,"SX5","",,35		  ,,)
+TRCell():New(oApont,"H6_DTAPONT","SH6",,,,,)
+TRCell():New(oApont,"H6_OPERADO","SH6",,,,,)
+TRCell():New(oApont,"H6_DATAINI","SH6",,,,,)
+TRCell():New(oApont,"H6_DATAFIN","SH6",,,,,)
+TRCell():New(oApont,"H6_HORAINI","SH6",,cPictHr    ,,,{|| TimeH6(Nil, "H6_HORAINI", cAliasSH6) })
+TRCell():New(oApont,"H6_HORAFIN","SH6",,cPictHr    ,,,{|| TimeH6(Nil, "H6_HORAFIN", cAliasSH6) })
+If cTpHr == "C"
+	TRCell():New(oApont,"PRODUTIVA"  ,"SH6",,cPicTotH,,,{|| Val(StrTran(If(H6_TIPO=="P",TimeH6(Nil,Nil,cAliasSH6),"000:00"),":",".")) })
+	TRCell():New(oApont,"IMPRODUTIVA","SH6",,cPicTotH,,,{|| Val(StrTran(If(H6_TIPO=="I",TimeH6(Nil,Nil,cAliasSH6),"000:00"),":",".")) })
+Else
+	TRCell():New(oApont,"PRODUTIVA"  ,"SH6",,cPicTotH,,,{|| If(H6_TIPO=="P",TimeH6(Nil,Nil,cAliasSH6),"000:00") })
+	TRCell():New(oApont,"IMPRODUTIVA","SH6",,cPicTotH,,,{|| If(H6_TIPO=="I",TimeH6(Nil,Nil,cAliasSH6),"000:00") })
+EndIf
+
+
+
+
+
+dbSelectArea("SX5")
+dbSeek(xFilial("SX5")+"44")
+while X5_FILIAL+X5_TABELA==xFilial("SX5")+"44"
+ 	TRCell():New(oApont,Trim(SX5->X5_CHAVE),,Trim(SX5->X5_CHAVE),cPictH6,,,)
+ 	dbSkip()
+EndDo
+
+Return(oReport)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportPrint(oReport,aOrdem)
+Local oApont    := oReport:Section(1)
+Local nOrdem    := oApont:GetOrder()
+Local nCnt      := 3
+Local cWhere
+Local cOrderBy
+Local cIndex
+Local xValMot
+
+
+
+
+oReport:SetTitle(If( cPaisLoc $ "ANG|PTG", "Relatório De Horas Improdutivas / Produtivas", "Relatorio de Horas Improdutivas / Produtivas" )+" "+aOrdem[nOrdem])
+
+
+
+
+If nOrdem == 1
+	oBreak := TRBreak():New(oApont,oApont:Cell("H6_OP"),"Total "+If( cPaisLoc $ "ANG|PTG", "Da Op:", "da OP:" ), .T. )
+Elseif nOrdem == 2
+	oBreak := TRBreak():New(oApont,oApont:Cell("H6_RECURSO"),"Total "+If( cPaisLoc $ "ANG|PTG", "Do Recurso:", "do Recurso:" ), .T. )
+Elseif nOrdem == 3
+	oBreak := TRBreak():New(oApont,oApont:Cell("H6_MOTIVO"),"Total "+If( cPaisLoc $ "ANG|PTG", "Do Motivo:", "do Motivo:" ), .T. )
+Elseif nOrdem == 4
+	oBreak := TRBreak():New(oApont,oApont:Cell("H6_DTAPONT"),"Total "+If( cPaisLoc $ "ANG|PTG", "Da Data:", "da Data:" ), .T. )
+Elseif nOrdem == 5
+	oBreak := TRBreak():New(oApont,oApont:Cell("H6_OPERADO"),"Total "+If( cPaisLoc $ "ANG|PTG", "Do Operador:", "do Operador:" ), .T. )
+Endif
+
+
+
+
+oFunction := TRFunction():New(oApont:Cell("PRODUTIVA"),"PRODUTIVA",If(cTpHr =="N","TIMESUM","SUM"),oBreak,If( cPaisLoc $ "ANG|PTG", "Horas produtivas - ", "Horas Produtivas - " ),,, .F. , .F. )
+oFunction := TRFunction():New(oApont:Cell("IMPRODUTIVA"),"IMPRODUTIVA",If(cTpHr =="N","TIMESUM","SUM"),oBreak,If( cPaisLoc $ "ANG|PTG", "Horas improdutivas - ", "Horas Improdutivas - " ),,, .F. , .F. )
+
+
+
+
+
+dbSelectArea("SX5")
+dbSeek(xFilial("SX5")+"44")
+while X5_FILIAL+X5_TABELA==xFilial("SX5")+"44"
+	oFunction := TRFunction():New(oApont:Cell(Trim(SX5->X5_CHAVE)),Trim(SX5->X5_CHAVE),If(cTpHr =="N","TIMESUM","SUM"),,Padr(Trim(Upper(SX5->X5_DESCRI)),35,"-"),,, .F. , .T. )
+ 	dbSkip()
+EndDo
+
+
+
+
+
+
+
+
+
+	MakeSqlExpr(oReport:uParam)
+
+
+
+
+
+	oApont:BeginQuery()
+
+	cAliasSH6 := GetNextAlias()
+
+	cWhere := "%"
+	If mv_par01 == 1
+		cWhere += " H6_TIPO = 'I' AND "
+	Elseif mv_par01 == 2
+		cWhere += " H6_TIPO = 'P' AND "
+	EndIf
+	cWhere += "%"
+
+
+
+
+	cOrderBy := "%"
+	If nOrdem == 1
+		cOrderBy += " H6_FILIAL, H6_OP, H6_DTAPONT "
+	ElseIf nOrdem == 2
+		cOrderBy += " H6_FILIAL, H6_RECURSO, H6_DTAPONT, H6_OP "
+	ElseIf nOrdem == 3
+		cOrderBy += " H6_FILIAL, H6_MOTIVO, H6_DTAPONT "
+	ElseIf nOrdem == 4
+		cOrderBy += " H6_FILIAL, H6_DTAPONT, H6_MOTIVO "
+	ElseIf nOrdem == 5
+		cOrderBy += " H6_FILIAL, H6_OPERADO, H6_DTAPONT "
+	EndIf
+	cOrderBy += "%"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasSH6," SELECT SH6.H6_FILIAL, SH6.H6_PRODUTO, SH6.H6_OPERAC, SH6.H6_SEQ, SH6.H6_DATAINI, SH6.H6_HORAINI, SH6.H6_DATAFIN, SH6.H6_HORAFIN, SH6.H6_RECURSO, SH6.H6_OP, SH6.H6_MOTIVO, SH6.H6_DTAPONT, SH6.H6_OPERADO, SH6.H6_TEMPO, SH6.H6_TIPOTEM, SH6.H6_TIPO, SH6.H6_FERRAM FROM  "+RetSqlName('SH6')+" SH6 WHERE H6_FILIAL =  '" +xFilial('SH6')+"'  AND H6_OP Between  "+___SQLGetValue(MV_PAR02)+" AND  "+___SQLGetValue(MV_PAR03)+" AND H6_RECURSO Between  "+___SQLGetValue(MV_PAR04)+" AND  "+___SQLGetValue(MV_PAR05)+" AND H6_MOTIVO Between  "+___SQLGetValue(MV_PAR06)+" AND  "+___SQLGetValue(MV_PAR07)+" AND H6_DTAPONT Between  "+___SQLGetValue(MV_PAR08)+" AND  "+___SQLGetValue(MV_PAR09)+" AND H6_OPERADO Between  "+___SQLGetValue(MV_PAR10)+" AND  "+___SQLGetValue(MV_PAR11)+" AND  "+___SQLGetValue(CWHERE)+" SH6.D_E_L_E_T_= ' ' ORDER BY  "+___SQLGetValue(CORDERBY),{},.F.)
+
+	oApont:EndQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TRPosition():New(oApont,"SH1",1,{|| xFilial("SH1") + (cAliasSH6)->H6_RECURSO})
+TRPosition():New(oApont,"SH4",1,{|| xFilial("SH4") + (cAliasSH6)->H6_FERRAM })
+TRPosition():New(oApont,"SX5",1,{|| xFilial("SX5")+"44"+(cAliasSH6)->H6_MOTIVO })
+
+
+
+
+oApont:Cell("PRODUTIVA"):Hide()
+oApont:Cell("IMPRODUTIVA"):Hide()
+oApont:Cell("PRODUTIVA"):HideHeader()
+oApont:Cell("IMPRODUTIVA"):HideHeader()
+
+dbSelectArea("SX5")
+dbSeek(xFilial("SX5")+"44")
+while X5_FILIAL+X5_TABELA==xFilial("SX5")+"44"
+ 	oApont:Cell(Trim(SX5->X5_CHAVE)):Hide()
+	oApont:Cell(Trim(SX5->X5_CHAVE)):HideHeader()
+	dbSkip()
+EndDo
+
+
+
+
+oReport:SetMeter(SH6->(LastRec()))
+oApont:Init()
+
+dbSelectArea(cAliasSH6)
+While !oReport:Cancel() .And.  !(cAliasSH6)->(Eof())
+
+	SX5->(dbSeek(xFilial("SX5")+"44"))
+	dbSelectArea(cAliasSH6)
+	while SX5->(X5_FILIAL+X5_TABELA)==xFilial("SX5")+"44"
+		If (cAliasSH6)->H6_MOTIVO == Trim(SX5->X5_CHAVE)
+
+
+
+
+
+
+			oApont:Cell(Trim(SX5->X5_CHAVE)):SetValue(Val(StrTran(TimeH6(Nil,Nil,cAliasSH6),":",".")))
+		Else
+			oApont:Cell(Trim(SX5->X5_CHAVE)):SetValue(0)
+		Endif
+	 	SX5->(dbSkip())
+	EndDo
+
+	oApont:PrintLine()
+	(cAliasSH6)->(dbSkip())
+	oReport:IncMeter()
+EndDo
+
+
+dbSelectArea("SX5")
+dbSeek(xFilial("SX5")+"44")
+while X5_FILIAL+X5_TABELA==xFilial("SX5")+"44"
+	xValMot := oApont:GetFunction(Trim(SX5->X5_CHAVE)):ReportValue()
+	If ValType(xValMot) == "N" .And.  xValMot == 0
+		oReport:aFunction[nCnt]:lEndSection := .F. 
+		oReport:aFunction[nCnt]:lEndReport  := .F. 
+		oReport:aFunction[nCnt]:lEndPage    := .F. 
+	EndIf
+	nCnt++
+	dbSkip()
+EndDo
+
+oApont:Finish()
+(cAliasSH6)->(DbCloseArea())
+oReport:EndPage()
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MATR825R3()
+
+
+
+LOCAL Tamanho  := "G"
+LOCAL titulo   := If( cPaisLoc $ "ANG|PTG", "Relatório De Horas Improdutivas / Produtivas", "Relatorio de Horas Improdutivas / Produtivas" )
+LOCAL cDesc1   := If( cPaisLoc $ "ANG|PTG", "Relação  de horas improdutivas / produtivas apontadas, de acordo", "Relacao  de Horas Improdutivas / Produtivas apontadas, de acordo" )
+LOCAL cDesc2   := If( cPaisLoc $ "ANG|PTG", "Com a ordem selecionada pelo utilizador.", "com a ordem selecionada pelo usuario." )
+LOCAL cDesc3   := ""
+LOCAL cString  := "SH6"
+LOCAL aOrd     := {If( cPaisLoc $ "ANG|PTG", "Por Op", "Por OP" ),"Por Recurso","Por Motivo","Por Data","Por Operador"}
+LOCAL wnrel    := "MATR825"
+
+
+
+
+PRIVATE aReturn:= {If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ),1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 2, 2, 1, "",1 }
+PRIVATE nLastKey:= 0 ,cPerg := "MTR826"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+pergunte(cPerg, .F. )
+
+
+
+
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3, .F. ,aOrd,,Tamanho)
+
+If nLastKey = 27
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey = 27
+	dbClearFilter()
+	Return
+Endif
+
+RptStatus({|lEnd| C825Imp(aOrd,@lEnd,wnRel,titulo,Tamanho)},titulo)
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function C825Imp(aOrd,lEnd,WnRel,titulo,Tamanho)
+
+
+
+
+LOCAL nTipo    := 0
+LOCAL cRodaTxt := If( cPaisLoc $ "ANG|PTG", "Registo(s)", "REGISTRO(S)" )
+LOCAL nCntImpr := 0,i
+
+
+
+LOCAL cTotProd:="0000:00",cTotImprod:="0000:00"
+LOCAL cQuebra,cCampo,cMens
+LOCAL cIndex
+
+
+
+LOCAL aMotivos:={},nProcura
+
+
+
+LOCAL cCond := 'H6_FILIAL=="'+xFilial("SH6")+'".And.'
+		cCond += 'H6_TIPO$"'+IIF(mv_par01==1,"I",IIF(mv_par01==2,"P","PI"))+'".And.'
+		If mv_par01#2
+			cCond += '(Empty(H6_OP) .Or. (H6_OP>="'+mv_par02+'".And.H6_OP<="'+mv_par03+'")) .And.'
+		Else
+			cCond += 'H6_OP>="'+mv_par02+'".And.H6_OP<="'+mv_par03+'".And.'
+		EndIf
+		cCond += 'H6_RECURSO>="'+mv_par04+'".And.H6_RECURSO<="'+mv_par05+'".And.'
+		cCond += 'H6_MOTIVO>="'+mv_par06+'".And.H6_MOTIVO<="'+mv_par07+'".And.'
+		cCond += 'DTOS(H6_DTAPONT)>="'+DTOS(mv_par08)+'".And.DTOS(H6_DTAPONT)<="'+DTOS(mv_par09)+'"'
+
+
+
+If aReturn[8] = 1
+	cIndex:="H6_FILIAL+H6_OP+DTOS(H6_DTAPONT)"
+	cCampo:="H6_FILIAL+H6_OP"
+	cMens:=If( cPaisLoc $ "ANG|PTG", "Da Op:", "da OP:" )
+ElseIf aReturn[8] = 2
+	cIndex:="H6_FILIAL+H6_RECURSO+DTOS(H6_DTAPONT)"
+	cCampo:="H6_FILIAL+H6_RECURSO"
+	cMens:=If( cPaisLoc $ "ANG|PTG", "Do Recurso:", "do Recurso:" )
+ElseIf aReturn[8] = 3
+	cIndex:="H6_FILIAL+H6_MOTIVO+DTOS(H6_DTAPONT)"
+	cCampo:="H6_FILIAL+H6_MOTIVO"
+	cMens:=If( cPaisLoc $ "ANG|PTG", "Do Motivo:", "do Motivo:" )
+ElseIf aReturn[8] = 4
+	cIndex:="H6_FILIAL+DTOS(H6_DTAPONT)+H6_MOTIVO"
+	cCampo:="H6_FILIAL+DTOS(H6_DTAPONT)"
+	cMens:=If( cPaisLoc $ "ANG|PTG", "Da Data:", "da Data:" )
+ElseIf aReturn[8] = 5
+	cIndex:="H6_FILIAL+H6_OPERADO+DTOS(H6_DTAPONT)"
+	cCampo:="H6_FILIAL+H6_OPERADO"
+	cMens:=If( cPaisLoc $ "ANG|PTG", "Do Operador:", "do Operador:" )
+EndIf
+
+
+
+
+cNomArq := CriaTrab("", .F. )
+
+
+
+
+dbSelectArea("SH6")
+IndRegua("SH6",cNomArq,cIndex,,cCond,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+dbGoTop()
+
+
+
+
+SetRegua(LastRec())
+
+
+
+
+titulo+=" "+aOrd[aReturn[8]]
+
+
+
+
+nTipo  := IIF(aReturn[4]==1,15,18)
+
+
+
+
+PRIVATE li := 80 ,m_pag := 1
+
+
+
+
+cabec1 := If( cPaisLoc $ "ANG|PTG", "Tipo Ordem De    Número   Recurso                                   Ferramenta                    Motivo                                 Data        Operador      Data        Data    Hora   Hora", "TIPO ORDEM DE    NUMERO   RECURSO                                   FERRAMENTA                    MOTIVO                                 DATA        OPERADOR      DATA        DATA    HORA   HORA" )
+cabec2 := If( cPaisLoc $ "ANG|PTG", "     Produção    De Horas                                                                                                                Apontamento              Inicio        Fim  Inicio    Fim", "     PRODUCAO    DE HORAS                                                                                                                APONTAMENTO              INICIO        FIM  INICIO    FIM" )
+
+
+
+
+
+while !Eof()
+	If H6_OPERADO < mv_par10 .Or.  H6_OPERADO > mv_par11
+		IncRegua()
+		dbSkip()
+		Loop
+	EndIf
+	cTotProd  :="0000:00"
+	cTotImProd:="0000:00"
+	cQuebra:=&(cCampo)
+	while !Eof() .And. &(cCampo)==cQuebra
+		If H6_OPERADO < mv_par10 .Or.  H6_OPERADO > mv_par11
+			IncRegua()
+			dbSkip()
+			Loop
+		EndIf
+		If li > 58
+			cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+		EndIf
+		IncRegua()
+		dbSelectArea("SH1")
+		dbSeek(xFilial("SH1")+SH6->H6_RECURSO)
+		dbSelectArea("SH4")
+		dbSeek(xFilial("SH4")+SH6->H6_FERRAM)
+       dbSelectArea("SH6")
+		PrintOut(li,001,H6_TIPO,PesqPict("SH6","H6_TIPO",1),)
+		PrintOut(li,005,H6_OP,PesqPict("SH6","H6_OP",11),)
+		PrintOut(li,018,TimeH6(),PesqPict("SH6","H6_TEMPO",6),)
+		PrintOut(li,027,H6_RECURSO,PesqPict("SH6","H6_RECURSO",6),)
+		PrintOut(li,035,Substr(SH1->H1_DESCRI,1,30),,)
+		PrintOut(li,068,H6_FERRAM,,)
+		PrintOut(li,075,Substr(SH4->H4_DESCRI,1,20),,)
+		PrintOut(li,098,H6_MOTIVO,PesqPict("SH6","H6_MOTIVO",2),)
+		dbSelectArea("SX5")
+		dbSeek(xFilial("SX5")+"44"+SH6->H6_MOTIVO)
+		PrintOut(li,101,Substr(X5Descri(),1,35),,)
+		dbSelectArea("SH6")
+		PrintOut(li,137,H6_DTAPONT,PesqPict("SH6","H6_DTAPONT",8),)
+		PrintOut(li,149,H6_OPERADO,PesqPict("SH6","H6_OPERADO",10),)
+		PrintOut(li,160,H6_DATAINI,PesqPict("SH6","H6_DATAINI",8),)
+		PrintOut(li,171,H6_DATAFIN,PesqPict("SH6","H6_DATAFIN",8),)
+		PrintOut(li,182,TimeH6(,"H6_HORAINI"),PesqPict("SH6","H6_HORAINI",8),)
+		PrintOut(li,189,TimeH6(,"H6_HORAFIN"),PesqPict("SH6","H6_HORAFIN",8),)
+		If H6_TIPO == "I"
+			nProcura:=ASCAN(aMotivos,{|x| x[1] == H6_MOTIVO})
+			If nProcura = 0
+				AADD(aMotivos,{H6_MOTIVO,R825Calc("0000:00")})
+			Else
+				aMotivos[nProcura,2]:=R825Calc(aMotivos[nProcura,2])
+			EndIf
+			cTotImprod:=R825Calc(cTotImProd)
+		Else
+			cTotProd:=R825Calc(cTotProd)
+		EndIf
+		li++
+		dbSkip()
+	EndDo
+	li++
+	If li > 58
+		cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+	EndIf
+	PrintOut(li,00,"Total "+cMens,,)
+	PrintOut(li,26,If(cPaisLoc$"ANG|PTG","Horas produtivas - ","Horas Produtivas - ")+A680ConvHora(cTotProd,"C",GetMV("MV_TPHR")),,)
+	PrintOut(li,77,If(cPaisLoc$"ANG|PTG","Horas improdutivas - ","Horas Improdutivas - ")+A680ConvHora(cTotImProd,"C",GetMV("MV_TPHR")),,)
+	li++ ;li++
+EndDo
+
+
+
+If Len(aMotivos) > 0
+	cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+	dbSelectArea("SX5")
+	PrintOut(li,00,If(cPaisLoc$"ANG|PTG","Motivos que criaram horas improdutivas","Motivos que geraram horas improdutivas"),,) ;li++
+	PrintOut(li,00,"----------------------------------------------",,) ;li++
+	li++
+	For i:=1 to Len(aMotivos)
+		If dbSeek(xFilial("SX5")+"44"+aMotivos[i,1])
+			PrintOut(li,00,Substr(X5Descri(),1,35),,)
+		EndIf
+		PrintOut(li,36," - "+A680ConvHora(aMotivos[i,2],"C",GetMV("MV_TPHR")),,)
+		li++
+	next
+EndIf
+IF li <> 80
+	Roda(nCntImpr,cRodaTxt,Tamanho)
+EndIF
+
+
+
+RetIndex("SH6")
+dbClearFilter()
+
+
+
+
+cNomArq += OrdBagExt()
+FErase((cNomArq) )
+
+If aReturn[5] = 1
+	Set( 24, "" )
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R825Calc(cHoraOri)
+
+Local nHor1      := Val(StrTran(cHoraOri,":","."))
+Local nHor2      := Val(StrTran(TimeH6("C"),":","."))
+Local cHoraDest  := "0000:00"
+Local nTamHora	 := If(TamSX3("H6_TEMPO")[1]>7,TamSX3("H6_TEMPO")[1],7)
+
+If !Empty(cHoraOri)
+	cHoraDest := StrTran(StrZero(nHor1+nHor2, nTamHora, 2),".",":")
+EndIf
+
+Return(cHoraDest)

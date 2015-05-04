@@ -1,0 +1,1280 @@
+#INCLUDE "MATR175.CH"
+#INCLUDE "PROTHEUS.CH"
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR175  ³ Autor ³Alexandre Inacio Lemes ³ Data ³28/06/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Relacao das Baixas do Controle de Qualidade                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ MATR175(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function MATR175()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And. TRepInUse()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Interface de impressao                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:= ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR175R3()
+EndIf
+                                               
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ ReportDef³Autor  ³Alexandre Inacio Lemes ³Data  ³28/06/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Relacao das Baixas do Controle de Qualidade                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ oExpO1: Objeto do relatorio                                ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+Local aOrdem   := {STR0003,STR0004}		//" Por Numero    "###" Por Produto        "
+Local cTitle   := STR0005	            //"Relacao de Baixas do CQ" 
+Local oReport 
+Local oSection1
+Local oSection2
+
+#IFDEF TOP
+	Local cAliasSD7 := GetNextAlias()
+#ELSE
+	Local cAliasSD7 := "SD7"
+#ENDIF
+
+AjustaSX1()
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                           ³
+//³mv_par01             // a partir do numero                    ³
+//³mv_par02             // ate o numero                          ³
+//³mv_par03             // Liberados/Rejeitados/Todos            ³
+//³mv_par04             // Imprime estornados Sim/Nao            ³
+//³mv_par05             // Data emissao inicial                  ³
+//³mv_par06             // Data emissao final                    ³
+//³mv_par07             // Fornecedor De                         ³
+//³mv_par08             // Fornecedor Ate                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Pergunte("MTR175",.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao do componente de impressao                                      ³
+//³                                                                        ³
+//³TReport():New                                                           ³
+//³ExpC1 : Nome do relatorio                                               ³
+//³ExpC2 : Titulo                                                          ³
+//³ExpC3 : Pergunte                                                        ³
+//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+//³ExpC5 : Descricao                                                       ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+oReport:= TReport():New("MTR175",cTitle,"MTR175", {|oReport| ReportPrint(oReport,aOrdem,cAliasSD7)},STR0001+" "+STR0002) //"Emite um relacao dos produto Liberados/Rejeitados pelo Controle de qualidade juntamente com a respectiva avaliacao."
+oReport:SetLandscape() 
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da secao utilizada pelo relatorio                               ³
+//³                                                                        ³
+//³TRSection():New                                                         ³
+//³ExpO1 : Objeto TReport que a secao pertence                             ³
+//³ExpC2 : Descricao da seçao                                              ³
+//³ExpA3 : Array com as tabelas utilizadas pela secao. A primeira tabela   ³
+//³        sera considerada como principal para a seção.                   ³
+//³ExpA4 : Array com as Ordens do relatório                                ³
+//³ExpL5 : Carrega campos do SX3 como celulas                              ³
+//³        Default : False                                                 ³
+//³ExpL6 : Carrega ordens do Sindex                                        ³
+//³        Default : False                                                 ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da celulas da secao do relatorio                                ³
+//³                                                                        ³
+//³TRCell():New                                                            ³
+//³ExpO1 : Objeto TSection que a secao pertence                            ³
+//³ExpC2 : Nome da celula do relatório. O SX3 será consultado              ³
+//³ExpC3 : Nome da tabela de referencia da celula                          ³
+//³ExpC4 : Titulo da celula                                                ³
+//³        Default : X3Titulo()                                            ³
+//³ExpC5 : Picture                                                         ³
+//³        Default : X3_PICTURE                                            ³
+//³ExpC6 : Tamanho                                                         ³
+//³        Default : X3_TAMANHO                                            ³
+//³ExpL7 : Informe se o tamanho esta em pixel                              ³
+//³        Default : False                                                 ³
+//³ExpB8 : Bloco de código para impressao.                                 ³
+//³        Default : ExpC2                                                 ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSection1:= TRSection():New(oReport,STR0037,{"SD7","SB1"},aOrdem)
+oSection1:SetHeaderPage()
+
+TRCell():New(oSection1,"D7_NUMERO" ,"SD7",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D7_PRODUTO","SD7",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"B1_DESC"   ,"SB1",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"B1_UM"     ,"SB1",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D7_LOCAL"  ,"SD7",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D7_DOC"    ,"SD7",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D7_ORIGLAN","SD7",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"D7_FORNECE","SD7",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"A2_NOME"   ,"SA2",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+
+oSection2:= TRSection():New(oSection1,STR0038,{"SD7","SB1"}) 
+oSection2:SetTotalInLine(.F.)
+oSection2:SetHeaderPage()
+
+TRCell():New(oSection2,"D7_NUMERO" ,"SD7",/*Titulo*/	,/*Picture*/				,/*Tamanho*/			,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"D7_DATA"   ,"SD7",/*Titulo*/	,/*Picture*/				,/*Tamanho*/			,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"TIPO"      ,"   ",STR0032		,/*Picture*/				,13						,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"QUANTIDADE","   ",STR0033		,PesqPictQt("D7_QTDE",17)	,TamSX3("D7_QTDE")[1]	,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"D7_USUARIO","SD7",/*Titulo*/	,/*Picture*/				,/*Tamanho*/			,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"AVALIACAO" ,"   ",STR0034		,/*Picture*/				,26						,/*lPixel*/,{|| cTexto })
+TRCell():New(oSection2,"D7_DOC"    ,"SD7",/*Titulo*/	,/*Picture*/				,/*Tamanho*/			,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"D7_LOCDEST","SD7",/*Titulo*/	,/*Picture*/				,/*Tamanho*/			,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"D7_MOTREJE","SD7",STR0035		,/*PicSture*/				,/*Tamanho*/			,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"X5_DESCRI" ,"SX5",STR0036		,/*Picture*/				,/*Tamanho*/			,/*lPixel*/,{|| If( !Empty((cAliasSD7)->D7_MOTREJE) , " - " + Left(X5Descri(),20) , "" ) })
+
+oSection2:Cell("AVALIACAO"):SetLineBreak() 
+
+If !__lPyme
+	TRCell():New(oSection2,"D7_LOTECTL","SD7",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oSection2,"D7_NUMLOTE","SD7",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+Endif
+
+Return(oReport)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrin³ Autor ³Alexandre Inacio Lemes ³Data  ³28/06/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Relacao das Baixas do Controle de Qualidade                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatorio                           ³±±
+±±³          ³ExpA1: Array com as Ordens do relatorio                     ³±±
+±±³          ³ExpC1: Alias do arquivo					                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport,aOrdem,cAliasSD7)
+
+Local oSection1  := oReport:Section(1) 
+Local oSection2  := oReport:Section(1):Section(1)  
+Local nOrdem     := oReport:Section(1):GetOrder()
+Local cProduto   := ""
+Local lSd7Valido := .T.
+
+#IFDEF TOP
+    Local cWhere    := ""
+	Local cOrder    := ""
+#ELSE
+	Local cCondicao := ""
+	Local cIndexKey := ""
+#ENDIF
+
+PRIVATE cDirCQ  :=ALLTRIM(GETMV("MV_DIRCQ"))
+PRIVATE cAuxTxt := ""
+PRIVATE cTexto  := ""
+PRIVATE cArqCQ  := ""
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Analisa a existencia do diretorio de Avaliacoes do CQ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cDirCQ:=IIF(Subs(cDirCQ,1,1)#'\','\'+cDirCQ,cDirCQ)
+cDirCQ:=IIF(Subs(cDirCQ,Len(cDirCq),1)#'\',cDirCQ+'\',cDirCQ)
+cArqCQ:=cDirCQ+"X"
+nHdl:=MSFCREATE(cArqCQ,0)
+If nHdl <= -1
+	HELP(" ",1,"NODIRCQ")
+	Return
+Else
+	If File(cArqCQ)
+		FCLOSE(nHdl)
+		FERASE(cArqCQ)
+	Endif
+Endif
+
+PRIVATE nSaldo := 0
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Adiciona a ordem escolhida ao titulo do relatorio          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:SetTitle(oReport:Title() + " -" + If( nOrdem == 1 , STR0003 , STR0004 ) ) //" Por Numero    " ### " Por Produto        "
+
+dbSelectArea("SD7")
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Filtragem do relatório                                                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+#IFDEF TOP
+	
+ 	MakeSqlExpr(oReport:uParam)
+    
+ 	oReport:Section(1):BeginQuery()	
+
+	cWhere := "%" 
+	If mv_par03 == 1 .And. mv_par04 == 1
+		cWhere += " AND ( D7_TIPO = 0 OR D7_TIPO = 1 OR D7_TIPO = 3 OR D7_TIPO = 6 )" 
+	ElseIf mv_par03 == 1 .And. mv_par04 == 2
+		cWhere += " AND ( D7_TIPO = 0 OR D7_TIPO = 1 OR D7_TIPO = 3 )" 
+	ElseIf mv_par03 == 2 .And. mv_par04 == 1
+		cWhere += " AND ( D7_TIPO = 0 OR D7_TIPO = 2 OR D7_TIPO = 4 OR D7_TIPO = 7 )" 
+	ElseIf mv_par03 == 2 .And. mv_par04 == 2
+		cWhere += " AND ( D7_TIPO = 0 OR D7_TIPO = 2 OR D7_TIPO = 4 )" 
+	ElseIf mv_par03 == 3 .And. mv_par04 == 1
+		cWhere += " AND ( D7_TIPO = 0 OR D7_TIPO = 1 OR D7_TIPO = 2 OR D7_TIPO = 3 OR D7_TIPO = 4 OR D7_TIPO = 6 OR D7_TIPO = 7 OR D7_TIPO = 8 OR D7_TIPO = 9 )" 
+	ElseIf mv_par03 == 3 .And. mv_par04 == 2
+		cWhere += " AND ( D7_TIPO = 0 OR D7_TIPO = 1 OR D7_TIPO = 2 OR D7_TIPO = 3 OR D7_TIPO = 4 OR D7_TIPO = 8 )" 
+	EndIf
+	cWhere += "%" 
+
+	If nOrdem == 1
+		SD7->(dbSetOrder(1))
+		cOrder := "% " + SqlOrder(SD7->(IndexKey())) + " %"
+	Else
+		cOrder := "% D7_FILIAL,D7_PRODUTO,D7_NUMERO,D7_LOCAL %"
+	EndIf
+
+	BeginSql Alias cAliasSD7
+	 
+		SELECT SD7.*,SD7.R_E_C_N_O_ SD7RECNO
+		 
+		FROM %table:SD7% SD7
+		 
+		WHERE D7_FILIAL  = %xFilial:SD7% AND 
+			D7_NUMERO   >= %Exp:mv_par01% AND 
+		    D7_NUMERO   <= %Exp:mv_par02% AND      
+		    D7_FORNECE  >= %Exp:mv_par07% AND 
+		    D7_FORNECE  <= %Exp:mv_par08% AND          
+		    D7_DATA     >= %Exp:Dtos(mv_par05)% AND 
+		    D7_DATA     <= %Exp:Dtos(mv_par06)% AND 
+		    SD7.%NotDel% 
+		    %Exp:cWhere%	    
+	
+		ORDER BY %Exp:cOrder%
+		   
+	EndSql
+	
+	oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
+    
+	oSection2:SetParentQuery()
+
+#ELSE
+
+	MakeAdvplExpr(oReport:uParam)
+
+	cCondicao := 'D7_FILIAL=="' + xFilial()+ '".And.'
+	cCondicao += 'D7_NUMERO>="' + mv_par01 + '".And.D7_NUMERO<="' + mv_par02 + '".And.'
+	cCondicao += 'D7_FORNECE>="'+ mv_par07 + '".And.D7_FORNECE<="'+ mv_par08 + '".And.'
+	cCondicao += 'DTOS(D7_DATA)>="'+DTOS(mv_par05)+'".And.DTOS(D7_DATA)<="'+DTOS(mv_par06)+'".And.'
+	
+	If mv_par03 == 1 .And. mv_par04 == 1
+		cCondicao += '( D7_TIPO = 0 .Or. D7_TIPO = 1 .Or. D7_TIPO = 3 .Or. D7_TIPO = 6 )' 
+	ElseIf mv_par03 == 1 .And. mv_par04 == 2
+		cCondicao += '( D7_TIPO = 0 .Or. D7_TIPO = 1 .Or. D7_TIPO = 3 )' 
+	ElseIf mv_par03 == 2 .And. mv_par04 == 1
+		cCondicao += '( D7_TIPO = 0 .Or. D7_TIPO = 2 .Or. D7_TIPO = 4 .Or. D7_TIPO = 7 )' 
+	ElseIf mv_par03 == 2 .And. mv_par04 == 2
+		cCondicao += '( D7_TIPO = 0 .Or. D7_TIPO = 2 .Or. D7_TIPO = 4 )' 
+	ElseIf mv_par03 == 3 .And. mv_par04 == 1
+		cCondicao += '( D7_TIPO = 0 .Or. D7_TIPO = 1 .Or. D7_TIPO = 2 .Or. D7_TIPO = 3 .Or. D7_TIPO = 4 .Or. D7_TIPO = 6 .Or. D7_TIPO = 7 .Or. D7_TIPO = 8 .Or. D7_TIPO = 9 )' 
+	ElseIf mv_par03 == 3 .And. mv_par04 == 2
+		cCondicao += '( D7_TIPO = 0 .Or. D7_TIPO = 1 .Or. D7_TIPO = 2 .Or. D7_TIPO = 3 .Or. D7_TIPO = 4 .Or. D7_TIPO = 8 )' 
+	EndIf
+
+	dbSelectArea("SD7")	
+	If nOrdem == 1
+		SD7->(dbSetOrder(1))
+		cIndexKey := IndexKey()
+	Else
+		cIndexKey := "D7_FILIAL+D7_PRODUTO+D7_NUMERO+D7_LOCAL"
+	EndIf
+				
+	oReport:Section(1):SetFilter(cCondicao,cIndexKey)
+
+#ENDIF		
+
+If nOrdem == 1
+	cKeyForTot := "D7_FILIAL+D7_NUMERO+D7_PRODUTO+D7_LOCAL"
+	oSection2:Cell("D7_NUMERO"):Disable()
+	oSection2:Cell("D7_DOC"):Disable()
+Else
+	cKeyForTot := "D7_FILIAL+D7_PRODUTO+D7_NUMERO+D7_LOCAL"
+	oSection1:Cell("D7_NUMERO"):Disable()
+	oSection1:Cell("D7_DOC"):Disable()
+	oSection1:Cell("D7_ORIGLAN"):Disable()
+	oSection2:Cell("X5_DESCRI"):Disable()
+EndIf
+
+TRPosition():New(oSection1,"SB1",1,{|| xFilial("SB1")+(cAliasSD7)->D7_PRODUTO })
+TRPosition():New(oSection1,"SA2",1,{|| xFilial("SA2")+(cAliasSD7)->D7_FORNECE+(cAliasSD7)->D7_LOJA})	
+TRPosition():New(oSection2,"SX5",1,{|| xFilial("SX5")+"43"+(cAliasSD7)->D7_MOTREJE })
+
+oSection2:SetTotalText(STR0020) //"Saldo "
+TRFunction():New(oSection2:Cell("QUANTIDADE"),NIL,"SUM",/*oBreak2*/,,/*cPicture*/,{|| nSaldo },.T.,.F.,,oSection2)
+
+oReport:SetMeter(SD7->(LastRec()))
+dbSelectArea(cAliasSD7)               
+
+While !oReport:Cancel() .And. !(cAliasSD7)->(Eof())
+	
+	oReport:IncMeter()
+	If oReport:Cancel()
+		Exit
+	EndIf
+	
+	If nOrdem == 1
+		cProduto := (cAliasSD7)->(D7_FILIAL+D7_NUMERO+D7_PRODUTO+D7_LOCAL)
+	Else
+		cProduto := (cAliasSD7)->(D7_FILIAL+D7_PRODUTO+D7_NUMERO+D7_LOCAL)
+		oSection2:Cell("D7_NUMERO"):Show()
+	EndIf
+
+	If lSd7Valido := If( (cAliasSD7)->D7_TIPO = 0 , ValidaSD7(cAliasSD7,cProduto,cKeyForTot) , .T. )
+		
+		oSection1:Init()
+		oSection1:PrintLine()
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Abre arquivo CQ99999.TXT                     ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		cArqCQ  :=cDirCq+"CQ"+(cAliasSD7)->D7_NUMERO+".TXT"
+		cAuxTxt := MemoRead(cArqCQ)
+		
+		nSaldo := 0
+		
+		oSection2:Init()
+		While !oReport:Cancel() .And. !(cAliasSD7)->(Eof()) .And. cProduto == (cAliasSD7)->&(cKeyForTot)
+			
+			oReport:IncMeter()
+			If oReport:Cancel()
+				Exit
+			EndIf
+			
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ Le o Texto com base no arquivo CQ99999.TXT   ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			cTexto := fLeTxt(cAuxTxt)
+			
+			If (cAliasSD7)->D7_TIPO == 0
+				oSection2:Cell("TIPO"):SetValue(STR0015) //"Qtd. Original"
+			ElseIf (cAliasSD7)->D7_TIPO == 1
+				oSection2:Cell("TIPO"):SetValue(STR0016)	//"Liberado"
+			ElseIf (cAliasSD7)->D7_TIPO == 2
+				oSection2:Cell("TIPO"):SetValue(STR0017)	//"Rejeitado"
+			ElseIf (cAliasSD7)->D7_TIPO == 3
+				oSection2:Cell("TIPO"):SetValue(STR0028)	//'Devolucao Liberacao '
+			ElseIf (cAliasSD7)->D7_TIPO == 4
+				oSection2:Cell("TIPO"):SetValue(STR0029)	//'Devolucao Rejeicao  '
+			ElseIf (cAliasSD7)->D7_TIPO == 6
+				oSection2:Cell("TIPO"):SetValue(STR0018)	//"Est. Liber."
+			ElseIf (cAliasSD7)->D7_TIPO == 7
+				oSection2:Cell("TIPO"):SetValue(STR0019)	//"Est. Rej."
+			ElseIf (cAliasSD7)->D7_TIPO == 8
+				oSection2:Cell("TIPO"):SetValue(STR0030)	//'Despesas Agregadas  '
+			ElseIf (cAliasSD7)->D7_TIPO == 9
+				oSection2:Cell("TIPO"):SetValue(STR0031)	//'Estorno Despesas    '
+			Endif
+			
+			If (cAliasSD7)->D7_QTDE <= 0
+				oSection2:Cell("QUANTIDADE"):SetValue((cAliasSD7)->D7_SALDO)
+			Else
+				oSection2:Cell("QUANTIDADE"):SetValue((cAliasSD7)->D7_QTDE)
+			Endif
+			
+			nSaldo := ( If( (cAliasSD7)->D7_TIPO == 0 , (cAliasSD7)->D7_SALDO , ;
+						 If( (cAliasSD7)->D7_TIPO == 1 .Or. (cAliasSD7)->D7_TIPO == 2 ,;
+			    		- (cAliasSD7)->D7_QTDE , (cAliasSD7)->D7_QTDE )))
+
+			oSection2:PrintLine()
+			
+			If nOrdem == 2
+				oSection2:Cell("D7_NUMERO"):Hide()
+			EndIf
+			
+			dbSelectArea(cAliasSD7)
+			dbSkip()
+			
+		EndDo
+		
+		oSection1:Finish()
+		oSection2:Finish()
+		
+	Else
+
+		dbSelectArea(cAliasSD7)
+		dbSkip()
+
+	EndIf
+	
+EndDo
+
+Return Nil
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ValidaSD7 ³ Autor ³Alexandre Inacio Lemes ³Data  ³28/06/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Relacao das Baixas do Controle de Qualidade                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpC1: Alias da Tabela                                      ³±±
+±±³          ³ExpC2: Conteudo dos campos do registro posicionado.         ³±±
+±±³          ³ExpC3: String para macroexecucao no while de pesiquisa.     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpL1 : .T. se o Registro SD7 for valido para impressao     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function ValidaSD7(cAliasSD7,cProduto,cKeyForTot)
+
+Local aArea	  := GetArea()
+Local lValido :=.F.
+
+dbSelectArea("SD7")
+
+#IFDEF TOP
+	SD7->(dbGoto((cAliasSD7)->SD7RECNO))
+#ENDIF
+
+SD7->(dbSkip())
+
+While !Eof() .And. cProduto ==  &(cKeyForTot)
+	If mv_par03 # 3
+		If (mv_par03==1 .and. SD7->D7_TIPO == 2) ;
+			.or. (mv_par03==2 .and. SD7->D7_TIPO == 1)
+			dbSkip()
+			Loop
+		Endif
+	Endif
+	If mv_par04 == 2 .And. (SD7->D7_TIPO == 6 .Or. SD7->D7_TIPO == 7)
+		dbSkip()
+		Loop
+	Endif
+	If mv_par04 == 1
+		If mv_par03 == 1 .And. SD7->D7_TIPO == 7
+			dbSkip()
+			Loop
+		ElseIf mv_par03 == 2 .And. SD7->D7_TIPO == 6
+			dbSkip()
+			Loop
+		Endif
+	Endif
+	lValido:=.T.
+	Exit
+End
+
+RestArea(aArea)
+
+Return lValido
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR175R3³ Autor ³ Gilson do Nascimento  ³ Data ³ 26.09.94 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Relacao das Baixas do Controle de Qualidade                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Marcos Simi.³25/06/98³XXXXXX³Acertos do lay-out,Nro. NF com 12 bytes.  ³±±
+±±³FernandoJoly³03/02/98³META  ³Utilizar B1_UM no lugar do D7_UM(Retirado)³±±
+±±³FernandoJoly³12/02/98³META  ³Imprimir o Motivo da Rejei‡„o.            ³±±
+±±³ Edson M.   ³30/03/99³XXXXXX³Passar o tamanho na SetPrint.             ³±±
+±±³Patricia Sal³01/03/00³XXXXXX³Imprimir campo D7_DOC.                    ³±±
+±±³Patricia Sal³16/03/00³003123³Acerto Impressao campo Memo, inclusao do  ³±±
+±±³            ³        ³      ³mv_par07/mv_par08, impressao Fornecedor.  ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function MATR175R3()
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL wnrel
+LOCAL cDesc1   := STR0001	//"Emite um relacao dos produto Liberados/Rejeitados pelo Controle de"
+LOCAL cDesc2   := STR0002	//"qualidade juntamente com a respectiva avaliacao."
+LOCAL cDesc3   := ""
+LOCAL cString  := "SD7"
+LOCAL aOrd     := {STR0003,STR0004}		//" Por Numero    "###" Por Produto        "
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variavel de acesso ao SXG                                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Static aTamSXG
+Static aTamSXG2
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis tipo Private padrao de todos os relatorios         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+PRIVATE nomeprog := "MATR175"
+PRIVATE titulo   := STR0005	//"Relacao de Baixas do CQ"
+PRIVATE aReturn := { STR0006, 1,STR0007, 1, 2, 1, "",1 }		//"Zebrado"###"Administracao"
+PRIVATE nLastKey := 0 ,cPerg := "MTR175"
+PRIVATE Tamanho
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Contadores de linha e pagina                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+PRIVATE li := 80
+PRIVATE m_pag := 1
+PRIVATE cAuxTxt
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Analisa a existencia do diretorio de Avaliacoes do CQ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+PRIVATE cDirCQ:=ALLTRIM(GETMV("MV_DIRCQ"))
+cDirCQ:=IIF(Subs(cDirCQ,1,1)#'\','\'+cDirCQ,cDirCQ)
+cDirCQ:=IIF(Subs(cDirCQ,Len(cDirCq),1)#'\',cDirCQ+'\',cDirCQ)
+cArqCQ:=cDirCQ+"X"
+nHdl:=MSFCREATE(cArqCQ,0)
+If nHdl <= -1
+	HELP(" ",1,"NODIRCQ")
+	Return
+Else
+	If File(cArqCQ)
+		FCLOSE(nHdl)
+		FERASE(cArqCQ)
+	Endif
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica conteudo da variavel STATIC p/ Grupo de Clientes    ³
+//³ (001) e Grupo de Lojas (002)                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+aTamSXG := If(aTamSXG  == NIL,TamSXG("001"),aTamSXG)
+aTamSXG2:= If(aTamSXG2 == NIL,TamSXG("002"),aTamSXG2)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                           ³
+//³mv_par01             // a partir do numero                    ³
+//³mv_par02             // ate o numero                          ³
+//³mv_par03             // Liberados/Rejeitados/Todos            ³
+//³mv_par04             // Imprime estornados Sim/Nao            ³
+//³mv_par05             // Data emissao inicial                  ³
+//³mv_par06             // Data emissao final                    ³
+//³mv_par07             // Fornecedor De                         ³
+//³mv_par08             // Fornecedor Ate                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AjustaSX1()
+pergunte(cPerg,.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Envia controle para a funcao SETPRINT                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+wnrel:=SetPrint(cString,NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.F.,aOrd,,Tamanho)
+
+If nLastKey == 27
+	Set Filter To
+	Return
+Endif
+
+If aReturn[8] == 1 .And. !(cPaisLoc=="MEX")
+	Tamanho  := If(aTamSXG[1] != aTamSXG[3] ,"G","M")
+Else
+	Tamanho  := "G"
+EndIf
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	Set Filter To
+	Return
+Endif
+
+RptStatus({|lEnd| R175Imp(@lEnd,tamanho,wnrel,cString)},Titulo)
+
+Return
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ R175IMP  ³ Autor ³ Cristina M. Ogura     ³ Data ³ 09.11.95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Chamada do Relatorio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR175		                                              ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function R175Imp(lEnd,tamanho,wnrel,cString)
+
+Local nIncCol	:= If(cPaisLoc == "MEX",9,0)
+LOCAL cRodaTxt:= STR0008	//"REGISTRO(S)"
+LOCAL nCntImpr:= 0,nRegOri:=0
+LOCAL nTotal  := 0 ,cChav ,cCotAnt ,nX ,lPedido ,lCotacao,nHdl
+LOCAL limite  := If(cPaisLoc == "MEX",220,132)
+LOCAL cbCont  := 00
+LOCAL lImpNum , cNumAnt,lProcessou:=.T., lImpSaldo:=.F., cProAnt
+LOCAL nSaldo
+STATIC nPosNome
+STATIC nTamNome
+PRIVATE nTipo := 0
+PRIVATE cabec1,cabec2,cabec3
+PRIVATE cTexto
+PRIVATE lImpCab
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa os codigos de caracter Comprimido/Normal da impressora ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+nTipo  := IIF(aReturn[4]==1,15,18)
+nPosNome := If(aReturn[8] == 1,107,144)
+nTamNome := If(aReturn[8] == 1,26,40)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Muda a ordem dos arquivos utilizados na rotina             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SD3")
+dbSetOrder(4)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Monta os Cabecalhos                                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If aReturn[8] == 1
+	// Caso nao utilize tamanho min, considera tamanho max e altera layout de impressao ref grupo 001
+	If aTamSXG[1] != aTamSXG[3]
+		cabec1 := If(cPaisLoc=="MEX",STR0039,STR0023)	//"NUMERO  CODIGO          DESCRICAO                      UM  LC ORIGEM  DOCUMENTO     ORIGEM    CODIGO                    RAZAO SOCIAL"
+		*****                123456  123456789012345 123456789012345678901234567890 12     12      1234567890123  12        12345678901234567890      1234567890123456789012354678901234567890
+		*****                0         1         2         3         4         5         6         7         8         9        10        11        12        13        14        15
+		*****                0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+	Else
+		cabec1 := If(cPaisLoc=="MEX",STR0040,STR0009)	//"NUMERO  CODIGO          DESCRICAO                      UM  LC ORIGEM  DOCUMENTO     ORIGEM    CODIGO      RAZAO SOCIAL"
+		*****                123456  123456789012345 123456789012345678901234567890 12     12      1234567890123  12        123456      1234567890123456789012356
+		*****                0         1         2         3         4         5         6         7         8         9        10        11        12        13        14        15
+		*****                0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+	EndIf
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ATENCAO!!!Se for PYME retira as informacoes de LOTE e SUBLOTE³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If !__lPyme
+		cabec2 := If(cPaisLoc=="MEX",STR0041,STR0010)	//"DATA       TIPO              QUANTIDADE  USUARIO         AVALIACAO                  LC MOTIVO DA REJEICAO          LOTE      SUBLOTE"
+		*****                1234567890 1234567890123456 123456789012 123456789012345 12345678901234567890123456 12 123456789012345678901234567 1234567890 123456
+		*****                0         1         2         3         4         5         6         7         8         9        10        11        12        13
+		*****                0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
+	Else
+		cabec2 := If(cPaisLoc=="MEX",STR0042,STR0027)	//"DATA       TIPO              QUANTIDADE  USUARIO         AVALIACAO                  LC MOTIVO DA REJEICAO                           "
+	EndIf
+Else
+	cabec1 := STR0011	//"CODIGO           DESCRICAO                       UM  ORIGEM"
+	*****	               1234567890123456 0123456789012345678901234567890 12    12
+	*****                0         1         2         3         4         5         6         7         8         9        10         110       120       130
+	*****                0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
+	// Caso nao utilize tamanho min, considera tamanho max e altera layout de impressao ref grupo 001
+	If aTamSXG[1] != aTamSXG[3]
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ATENCAO!!!Se for PYME retira as informacoes de LOTE e SUBLOTE³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If !__lPyme
+			cabec2 := If(cPaisLoc=="MEX",STR0043,STR0024)	//"NUMERO   DATA     TIPO             QUANTIDADE   USUARIO          AVALIACAO               DOCUMENTO     LC REJEICAO LOTE      SUBLOTE    CODIGO                RAZAO SOCIAL"
+			*****	               123456 1234567890 123456789012345 0123456789012 1234567890123456 12345678901234567890123 1234567890123 12 12345    1234567890 123456    12345678901234567890  1234567890123456789012345678901234567890
+			*****                0         1         2         3         4         5         6         7         8         9        10         110       120       130      14        15        16        17        18        19        20
+			*****                012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+		Else
+			cabec2 := If(cPaisLoc=="MEX",STR0044,STR0026)	//"NUMERO   DATA     TIPO             QUANTIDADE   USUARIO          AVALIACAO               DOCUMENTO     LC REJEICAO                      CODIGO                RAZAO SOCIAL"
+		EndIf
+	Else
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ATENCAO!!!Se for PYME retira as informacoes de LOTE e SUBLOTE³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If !__lPyme
+			cabec2 := If(cPaisLoc=="MEX",STR0045,STR0012)	//"NUMERO   DATA     TIPO             QUANTIDADE   USUARIO          AVALIACAO               DOCUMENTO     LC REJEICAO LOTE      SUBLOTE    CODIGO  RAZAO SOCIAL"
+			*****	               123456 1234567890 123456789012345 0123456789012 1234567890123456 12345678901234567890123 1234567890123 12 12345    1234567890 123456    123456  1234567890123456789012345678901234567890
+			*****                0         1         2         3         4         5         6         7         8         9        10         110       120       130      14        15        16        17        18
+			*****                012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345
+		Else
+			cabec2 := If(cPaisLoc=="MEX",STR0046,STR0025)	//"NUMERO   DATA     TIPO             QUANTIDADE   USUARIO          AVALIACAO               DOCUMENTO     LC REJEICAO                      CODIGO  RAZAO SOCIAL"
+		EndIf
+	EndIf
+EndIf
+
+// Caso nao utilize tamanho min, considera tamanho max e altera layout de impressao ref grupo 001 (Fornec)
+If aTamSXG[1] != aTamSXG[3]
+	nPosNome += aTamSXG[4]-aTamSXG[3]
+	If aReturn[8] == 1
+		nTamNome += aTamSXG[4]-aTamSXG[3]
+	EndIf
+Endif
+
+dbSelectArea("SD7")
+If aReturn[8]==1
+	dbSetOrder(1)
+	cCond := "cProdAnt == D7_FILIAL+D7_NUMERO+D7_PRODUTO+D7_LOCAL"
+Else
+	cNomArq := CriaTrab(Nil,.F.)
+	IndRegua("SD7",cNomArq,"D7_FILIAL+D7_PRODUTO+D7_NUMERO+D7_LOCAL",,,STR0013)		//"Selecinando Registros ..."
+	cCond := "cProdAnt == D7_FILIAL+D7_PRODUTO+D7_NUMERO+D7_LOCAL"
+Endif
+dbSeek(xFilial())
+
+SetRegua(RecCount())
+
+While !Eof() .And. D7_FILIAL == xFilial()
+	
+	cTexto:=""
+	
+	If lEnd
+		@PROW()+1,001 PSAY STR0014		//"CANCELADO PELO OPERADOR"
+		Exit
+	Endif
+	
+	IncRegua()		// Incrementa regua de impressao
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Filtra pelo numero das transferencias                        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If D7_NUMERO < mv_par01 .OR. D7_NUMERO > mv_par02
+		dbSkip()
+		Loop
+	Endif
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Filtra transferencias de acordo com os parametros            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If mv_par03 # 3
+		If (mv_par03==1 .and. D7_TIPO == 2) .or. ;            
+		   (mv_par03==2 .and. D7_TIPO == 1) .or. ;  
+		   (mv_par03==1 .and. D7_TIPO == 4) .or. ; 
+		   (mv_par03==2 .and. D7_TIPO == 3) .or. ;  
+		   (D7_TIPO ==8 .or.  D7_TIPO == 9)    
+  		   dbSkip()
+		   Loop
+		Endif
+	Endif
+	
+	If mv_par04 == 2 .And. (D7_TIPO == 6 .Or. D7_TIPO == 7 .Or. D7_TIPO == 9)
+		dbSkip()
+		Loop
+	Endif
+	
+	If mv_par04 == 1
+		If mv_par03 == 1 .And. D7_TIPO == 7
+			dbSkip()
+			Loop
+		ElseIf mv_par03 == 2 .And. D7_TIPO == 6
+			dbSkip()
+			Loop
+		Endif
+	Endif
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Verifica intervalo de data de emissao                        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If (D7_DATA < mv_par05 .Or. D7_DATA > mv_par06)
+		dbSkip()
+		Loop
+	Endif
+	
+	If D7_FORNECE < mv_par07 .Or. D7_FORNECE > mv_par08
+		dbSkip()
+		Loop
+	EndIf
+	
+	dbSelectArea("SD7")
+	
+	cArqCQ:=cDirCq+"CQ"+SD7->D7_NUMERO+".TXT"
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Abre arquivo CQ99999.TXT                     ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	cAuxTxt := MemoRead(cArqCQ)
+	
+	If li > 55
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+	Endif
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Adiciona 1 ao contador de registros impressos         ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	nCntImpr++
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Posiciona no arquivo de produtos                             ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	dbSelectArea("SB1")
+	dbSetOrder(1)
+	dbSeek(xFilial()+SD7->D7_PRODUTO)
+	dbSelectArea("SD7")
+	
+	lImpCab  := .T.
+	
+	If aReturn[8] == 1
+		cProdAnt := D7_FILIAL+D7_NUMERO+D7_PRODUTO+D7_LOCAL
+	Else
+		cProdAnt := D7_FILIAL+D7_PRODUTO+D7_NUMERO+D7_LOCAL
+	Endif
+	lImpNum :=  If(cNumAnt<>D7_NUMERO,.T.,.F.)
+	lImpSaldo:= .F.
+	nSaldo  := 0
+	
+	While !Eof() .And. &cCond
+		IncRegua()			// Incrementa regua
+		
+		If D7_NUMERO < mv_par01 .OR. D7_NUMERO > mv_par02
+			dbSkip()
+			Loop
+		Endif
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Filtra Transferencias de acordo com os parametros            ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	    If mv_par03 # 3
+		   If (mv_par03==1 .and. D7_TIPO == 2) .or. ;            
+		      (mv_par03==2 .and. D7_TIPO == 1) .or. ;  
+		      (mv_par03==1 .and. D7_TIPO == 4) .or. ; 
+		      (mv_par03==2 .and. D7_TIPO == 3) .or. ;  
+		      (D7_TIPO ==8 .or.  D7_TIPO == 9)    
+  		      dbSkip()
+		      Loop
+		   Endif
+	    Endif
+	
+	    If mv_par04 == 2 .And. (D7_TIPO == 6 .Or. D7_TIPO == 7 .Or. D7_TIPO == 9)
+		   dbSkip()
+		   Loop
+	    Endif
+	
+	    If mv_par04 == 1
+		   If mv_par03 == 1 .And. D7_TIPO == 7
+			  dbSkip()
+			  Loop
+		   ElseIf mv_par03 == 2 .And. D7_TIPO == 6
+			  dbSkip()
+			  Loop
+		   Endif
+	    Endif
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Verifica intervalo de data de emissao                        ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If (D7_DATA < mv_par05 .Or. D7_DATA > mv_par06)
+			dbSkip()
+			Loop
+		Endif
+		
+		If D7_FORNECE < mv_par07 .Or. D7_FORNECE > mv_par08
+			dbSkip()
+			Loop
+		EndIf
+		
+		dbSelectArea("SD7")
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Abre arquivo CQ99999.TXT                     ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		cTexto := fLeTxt(cAuxTxt)
+		
+		If li > 55
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+			lImpCab := .T.
+		Endif
+		
+		If aReturn[8] == 1		// Ordem Numero
+			If D7_TIPO <> 0
+				@ li,000 PSAY D7_DATA
+			Endif
+			If D7_TIPO == 0
+				If lProcessou := VerD7Tipo()
+					li++
+					fImpCab()		// Imprime cabecalhos
+					@ li,000 PSAY D7_DATA
+					@ li,011 PSAY STR0015	//"Qtd. Original"
+				EndIf
+			ElseIf D7_TIPO == 1
+				@ li,011 PSAY STR0016	//"Liberado"
+			ElseIf D7_TIPO == 2
+				@ li,011 PSAY STR0017	//"Rejeitado"
+			ElseIf D7_TIPO == 3
+				@ li,011 PSAY STR0028	//'Devolucao Liberacao '
+			ElseIf D7_TIPO == 4
+				@ li,011 PSAY STR0029	//'Devolucao Rejeicao  '
+			ElseIf D7_TIPO == 6
+				@ li,011 PSAY STR0018	//"Est. Liber."
+			ElseIf D7_TIPO == 7
+				@ li,011 PSAY STR0019	//"Est. Rej."
+			ElseIf D7_TIPO == 8
+				@ li,011 PSAY STR0030	//'Despesas Agregadas  '
+			ElseIf D7_TIPO == 9
+				@ li,011 PSAY STR0031	//'Estorno Despesas    '
+			Endif
+
+			If lProcessou
+				If D7_QTDE <= 0
+					@ li,028 PSAY D7_SALDO   Picture PesqPictQt("D7_SALDO",12)
+				Else
+					@ li,028 PSAY D7_QTDE    Picture PesqPictQt("D7_QTDE",12)
+				Endif
+				@ li,041 PSAY D7_USUARIO
+			EndIf
+		Else
+			If (lProcessou := If(D7_TIPO == 0, VerD7Tipo(), .T.))
+				If (cProAnt # D7_PRODUTO)
+					li++
+					fImpCab()
+					cProAnt := D7_PRODUTO
+					lImpSaldo := .T.
+				Endif
+				If  lImpNum
+					@ li,000 PSAY D7_NUMERO
+					lImpNum := .F.
+				Endif
+				@ li,007 PSAY D7_DATA
+				If D7_TIPO == 0
+					@ li,018 PSAY STR0015	//"Qtd. Original"
+				ElseIf D7_TIPO == 1
+					@ li,018 PSAY STR0016	//"Liberado"
+				ElseIf D7_TIPO == 2
+					@ li,018 PSAY STR0017	//"Rejeitado"
+			    ElseIf D7_TIPO == 3
+				    @ li,018 PSAY STR0028	//'Devolucao Liberacao '
+			    ElseIf D7_TIPO == 4
+				    @ li,018 PSAY STR0029	//'Devolucao Rejeicao  '
+				ElseIf D7_TIPO == 6
+					@ li,018 PSAY STR0018	//"Est. Liber."
+				ElseIf D7_TIPO == 7
+					@ li,018 PSAY STR0019	//"Est. Rej."
+			    ElseIf D7_TIPO == 8
+				    @ li,018 PSAY STR0030	//'Despesas Agregadas  '
+			    ElseIf D7_TIPO == 9
+				    @ li,018 PSAY STR0031	//'Estorno Despesas    '
+				Endif
+				If D7_QTDE <= 0
+					@ li,034 PSAY D7_SALDO	Picture PesqPictQt("D7_SALDO",12)
+				Else
+					@ li,034 PSAY D7_QTDE    Picture PesqPictQt("D7_QTDE",12)
+				Endif
+				@ li,048 PSAY D7_USUARIO
+			Endif
+		Endif
+		
+		If lProcessou
+
+			If MLCOUNT(cTexto,61) > 0		// Imprime texto de Observacao
+				ImpTxt(cTexto)
+			Else
+				If aReturn[8] == 1
+					@ Li,084 PSAY SD7->D7_LOCDEST
+					If SX5->(dbSeek(xFilial('SX5')+'43'+SD7->D7_MOTREJE,.F.))
+						@ Li,087 PSAY SD7->D7_MOTREJE + ' - ' + Left(X5Descri(),20)
+					EndIf
+					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+					//³ATENCAO!!!Se for PYME retira as informacoes de LOTE e SUBLOTE³
+					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+					If !__lPyme
+						@ Li,115 PSAY SD7->D7_LOTECTL
+						@ Li,126 PSAY SD7->D7_NUMLOTE
+					EndIf
+				Else
+					@ li, 089 PSAY SD7->D7_DOC
+					@ Li, 103+nIncCol PSAY SD7->D7_LOCDEST
+					@ Li, 106+nIncCol PSAY SD7->D7_MOTREJE
+					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+					//³ATENCAO!!!Se for PYME retira as informacoes de LOTE e SUBLOTE³
+					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+					If !__lPyme
+						@ Li, 115+nIncCol PSAY SD7->D7_LOTECTL
+						@ Li, 126+nIncCol PSAY SD7->D7_NUMLOTE
+					EndIf
+					@ Li, 136+nIncCol PSAY SD7->D7_FORNECE
+					SA2->(dbSeek(xFilial()+SD7->D7_FORNECE+SD7->D7_LOJA))
+					@ li,nPosNome+nIncCol PSAY Substr(SA2->A2_NOME,1,nTamNome)
+				EndIf
+			Endif
+			
+			// Acumula Saldos
+			nSaldo := nSaldo + (Iif(D7_TIPO==0,D7_SALDO,IiF(D7_TIPO==1 .Or. D7_TIPO==2,-D7_QTDE,D7_QTDE)))
+			If aReturn[8] == 1
+				lImpSaldo := .T.
+			Endif
+			li++
+		EndIf
+		dbSkip()
+	EndDo
+	If mv_par03 == 3 .And. mv_par04 == 1 .And. (lImpSaldo := If(aReturn[8] == 1,lImpSaldo,cProAnt <> D7_PRODUTO.And.lImpSaldo))
+		If aReturn[8] == 1
+			@li,13 PSAY STR0020	//"Saldo "
+			@li,28 PSAY nSaldo	Picture PesqPictQt("D7_QTDE",12)
+		Else
+			@li,18 PSAY STR0020	//"Saldo "
+			@li,34 PSAY nSaldo	Picture PesqPictQt("D7_QTDE",12)
+		Endif
+		Li+=2
+	ElseIf mv_par03 <> 3 .And. lProcessou .And. aReturn[8] == 1
+		Li+=2
+	Endif
+EndDo
+
+If li != 80
+	Roda(nCntImpr,cRodaTxt,Tamanho)
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Devolve a condicao original do arquivo principal             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SD7")
+RetIndex("SD7")
+Set Filter To
+dbSetOrder(1)
+
+If aReturn[8] == 2
+	If File(cNomArq+OrdBagExt())
+		Ferase(cNomArq+OrdBagExt())
+	Endif
+Endif
+
+If aReturn[5] == 1
+	Set Printer To
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return .T.
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³  fLeTXT  ³ Autor ³   Marcos Simidu       ³ Data ³ 20.11.96 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Le Arquivo de Controle de Transacoes do CQ.                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function fLeTXT(cTexto)
+
+cAcha:= STR0021+Str(D7_TIPO,1)+STR0022+D7_SEQ+"/A]"		//"[TIPO:"###"/SEQ:"
+nAt  := At(cAcha,cTexto)
+cAcha:= STR0021+Str(D7_TIPO,1)+STR0022+D7_SEQ+"/Z]"		//"[TIPO:"###"/SEQ:"
+nAt1 := At(cAcha,cTexto)
+If nAt#0 .And. nAt1#0
+	cTexto := Substr(cTexto,nAt+20,nAt1-nAt-21)
+Else
+	cTexto := ""
+EndIf
+
+Return(cTexto)
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³  ImpTXT  ³ Autor ³   Marcos Simidu       ³ Data ³ 21.11.96 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Imprime texto de avaliacao de transacoes do CQ.            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function ImpTXT(cTexto)
+LOCAL cAcentos := "€ú‡úúú…ú†ú úúˆúú‚ú¡ú“ú”ú•ú¢ú£ú"
+LOCAL cAcSubst := "C,c,A~A'a`a~a'E'e^e`e'i'o^o~o`o'U'"
+LOCAL nCol,ntam
+Local lFirst   := .T.
+Local i        := 0
+Local j        := 0
+Local nIncCol  := If(cPaisLoc == "MEX",9,0)
+
+If aReturn[8] == 1
+	nCol := 57
+	nTam := 26
+Else
+	nCol := 65
+	nTam := 23
+Endif
+For i:=1 To MLCOUNT(cTexto,nTam)
+	If li > 55
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		lImpCab := .T.
+		fImpCab()
+	Endif
+	cLine:=MEMOLINE(cTexto,nTam,i,,.T.)
+	cImpLin:=""
+	For j:=1 TO LEN(cLine)
+		cImpCar:=SubStr(cLine,j,1)
+		If cImpCar == Chr(13)
+			cImpCar := " "
+		EndIf
+		IF AT(cImpCar,cAcentos)>0
+			cImpCar:=SubStr(cAcSubst,AT(cImpCar,cAcentos),1)+CHR(8)+SUBSTR(cAcSubSt,AT(cImpCar,cAcentos)+1,1)
+		EndIF
+		cImpLin:=cImpLin+cImpCar
+	Next j
+	@li,nCol PSAY cImpLin
+	If lFirst
+		lFirst := .F.
+		If aReturn[8] == 1
+			@ Li, 085 PSAY SD7->D7_LOCDEST
+			If SX5->(dbSeek(xFilial('SX5')+'43'+SD7->D7_MOTREJE,.F.))
+				@ Li, 088 PSAY SD7->D7_MOTREJE + ' - ' + Left(X5Descri(),20)
+			EndIf
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ATENCAO!!!Se for PYME retira as informacoes de LOTE e SUBLOTE³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			If !__lPyme
+				@ Li, 116 PSAY SD7->D7_LOTECTL
+				@ Li, 127 PSAY SD7->D7_NUMLOTE
+			EndIf
+		Else
+			@ li, 090 PSAY SD7->D7_DOC
+			@ Li, 104+nIncCol PSAY SD7->D7_LOCDEST
+			@ Li, 107+nIncCol PSAY SD7->D7_MOTREJE
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ATENCAO!!!Se for PYME retira as informacoes de LOTE e SUBLOTE³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			If !__lPyme
+				@ Li, 116+nIncCol PSAY SD7->D7_LOTECTL
+				@ Li, 127+nIncCol PSAY SD7->D7_NUMLOTE
+			EndIf
+			@ Li, 137+nIncCol PSAY SD7->D7_FORNECE
+			SA2->(dbSeek(xFilial()+SD7->D7_FORNECE+SD7->D7_LOJA))
+			@ li,nPosNome+1+nIncCol PSAY Substr(SA2->A2_NOME,1,nTamNome)
+		Endif
+	EndIf
+	li++
+Next i
+li--
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ fImpCab  ³ Autor ³   Marcos Simidu       ³ Data ³ 21.11.96 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Imprime Cabecalho.                                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function fImpCab()
+
+Local nIncCol	:= If(cPaisLoc == "MEX",9,0)
+
+// Imprime Cabecalhos
+If lImpCab .And. aReturn[8] == 1
+	@ li,000 PSAY D7_NUMERO
+	@ li,008 PSAY D7_PRODUTO
+	@ li,024 PSAY Substr(SB1->B1_DESC,1,30)
+	@ li,055 PSAY SB1->B1_UM
+	@ li,062 PSAY D7_LOCAL
+	@ li,070 PSAY SD7->D7_DOC
+	@ li,084+nIncCol PSAY SD7->D7_ORIGLAN
+	@ li,095+nIncCol PSAY SD7->D7_FORNECE
+	SA2->(dbSeek(xFilial()+SD7->D7_FORNECE+SD7->D7_LOJA))
+	@ li,nPosNome+nIncCol PSAY Substr(SA2->A2_NOME,1,nTamNome)
+	li+=2
+	lImpCab := .F.
+ElseIf lImpCab .And. aReturn[8] == 2
+	@ li,000 PSAY D7_PRODUTO
+	@ li,017 PSAY Substr(SB1->B1_DESC,1,30)
+	@ li,049 PSAY SB1->B1_UM
+	@ li,055 PSAY D7_LOCAL
+	li+=2
+	lImpCab := .F.
+Endif
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³VerD7Tipo ³ Autor ³ Marcos Daniel         ³ Data ³ 29/12/03 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Verifica se o registro deve ser impresso.                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Function VerD7Tipo()
+
+Local	lProcessou:=.F.
+Local	nRegOri:=Recno()
+
+SD7->(dbSkip())
+
+While !Eof() .And. &cCond //If(aReturn[8] == 1,&cCond,.T.)
+	If mv_par03 # 3
+		If (mv_par03==1 .and. D7_TIPO == 2) ;
+			.or. (mv_par03==2 .and. D7_TIPO == 1)
+			dbSkip()
+			Loop
+		Endif
+	Endif
+	If mv_par04 == 2 .And. (D7_TIPO == 6 .Or. D7_TIPO == 7)
+		dbSkip()
+		Loop
+	Endif
+	If mv_par04 == 1
+		If mv_par03 == 1 .And. D7_TIPO == 7
+			dbSkip()
+			Loop
+		ElseIf mv_par03 == 2 .And. D7_TIPO == 6
+			dbSkip()
+			Loop
+		Endif
+	Endif
+	lProcessou:=.T.
+	Exit
+End
+dbGoto(nRegOri)
+
+Return lProcessou
+
+/*
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³AjustaSX1  ³ Autor ³ Felipe Toledo Bittar ³ Data ³ 22.04.08 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Funcao utilizada para ajustar o dicionario SX1             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ Nenhum                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MTR180	                                                  ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function AjustaSX1()
+
+Local cPergSpa  := "¿De Fecha ?"
+Local cPerg 	:= "MTR175"         
+Local nTamSX1   := Len(SX1->X1_GRUPO)
+
+dbSelectArea("SX1")
+dbSetOrder(1)
+If dbSeek(PADR(cPerg,nTamSX1)+"05") .And. Trim(Upper(SX1->X1_PERSPA)) != Upper(cPergSpa)
+	RecLock("SX1",.F.)
+	Replace X1_PERSPA	with cPergSpa
+	MsUnLock()
+EndIf
+
+Return

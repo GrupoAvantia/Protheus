@@ -1,0 +1,2272 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\matr972.ch"
+#line 16 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr972.prx"
+Function MATR972
+
+
+
+
+LOCAL aSv:=	GetArea()
+Local cVValid
+Local cVLayOut
+wnRel		:=	"MATR972"
+Titulo 		:=	If( cPaisLoc $ "ANG|PTG", "Nova Gia", "Nova GIA" )
+cDesc1 		:=	If( cPaisLoc $ "ANG|PTG", "Emissão De Listagem Para Auxiliar O Preenchimento Da Gia.", "Emissäo de listagem para auxiliar o preenchimento da GIA." )
+cDesc2 		:=	""
+cDesc3 		:=	If( cPaisLoc $ "ANG|PTG", "Irá imprimir os lancamentos fiscais conforme os parâmetros informados.", "Irá imprimir os lançamentos fiscais conforme os parâmetros informados." )
+aReturn		:=	{ If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ), 1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administraçäo" ), 2, 2, 1, "",1 }
+nomeprog	:=	"MATR972"
+cPerg		:=	"MTR972"
+cString		:=	"SF3"
+Tamanho		:=	"G"
+Limite 		:=	220
+nTipo		:=	18
+cabec1 		:=	SM0->M0_FILIAL
+cabec2 		:=	""
+cabec3 		:=	""
+m_pag		:=	1
+cbtxt		:=	SPACE(10)
+cbcont 		:=	0
+
+AjustaSx1 (cPerg)
+
+
+
+nLastKey	:=	0
+wnrel		:=	SetPrint(cString,wnrel,cPerg,Titulo,cDesc1,cDesc2,cDesc3, .F. ,"", .F. ,Tamanho,, .F. )
+If nLastKey==27
+  	dbClearFilter()
+  	Return
+Endif
+SetDefault(aReturn,cString)
+If nLastKey==27
+  	dbClearFilter()
+  	Return
+Endif
+
+Pergunte(cPerg, .F. )
+cVValid     :=  mv_par14
+cVLayOut    :=  mv_par15
+
+
+
+
+
+
+
+
+If !((cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210"))
+	Aviso( If( cPaisLoc $ "ANG|PTG", "Atenção !", "Atencao !" ) , If( cPaisLoc $ "ANG|PTG", "Não existe a versão de validação ou da visualização indicada ", "Não existe a Versão do Validador ou do Layout indicado " )+cVValid+" "+ cVLayOut +". "+ If( cPaisLoc $ "ANG|PTG", "Última versão do validador e do layout são 0780 e 0208", "Ultima Versão do Validador e do Layout são 0780 e 0208" ) , {"Ok" } )
+	Return
+Else
+	RptStatus({|lEnd| R972Imp(@lEnd,wnRel,cString,Tamanho)},titulo)
+	If aReturn[5]==1
+	  	Set( 24, "" )
+	   ourspool(wnrel)
+	Endif
+EndIf
+MS_FLUSH()
+
+RestArea(aSv)
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R972Imp(lEnd,wnRel,cString,Tamanho)
+
+
+
+PRIVATE nPagina		:=	1
+PRIVATE	nLin	    :=	80
+PRIVATE	lAbortPrint	:= .F. 
+PRIVATE	aApuracao
+Private	cArqCabec   := ""
+Private cArqCFO     := ""
+Private cArqInt     := ""
+Private cArqZFM     := ""
+Private cArqOcor    := ""
+Private cArqIE      := ""
+Private	cArqDIPAM   := ""
+Private cArqIeSt    := ""
+Private cArqIeSd    := ""
+Private cArqExpt    := ""
+Private cIndSF3	    := ""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+pergunte(cPerg, .F. )
+
+
+
+PRIVATE	dDtIni		:=	mv_par01
+PRIVATE	dDtFim		:=	mv_par02
+PRIVATE	nTipoGia	:=	mv_par03
+PRIVATE	nMoviment	:=	mv_par04
+PRIVATE	nTransmit	:=	mv_par05
+PRIVATE	nSaldoST	:=	mv_par06
+PRIVATE	nRegime		:=	mv_par07
+PRIVATE	nMes		:=	mv_par08
+PRIVATE	nAno		:=	mv_par09
+PRIVATE	nMesIni		:=	mv_par10
+PRIVATE	nAnoIni		:=	mv_par11
+PRIVATE	cNrLivro	:=	mv_par12
+PRIVATE nICMSFIX	:=	mv_par13
+Private cVValid     :=  mv_par14
+Private cVLayOut    :=  mv_par15
+PRIVATE nTotDeb		:= 0
+PRIVATE	nTotCred	:= 0
+PRIVATE nSaldPer	:= 0
+PRIVATE	nTDebST		:= 0
+PRIVATE nTCredST	:= 0
+PRIVATE	AL			:=	{}
+PRIVATE	cPictVal	:=	"@E) 999,999,999.99"
+Private	cFilDe		:=	Iif (Empty (mv_par16+mv_par17), cFilAnt, mv_par16)
+Private	cFilAte		:=	Iif (Empty (mv_par17), cFilAnt, mv_par17)
+Private nGeraTransp :=  mv_par18
+Private nSelFil     :=  mv_par19
+
+
+
+
+aApuracao := A970ArqIC( .T. )
+
+
+
+
+a972CriaTemp()
+
+
+
+a972MontTrab(aApuracao, .F. ,dDtIni,dDtFim,cNrLivro,nRegime,cFilDe,cFilAte,cVLayOut,nSelFil)
+
+
+
+(cArqCFO)->(dbSeek("1", .T. ))
+If !lAbortPrint .and.  (cArqCFO)->(!eof())
+	R972CFOEnt()
+EndIf
+
+
+
+(cArqCFO)->(dbSeek("5", .T. ))
+
+If !lAbortPrint .and.  (cArqCFO)->(!eof())
+	R972CFOSai()
+Endif
+
+
+
+(cArqInt)->(dbSeek("1", .t. ))
+
+If !lAbortPrint .and.  (cArqInt)->(!eof())
+	R972UFEnt()
+EndIf
+
+
+
+(cArqInt)->(dbSeek("5", .t. ))
+If !lAbortPrint .and.  (cArqInt)->(!eof())
+	R972UFSai()
+EndIf
+
+
+
+If !lAbortPrint .And.  (cArqZFM)->(LastRec()) > 0
+	R972ZFM()
+EndIf
+
+
+
+If !lAbortPrint
+	R972Apur(1)
+EndIf
+
+
+
+If !lAbortPrint
+	R972Apur(2)
+EndIf
+roda(cbcont,cbtxt,Tamanho)
+
+
+
+
+If File(cArqCabec+GetDBExtension())
+	dbSelectArea(cArqCabec)
+	dbCloseArea()
+	Ferase(cArqCabec+GetDBExtension())
+	Ferase(cArqCabec+OrdBagExt())
+Endif
+
+If File(cArqCFO+GetDBExtension())
+	dbSelectArea(cArqCFO)
+	dbCloseArea()
+	Ferase(cArqCFO+GetDBExtension())
+	Ferase(cArqCFO+OrdBagExt())
+Endif
+
+If File(cArqInt+GetDBExtension())
+	dbSelectArea(cArqInt)
+	dbCloseArea()
+	Ferase(cArqInt+GetDBExtension())
+	Ferase(cArqInt+OrdBagExt())
+Endif
+If File(cArqZFM+GetDBExtension())
+	dbSelectArea(cArqZFM)
+	dbCloseArea()
+	Ferase(cArqZFM+GetDBExtension())
+	Ferase(cArqZFM+OrdBagExt())
+Endif
+
+If File(cArqOcor+GetDBExtension())
+	dbSelectArea(cArqOcor)
+	dbCloseArea()
+	Ferase(cArqOcor+GetDBExtension())
+	Ferase(cArqOcor+OrdBagExt())
+Endif
+
+If File(cArqIE+GetDBExtension())
+	dbSelectArea(cArqIE)
+	dbCloseArea()
+	Ferase(cArqIE+GetDBExtension())
+	Ferase(cArqIE+OrdBagExt())
+Endif
+
+
+
+
+
+
+
+
+
+
+
+If (cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210")
+
+	If File(cArqIeSt+GetDBExtension())
+		dbSelectArea(cArqIeSt)
+		dbCloseArea()
+		Ferase(cArqIeSt+GetDBExtension())
+		Ferase(cArqIeSt+OrdBagExt())
+	Endif
+
+	If File(cArqIeSd+GetDBExtension())
+		dbSelectArea(cArqIeSd)
+		dbCloseArea()
+		Ferase(cArqIeSd+GetDBExtension())
+		Ferase(cArqIeSd+OrdBagExt())
+	Endif
+   	If File(cArqExpt+GetDBExtension())
+		dbSelectArea(cArqExpt)
+		dbCloseArea()
+		Ferase(cArqExpt+GetDBExtension())
+		Ferase(cArqExpt+OrdBagExt())
+	Endif
+EndIf
+If File(cArqDIPAM+GetDBExtension())
+	dbSelectArea(cArqDIPAM)
+	dbCloseArea()
+	Ferase(cArqDIPAM+GetDBExtension())
+	Ferase(cArqDIPAM+OrdBagExt())
+Endif
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R972LayOut(nLayOut)
+
+Do Case
+	Case nLayOut==1
+		aL			:=	Array(07)
+		aL[01]	:=	Padc(If( cPaisLoc $ "ANG|PTG", "Contribuinte", "CONTRIBUINTE" ),144)
+		aL[02]	:=	Padc("============",144)
+		aL[03]	:=	"|==========================================================================================================================================|"
+		aL[04]	:=	If( cPaisLoc $ "ANG|PTG", "| Inscr. Estadual  |    C.n.p.j.        | Cnae      |tipo Da Gia      |regime Tributario  |referencia|ref.inicial|com Movimento|transmitida|", "| Inscr. Estadual  |    C.N.P.J.        | CNAE      |Tipo da GIA      |Regime Tributario  |Referencia|Ref.Inicial|Com Movimento|Transmitida|" )
+		aL[05]	:=	"|==================|====================|===========|=================|===================|==========|===========|=============|===========|"
+		aL[06]	:=	"| ###############  | ################## | ######### | ############### | ##################|  ####### |  #######  |   ###       |   ###     |"
+		aL[07]	:=	"|==========================================================================================================================================|"
+	Case nLayOut==2
+		aL			:=	Array(50)
+		aL[01]	:=	" "
+		aL[02]	:=	Padc(If( cPaisLoc $ "ANG|PTG", "Resumo por cfops - entradas( grupos 1, 2 e 3)", "RESUMO POR CFOPs - Entradas( Grupos 1, 2 e 3)" ),132)
+		aL[03]	:=	Padc("=============================================",132)
+        aL[04]	:=	" "
+		aL[05]	:="|=====================================================================================================================================================================================|"
+		aL[06]	:=If( cPaisLoc $ "ANG|PTG", "|                                                |    valores       |                          icms valores fiscais                             | imposto retido   |outros impostos   |", "|                                                |    VALORES       |                          ICMS VALORES FISCAIS                             | IMPOSTO RETIDO   |OUTROS IMPOSTOS   |" )
+		aL[07]	:="|                                                |                  |---------------------------------------------------------------------------|                  |                  |"
+		aL[08]	:=If( cPaisLoc $ "ANG|PTG", "|           código s fiscais                      |   contabeis      |  operações com crédito do imposto   |   operações sem crédito do imposto  |                  |                  |", "|           CODIGOS FISCAIS                      |   CONTABEIS      |  OPERACOES COM CREDITO DO IMPOSTO   |   OPERACOES SEM CREDITO DO IMPOSTO  |                  |                  |" )
+		aL[09]	:="|                                                |                  |-------------------------------------|-------------------------------------|                  |                  |"
+		aL[10]	:=If( cPaisLoc $ "ANG|PTG", "|                                                |                  |base de cálculo   |imposto creditado |isentas/n.tribut. | outras           |                  |                  |", "|                                                |                  |BASE DE CALCULO   |IMPOSTO CREDITADO |ISENTAS/N.TRIBUT. | OUTRAS           |                  |                  |" )
+		aL[11]	:="|================================================|==================|==================|==================|==================|==================|==================|==================|"
+		aL[12]	:=If( cPaisLoc $ "ANG|PTG", "| no distrito                                      |                  |                  |                  |                  |                  |                  |                  |", "| NO ESTADO                                      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[13]	:=If( cPaisLoc $ "ANG|PTG", "| compras         (1.11/1.14)-(1.101/1.126)      |                  |                  |                  |                  |                  |                  |                  |", "| Compras         (1.11/1.14)-(1.101/1.126)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[14]	:=If( cPaisLoc $ "ANG|PTG", "| transferencia   (1.21/1.24)-(1.151/1.154)      |                  |                  |                  |                  |                  |                  |                  |", "| Transferencia   (1.21/1.24)-(1.151/1.154)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[15]	:=If( cPaisLoc $ "ANG|PTG", "| devolução       (1.31/1.34)-(1.201/1.207)      |                  |                  |                  |                  |                  |                  |                  |", "| Devolucao       (1.31/1.34)-(1.201/1.207)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[16]	:=If( cPaisLoc $ "ANG|PTG", "| comp.en.eletr.  (1.41/1.46)-(1.251/1.257)      |                  |                  |                  |                  |                  |                  |                  |", "| Comp.En.Eletr.  (1.41/1.46)-(1.251/1.257)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[17]	:=If( cPaisLoc $ "ANG|PTG", "| aq.serv.comun.  (1.51/1.55)-(1.301/1.305)      |                  |                  |                  |                  |                  |                  |                  |", "| Aq.Serv.Comun.  (1.51/1.55)-(1.301/1.305)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[18]	:=If( cPaisLoc $ "ANG|PTG", "| aq.serv.transp. (1.61/1.65)-(1.351/1.355)      |                  |                  |                  |                  |                  |                  |                  |", "| Aq.Serv.Transp. (1.61/1.65)-(1.351/1.355)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[19]	:=If( cPaisLoc $ "ANG|PTG", "| subst.trib.     (1.71/1.79)-(1.401/1.411)      |                  |                  |                  |                  |                  |                  |                  |", "| Subst.Trib.     (1.71/1.79)-(1.401/1.411)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[20]	:=If( cPaisLoc $ "ANG|PTG", "| outras               (1.91)-(1.551)            |                  |                  |                  |                  |                  |                  |                  |", "| Outras               (1.91)-(1.551)            |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[21]	:=If( cPaisLoc $ "ANG|PTG", "| outras          (1.92/1.99)-(1.552/1.949)      |                  |                  |                  |                  |                  |                  |                  |", "| Outras          (1.92/1.99)-(1.552/1.949)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[22]	:=If( cPaisLoc $ "ANG|PTG", "| outras             (1.99.1)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras             (1.99.1)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[23]	:=If( cPaisLoc $ "ANG|PTG", "| outras             (1.99.9)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras             (1.99.9)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[24]	:=If( cPaisLoc $ "ANG|PTG", "| de outros distritos                              |                  |                  |                  |                  |                  |                  |                  |", "| DE OUTROS ESTADOS                              |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[25]	:=If( cPaisLoc $ "ANG|PTG", "| compras         (2.11/2.14)-(2.101/2.126)      |                  |                  |                  |                  |                  |                  |                  |", "| Compras         (2.11/2.14)-(2.101/2.126)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[26]	:=If( cPaisLoc $ "ANG|PTG", "| transferencia   (2.21/2.24)-(1.251/1.257)      |                  |                  |                  |                  |                  |                  |                  |", "| Transferencia   (2.21/2.24)-(1.251/1.257)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[27]	:=If( cPaisLoc $ "ANG|PTG", "| devolução       (2.31/2.34)-(2.201/2.207)      |                  |                  |                  |                  |                  |                  |                  |", "| Devolucao       (2.31/2.34)-(2.201/2.207)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[28]	:=If( cPaisLoc $ "ANG|PTG", "| comp.en.eletr.  (2.41/2.46)-(2.251/2.257)      |                  |                  |                  |                  |                  |                  |                  |", "| Comp.En.Eletr.  (2.41/2.46)-(2.251/2.257)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[29]	:=If( cPaisLoc $ "ANG|PTG", "| aq.serv.comun.  (2.51/2.55)-(2.301/2.305)      |                  |                  |                  |                  |                  |                  |                  |", "| Aq.Serv.Comun.  (2.51/2.55)-(2.301/2.305)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[30]	:=If( cPaisLoc $ "ANG|PTG", "| aq.serv.transp. (2.61/2.65)-(2.351/2.355)      |                  |                  |                  |                  |                  |                  |                  |", "| Aq.Serv.Transp. (2.61/2.65)-(2.351/2.355)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[31]	:=If( cPaisLoc $ "ANG|PTG", "| subst.trib.     (2.71/2.79)-(2.401/2.411)      |                  |                  |                  |                  |                  |                  |                  |", "| Subst.Trib.     (2.71/2.79)-(2.401/2.411)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[32]	:=If( cPaisLoc $ "ANG|PTG", "| outras               (2.91)-(2.551)            |                  |                  |                  |                  |                  |                  |                  |", "| Outras               (2.91)-(2.551)            |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[33]	:=If( cPaisLoc $ "ANG|PTG", "| outras          (2.92/2.99)-(2.552/2.949)      |                  |                  |                  |                  |                  |                  |                  |", "| Outras          (2.92/2.99)-(2.552/2.949)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[34]	:=If( cPaisLoc $ "ANG|PTG", "| outras             (2.99.1)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras             (2.99.1)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[35]	:=If( cPaisLoc $ "ANG|PTG", "| outras             (2.99.9)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras             (2.99.9)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[36]	:=If( cPaisLoc $ "ANG|PTG", "| do exterior                                    |                  |                  |                  |                  |                  |                  |                  |", "| DO EXTERIOR                                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[37]	:=If( cPaisLoc $ "ANG|PTG", "| compras         (3.11/3.13)-(3.101/3.126)      |                  |                  |                  |                  |                  |                  |                  |", "| Compras         (3.11/3.13)-(3.101/3.126)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[38]	:=If( cPaisLoc $ "ANG|PTG", "| devolução       (3.21/3.24)-(3.201/3.207)      |                  |                  |                  |                  |                  |                  |                  |", "| Devolucao       (3.21/3.24)-(3.201/3.207)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[39]	:=If( cPaisLoc $ "ANG|PTG", "| comp.en.eletrica     (3.31)-(3.251)            |                  |                  |                  |                  |                  |                  |                  |", "| Comp.En.Eletrica     (3.31)-(3.251)            |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[40]	:=If( cPaisLoc $ "ANG|PTG", "| aq.serv.comunicação  (3.41)-(3.301)            |                  |                  |                  |                  |                  |                  |                  |", "| Aq.Serv.Comunicacao  (3.41)-(3.301)            |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[41]	:=If( cPaisLoc $ "ANG|PTG", "| aq.serv.transp. (3.51/3.54)-(3.351/3.354)      |                  |                  |                  |                  |                  |                  |                  |", "| Aq.Serv.Transp. (3.51/3.54)-(3.351/3.354)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[42]	:=If( cPaisLoc $ "ANG|PTG", "| outras               (3.91)-(3.551)            |                  |                  |                  |                  |                  |                  |                  |", "| Outras               (3.91)-(3.551)            |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[43]	:=If( cPaisLoc $ "ANG|PTG", "| outras               (3.94)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras               (3.94)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[44]	:=If( cPaisLoc $ "ANG|PTG", "| outras          (3.97/3.99)-(3.556/3.949)      |                  |                  |                  |                  |                  |                  |                  |", "| Outras          (3.97/3.99)-(3.556/3.949)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[45]	:=If( cPaisLoc $ "ANG|PTG", "| outras             (3.99.1)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras             (3.99.1)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[46]	:=If( cPaisLoc $ "ANG|PTG", "| outras             (3.99.9)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras             (3.99.9)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[47]	:="|                                           #####|##################|##################|##################|##################|##################|##################|##################|"
+		aL[48]	:="|------------------------------------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|"
+		aL[49]	:=If( cPaisLoc $ "ANG|PTG", "| totais                                         |##################|##################|##################|##################|##################|##################|##################|", "| TOTAIS                                         |##################|##################|##################|##################|##################|##################|##################|" )
+		aL[50]	:="| ########################################  #####|                  |                  |                  |                  |                  |                  |                  |"
+
+	Case nLayOut==3
+		aL			:=	Array(52)
+		aL[01]	:=	" "
+		aL[02]	:=	Padc(If( cPaisLoc $ "ANG|PTG", "Resumo por cfops - saidas( grupos 5, 6 e 7)", "RESUMO POR CFOPs - SAIDAS( Grupos 5, 6 e 7)" ),132)
+		aL[03]	:=	Padc("===========================================",132)
+        aL[04]	:=	" "
+		aL[05]	:="|=====================================================================================================================================================================================|"
+		aL[06]	:=If( cPaisLoc $ "ANG|PTG", "|                                                |    valores       |                          icms valores fiscais                             | imposto retido   |outros impostos   |", "|                                                |    VALORES       |                          ICMS VALORES FISCAIS                             | IMPOSTO RETIDO   |OUTROS IMPOSTOS   |" )
+		aL[07]	:="|                                                |                  |---------------------------------------------------------------------------|                  |                  |"
+		aL[08]	:=If( cPaisLoc $ "ANG|PTG", "|       fiscais                                  |   contabeis      |  operações com debito do imposto    |   operações sem debito do imposto   |                  |                  |", "|       FISCAIS                                  |   CONTABEIS      |  OPERACOES COM DEBITO DO IMPOSTO    |   OPERACOES SEM DEBITO DO IMPOSTO   |                  |                  |" )
+		aL[09]	:="|                                                |                  |-------------------------------------|-------------------------------------|                  |                  |"
+		aL[10]	:=If( cPaisLoc $ "ANG|PTG", "|                                                |                  |base de cálculo   |imposto creditado |isentas/n.tribut. | outras           |                  |                  |", "|                                                |                  |BASE DE CALCULO   |IMPOSTO CREDITADO |ISENTAS/N.TRIBUT. | OUTRAS           |                  |                  |" )
+		aL[11]	:="|================================================|==================|==================|==================|==================|==================|==================|==================|"
+		aL[12]	:=If( cPaisLoc $ "ANG|PTG", "| no distrito                                      |                  |                  |                  |                  |                  |                  |                  |", "| NO ESTADO                                      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[13]	:=If( cPaisLoc $ "ANG|PTG", "| vendas          (5.11/5.17)-(5.101/5.126)      |                  |                  |                  |                  |                  |                  |                  |", "| Vendas          (5.11/5.17)-(5.101/5.126)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[14]	:=If( cPaisLoc $ "ANG|PTG", "| transferencia   (5.21/5.26)-(5.151/5.156)      |                  |                  |                  |                  |                  |                  |                  |", "| Transferencia   (5.21/5.26)-(5.151/5.156)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[15]	:=If( cPaisLoc $ "ANG|PTG", "| devolução       (5.31/5.34)-(5.201/5.207)      |                  |                  |                  |                  |                  |                  |                  |", "| Devolucao       (5.31/5.34)-(5.201/5.207)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[16]	:=If( cPaisLoc $ "ANG|PTG", "| venda en.eletr. (5.41/5.45)-(5.251/5.258)      |                  |                  |                  |                  |                  |                  |                  |", "| Venda En.Eletr. (5.41/5.45)-(5.251/5.258)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[17]	:=If( cPaisLoc $ "ANG|PTG", "| prest.serv.com. (5.51/5.53)-(5.301/5.307)      |                  |                  |                  |                  |                  |                  |                  |", "| Prest.Serv.Com. (5.51/5.53)-(5.301/5.307)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[18]	:=If( cPaisLoc $ "ANG|PTG", "| prest.serv.tran.(5.61/5.63)-(5.351/5.357)      |                  |                  |                  |                  |                  |                  |                  |", "| Prest.Serv.Tran.(5.61/5.63)-(5.351/5.357)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[19]	:=If( cPaisLoc $ "ANG|PTG", "| subst.trib.     (5.71/5.79)-(5.401/5.411)      |                  |                  |                  |                  |                  |                  |                  |", "| Subst.Trib.     (5.71/5.79)-(5.401/5.411)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[20]	:=If( cPaisLoc $ "ANG|PTG", "| outras          (5.91/5.94)-(5.551/5.902)      |                  |                  |                  |                  |                  |                  |                  |", "| Outras          (5.91/5.94)-(5.551/5.902)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[21]	:=If( cPaisLoc $ "ANG|PTG", "| outras               (5.95)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras               (5.95)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[22]	:=If( cPaisLoc $ "ANG|PTG", "| outras          (5.96/5.99)-(5.949)            |                  |                  |                  |                  |                  |                  |                  |", "| Outras          (5.96/5.99)-(5.949)            |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[23]	:=If( cPaisLoc $ "ANG|PTG", "| outras             (5.99.1)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras             (5.99.1)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[24]	:=If( cPaisLoc $ "ANG|PTG", "| outras             (5.99.9)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras             (5.99.9)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[25]	:=If( cPaisLoc $ "ANG|PTG", "| de outros distritos                              |                  |                  |                  |                  |                  |                  |                  |", "| DE OUTROS ESTADOS                              |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[26]	:=If( cPaisLoc $ "ANG|PTG", "| vendas          (6.11/6.19)-(6.101/6.108)      |                  |                  |                  |                  |                  |                  |                  |", "| Vendas          (6.11/6.19)-(6.101/6.108)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[27]	:=If( cPaisLoc $ "ANG|PTG", "| transferencia   (6.21/6.26)-(6.151/6.156)      |                  |                  |                  |                  |                  |                  |                  |", "| Transferencia   (6.21/6.26)-(6.151/6.156)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[28]	:=If( cPaisLoc $ "ANG|PTG", "| devolução       (6.31/6.34)-(6.201/6.207)      |                  |                  |                  |                  |                  |                  |                  |", "| Devolucao       (6.31/6.34)-(6.201/6.207)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[29]	:=If( cPaisLoc $ "ANG|PTG", "| venda en.eletr. (6.41/6.45)-(6.251/6.258)      |                  |                  |                  |                  |                  |                  |                  |", "| Venda En.Eletr. (6.41/6.45)-(6.251/6.258)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[30]	:=If( cPaisLoc $ "ANG|PTG", "| prest.serv.com. (6.51/6.53)-(6.301/6.307)      |                  |                  |                  |                  |                  |                  |                  |", "| Prest.Serv.Com. (6.51/6.53)-(6.301/6.307)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[31]	:=If( cPaisLoc $ "ANG|PTG", "| prest.serv.tran.(6.61/6.63)-(6.351/6.357)      |                  |                  |                  |                  |                  |                  |                  |", "| Prest.Serv.Tran.(6.61/6.63)-(6.351/6.357)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[32]	:=If( cPaisLoc $ "ANG|PTG", "| subst.trib.     (6.71/6.79)-(6.401/6.411)      |                  |                  |                  |                  |                  |                  |                  |", "| Subst.Trib.     (6.71/6.79)-(6.401/6.411)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[33]	:=If( cPaisLoc $ "ANG|PTG", "| remessa de produção  6.86      |                  |                  |                  |                  |                  |                  |                  |", "| Remessa de Producao  6.86      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[34]	:=If( cPaisLoc $ "ANG|PTG", "| outras          (6.91/6.94)-(6.551/6.902)      |                  |                  |                  |                  |                  |                  |                  |", "| Outras          (6.91/6.94)-(6.551/6.902)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[35]	:=If( cPaisLoc $ "ANG|PTG", "| outras          (6.96/6.99)-(6.904/6.949)      |                  |                  |                  |                  |                  |                  |                  |", "| Outras          (6.96/6.99)-(6.904/6.949)      |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[36]	:=If( cPaisLoc $ "ANG|PTG", "| outras               (6.95)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras               (6.95)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[37]	:=If( cPaisLoc $ "ANG|PTG", "| outras             (6.99.1)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras             (6.99.1)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[38]	:=If( cPaisLoc $ "ANG|PTG", "| outras             (6.99.9)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras             (6.99.9)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[39]	:=If( cPaisLoc $ "ANG|PTG", "| do exterior                                    |                  |                  |                  |                  |                  |                  |                  |", "| DO EXTERIOR                                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[40]	:=If( cPaisLoc $ "ANG|PTG", "| vendas                  (7.11-7.17,7.101-7.127)|                  |                  |                  |                  |                  |                  |                  |", "| Vendas                  (7.11-7.17,7.101-7.127)|                  |                  |                  |                  |                  |                  |                  |" )
+		aL[41]	:=If( cPaisLoc $ "ANG|PTG", "| devolução   (7.31-7.34,7.201-7.211,7.553,7.556)|                  |                  |                  |                  |                  |                  |                  |", "| Devolucao   (7.31-7.34,7.201-7.211,7.553,7.556)|                  |                  |                  |                  |                  |                  |                  |" )
+		aL[42]	:=If( cPaisLoc $ "ANG|PTG", "| venda en.eletrica    (7.41)-(7.251)            |                  |                  |                  |                  |                  |                  |                  |", "| Venda En.Eletrica    (7.41)-(7.251)            |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[43]	:=If( cPaisLoc $ "ANG|PTG", "| prest.serv.com.      (7.51)                    |                  |                  |                  |                  |                  |                  |                  |", "| Prest.Serv.Com.      (7.51)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[44]	:=If( cPaisLoc $ "ANG|PTG", "| prest.serv.tran.     (7.61)-(7.358)            |                  |                  |                  |                  |                  |                  |                  |", "| Prest.Serv.Tran.     (7.61)-(7.358)            |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[45]	:=If( cPaisLoc $ "ANG|PTG", "| outras               (7.99)-(7.949)            |                  |                  |                  |                  |                  |                  |                  |", "| Outras               (7.99)-(7.949)            |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[46]	:=If( cPaisLoc $ "ANG|PTG", "| outras             (7.99.1)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras             (7.99.1)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[47]	:=If( cPaisLoc $ "ANG|PTG", "| outras             (7.99.9)                    |                  |                  |                  |                  |                  |                  |                  |", "| Outras             (7.99.9)                    |                  |                  |                  |                  |                  |                  |                  |" )
+		aL[48]	:="|                                           #####|##################|##################|##################|##################|##################|##################|##################|"
+		aL[49]	:="|------------------------------------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|"
+		aL[50]	:=If( cPaisLoc $ "ANG|PTG", "| totais                                         |##################|##################|##################|##################|##################|##################|##################|", "| TOTAIS                                         |##################|##################|##################|##################|##################|##################|##################|" )
+		aL[51]	:="| ########################################  #####|                  |                  |                  |                  |                  |                  |                  |"
+		aL[52]	:=If( cPaisLoc $ "ANG|PTG", "| vendas                           (7.251, 7.551)|                  |                  |                  |                  |                  |                  |                  |", "| Vendas                           (7.251, 7.551)|                  |                  |                  |                  |                  |                  |                  |" )
+	Case nLayOut==4
+		aL			:=	Array(15)
+		aL[01]	:=	" "
+		aL[02]	:=	Padc(If( cPaisLoc $ "ANG|PTG", "Informação Das Operações E Prestações Interestaduais - Icms", "INFORMACAO DAS OPERACOES E PRESTACOES INTERESTADUAIS - ICMS" ),132)
+		aL[03]	:=	Padc("===========================================================",132)
+		aL[04]	:=	" "
+		aL[05]	:=	Padc(If( cPaisLoc $ "ANG|PTG", "Entradas De Mercadorias, Bens E/ou Aquisições De Serviço  S", "ENTRADAS DE MERCADORIAS, BENS E/OU AQUISICOES DE SERVICOS" ),132)
+		aL[06]	:=	Padc("=========================================================",132)
+        aL[07]	:=	" "
+		aL[08]	:="|==============================================================================================================================|"
+		aL[09]	:=If( cPaisLoc $ "ANG|PTG", "| Cfop |  Código  E Unidade De  |    Valores    |   Base De     |    Imposto    |   Outras      |icms Cobrado P/subst.tributaria|", "| CFOP |  CODIGO E UNIDADE DE  |    VALORES    |   BASE DE     |    IMPOSTO    |   OUTRAS      |ICMS COBRADO P/SUBST.TRIBUTARIA|" )
+		aL[10]	:="|      |                       |               |               |               |               |-------------------------------|"
+		aL[11]	:=If( cPaisLoc $ "ANG|PTG", "|      |  Federação De Origem  |   Contabeis   |   Cálculo     |               |               |petroleo/energ.|outros Produtos|", "|      |  FEDERACAO DE ORIGEM  |   CONTABEIS   |   CALCULO     |               |               |PETROLEO/ENERG.|OUTROS PRODUTOS|" )
+		aL[12]	:="|======|=======================|===============|===============|===============|===============|===============|===============|"
+		aL[13]	:="|------|-----------------------|---------------|---------------|---------------|---------------|---------------|---------------|"
+		aL[14]	:="|######| ######################|###############|###############|###############|###############|###############|###############|"
+		aL[15]	:=If( cPaisLoc $ "ANG|PTG", "|      | totais                |###############|###############|###############|###############|###############|###############|", "|      | TOTAIS                |###############|###############|###############|###############|###############|###############|" )
+	Case nLayOut==5
+		aL			:=	Array(15)
+		aL[01]	:=	" "
+		aL[02]	:=	Padc(If( cPaisLoc $ "ANG|PTG", "Informação Das Operações E Prestações Interestaduais - Icms", "INFORMACAO DAS OPERACOES E PRESTACOES INTERESTADUAIS - ICMS" ),132)
+		aL[03]	:=	Padc("===========================================================",132)
+		aL[04]	:=	" "
+		aL[05]	:=	Padc(If( cPaisLoc $ "ANG|PTG", "Saidas De Mercadorias, Bens E/ou Prestações De Serviço  S", "SAIDAS DE MERCADORIAS, BENS E/OU PRESTACOES DE SERVICOS" ),132)
+		aL[06]	:=	Padc("=======================================================",132)
+      aL[07]	:=	" "
+		aL[08]	:="|===================================================================================================================================================================|"
+		aL[09]	:=If( cPaisLoc $ "ANG|PTG", "| cfop |  código  e unidade de  |          valores contabeis           |            base de cálculo          |    isentas ou    |     outras       | icms cobrado por |", "| CFOP |  CODIGO E UNIDADE DE  |          VALORES CONTABEIS           |            BASE DE CALCULO          |    ISENTAS OU    |     OUTRAS       | ICMS COBRADO POR |" )
+		aL[10]	:=If( cPaisLoc $ "ANG|PTG", "|      |                       |-------------------------------------|-------------------------------------|      não         |                  |   substituição   |", "|      |                       |-------------------------------------|-------------------------------------|      NAO         |                  |   SUBSTITUICAO   |" )
+		aL[11]	:=If( cPaisLoc $ "ANG|PTG", "|      |  federação de destino |não contribuinte  | contribuinte     |não contribuinte  | contribuinte     |    tributadas    |                  |    tributaria    |", "|      |  FEDERACAO DE DESTINO |NAO CONTRIBUINTE  | CONTRIBUINTE     |NAO CONTRIBUINTE  | CONTRIBUINTE     |    TRIBUTADAS    |                  |    TRIBUTARIA    |" )
+		aL[12]	:="|======|=======================|==================|==================|==================|==================|==================|==================|==================|"
+		aL[13]	:="|------|-----------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|"
+		aL[14]	:="|######| ######################|##################|##################|##################|##################|##################|##################|##################|"
+		aL[15]	:=If( cPaisLoc $ "ANG|PTG", "|      | totais                |##################|##################|##################|##################|##################|##################|##################|", "|      | TOTAIS                |##################|##################|##################|##################|##################|##################|##################|" )
+	Case nLayOut==6
+		aL:=Array(12)
+		aL[01]	:=	If( cPaisLoc $ "ANG|PTG", "                   Relação De Notas Fiscais De Saida Para Zfm/alc", "                   RELACAO DE NOTAS FISCAIS DE SAIDA PARA ZFM/ALC" )
+		aL[02]	:=	"                   =============================================="
+		aL[03]	:=	" "
+		aL[04]	:="|=======================================================================================|"
+		aL[05]	:=If( cPaisLoc $ "ANG|PTG", "|cfop  |  Emissão   |número | Valor            |cnpj Do Destinatario | Concelho Destino|", "|CFOP  |  EMISSAO   |NUMERO | VALOR            |CNPJ DO DESTINATARIO | MUNICIPIO DESTINO|" )
+		aL[06]	:="|======|============|=======|==================|=====================|==================|"
+		aL[07]	:="|######| ########## |###### |##################| ##################  |             #####|"
+		aL[08]	:=If( cPaisLoc $ "ANG|PTG", "|sub-total                   ##################|", "|SUB-TOTAL                   ##################|" )
+		aL[09]	:=If( cPaisLoc $ "ANG|PTG", "|total crial                 ##################|", "|TOTAL GERAL                 ##################|" )
+		aL[10]	:="|==============================================|"
+		aL[11]	:="|----------------------------------------------|----------------------------------------|"
+		aL[12]	:="|----------------------------------------------|"
+	Case nLayOut==7
+		aL:=Array(41)
+		aL[01]	:=" "
+		aL[02]	:=If( cPaisLoc $ "ANG|PTG", "                    Apuração Do Icms - Operações Proprias", "                    APURACAO DO ICMS - OPERACOES PROPRIAS" )
+		aL[03]	:="                    ====================================="
+		aL[04]	:=	" "
+		aL[05]	:=If( cPaisLoc $ "ANG|PTG", "                  Apuração Do Icms - Substituição Tributaria", "                  APURACAO DO ICMS - SUBSTITUICAO TRIBUTARIA" )
+		aL[06]	:="                  =========================================="
+      aL[07]	:=" "
+		aL[08]	:="|============================================================================"
+		aL[09]	:=If( cPaisLoc $ "ANG|PTG", "|     | debito do imposto                          |     |                  |", "|     | DEBITO DO IMPOSTO                          |     |                  |" )
+		aL[10]	:="|-----|--------------------------------------------|-----|------------------|"
+		aL[11]	:=If( cPaisLoc $ "ANG|PTG", "| 001 | por saidas com debito do imposto           | 051 |##################|", "| 001 | Por saidas com debito do imposto           | 051 |##################|" )
+		aL[12]	:=If( cPaisLoc $ "ANG|PTG", "| 002 | outros debitos                             |     |                  |", "| 002 | Outros debitos                             |     |                  |" )
+		aL[13]	:="|     |                                            | 052 |##################|"
+		aL[14]	:=If( cPaisLoc $ "ANG|PTG", "| 003 | estorno de créditos                        |     |                  |", "| 003 | Estorno de creditos                        |     |                  |" )
+		aL[15]	:="|     |                                            | 053 |##################|"
+		aL[16]	:="|-----|--------------------------------------------|-----|------------------|"
+		aL[17]	:=If( cPaisLoc $ "ANG|PTG", "| 005 | subtotal-debito( 051+052+053)              | 055 |##################|", "| 005 | SUBTOTAL-DEBITO( 051+052+053)              | 055 |##################|" )
+		aL[18]	:="|-----|--------------------------------------------|-----|------------------|"
+		aL[19]	:=If( cPaisLoc $ "ANG|PTG", "|     | crédito do imposto                         |     |                  |", "|     | CREDITO DO IMPOSTO                         |     |                  |" )
+		aL[20]	:="|-----|--------------------------------------------|-----|------------------|"
+		aL[21]	:=If( cPaisLoc $ "ANG|PTG", "| 006 | por entradas com crédito do imposto        | 056 |##################|", "| 006 | Por entradas com credito do imposto        | 056 |##################|" )
+		aL[22]	:=If( cPaisLoc $ "ANG|PTG", "| 007 | outros créditos                            |     |                  |", "| 007 | Outros Creditos                            |     |                  |" )
+		aL[23]	:="|     |                                            | 057 |##################|"
+		aL[24]	:=If( cPaisLoc $ "ANG|PTG", "| 008 | estorno de debitos                         |     |                  |", "| 008 | Estorno de debitos                         |     |                  |" )
+		aL[25]	:="|     |                                            | 058 |##################|"
+		aL[26]	:=If( cPaisLoc $ "ANG|PTG", "| 010 | subtotal( 056+057+058)                     | 060 |##################|", "| 010 | SUBTOTAL( 056+057+058)                     | 060 |##################|" )
+		aL[27]	:=If( cPaisLoc $ "ANG|PTG", "| 011 | saldo credor do período anterior           | 061 |##################|", "| 011 | Saldo Credor do periodo anterior           | 061 |##################|" )
+		aL[28]	:="|-----|--------------------------------------------|-----|------------------|"
+		aL[29]	:=If( cPaisLoc $ "ANG|PTG", "| 012 | total-crédito( 060+061)                    | 062 |##################|", "| 012 | TOTAL-CREDITO( 060+061)                    | 062 |##################|" )
+		aL[30]	:="|-----|--------------------------------------------|-----|------------------|"
+		aL[31]	:=If( cPaisLoc $ "ANG|PTG", "|     | apuração dos saldos                        |     |                  |", "|     | APURACAO DOS SALDOS                        |     |                  |" )
+		aL[32]	:="|-----|--------------------------------------------|-----|------------------|"
+		aL[33]	:=If( cPaisLoc $ "ANG|PTG", "| 013 | saldo devedor(055-062)                     | 063 |##################|", "| 013 | Saldo devedor(055-062)                     | 063 |##################|" )
+		aL[34]	:=If( cPaisLoc $ "ANG|PTG", "| 014 | deduções                                   | 064 |##################|", "| 014 | Deducoes                                   | 064 |##################|" )
+		aL[35]	:=If( cPaisLoc $ "ANG|PTG", "| 015 | imposto a recolher(063-064)                | 065 |##################|", "| 015 | Imposto a recolher(063-064)                | 065 |##################|" )
+		aL[36]	:=If( cPaisLoc $ "ANG|PTG", "| 016 | saldo credor a transportar(062-055)        | 060 |##################|", "| 016 | Saldo Credor a transportar(062-055)        | 060 |##################|" )
+		aL[37]	:="|===========================================================================|"
+		aL[38]	:=If( cPaisLoc $ "ANG|PTG", "| 014 | deduções                                   |     |                  |", "| 014 | Deducoes                                   |     |                  |" )
+		aL[39]	:=If( cPaisLoc $ "ANG|PTG", "|     |  icms fixado p/o período ##################|     |                  |", "|     |  ICMS Fixado p/o periodo ##################|     |                  |" )
+		aL[40]	:=If( cPaisLoc $ "ANG|PTG", "|     |  outras                  ##################| 064 |##################|", "|     |  Outras                  ##################| 064 |##################|" )
+		aL[41]	:=If( cPaisLoc $ "ANG|PTG", "|     | fixado a maior(064-063)                    | 067 |##################|", "|     | Fixado a maior(064-063)                    | 067 |##################|" )
+	Case nLayOut==8
+		aL:=Array(9)
+		aL[01]:=" "
+		aL[02]:=Padc(If( cPaisLoc $ "ANG|PTG", "Detalhamento de outros créditos( itens 007.04 a 007.07)", "DETALHAMENTO DE OUTROS CREDITOS( ITENS 007.04 A 007.07)" ),132)
+		aL[03]:=Padc("=======================================================",132)
+		aL[04]:=" "
+		aL[08]:="|=====================================================|"
+		aL[05]:=If( cPaisLoc $ "ANG|PTG", "| cod.subitem | i.e.remetente   |valor da factura   |", "| COD.SUBITEM | I.E.Remetente   |Valor da Nota Fiscal |" )
+		aL[06]:="|=============|=================|=====================|"
+		aL[07]:="|   ######    | ############### |  ################## |"
+		aL[06]:="|=====================================================|"
+		aL[09]:=If( cPaisLoc $ "ANG|PTG", "| valor total do subitem           ################## |", "| VALOR TOTAL DO SUBITEM           ################## |" )
+		aL[06]:="|=====================================================|"
+    Case nLayOut==9
+		aL			:=	Array(15)
+		aL[01]	:=	" "
+		aL[02]	:=	Padc(If( cPaisLoc $ "ANG|PTG", "Informação Das Operações E Prestações Interestaduais - Icms", "INFORMACAO DAS OPERACOES E PRESTACOES INTERESTADUAIS - ICMS" ),132)
+		aL[03]	:=	Padc("===========================================================",132)
+		aL[04]	:=	" "
+		aL[05]	:=	Padc(If( cPaisLoc $ "ANG|PTG", "Entradas De Mercadorias, Bens E/ou Aquisições De Serviço  S", "ENTRADAS DE MERCADORIAS, BENS E/OU AQUISICOES DE SERVICOS" ),132)
+		aL[06]	:=	Padc("=========================================================",132)
+        aL[07]	:=	" "
+	    aL[08]	:=	"|=============================================================================================================================|"
+	    aL[09]	:=	If( cPaisLoc $ "ANG|PTG", "| cfop |  código  e unidade de  |    valores       |   base de        |    outras        | icms cobrado p/ subst. tributaria   |", "| CFOP |  CODIGO E UNIDADE DE  |    VALORES       |   BASE DE        |    OUTRAS        | ICMS COBRADO P/ SUBST. TRIBUTARIA   |" )
+        aL[10]	:=	"|      |                       |                  |                  |                  |-------------------------------------|"
+        aL[11]	:=	If( cPaisLoc $ "ANG|PTG", "|      |  federação de origem  |   contabeis      |   cálculo        |                  |petroleo/energia  | outros produtos  |", "|      |  FEDERACAO DE ORIGEM  |   CONTABEIS      |   CALCULO        |                  |PETROLEO/ENERGIA  | OUTROS PRODUTOS  |" )
+        aL[12]	:=	"|======|=======================|==================|==================|==================|==================|==================|"
+        aL[13]	:=	"|------|-----------------------|------------------|------------------|------------------|------------------|------------------|"
+        aL[14]	:=	"|######| ######################|##################|##################|##################|##################|##################|"
+        aL[15]	:=	If( cPaisLoc $ "ANG|PTG", "|      | totais                |##################|##################|##################|##################|##################|", "|      | TOTAIS                |##################|##################|##################|##################|##################|" )
+    Case nLayOut==10
+        aL			:=	Array(15)
+		aL[01]	:=	" "
+		aL[02]	:=	Padc(If( cPaisLoc $ "ANG|PTG", "Informação Das Operações E Prestações Interestaduais - Icms", "INFORMACAO DAS OPERACOES E PRESTACOES INTERESTADUAIS - ICMS" ),132)
+		aL[03]	:=	Padc("===========================================================",132)
+		aL[04]	:=	" "
+		aL[05]	:=	Padc(If( cPaisLoc $ "ANG|PTG", "Saidas De Mercadorias, Bens E/ou Prestações De Serviço  S", "SAIDAS DE MERCADORIAS, BENS E/OU PRESTACOES DE SERVICOS" ),132)
+		aL[06]	:=	Padc("=======================================================",132)
+        aL[07]	:=	" "
+		aL[08]	:="|===============================================================================================================================================================|"
+		aL[09]	:=If( cPaisLoc $ "ANG|PTG", "| Cfop |  Código  E Unidade De  |          Valore Contabeis     |        Base De Cálculo        |    Isentas Ou |   Imposto     |     Outras    |icms Cobrado Por|", "| CFOP |  CODIGO E UNIDADE DE  |          VALORE CONTABEIS     |        BASE DE CALCULO        |    ISENTAS OU |   IMPOSTO     |     OUTRAS    |ICMS COBRADO POR|" )
+		aL[10]	:=If( cPaisLoc $ "ANG|PTG", "|      |                       |-------------------------------|-------------------------------|      não      |               |               |  substituição  |", "|      |                       |-------------------------------|-------------------------------|      NAO      |               |               |  SUBSTITUICAO  |" )
+		aL[11]	:=If( cPaisLoc $ "ANG|PTG", "|      |  federação de destino |não contribnt. | contribuinte  |não contribnt. | contribuinte  |    tributadas |               |               |   tributaria   |", "|      |  FEDERACAO DE DESTINO |NAO CONTRIBNT. | CONTRIBUINTE  |NAO CONTRIBNT. | CONTRIBUINTE  |    TRIBUTADAS |               |               |   TRIBUTARIA   |" )
+		aL[12]	:="|======|=======================|===============|===============|===============|===============|===============|===============|===============|================|"
+		aL[13]	:="|------|-----------------------|---------------|---------------|---------------|---------------|---------------|---------------|---------------|----------------|"
+		aL[14]	:="|######| ######################|###############|###############|###############|###############|###############|###############|###############|################|"
+		aL[15]	:=If( cPaisLoc $ "ANG|PTG", "|      | totais                |###############|###############|###############|###############|###############|###############|###############|################|", "|      | TOTAIS                |###############|###############|###############|###############|###############|###############|###############|################|" )
+	Case nLayOut==11
+		aL			:=	Array(52)
+		aL[01]	:=	" "
+		aL[02]	:=	Padc(If( cPaisLoc $ "ANG|PTG", "Resumo por cfops - entradas( grupos 1, 2 e 3)", "RESUMO POR CFOPs - Entradas( Grupos 1, 2 e 3)" ),132)
+		aL[03]	:=	Padc("=============================================",132)
+        aL[04]	:=	" "
+		aL[05]	:= "|================================================================================================================================================================================================|"
+		aL[06]	:= If( cPaisLoc $ "ANG|PTG", "|                                                |    Valores    |                          Icms Valores Fiscais                 | Imposto Retido|  Substituto   |  Substituido  |outros Impostos|", "|                                                |    VALORES    |                          ICMS VALORES FISCAIS                 | IMPOSTO RETIDO|  SUBSTITUTO   |  SUBSTITUIDO  |OUTROS IMPOSTOS|" )
+		aL[07]	:= "|                                                |               |---------------------------------------------------------------|               |               |               |               |"
+		aL[08]	:= If( cPaisLoc $ "ANG|PTG", "|               código s fiscais                  |   contabeis   |operações c/crédito do imposto |operações sem credt.do imposto |               |               |               |               |", "|               CODIGOS FISCAIS                  |   CONTABEIS   |OPERACOES C/CREDITO DO IMPOSTO |OPERACOES SEM CREDT.DO IMPOSTO |               |               |               |               |" )
+		aL[09]	:= "|                                                |               |-------------------------------|-------------------------------|               |               |               |               |"
+		aL[10]	:= If( cPaisLoc $ "ANG|PTG", "|                                                |               |base de calculo|imposto credit.|isent./n.tribt.| outras        |               |               |               |               |", "|                                                |               |BASE DE CALCULO|IMPOSTO CREDIT.|ISENT./N.TRIBT.| OUTRAS        |               |               |               |               |" )
+		aL[11]	:= "|================================================|===============|===============|===============|===============|===============|===============|===============|===============|===============|"
+		aL[12]	:= If( cPaisLoc $ "ANG|PTG", "| no distrito                                      |               |               |               |               |               |               |               |               |               |", "| NO ESTADO                                      |               |               |               |               |               |               |               |               |               |" )
+		aL[13]	:= If( cPaisLoc $ "ANG|PTG", "| compras         (1.11/1.14)-(1.101/1.126)      |               |               |               |               |               |               |               |               |               |", "| Compras         (1.11/1.14)-(1.101/1.126)      |               |               |               |               |               |               |               |               |               |" )
+		aL[14]	:= If( cPaisLoc $ "ANG|PTG", "| transferencia   (1.21/1.24)-(1.151/1.154)      |               |               |               |               |               |               |               |               |               |", "| Transferencia   (1.21/1.24)-(1.151/1.154)      |               |               |               |               |               |               |               |               |               |" )
+		aL[15]	:= If( cPaisLoc $ "ANG|PTG", "| devolução       (1.31/1.34)-(1.201/1.207)      |               |               |               |               |               |               |               |               |               |", "| Devolucao       (1.31/1.34)-(1.201/1.207)      |               |               |               |               |               |               |               |               |               |" )
+        aL[16]  := If( cPaisLoc $ "ANG|PTG", "| comp.en.eletr.  (1.41/1.46)-(1.251/1.257)      |               |               |               |               |               |               |               |               |               |", "| Comp.En.Eletr.  (1.41/1.46)-(1.251/1.257)      |               |               |               |               |               |               |               |               |               |" )
+		aL[17]	:= If( cPaisLoc $ "ANG|PTG", "| aq.serv.comun.  (1.51/1.55)-(1.301/1.305)      |               |               |               |               |               |               |               |               |               |", "| Aq.Serv.Comun.  (1.51/1.55)-(1.301/1.305)      |               |               |               |               |               |               |               |               |               |" )
+		aL[18]	:= If( cPaisLoc $ "ANG|PTG", "| aq.serv.transp. (1.61/1.65)-(1.351/1.355)      |               |               |               |               |               |               |               |               |               |", "| Aq.Serv.Transp. (1.61/1.65)-(1.351/1.355)      |               |               |               |               |               |               |               |               |               |" )
+		aL[19]	:= If( cPaisLoc $ "ANG|PTG", "| subst.trib.     (1.71/1.79)-(1.401/1.411)      |               |               |               |               |               |               |               |               |               |", "| Subst.Trib.     (1.71/1.79)-(1.401/1.411)      |               |               |               |               |               |               |               |               |               |" )
+		aL[20]	:= If( cPaisLoc $ "ANG|PTG", "| outras               (1.91)-(1.551)            |               |               |               |               |               |               |               |               |               |", "| Outras               (1.91)-(1.551)            |               |               |               |               |               |               |               |               |               |" )
+		aL[21]	:= If( cPaisLoc $ "ANG|PTG", "| outras          (1.92/1.99)-(1.552/1.949)      |               |               |               |               |               |               |               |               |               |", "| Outras          (1.92/1.99)-(1.552/1.949)      |               |               |               |               |               |               |               |               |               |" )
+		aL[22]	:= If( cPaisLoc $ "ANG|PTG", "| outras             (1.99.1)                    |               |               |               |               |               |               |               |               |               |", "| Outras             (1.99.1)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[23]	:= If( cPaisLoc $ "ANG|PTG", "| outras             (1.99.9)                    |               |               |               |               |               |               |               |               |               |", "| Outras             (1.99.9)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[24]	:= If( cPaisLoc $ "ANG|PTG", "| de outros distritos                              |               |               |               |               |               |               |               |               |               |", "| DE OUTROS ESTADOS                              |               |               |               |               |               |               |               |               |               |" )
+		aL[25]	:= If( cPaisLoc $ "ANG|PTG", "| compras         (2.11/2.14)-(2.101/2.126)      |               |               |               |               |               |               |               |               |               |", "| Compras         (2.11/2.14)-(2.101/2.126)      |               |               |               |               |               |               |               |               |               |" )
+		aL[26]	:= If( cPaisLoc $ "ANG|PTG", "| transferencia   (2.21/2.24)-(1.251/1.257)      |               |               |               |               |               |               |               |               |               |", "| Transferencia   (2.21/2.24)-(1.251/1.257)      |               |               |               |               |               |               |               |               |               |" )
+		aL[27]	:= If( cPaisLoc $ "ANG|PTG", "| devolução       (2.31/2.34)-(2.201/2.207)      |               |               |               |               |               |               |               |               |               |", "| Devolucao       (2.31/2.34)-(2.201/2.207)      |               |               |               |               |               |               |               |               |               |" )
+        aL[28]  := If( cPaisLoc $ "ANG|PTG", "| comp.en.eletr.  (2.41/2.46)-(2.251/2.257)      |               |               |               |               |               |               |               |               |               |", "| Comp.En.Eletr.  (2.41/2.46)-(2.251/2.257)      |               |               |               |               |               |               |               |               |               |" )
+		aL[29]	:= If( cPaisLoc $ "ANG|PTG", "| aq.serv.comun.  (2.51/2.55)-(2.301/2.305)      |               |               |               |               |               |               |               |               |               |", "| Aq.Serv.Comun.  (2.51/2.55)-(2.301/2.305)      |               |               |               |               |               |               |               |               |               |" )
+		aL[30]	:= If( cPaisLoc $ "ANG|PTG", "| aq.serv.transp. (2.61/2.65)-(2.351/2.355)      |               |               |               |               |               |               |               |               |               |", "| Aq.Serv.Transp. (2.61/2.65)-(2.351/2.355)      |               |               |               |               |               |               |               |               |               |" )
+		aL[31]	:= If( cPaisLoc $ "ANG|PTG", "| subst.trib.     (2.71/2.79)-(2.401/2.411)      |               |               |               |               |               |               |               |               |               |", "| Subst.Trib.     (2.71/2.79)-(2.401/2.411)      |               |               |               |               |               |               |               |               |               |" )
+		aL[32]	:= If( cPaisLoc $ "ANG|PTG", "| outras               (3.91)-(3.551)            |               |               |               |               |               |               |               |               |               |", "| Outras               (3.91)-(3.551)            |               |               |               |               |               |               |               |               |               |" )
+		aL[33]	:= If( cPaisLoc $ "ANG|PTG", "| outras          (2.92/2.99)-(2.552/2.949)      |               |               |               |               |               |               |               |               |               |", "| Outras          (2.92/2.99)-(2.552/2.949)      |               |               |               |               |               |               |               |               |               |" )
+		aL[34]	:= If( cPaisLoc $ "ANG|PTG", "| outras             (2.99.1)                    |               |               |               |               |               |               |               |               |               |", "| Outras             (2.99.1)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[35]	:= If( cPaisLoc $ "ANG|PTG", "| outras             (2.99.9)                    |               |               |               |               |               |               |               |               |               |", "| Outras             (2.99.9)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[36]	:= If( cPaisLoc $ "ANG|PTG", "| do exterior                                    |               |               |               |               |               |               |               |               |               |", "| DO EXTERIOR                                    |               |               |               |               |               |               |               |               |               |" )
+		aL[37]	:= If( cPaisLoc $ "ANG|PTG", "| compras         (3.11/3.13)-(3.101/3.126)      |               |               |               |               |               |               |               |               |               |", "| Compras         (3.11/3.13)-(3.101/3.126)      |               |               |               |               |               |               |               |               |               |" )
+		aL[38]	:= If( cPaisLoc $ "ANG|PTG", "| devolução       (3.21/3.24)-(3.201/3.207)      |               |               |               |               |               |               |               |               |               |", "| Devolucao       (3.21/3.24)-(3.201/3.207)      |               |               |               |               |               |               |               |               |               |" )
+		aL[39]	:= If( cPaisLoc $ "ANG|PTG", "| comp.en.eletrica     (3.31)-(3.251)            |               |               |               |               |               |               |               |               |               |", "| Comp.En.Eletrica     (3.31)-(3.251)            |               |               |               |               |               |               |               |               |               |" )
+		aL[40]	:= If( cPaisLoc $ "ANG|PTG", "| aq.serv.comunicação  (3.41)-(3.301)            |               |               |               |               |               |               |               |               |               |", "| Aq.Serv.Comunicacao  (3.41)-(3.301)            |               |               |               |               |               |               |               |               |               |" )
+		aL[41]	:= If( cPaisLoc $ "ANG|PTG", "| aq.serv.transp. (3.51/3.54)-(3.351/3.354)      |               |               |               |               |               |               |               |               |               |", "| Aq.Serv.Transp. (3.51/3.54)-(3.351/3.354)      |               |               |               |               |               |               |               |               |               |" )
+		aL[42]	:= If( cPaisLoc $ "ANG|PTG", "| outras               (3.91)-(3.551)            |               |               |               |               |               |               |               |               |               |", "| Outras               (3.91)-(3.551)            |               |               |               |               |               |               |               |               |               |" )
+		aL[43]	:= If( cPaisLoc $ "ANG|PTG", "| outras               (3.94)                    |               |               |               |               |               |               |               |               |               |", "| Outras               (3.94)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[44]	:= If( cPaisLoc $ "ANG|PTG", "| outras          (3.97/3.99)-(3.556/3.949)      |               |               |               |               |               |               |               |               |               |", "| Outras          (3.97/3.99)-(3.556/3.949)      |               |               |               |               |               |               |               |               |               |" )
+		aL[45]	:= If( cPaisLoc $ "ANG|PTG", "| outras             (3.99.1)                    |               |               |               |               |               |               |               |               |               |", "| Outras             (3.99.1)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[46]	:= If( cPaisLoc $ "ANG|PTG", "| outras             (3.99.9)                    |               |               |               |               |               |               |               |               |               |", "| Outras             (3.99.9)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[47]	:= "|                                           #####|###############|###############|###############|###############|###############|###############|###############|###############|###############|"
+		aL[48]	:= "|------------------------------------------------|---------------|---------------|---------------|---------------|---------------|---------------|---------------|---------------|---------------|"
+		aL[49]	:= If( cPaisLoc $ "ANG|PTG", "| totais                                         |###############|###############|###############|###############|###############|###############|###############|###############|###############|", "| TOTAIS                                         |###############|###############|###############|###############|###############|###############|###############|###############|###############|" )
+		aL[50]	:= "| ########################################  #####|               |               |               |               |               |               |               |               |               |"
+		aL[51]	:= If( cPaisLoc $ "ANG|PTG", "| entradas combust./lubrif.   (1.651/1.699)      |               |               |               |               |               |               |               |               |               |", "| Entradas Combust./Lubrif.   (1.651/1.699)      |               |               |               |               |               |               |               |               |               |" )
+		aL[52]	:= If( cPaisLoc $ "ANG|PTG", "| entradas combust./lubrif.   (2.651/2.699)      |               |               |               |               |               |               |               |               |               |", "| Entradas Combust./Lubrif.   (2.651/2.699)      |               |               |               |               |               |               |               |               |               |" )
+	Case nLayOut==12
+		aL			:=	Array(54)
+		aL[01]	:=	" "
+    	aL[02]	:=	Padc(If( cPaisLoc $ "ANG|PTG", "Resumo por cfops - saidas( grupos 5, 6 e 7)", "RESUMO POR CFOPs - SAIDAS( Grupos 5, 6 e 7)" ),132)
+		aL[03]	:=	Padc("===========================================",132)
+        aL[04]	:=	" "
+		aL[05]	:= "|================================================================================================================================================================================================|"
+		aL[06]	:= If( cPaisLoc $ "ANG|PTG", "|       Código S                                  |    Valores    |                          Icms Valores Fiscais                 | Imposto Retido|  Substituto   |  Substituido  |outros Impostos|", "|       CODIGOS                                  |    VALORES    |                          ICMS VALORES FISCAIS                 | IMPOSTO RETIDO|  SUBSTITUTO   |  SUBSTITUIDO  |OUTROS IMPOSTOS|" )
+		aL[07]	:= "|                                                |               |---------------------------------------------------------------|               |               |               |               |"
+		aL[08]	:= If( cPaisLoc $ "ANG|PTG", "|       fiscais                                  |   contabeis   |operações c/crédito do imposto |operações sem credt.do imposto |               |               |               |               |", "|       FISCAIS                                  |   CONTABEIS   |OPERACOES C/CREDITO DO IMPOSTO |OPERACOES SEM CREDT.DO IMPOSTO |               |               |               |               |" )
+		aL[09]	:= "|                                                |               |-------------------------------|-------------------------------|               |               |               |               |"
+		aL[10]	:= If( cPaisLoc $ "ANG|PTG", "|                                                |               |base de calculo|    imposto    |isent./n.tribt.| outras        |               |               |               |               |", "|                                                |               |BASE DE CALCULO|    IMPOSTO    |ISENT./N.TRIBT.| OUTRAS        |               |               |               |               |" )
+		aL[11]	:= "|================================================|===============|===============|===============|===============|===============|===============|===============|===============|===============|"
+		aL[12]	:= If( cPaisLoc $ "ANG|PTG", "| no distrito                                      |               |               |               |               |               |               |               |               |               |", "| NO ESTADO                                      |               |               |               |               |               |               |               |               |               |" )
+		aL[13]	:= If( cPaisLoc $ "ANG|PTG", "| vendas          (5.11/5.17)-(5.101/5.126)      |               |               |               |               |               |               |               |               |               |", "| Vendas          (5.11/5.17)-(5.101/5.126)      |               |               |               |               |               |               |               |               |               |" )
+		aL[14]	:= If( cPaisLoc $ "ANG|PTG", "| transferencia   (5.21/5.26)-(5.151/5.156)      |               |               |               |               |               |               |               |               |               |", "| Transferencia   (5.21/5.26)-(5.151/5.156)      |               |               |               |               |               |               |               |               |               |" )
+		aL[15]	:= If( cPaisLoc $ "ANG|PTG", "| devolução       (5.31/5.34)-(5.201/5.207)      |               |               |               |               |               |               |               |               |               |", "| Devolucao       (5.31/5.34)-(5.201/5.207)      |               |               |               |               |               |               |               |               |               |" )
+		aL[16]	:= If( cPaisLoc $ "ANG|PTG", "| venda en.eletr. (5.41/5.45)-(5.251/5.258)      |               |               |               |               |               |               |               |               |               |", "| Venda En.Eletr. (5.41/5.45)-(5.251/5.258)      |               |               |               |               |               |               |               |               |               |" )
+		aL[17]	:= If( cPaisLoc $ "ANG|PTG", "| prest.serv.com. (5.51/5.53)-(5.301/5.307)      |               |               |               |               |               |               |               |               |               |", "| Prest.Serv.Com. (5.51/5.53)-(5.301/5.307)      |               |               |               |               |               |               |               |               |               |" )
+		aL[18]	:= If( cPaisLoc $ "ANG|PTG", "| prest.serv.tran.(5.61/5.63)-(5.351/5.357)      |               |               |               |               |               |               |               |               |               |", "| Prest.Serv.Tran.(5.61/5.63)-(5.351/5.357)      |               |               |               |               |               |               |               |               |               |" )
+		aL[19]	:= If( cPaisLoc $ "ANG|PTG", "| subst.trib.     (5.71/5.79)-(5.401/5.411)      |               |               |               |               |               |               |               |               |               |", "| Subst.Trib.     (5.71/5.79)-(5.401/5.411)      |               |               |               |               |               |               |               |               |               |" )
+		aL[20]	:= If( cPaisLoc $ "ANG|PTG", "| outras          (5.91/5.94)-(5.551/5.902)      |               |               |               |               |               |               |               |               |               |", "| Outras          (5.91/5.94)-(5.551/5.902)      |               |               |               |               |               |               |               |               |               |" )
+		aL[21]	:= If( cPaisLoc $ "ANG|PTG", "| outras               (5.95)                    |               |               |               |               |               |               |               |               |               |", "| Outras               (5.95)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[22]	:= If( cPaisLoc $ "ANG|PTG", "| outras          (5.96/5.99)-(5.949)            |               |               |               |               |               |               |               |               |               |", "| Outras          (5.96/5.99)-(5.949)            |               |               |               |               |               |               |               |               |               |" )
+		aL[23]	:= If( cPaisLoc $ "ANG|PTG", "| outras             (5.99.1)                    |               |               |               |               |               |               |               |               |               |", "| Outras             (5.99.1)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[24]	:= If( cPaisLoc $ "ANG|PTG", "| outras             (5.99.9)                    |               |               |               |               |               |               |               |               |               |", "| Outras             (5.99.9)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[25]	:= If( cPaisLoc $ "ANG|PTG", "| de outros distritos                              |               |               |               |               |               |               |               |               |               |", "| DE OUTROS ESTADOS                              |               |               |               |               |               |               |               |               |               |" )
+		aL[26]	:= If( cPaisLoc $ "ANG|PTG", "| vendas          (6.11/6.19)-(6.101/6.108)      |               |               |               |               |               |               |               |               |               |", "| Vendas          (6.11/6.19)-(6.101/6.108)      |               |               |               |               |               |               |               |               |               |" )
+		aL[27]	:= If( cPaisLoc $ "ANG|PTG", "| transferencia   (6.21/6.26)-(6.151/6.156)      |               |               |               |               |               |               |               |               |               |", "| Transferencia   (6.21/6.26)-(6.151/6.156)      |               |               |               |               |               |               |               |               |               |" )
+		aL[28]	:= If( cPaisLoc $ "ANG|PTG", "| devolução       (6.31/6.34)-(6.201/6.207)      |               |               |               |               |               |               |               |               |               |", "| Devolucao       (6.31/6.34)-(6.201/6.207)      |               |               |               |               |               |               |               |               |               |" )
+		aL[29]	:= If( cPaisLoc $ "ANG|PTG", "| venda en.eletr. (6.41/6.45)-(6.251/6.258)      |               |               |               |               |               |               |               |               |               |", "| Venda En.Eletr. (6.41/6.45)-(6.251/6.258)      |               |               |               |               |               |               |               |               |               |" )
+		aL[30]	:= If( cPaisLoc $ "ANG|PTG", "| prest.serv.com. (6.51/6.53)-(6.301/6.307)      |               |               |               |               |               |               |               |               |               |", "| Prest.Serv.Com. (6.51/6.53)-(6.301/6.307)      |               |               |               |               |               |               |               |               |               |" )
+		aL[31]	:= If( cPaisLoc $ "ANG|PTG", "| prest.serv.tran.(6.61/6.63)-(6.351/6.357)      |               |               |               |               |               |               |               |               |               |", "| Prest.Serv.Tran.(6.61/6.63)-(6.351/6.357)      |               |               |               |               |               |               |               |               |               |" )
+		aL[32]	:= If( cPaisLoc $ "ANG|PTG", "| subst.trib.     (6.71/6.79)-(6.401/6.411)      |               |               |               |               |               |               |               |               |               |", "| Subst.Trib.     (6.71/6.79)-(6.401/6.411)      |               |               |               |               |               |               |               |               |               |" )
+		aL[33]	:= If( cPaisLoc $ "ANG|PTG", "| remessa de produção  (6.86)-(6.501)            |               |               |               |               |               |               |               |               |               |", "| Remessa de Producao  (6.86)-(6.501)            |               |               |               |               |               |               |               |               |               |" )
+		aL[34]	:= If( cPaisLoc $ "ANG|PTG", "| outras          (6.91/6.94)-(6.551/6.902)      |               |               |               |               |               |               |               |               |               |", "| Outras          (6.91/6.94)-(6.551/6.902)      |               |               |               |               |               |               |               |               |               |" )
+		aL[35]	:= If( cPaisLoc $ "ANG|PTG", "| outras          (6.96/6.99)-(6.904/6.949)      |               |               |               |               |               |               |               |               |               |", "| Outras          (6.96/6.99)-(6.904/6.949)      |               |               |               |               |               |               |               |               |               |" )
+		aL[36]	:= If( cPaisLoc $ "ANG|PTG", "| outras               (6.95)                    |               |               |               |               |               |               |               |               |               |", "| Outras               (6.95)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[37]	:= If( cPaisLoc $ "ANG|PTG", "| outras             (6.99.1)                    |               |               |               |               |               |               |               |               |               |", "| Outras             (6.99.1)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[38]	:= If( cPaisLoc $ "ANG|PTG", "| outras             (6.99.9)                    |               |               |               |               |               |               |               |               |               |", "| Outras             (6.99.9)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[39]	:= If( cPaisLoc $ "ANG|PTG", "| do exterior                                    |               |               |               |               |               |               |               |               |               |", "| DO EXTERIOR                                    |               |               |               |               |               |               |               |               |               |" )
+		aL[40]	:= If( cPaisLoc $ "ANG|PTG", "| vendas                  (7.11-7.17,7.101-7.127)|               |               |               |               |               |               |               |               |               |", "| Vendas                  (7.11-7.17,7.101-7.127)|               |               |               |               |               |               |               |               |               |" )
+		aL[41]	:= If( cPaisLoc $ "ANG|PTG", "| devolução   (7.31-7.34,7.201-7.211,7.553,7.556)|               |               |               |               |               |               |               |               |               |", "| Devolucao   (7.31-7.34,7.201-7.211,7.553,7.556)|               |               |               |               |               |               |               |               |               |" )
+		aL[42]	:= If( cPaisLoc $ "ANG|PTG", "| venda en.eletrica    (7.41)-(7.251)            |               |               |               |               |               |               |               |               |               |", "| Venda En.Eletrica    (7.41)-(7.251)            |               |               |               |               |               |               |               |               |               |" )
+		aL[43]	:= If( cPaisLoc $ "ANG|PTG", "| prest.serv.com.      (7.51)                    |               |               |               |               |               |               |               |               |               |", "| Prest.Serv.Com.      (7.51)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[44]	:= If( cPaisLoc $ "ANG|PTG", "| prest.serv.tran.     (7.61)-(7.358)            |               |               |               |               |               |               |               |               |               |", "| Prest.Serv.Tran.     (7.61)-(7.358)            |               |               |               |               |               |               |               |               |               |" )
+		aL[45]	:= If( cPaisLoc $ "ANG|PTG", "| outras               (7.99)-(7.949)            |               |               |               |               |               |               |               |               |               |", "| Outras               (7.99)-(7.949)            |               |               |               |               |               |               |               |               |               |" )
+		aL[46]	:= If( cPaisLoc $ "ANG|PTG", "| outras             (7.99.1)                    |               |               |               |               |               |               |               |               |               |", "| Outras             (7.99.1)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[47]	:= If( cPaisLoc $ "ANG|PTG", "| outras             (7.99.9)                    |               |               |               |               |               |               |               |               |               |", "| Outras             (7.99.9)                    |               |               |               |               |               |               |               |               |               |" )
+		aL[48]	:= "|                                           #####|###############|###############|###############|###############|###############|###############|###############|###############|###############|"
+		aL[49]	:= "|------------------------------------------------|---------------|---------------|---------------|---------------|---------------|---------------|---------------|---------------|---------------|"
+		aL[50]	:= If( cPaisLoc $ "ANG|PTG", "| totais                                         |###############|###############|###############|###############|###############|###############|###############|###############|###############|", "| TOTAIS                                         |###############|###############|###############|###############|###############|###############|###############|###############|###############|" )
+		aL[51]	:= "| ########################################  #####|               |               |               |               |               |               |               |               |               |"
+		aL[52]	:= If( cPaisLoc $ "ANG|PTG", "| vendas                           (7.251, 7.551)|               |               |               |               |               |               |               |               |               |", "| Vendas                           (7.251, 7.551)|               |               |               |               |               |               |               |               |               |" )
+		aL[53]	:= If( cPaisLoc $ "ANG|PTG", "| saídas combust./lubrif.     (5.651/5.699)      |               |               |               |               |               |               |               |               |               |", "| Saidas Combust./Lubrif.     (5.651/5.699)      |               |               |               |               |               |               |               |               |               |" )
+		aL[54]	:= If( cPaisLoc $ "ANG|PTG", "| saídas combust./lubrif.     (6.651/6.699)      |               |               |               |               |               |               |               |               |               |", "| Saidas Combust./Lubrif.     (6.651/6.699)      |               |               |               |               |               |               |               |               |               |" )
+EndCase
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function R972Contr()
+Local cAlias	:= Alias()
+nLin		:=	80
+
+R972LayOut(1)
+
+dbSelectArea(cArqCabec)
+dbGoTop()
+While !eof()
+
+	If Interrupcao(@lAbortPrint)
+		Exit
+	Endif
+        If nLin>55
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		nLin:=_PROW()+1
+		FmtLin({Replic("*",Limite)},"#",,,@nLin)
+		nLin:=nLin+1
+		FmtLin(,{aL[1],aL[2],aL[3],aL[4],aL[5]},,,@nLin)
+	Endif
+
+	aDados:=Array(9)
+	aDados[1]	:=	Transform((cArqCabec)->IE,"@R 999.999.999.999")
+	aDados[2]	:=	Transform((cArqCabec)->CNPJ,"@R 99.999.999/9999-99")
+	aDados[3]	:=	Transform((cArqCabec)->CNAE,"@R 9999-9/99")
+	aDados[4]	:=	(cArqCabec)->TIPO+"-"+if((cArqCabec)->TIPO=="01","Normal",if((cArqCabec)->TIPO=="02",If( cPaisLoc $ "ANG|PTG", "Substituta", "Substitutiva" ),"Coligida"))
+	aDados[5]	:=	(cArqCabec)->REGTRIB+"-"+if((cArqCabec)->REGTRIB	=="01",If( cPaisLoc $ "ANG|PTG", "Rpa", "RPA" ),if((cArqCabec)->REGTRIB	=="02",If( cPaisLoc $ "ANG|PTG", "Res", "RES" ),If( cPaisLoc $ "ANG|PTG", "Rpa-dispensado", "RPA-DISPENSADO" )))
+	aDados[6]	:=	substr((cArqCabec)->REF,5,2)+"/"+substr((cArqCabec)->REF,1,4)
+	aDados[7]	:=	substr((cArqCabec)->REFINIC,5,2)+"/"+substr((cArqCabec)->REFINIC,1,4)
+	aDados[8]	:=	if((cArqCabec)->MOVIMEN=="1","Sim",If( cPaisLoc $ "ANG|PTG", "Não", "Nao" ))
+	aDados[9]	:=	if((cArqCabec)->TRANSMI=="1","Sim",If( cPaisLoc $ "ANG|PTG", "Não", "Nao" ))
+	nSaldPer		:=	(cArqCabec)->SALDO
+	FmtLin(@aDados,aL[6],cPictVal,,@nLin)
+	dbSkip()
+End
+
+FmtLin(,aL[7],,,@nLin)
+
+dbSelectArea(cAlias)
+
+return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function R972CFOEnt
+Local cAlias		:= Alias()
+Local aCfo			:= array(4)
+Local lFirstEst	:= .T. 
+Local lFirstINT	:= .T. 
+Local lFirstEXT	:= .T. 
+Local aTotais	:= {}
+Local cTexto	:=""
+
+
+
+
+
+
+
+
+
+
+
+aTotais	:= If((cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210"), array(9),array(7))
+
+nLin		:=	80
+SX5->(dbSetOrder(1))
+
+afill(aTotais,0)
+
+R972LayOut(1)
+R972Contr()
+
+
+
+
+
+
+
+
+
+
+
+R972LayOut(If((cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210"),11,2))
+
+nLin++
+FmtLin(,{aL[1],aL[2],aL[3],aL[4],aL[5],aL[6],aL[7],aL[8],aL[9],aL[10],aL[11]},,,@nLin)
+
+dbSelectArea(cArqCFO)
+dbGoTop()
+While !eof() .and.  substr((cArqCFO)->CFOP,1,1)<"5"
+
+	If Interrupcao(@lAbortPrint)
+		Exit
+	Endif
+        If nLin>55
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		nLin:=_PROW()+1
+		FmtLin({Replic("*",Limite)},"#",,,@nLin)
+		nLin:=nLin+1
+		FmtLin(,{aL[1],aL[2],aL[3],aL[4],aL[5],aL[6],aL[7],aL[8],aL[9],aL[10],aL[11]},,,@nLin)
+	Endif
+
+	if substr((cArqCFO)->CFOP,1,1) == "1" .and.  lFirstEST
+		FmtLin(,aL[12],,,@nLin)
+		FmtLin(,aL[48],,,@nLin)
+	   lFirstEST	:= .F. 
+	ElseIf substr((cArqCFO)->CFOP,1,1) == "2" .and.  lFirstINT
+		FmtLin(,aL[24],,,@nLin)
+		FmtLin(,aL[48],,,@nLin)
+	   lFirstINT	:= .F. 
+	ElseIf substr((cArqCFO)->CFOP,1,1) == "3" .and.  lFirstEXT
+		FmtLin(,aL[36],,,@nLin)
+		FmtLin(,aL[48],,,@nLin)
+	   lFirstEXT	:= .F. 
+	Endif
+
+
+	if (substr((cArqCFO)->CFOP,1,3) >= "111" .and.  substr((cArqCFO)->CFOP,1,3) <= "114" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "1101" .and.  substr((cArqCFO)->CFOP,1,4) <= "1126")
+		FmtLin(,aL[13],,,@nLin)
+		aCFO[1]	:=	"111"
+		aCFO[2]	:=	"114"
+		aCFO[3]	:=	"1101"
+		aCFO[4]	:=	"1126"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "121" .and.  substr((cArqCFO)->CFOP,1,3) <= "124" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "1151" .and.  substr((cArqCFO)->CFOP,1,4) <= "1154")
+		FmtLin(,aL[14],,,@nLin)
+		aCFO[1]	:=	"121"
+		aCFO[2]	:=	"124"
+		aCFO[3]	:=	"1151"
+		aCFO[4]	:=	"1154"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "131" .and.  substr((cArqCFO)->CFOP,1,3) <= "134" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "1201" .and.  substr((cArqCFO)->CFOP,1,4) <= "1209")
+		FmtLin(,aL[15],,,@nLin)
+		aCFO[1]	:=	"131"
+		aCFO[2]	:=	"134"
+		aCFO[3]	:=	"1201"
+		aCFO[4]	:=	"1209"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "141" .and.  substr((cArqCFO)->CFOP,1,3) <= "146" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "1251" .and.  substr((cArqCFO)->CFOP,1,4) <= "1257")
+		FmtLin(,aL[16],,,@nLin)
+		aCFO[1]	:=	"141"
+		aCFO[2]	:=	"146"
+		aCFO[3]	:=	"1251"
+		aCFO[4]	:=	"1257"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "151" .and.  substr((cArqCFO)->CFOP,1,3) <= "155" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "1301" .and.  substr((cArqCFO)->CFOP,1,4) <= "1306")
+		FmtLin(,aL[17],,,@nLin)
+		aCFO[1]	:=	"151"
+		aCFO[2]	:=	"155"
+		aCFO[3]	:=	"1301"
+		aCFO[4]	:=	"1306"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "161" .and.  substr((cArqCFO)->CFOP,1,3) <= "165" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "1351" .and.  substr((cArqCFO)->CFOP,1,4) <= "1356")
+		FmtLin(,aL[18],,,@nLin)
+		aCFO[1]	:=	"161"
+		aCFO[2]	:=	"165"
+		aCFO[3]	:=	"1351"
+		aCFO[4]	:=	"1356"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "171" .and.  substr((cArqCFO)->CFOP,1,3) <= "179" .and.  nAno <= 2002) .OR.  (Val((cArqCFO)->CFOP) >= 1401 .and.  Val((cArqCFO)->CFOP) <= 1449)
+		FmtLin(,aL[19],,,@nLin)
+		aCFO[1]	:=	"171"
+		aCFO[2]	:=	"179"
+		aCFO[3]	:=	"1401"
+		aCFO[4]	:=	"1449"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) == "191" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) == "1551")
+		FmtLin(,aL[20],,,@nLin)
+		aCFO[1]	:=	"191"
+		aCFO[2]	:=	"191"
+		aCFO[3]	:=	"1551"
+		aCFO[4]	:=	"1551"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "192" .and.  substr((cArqCFO)->CFOP,1,3) <= "199" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "1552" .and.  substr((cArqCFO)->CFOP,1,4) <= "1557")
+		FmtLin(,aL[21],,,@nLin)
+		aCFO[1]	:=	"192"
+		aCFO[2]	:=	"199"
+		aCFO[3]	:=	"1552"
+		aCFO[4]	:=	"1557"
+	Elseif (Val((cArqCFO)->CFOP) >= 1651 .And.  Val((cArqCFO)->CFOP) <= 1699 .And.  nAno >= 2004)
+		FmtLin(,aL[51],,,@nLin)
+		aCFO[3]	:=	"1651"
+		aCFO[4]	:=	"1699"
+    Elseif ALLTRIM((cArqCFO)->CFOP) == "1991"
+		FmtLin(,aL[22],,,@nLin)
+		aCFO[1]	:=	"1991"
+		aCFO[2]	:=	"1991"
+		aCFO[3]	:=	"1991"
+		aCFO[4]	:=	"1991"
+
+    Elseif (ALLTRIM((cArqCFO)->CFOP) == "1999") .OR.  (substr((cArqCFO)->CFOP,1,4) == "1949")
+		FmtLin(,aL[23],,,@nLin)
+		aCFO[1]	:=	"1999"
+		aCFO[2]	:=	"1999"
+		aCFO[3]	:=	"1949"
+		aCFO[4]	:=	Alltrim((cArqCFO)->CFOP)
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "211" .and.  substr((cArqCFO)->CFOP,1,3) <= "214" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "2101" .and.  substr((cArqCFO)->CFOP,1,4) <= "2116")
+		FmtLin(,aL[25],,,@nLin)
+		aCFO[1]	:=	"211"
+		aCFO[2]	:=	"214"
+		aCFO[3]	:=	"2101"
+		aCFO[4]	:=	"2126"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "221" .and.  substr((cArqCFO)->CFOP,1,3) <= "224" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "2151" .and.  substr((cArqCFO)->CFOP,1,4) <= "2154")
+		FmtLin(,aL[26],,,@nLin)
+		aCFO[1]	:=	"221"
+		aCFO[2]	:=	"224"
+		aCFO[3]	:=	"2151"
+		aCFO[4]	:=	"2154"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "231" .and.  substr((cArqCFO)->CFOP,1,3) <= "234" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "2201" .and.  substr((cArqCFO)->CFOP,1,4) <= "2209")
+		FmtLin(,aL[27],,,@nLin)
+		aCFO[1]	:=	"231"
+		aCFO[2]	:=	"234"
+		aCFO[3]	:=	"2201"
+		aCFO[4]	:=	"2209"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "241" .and.  substr((cArqCFO)->CFOP,1,3) <= "246" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "2251" .and.  substr((cArqCFO)->CFOP,1,4) <= "2257")
+		FmtLin(,aL[28],,,@nLin)
+		aCFO[1]	:=	"241"
+		aCFO[2]	:=	"246"
+		aCFO[3]	:=	"2251"
+		aCFO[4]	:=	"2257"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "251" .and.  substr((cArqCFO)->CFOP,1,3) <= "255" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "2301" .and.  substr((cArqCFO)->CFOP,1,4) <= "2306")
+		FmtLin(,aL[29],,,@nLin)
+		aCFO[1]	:=	"251"
+		aCFO[2]	:=	"255"
+		aCFO[3]	:=	"2301"
+		aCFO[4]	:=	"2306"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "261" .and.  substr((cArqCFO)->CFOP,1,3) <= "265" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "2351" .and.  substr((cArqCFO)->CFOP,1,4) <= "2356")
+		FmtLin(,aL[30],,,@nLin)
+		aCFO[1]	:=	"261"
+		aCFO[2]	:=	"265"
+		aCFO[3]	:=	"2351"
+		aCFO[4]	:=	"2356"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "271" .and.  substr((cArqCFO)->CFOP,1,3) <= "279" .and.  nAno <= 2002) .OR.  (Val((cArqCFO)->CFOP) >= 2401 .and.  Val((cArqCFO)->CFOP) <= 2449)
+		FmtLin(,aL[31],,,@nLin)
+		aCFO[1]	:=	"271"
+		aCFO[2]	:=	"279"
+		aCFO[3]	:=	"2401"
+		aCFO[4]	:=	"2449"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) == "291" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) == "2551")
+		FmtLin(,aL[32],,,@nLin)
+		aCFO[1]	:=	"291"
+		aCFO[2]	:=	"291"
+		aCFO[3]	:=	"2551"
+		aCFO[4]	:=	"2551"
+	Elseif (Val((cArqCFO)->CFOP) >= 2651 .And.  Val((cArqCFO)->CFOP) <= 2699 .And.  nAno >= 2004)
+		FmtLin(,aL[52],,,@nLin)
+		aCFO[3]	:=	"2651"
+		aCFO[4]	:=	"2699"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "292" .and.  substr((cArqCFO)->CFOP,1,3) <= "299" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "2901" .and.  substr((cArqCFO)->CFOP,1,4) <= "2925")
+		FmtLin(,aL[33],,,@nLin)
+		aCFO[1]	:=	"292"
+		aCFO[2]	:=	"299"
+		aCFO[3]	:=	"2901"
+		aCFO[4]	:=	"2925"
+    Elseif ALLTRIM((cArqCFO)->CFOP) == "2991"
+		FmtLin(,aL[34],,,@nLin)
+		aCFO[1]	:=	"2991"
+		aCFO[2]	:=	"2991"
+		aCFO[3]	:=	"2991"
+		aCFO[4]	:=	"2991"
+
+    Elseif (ALLTRIM((cArqCFO)->CFOP) == "2999") .OR.  (substr((cArqCFO)->CFOP,1,4) == "2949")
+        FmtLin(,aL[35],,,@nLin)
+		aCFO[1]	:=	"2999"
+		aCFO[2]	:=	"2999"
+		aCFO[3]	:=	"2949"
+		aCFO[4]	:=	"2949"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "311" .and.  substr((cArqCFO)->CFOP,1,3) <= "313" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "3101" .and.  substr((cArqCFO)->CFOP,1,4) <= "3127")
+		FmtLin(,aL[37],,,@nLin)
+		aCFO[1]	:=	"311"
+		aCFO[2]	:=	"313"
+		aCFO[3]	:=	"3101"
+		aCFO[4]	:=	"3127"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "321" .and.  substr((cArqCFO)->CFOP,1,3) <= "324" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "3201" .and.  substr((cArqCFO)->CFOP,1,4) <= "3211")
+		FmtLin(,aL[38],,,@nLin)
+		aCFO[1]	:=	"321"
+		aCFO[2]	:=	"324"
+		aCFO[3]	:=	"3201"
+		aCFO[4]	:=	"3211"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) == "331" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) == "3251")
+		FmtLin(,aL[39],,,@nLin)
+		aCFO[1]	:=	"331"
+		aCFO[2]	:=	"331"
+		aCFO[3]	:=	"3251"
+		aCFO[4]	:=	"3251"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) == "341" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) == "3301")
+		FmtLin(,aL[40],,,@nLin)
+		aCFO[1]	:=	"341"
+		aCFO[2]	:=	"341"
+		aCFO[3]	:=	"3301"
+		aCFO[4]	:=	"3301"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "351" .and.  substr((cArqCFO)->CFOP,1,3) <= "354" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "3351" .and.  substr((cArqCFO)->CFOP,1,4) <= "3356")
+		FmtLin(,aL[41],,,@nLin)
+		aCFO[1]	:=	"351"
+		aCFO[2]	:=	"354"
+		aCFO[3]	:=	"3351"
+		aCFO[4]	:=	"3356"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) == "391" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) == "3551")
+		FmtLin(,aL[42],,,@nLin)
+		aCFO[1]	:=	"391"
+		aCFO[2]	:=	"391"
+		aCFO[3]	:=	"3551"
+		aCFO[4]	:=	"3551"
+	Elseif substr((cArqCFO)->CFOP,1,3) == "394" .and.  nAno <= 2002
+		FmtLin(,aL[43],,,@nLin)
+		aCFO[1]	:=	"394"
+		aCFO[2]	:=	"394"
+		aCFO[3]	:=	"394"
+		aCFO[4]	:=	"394"
+
+	Elseif (substr((cArqCFO)->CFOP,1,3) >= "397" .and.  substr((cArqCFO)->CFOP,1,3) <= "399" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) == "3556")
+		FmtLin(,aL[44],,,@nLin)
+		aCFO[1]	:=	"397"
+		aCFO[2]	:=	"399"
+		aCFO[3]	:=	"3556"
+		aCFO[4]	:=	"3556"
+    Elseif ALLTRIM((cArqCFO)->CFOP) == "3991"
+		FmtLin(,aL[45],,,@nLin)
+		aCFO[1]	:=	"3991"
+		aCFO[2]	:=	"3991"
+		aCFO[3]	:=	"3991"
+		aCFO[4]	:=	"3991"
+
+    Elseif (ALLTRIM((cArqCFO)->CFOP) == "3999") .OR.  (substr((cArqCFO)->CFOP,1,4) == "3949")
+		FmtLin(,aL[46],,,@nLin)
+		aCFO[1]	:=	"3999"
+		aCFO[2]	:=	"3999"
+		aCFO[3]	:=	"3949"
+		aCFO[4]	:=	"3949"
+	Else
+		cTexto :=""
+		If SX5->(DbSeek(xFilial("SX5")+"13"+(cArqCFO)->CFOP))
+           cTexto := SUBS(SX5->X5_DESCRI,1,40)
+        Endif
+        FmtLin({cTexto,(cArqCFO)->CFOP},aL[50],,,@nLin)
+		aCFO[1]	:=	(cArqCFO)->CFOP
+		aCFO[2]	:=	(cArqCFO)->CFOP
+		aCFO[3]	:=	(cArqCFO)->CFOP
+		aCFO[4]	:=	(cArqCFO)->CFOP
+	Endif
+	FmtLin(,aL[48],,,@nLin)
+
+
+	while	!eof() .and.  (AllTrim((cArqCFO)->CFOP) >= AllTrim(aCFO[1]) .AND.  AllTrim((cArqCFO)->CFOP) <= AllTrim(aCFO[2]) .And.  nAno <= 2002) .Or.  (AllTrim((cArqCFO)->CFOP) >= AllTrim(aCFO[3]) .AND.  AllTrim((cArqCFO)->CFOP) <= AllTrim(aCFO[4]))
+
+
+
+
+
+
+
+
+
+
+
+		aDados   	:= If((cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210"),array(10),Array(8))
+
+        aDados[1]   :=  Transform((cArqCFO)->CFOP,PesqPict("SF3","F3_CFO"))
+		aDados[2]	:=	(cArqCFO)->VALCONT
+		aDados[3]	:=	(cArqCFO)->BASEICM
+		aDados[4]	:=	(cArqCFO)->VALTRIB
+		aDados[5]	:=	(cArqCFO)->ISENTA
+		aDados[6]	:=	(cArqCFO)->OUTRAS
+		aDados[7]	:=	(cArqCFO)->RETIDO
+
+
+
+
+
+
+
+
+
+
+
+		If (cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210")
+
+			aDados[8]	:=	(cArqCFO)->RtStSt
+			aDados[9]	:=	(cArqCFO)->RtSbSt
+			aDados[10]	:=	(cArqCFO)->IMPOSTO
+			nTCredST	+=	(cArqCFO)->RtStSt
+		Else
+			aDados[8]	:=	(cArqCFO)->IMPOSTO
+			nTCredST	+=	(cArqCFO)->RETIDO
+		Endif
+		nTotCred		+=	(cArqCFO)->VALTRIB
+
+
+	   atotais[1]	+=	(cArqCFO)->VALCONT
+	   atotais[2]	+=	(cArqCFO)->BASEICM
+	   atotais[3]	+=	(cArqCFO)->VALTRIB
+	   atotais[4]	+=	(cArqCFO)->ISENTA
+	   atotais[5]	+=	(cArqCFO)->OUTRAS
+	   atotais[6]	+=	(cArqCFO)->RETIDO
+
+
+
+
+
+
+
+
+
+
+
+
+	   If (cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .Or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210")
+	   		atotais[7]	+=	(cArqCFO)->RtStSt
+			atotais[8]	+=	(cArqCFO)->RtSbSt
+			atotais[9]	+=	(cArqCFO)->IMPOSTO
+	   Else
+	   		atotais[7]	+=	(cArqCFO)->IMPOSTO
+	   EndIf
+
+		FmtLin(@aDados,aL[47],cPictVal,,@nLin)
+		dbSkip()
+	EndDo
+	FmtLin(,aL[48],,,@nLin)
+
+End
+FmtLin(@aTotais,aL[49],cPictVal,,@nLin)
+
+FmtLin(,aL[5],,,@nLin)
+
+dbSelectArea(cAlias)
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function R972CFOSai
+Local cAlias	:= Alias()
+Local	aCFO		:= array(4)
+Local lFirstEst:= .T. 
+Local lFirstINT:= .T. 
+Local lFirstEXT:= .T. 
+Local aTotais	:= {}
+Local cTexto	:=""
+
+
+
+
+
+
+
+
+
+
+
+aTotais	:= If((cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210"),array(9),array(7))
+
+nLin		:=	80
+SX5->(dbSetOrder(1))
+
+R972LayOut(1)
+R972Contr()
+
+afill(aTotais,0)
+
+
+
+
+
+
+
+
+
+
+R972LayOut(If((cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210"),12,3))
+
+nLin ++
+FmtLin(,{aL[1],aL[2],aL[3],aL[4],aL[5],aL[6],aL[7],aL[8],aL[9],aL[10],aL[11]},,,@nLin)
+
+dbSelectArea(cArqCFO)
+dbSeek("5", .T. )
+
+While !eof() .and.  substr((cArqCFO)->CFOP,1,1) >= "5"
+
+	If Interrupcao(@lAbortPrint)
+		Exit
+	Endif
+        If nLin>55
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		nLin:=_PROW()+1
+		FmtLin({Replic("*",Limite)},"#",,,@nLin)
+		nLin:=nLin+1
+		FmtLin(,{aL[1],aL[2],aL[3],aL[4],aL[5],aL[6],aL[7],aL[8],aL[9],aL[10],aL[11]},,,@nLin)
+	Endif
+	if substr((cArqCFO)->CFOP,1,1) == "5" .and.  lFirstEST
+		FmtLin(,aL[12],,,@nLin)
+		FmtLin(,aL[49],,,@nLin)
+	   lFirstEST	:= .F. 
+	ElseIf substr((cArqCFO)->CFOP,1,1) == "6" .and.  lFirstINT
+		FmtLin(,aL[25],,,@nLin)
+		FmtLin(,aL[49],,,@nLin)
+	   lFirstINT	:= .F. 
+	ElseIf substr((cArqCFO)->CFOP,1,1) == "7" .and.  lFirstEXT
+		FmtLin(,aL[39],,,@nLin)
+		FmtLin(,aL[49],,,@nLin)
+	   lFirstEXT	:= .F. 
+	Endif
+
+
+	if (substr((cArqCFO)->CFOP,1,3) >= "511" .and.  substr((cArqCFO)->CFOP,1,3) <= "517" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "5101" .and.  substr((cArqCFO)->CFOP,1,4) <= "5125")
+		FmtLin(,aL[13],,,@nLin)
+		aCFO[1]	:=	"511"
+		aCFO[2]	:=	"517"
+		aCFO[3]	:=	"5101"
+		aCFO[4]	:=	"5125"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "521" .and.  substr((cArqCFO)->CFOP,1,3) <= "526" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "5151" .and.  substr((cArqCFO)->CFOP,1,4) <= "5156")
+		FmtLin(,aL[14],,,@nLin)
+		aCFO[1]	:=	"521"
+		aCFO[2]	:=	"526"
+		aCFO[3]	:=	"5151"
+		aCFO[4]	:=	"5156"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "531" .and.  substr((cArqCFO)->CFOP,1,3) <= "534" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "5201" .and.  substr((cArqCFO)->CFOP,1,4) <= "5210")
+		FmtLin(,aL[15],,,@nLin)
+		aCFO[1]	:=	"531"
+		aCFO[2]	:=	"534"
+		aCFO[3]	:=	"5201"
+		aCFO[4]	:=	"5210"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "541" .and.  substr((cArqCFO)->CFOP,1,3) <= "545" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "5251" .and.  substr((cArqCFO)->CFOP,1,4) <= "5258")
+		FmtLin(,aL[16],,,@nLin)
+		aCFO[1]	:=	"541"
+		aCFO[2]	:=	"545"
+		aCFO[3]	:=	"5251"
+		aCFO[4]	:=	"5258"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "551" .and.  substr((cArqCFO)->CFOP,1,3) <= "553" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "5301" .and.  substr((cArqCFO)->CFOP,1,4) <= "5307")
+		FmtLin(,aL[17],,,@nLin)
+		aCFO[1]	:=	"551"
+		aCFO[2]	:=	"553"
+		aCFO[3]	:=	"5301"
+		aCFO[4]	:=	"5307"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "561" .and.  substr((cArqCFO)->CFOP,1,3) <= "563" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "5351" .and.  substr((cArqCFO)->CFOP,1,4) <= "5359")
+		FmtLin(,aL[18],,,@nLin)
+		aCFO[1]	:=	"561"
+		aCFO[2]	:=	"563"
+		aCFO[3]	:=	"5351"
+		aCFO[4]	:=	"5359"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "571" .and.  substr((cArqCFO)->CFOP,1,3) <= "579" .and.  nAno <= 2002) .OR.  (Val((cArqCFO)->CFOP) >= 5401 .and.  Val((cArqCFO)->CFOP) <= 5449)
+		FmtLin(,aL[19],,,@nLin)
+		aCFO[1]	:=	"571"
+		aCFO[2]	:=	"579"
+		aCFO[3]	:=	"5401"
+		aCFO[4]	:=	"5449"
+	ElseIf (Val((cArqCFO)->CFOP) >= 5651 .And.  Val((cArqCFO)->CFOP) <= 5699 .And.  nAno >= 2004)
+		FmtLin(,aL[53],,,@nLin)
+		aCFO[3]	:=	"5651"
+		aCFO[4]	:=	"5699"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "591" .and.  substr((cArqCFO)->CFOP,1,3) <= "594" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "5901" .and.  substr((cArqCFO)->CFOP,1,4) <= "5903")
+		FmtLin(,aL[20],,,@nLin)
+		aCFO[1]	:=	"591"
+		aCFO[2]	:=	"594"
+		aCFO[3]	:=	"5901"
+		aCFO[4]	:=	"5903"
+	ElseIf substr((cArqCFO)->CFOP,1,3) == "595" .and.  nAno <= 2002
+		FmtLin(,aL[21],,,@nLin)
+		aCFO[1]	:=	"595"
+		aCFO[2]	:=	"595"
+		aCFO[3]	:=	"595"
+		aCFO[4]	:=	"595"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "596" .and.  substr((cArqCFO)->CFOP,1,3) <= "599" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "5904" .and.  substr((cArqCFO)->CFOP,1,4) <= "5933")
+		FmtLin(,aL[22],,,@nLin)
+		aCFO[1]	:=	"596"
+		aCFO[2]	:=	"599"
+		aCFO[3]	:=	"5904"
+		aCFO[4]	:=	"5933"
+    ElseIf ALLTRIM((cArqCFO)->CFOP) == "5991"
+		FmtLin(,aL[23],,,@nLin)
+		aCFO[1]	:=	"5991"
+		aCFO[2]	:=	"5991"
+		aCFO[3]	:=	"5991"
+		aCFO[4]	:=	"5991"
+
+    ElseIf (ALLTRIM((cArqCFO)->CFOP) == "5999") .OR.  (substr((cArqCFO)->CFOP,1,4) == "5949" )
+		FmtLin(,aL[24],,,@nLin)
+		aCFO[1]	:=	"5999"
+		aCFO[2]	:=	"5999"
+		aCFO[3]	:=	"5949"
+		aCFO[4]	:=	"5949"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "611" .and.  substr((cArqCFO)->CFOP,1,3) <= "619" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "6101" .and.  substr((cArqCFO)->CFOP,1,4) <= "6125")
+		FmtLin(,aL[26],,,@nLin)
+		aCFO[1]	:=	"611"
+		aCFO[2]	:=	"619"
+		aCFO[3]	:=	"6101"
+		aCFO[4]	:=	"6125"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "621" .and.  substr((cArqCFO)->CFOP,1,3) <= "626" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "6151" .and.  substr((cArqCFO)->CFOP,1,4) <= "6156")
+		FmtLin(,aL[27],,,@nLin)
+		aCFO[1]	:=	"621"
+		aCFO[2]	:=	"626"
+		aCFO[3]	:=	"6151"
+		aCFO[4]	:=	"6156"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "631" .and.  substr((cArqCFO)->CFOP,1,3) <= "634" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "6201" .and.  substr((cArqCFO)->CFOP,1,4) <= "6210")
+		FmtLin(,aL[28],,,@nLin)
+		aCFO[1]	:=	"631"
+		aCFO[2]	:=	"634"
+		aCFO[3]	:=	"6201"
+		aCFO[4]	:=	"6210"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "641" .and.  substr((cArqCFO)->CFOP,1,3) <= "645" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "6251" .and.  substr((cArqCFO)->CFOP,1,4) <= "6258")
+		FmtLin(,aL[29],,,@nLin)
+		aCFO[1]	:=	"641"
+		aCFO[2]	:=	"645"
+		aCFO[3]	:=	"6251"
+		aCFO[4]	:=	"6258"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "651" .and.  substr((cArqCFO)->CFOP,1,3) <= "653" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "6301" .and.  substr((cArqCFO)->CFOP,1,4) <= "6307")
+		FmtLin(,aL[30],,,@nLin)
+		aCFO[1]	:=	"651"
+		aCFO[2]	:=	"653"
+		aCFO[3]	:=	"6301"
+		aCFO[4]	:=	"6307"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "661" .and.  substr((cArqCFO)->CFOP,1,3) <= "663" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "6351" .and.  substr((cArqCFO)->CFOP,1,4) <= "6359")
+		FmtLin(,aL[31],,,@nLin)
+		aCFO[1]	:=	"661"
+		aCFO[2]	:=	"663"
+		aCFO[3]	:=	"6351"
+		aCFO[4]	:=	"6359"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "671" .and.  substr((cArqCFO)->CFOP,1,3) <= "679" .and.  nAno <= 2002) .OR.  (VAl((cArqCFO)->CFOP) >= 6401 .and.  Val((cArqCFO)->CFOP) <= 6449)
+		FmtLin(,aL[32],,,@nLin)
+		aCFO[1]	:=	"671"
+		aCFO[2]	:=	"679"
+		aCFO[3]	:=	"6401"
+		aCFO[4]	:=	"6449"
+
+    ElseIf TRIM((cArqCFO)->CFOP) == "686" .and.  nAno <= 2002.OR. (substr((cArqCFO)->CFOP,1,4) == "6501")
+		FmtLin(,aL[33],,,@nLin)
+		aCFO[1]	:=	"686"
+		aCFO[2]	:=	"686"
+		aCFO[3]	:=	"6501"
+		aCFO[4]	:=	"6501"
+	ElseIf (Val((cArqCFO)->CFOP) >= 6651 .And.  Val((cArqCFO)->CFOP) <= 6699 .And.  nAno >= 2004)
+		FmtLin(,aL[54],,,@nLin)
+		aCFO[3]	:=	"6651"
+		aCFO[4]	:=	"6699"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "691" .and.  substr((cArqCFO)->CFOP,1,3) <= "694" .and.  nAno <= 2002 .OR.  (substr((cArqCFO)->CFOP,1,4)) >= "6901" .and.  substr((cArqCFO)->CFOP,1,4) <= "6903")
+		FmtLin(,aL[34],,,@nLin)
+		aCFO[1]	:=	"691"
+		aCFO[2]	:=	"694"
+		aCFO[3]	:=	"6901"
+		aCFO[4]	:=	"6903"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "696" .and.  substr((cArqCFO)->CFOP,1,3) <= "699" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "6904" .and.  substr((cArqCFO)->CFOP,1,4) <= "6933")
+		FmtLin(,aL[35],,,@nLin)
+		aCFO[1]	:=	"696"
+		aCFO[2]	:=	"699"
+		aCFO[3]	:=	"6904"
+		aCFO[4]	:=	"6933"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) == "695" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) == "6553")
+		FmtLin(,aL[36],,,@nLin)
+		aCFO[1]	:=	"695"
+		aCFO[2]	:=	"695"
+		aCFO[3]	:=	"6553"
+		aCFO[4]	:=	"6553"
+    ElseIf TRIM((cArqCFO)->CFOP) == "6991"
+		FmtLin(,aL[37],,,@nLin)
+		aCFO[1]	:=	"6991"
+		aCFO[2]	:=	"6991"
+		aCFO[3]	:=	"6991"
+		aCFO[4]	:=	"6991"
+
+    ElseIf (TRIM((cArqCFO)->CFOP) == "6999") .OR.  (substr((cArqCFO)->CFOP,1,4) == "6949")
+		FmtLin(,aL[38],,,@nLin)
+		aCFO[1]	:=	"6999"
+		aCFO[2]	:=	"6999"
+		aCFO[3]	:=	"6949"
+		aCFO[4]	:=	"6949"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "711" .and.  substr((cArqCFO)->CFOP,1,3) <= "717" .and.  nAno <= 2002) .Or.  (substr((cArqCFO)->CFOP,1,4) >= "7101" .and.  substr((cArqCFO)->CFOP,1,4) <= "7127")
+		FmtLin(,aL[40],,,@nLin)
+		aCFO[1]	:=	"711"
+		aCFO[2]	:=	"717"
+		aCFO[3]	:=	"7101"
+		aCFO[4]	:=	"7127"
+	ElseIf (substr((cArqCFO)->CFOP,1,4)$"/7251/7551/")
+		FmtLin(,aL[52],,,@nLin)
+		aCFO[1]	:=	"7251"
+		aCFO[2]	:=	"7251"
+		aCFO[3]	:=	"7551"
+		aCFO[4]	:=	"7551"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) >= "731" .and.  substr((cArqCFO)->CFOP,1,3) <= "734" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) >= "7201" .and.  substr((cArqCFO)->CFOP,1,4) <= "7211")
+		FmtLin(,aL[41],,,@nLin)
+		aCFO[1]	:=	"731"
+		aCFO[2]	:=	"734"
+		aCFO[3]	:=	"7201"
+		aCFO[4]	:=	"7211"
+	ElseIf (substr((cArqCFO)->CFOP,1,4)$"7553")
+		FmtLin(,aL[41],,,@nLin)
+
+
+		aCFO[3]	:=	"7553"
+		aCFO[4]	:=	"7553"
+	ElseIf (substr((cArqCFO)->CFOP,1,4)$"7556")
+		FmtLin(,aL[41],,,@nLin)
+
+
+		aCFO[3]	:=	"7556"
+		aCFO[4]	:=	"7556"
+	ElseIf substr((cArqCFO)->CFOP,1,3) == "741" .and.  nAno <= 2002
+		FmtLin(,aL[42],,,@nLin)
+		aCFO[1]	:=	"741"
+		aCFO[2]	:=	"741"
+		aCFO[3]	:=	"741"
+		aCFO[4]	:=	"741"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) == "751" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) == "7301")
+		FmtLin(,aL[43],,,@nLin)
+		aCFO[1]	:=	"751"
+		aCFO[2]	:=	"751"
+		aCFO[3]	:=	"7301"
+		aCFO[4]	:=	"7301"
+
+	ElseIf (substr((cArqCFO)->CFOP,1,3) == "761" .and.  nAno <= 2002) .OR.  (substr((cArqCFO)->CFOP,1,4) == "7358")
+		FmtLin(,aL[44],,,@nLin)
+		aCFO[1]	:=	"761"
+		aCFO[2]	:=	"761"
+		aCFO[3]	:=	"7358"
+		aCFO[4]	:=	"7358"
+	ElseIf substr((cArqCFO)->CFOP,1,3) == "799" .and.  nAno <= 2002
+		FmtLin(,aL[45],,,@nLin)
+		aCFO[1]	:=	"799"
+		aCFO[2]	:=	"799"
+		aCFO[3]	:=	"799"
+		aCFO[4]	:=	"799"
+    ElseIf TRIM((cArqCFO)->CFOP) == "7991"
+		FmtLin(,aL[46],,,@nLin)
+		aCFO[1]	:=	"7991"
+		aCFO[2]	:=	"7991"
+		aCFO[3]	:=	"7991"
+		aCFO[4]	:=	"7991"
+    ElseIf TRIM((cArqCFO)->CFOP) == "7999"
+		FmtLin(,aL[47],,,@nLin)
+		aCFO[1]	:=	"7999"
+		aCFO[2]	:=	"7999"
+		aCFO[3]	:=	"7999"
+		aCFO[4]	:=	"7999"
+	Else
+		cTexto :=""
+		If SX5->(DbSeek(xFilial("SX5")+"13"+(cArqCFO)->CFOP))
+           cTexto := SUBS(SX5->X5_DESCRI,1,40)
+        Endif
+        FmtLin({cTexto,(cArqCFO)->CFOP},aL[51],,,@nLin)
+		aCFO[1]	:=	(cArqCFO)->CFOP
+		aCFO[2]	:=	(cArqCFO)->CFOP
+		aCFO[3]	:=	(cArqCFO)->CFOP
+		aCFO[4]	:=	(cArqCFO)->CFOP
+	Endif
+	FmtLin(,aL[49],,,@nLin)
+
+
+	while	!eof() .and.  (AllTrim((cArqCFO)->CFOP) >= AllTrim(aCFO[1]) .AND.  AllTrim((cArqCFO)->CFOP) <= AllTrim(aCFO[2]) .And.  nAno <= 2002) .Or.  (AllTrim((cArqCFO)->CFOP) >= AllTrim(aCFO[3]) .AND.  AllTrim((cArqCFO)->CFOP) <= AllTrim(aCFO[4]))
+
+
+
+
+
+
+
+
+
+
+
+		aDados   	:= If((cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210"),array(10),Array(8))
+
+        aDados[1]   :=  Transform((cArqCFO)->CFOP,PESQPICT("SF3","F3_CFO"))
+		aDados[2]	:=	(cArqCFO)->VALCONT
+		aDados[3]	:=	(cArqCFO)->BASEICM
+		aDados[4]	:=	(cArqCFO)->VALTRIB
+		aDados[5]	:=	(cArqCFO)->ISENTA
+		aDados[6]	:=	(cArqCFO)->OUTRAS
+		aDados[7]	:=	(cArqCFO)->RETIDO
+
+
+
+
+
+
+
+
+
+
+
+		If (cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210")
+
+			aDados[8]	:=	(cArqCFO)->RtStSt
+			aDados[9]	:=	(cArqCFO)->RtSbSt
+			aDados[10]	:=	(cArqCFO)->IMPOSTO
+			nTDebSt		+=	(cArqCFO)->RtStSt
+		Else
+			aDados[8]	:=	(cArqCFO)->IMPOSTO
+			nTDebSt		+=	(cArqCFO)->RETIDO
+		Endif
+		nTotDeb		+=	(cArqCFO)->VALTRIB
+
+
+	   atotais[1]	+=	(cArqCFO)->VALCONT
+	   atotais[2]	+=	(cArqCFO)->BASEICM
+	   atotais[3]	+=	(cArqCFO)->VALTRIB
+	   atotais[4]	+=	(cArqCFO)->ISENTA
+	   atotais[5]	+=	(cArqCFO)->OUTRAS
+	   atotais[6]	+=	(cArqCFO)->RETIDO
+
+
+
+
+
+
+
+
+
+
+
+	   	If (cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210")
+
+			atotais[7]	+=	(cArqCFO)->RtStSt
+			atotais[8]	+=	(cArqCFO)->RtSbSt
+			atotais[9]	+=	(cArqCFO)->IMPOSTO
+		Else
+	   		atotais[7]	+=	(cArqCFO)->IMPOSTO
+	   	EndIf
+		FmtLin(@aDados,aL[48],cPictVal,,@nLin)
+		dbSkip()
+	EndDo
+	FmtLin(,aL[49],,,@nLin)
+End
+
+FmtLin(@aTotais,aL[50],cPictVal,,@nLin)
+
+FmtLin(,aL[5],,,@nLin)
+
+dbSelectArea(cAlias)
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function R972UFEnt
+Local cAlias	:= Alias()
+Local cEstado	:= ""
+Local aTotais	:= {}
+Local cUF		:= ""
+
+
+
+
+
+
+
+
+
+
+
+aTotais	:= If((cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210"),array(6),array(5))
+
+nLin	:=	80
+cCfo	:=	""
+lFirst:= .T. 
+
+afill(aTotais,0)
+
+R972LayOut(1)
+R972Contr()
+
+
+
+
+
+
+
+
+
+
+
+R972LayOut(If((cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210"),4,9))
+
+nLin++
+FmtLin(,{aL[1],aL[2],aL[3],aL[4],aL[5],aL[6],aL[7],aL[8],aL[9],aL[10],aL[11],aL[12]},,,@nLin)
+
+dbSelectArea(cArqInt)
+dbSeek("1", .t. )
+While !eof() .and.  substr((cArqInt)->CFOP,1,1) < "5"
+
+	If Interrupcao(@lAbortPrint)
+		Exit
+	Endif
+
+	cCFO	:=	alltrim((cArqInt)->CFOP)
+	lFirst:= .T. 
+    While !eof() .and.  alltrim((cArqInt)->CFOP) == cCFO
+        If nLin>55
+	        FmtLin(,aL[13],,,@nLin)
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+			nLin:=_PROW()+1
+			FmtLin({Replic("*",limite)},"#",,,@nLin)
+			nLin:=nLin+1
+			FmtLin(,{aL[1],aL[2],aL[3],aL[4],aL[5],aL[6],aL[7],aL[8],aL[9],aL[10],aL[11],aL[12]},,,@nLin)
+		Endif
+		cUF			:= R972Estado((cArqInt)->UF)
+		cEstado		:= if( SX5->(dbSeek(xFilial("SX5")+"12"+cUF)),alltrim(SX5->X5_DESCRI),"")
+
+
+
+
+
+
+
+
+
+
+
+		aDados		:=	If((cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210"),Array(8),Array(7))
+
+        aDados[1]   :=  if(lFirst,Transform((cArqInt)->CFOP,PESQPICT("SF3","F3_CFO")),"")
+		aDados[2]	:=	(cArqInt)->UF+"."+cEstado
+		aDados[3]	:=	(cArqInt)->VALCONT
+		aDados[4]	:=	(cArqInt)->BASECON
+
+
+
+
+
+
+
+
+
+
+
+		If (cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210")
+
+			aDados[5]   :=  (cArqInt)->IMPOSTO
+			aDados[6]	:=	(cArqInt)->OUTRAS
+			aDados[7]	:=	(cArqInt)->PETROL
+			aDados[8]	:=	(cArqInt)->OUTPROD
+        Else
+			aDados[5]	:=	(cArqInt)->OUTRAS
+			aDados[6]	:=	(cArqInt)->PETROL
+			aDados[7]	:=	(cArqInt)->OUTPROD
+        Endif
+		aTotais[1]	+=	(cArqInt)->VALCONT
+		aTotais[2]	+=	(cArqInt)->BASECON
+
+
+
+
+
+
+
+
+
+
+
+		If (cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210")
+
+			aTotais[3]	+=	(cArqInt)->IMPOSTO
+			aTotais[4]	+=	(cArqInt)->OUTRAS
+			aTotais[5]	+=	(cArqInt)->PETROL
+			aTotais[6]	+=	(cArqInt)->OUTPROD
+        Else
+			aTotais[3]	+=	(cArqInt)->OUTRAS
+			aTotais[4]	+=	(cArqInt)->PETROL
+			aTotais[5]	+=	(cArqInt)->OUTPROD
+        EndIf
+		FmtLin(@aDados,aL[14],cPictVal,,@nLin)
+		lFirst	:= .F. 
+		dbSkip()
+	EndDo
+	FmtLin(,aL[13],,,@nLin)
+End
+
+FmtLin(@aTotais,aL[15],cPictVal,,@nLin)
+
+FmtLin(,aL[8],,,@nLin)
+
+dbSelectArea(cAlias)
+
+return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function R972UFSai
+Local cAlias	:= Alias()
+Local aTotais	:= {}
+Local cCfo	:=	""
+Local lFirst:= .T. 
+Local cUF		:= ""
+
+
+
+
+
+
+
+
+
+
+
+aTotais	:= If((cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210"),array(8),array(7))
+
+nLin	:=	80
+
+afill(aTotais,0)
+R972LayOut(1)
+R972Contr()
+
+
+
+
+
+
+
+
+
+
+
+R972LayOut(If((cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210"),10,5))
+
+nLin++
+FmtLin(,{aL[1],aL[2],aL[3],aL[4],aL[5],aL[6],aL[7],aL[8],aL[9],aL[10],aL[11],aL[12]},,,@nLin)
+
+dbSelectArea(cArqInt)
+dbSeek("5", .t. )
+While !eof() .and.  substr((cArqInt)->CFOP,1,1) >="5"
+
+	If Interrupcao(@lAbortPrint)
+		Exit
+	Endif
+
+	cCFO	:=	alltrim((cArqInt)->CFOP)
+	lFirst:= .T. 
+    While !eof() .and.  alltrim((cArqInt)->CFOP) == cCFO
+        If nLin>55
+	        FmtLin(,aL[13],,,@nLin)
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+			nLin:=_PROW()+1
+			FmtLin({Replic("*",limite)},"#",,,@nLin)
+			nLin:=nLin+1
+			FmtLin(,{aL[1],aL[2],aL[3],aL[4],aL[5],aL[6],aL[7],aL[8],aL[9],aL[10],aL[11],aL[12]},,,@nLin)
+		Endif
+		cUF			:= R972Estado((cArqInt)->UF)
+		cEstado		:= if( SX5->(dbSeek(xFilial("SX5")+"12"+cUF)),alltrim(SX5->X5_DESCRI),"")
+
+
+
+
+
+
+
+
+
+
+
+		aDados		:=	If((cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210"),Array(10),Array(9))
+
+        aDados[1]   :=  if(lFirst,Transform((cArqInt)->CFOP,PESQPICT("SF3","F3_CFO")),"")
+		aDados[2]	:=	(cArqInt)->UF+"."+cEstado
+		aDados[3]	:=	(cArqInt)->VALNCON
+		aDados[4]	:=	(cArqInt)->VALCONT
+		aDados[5]	:=	(cArqInt)->BASENCO
+		aDados[6]	:=	(cArqInt)->BASECON
+        aDados[7]	:=	(cArqInt)->ISENTA
+
+
+
+
+
+
+
+
+
+
+
+        If (cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210")
+
+			aDados[8]	:=	(cArqInt)->IMPOSTO
+			aDados[9]	:=	(cArqInt)->OUTRAS
+			aDados[10]	:=	(cArqInt)->RETIDO
+		Else
+	    	aDados[8]	:=	(cArqInt)->OUTRAS
+			aDados[9]	:=	(cArqInt)->RETIDO
+		EndIf
+      	lFirst		:= .F. 
+
+		aTotais[1]	+=	(cArqInt)->VALNCON
+		aTotais[2]	+=	(cArqInt)->VALCONT
+		aTotais[3]	+=	(cArqInt)->BASENCO
+		aTotais[4]	+=	(cArqInt)->BASECON
+		aTotais[5]	+=	(cArqInt)->ISENTA
+
+
+
+
+
+
+
+
+
+
+
+		If (cVValid == "0700" .and.  cVLayOut == "0200") .or.  (cVValid == "0710" .and.  cVLayOut == "0201") .or.  (cVValid == "0720" .and.  cVLayOut == "0202") .or.  (cVValid == "0730" .and.  cVLayOut == "0203") .or.  (cVValid == "0740" .and.  cVLayOut == "0204") .or.  (cVValid == "0750" .and.  cVLayOut == "0205") .or.  (cVValid == "0760" .and.  cVLayOut == "0206") .or.  (cVValid == "0770" .and.  cVLayOut == "0207") .or.  (cVValid == "0780" .and.  cVLayOut == "0208") .or.  (cVValid == "0790" .and.  cVLayOut == "0209") .or.  (cVValid == "0800" .and.  cVLayOut == "0210")
+
+			aTotais[6]	+=	(cArqInt)->IMPOSTO
+			aTotais[7]	+=	(cArqInt)->OUTRAS
+			aTotais[8]	+=	(cArqInt)->RETIDO
+        Else
+            aTotais[6]	+=	(cArqInt)->OUTRAS
+			aTotais[7]	+=	(cArqInt)->RETIDO
+		EndIF
+
+		FmtLin(@aDados,aL[14],cPictVal,,@nLin)
+		dbSkip()
+	EndDo
+	FmtLin(,aL[13],,,@nLin)
+End
+
+FmtLin(@aTotais,aL[15],cPictVal,,@nLin)
+FmtLin(,aL[8],,,@nLin)
+
+dbSelectArea(cAlias)
+
+return
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function R972ZFM
+Local cAlias	:= Alias()
+Local cCfop		:= ""
+Local lFirst	:= .T. 
+Local nTotal	:= 0
+Local nTotGer	:= 0
+nLin	:=	80
+
+R972LayOut(1)
+R972Contr()
+
+R972LayOut(6)
+nLin++
+FmtLin(,{aL[1],aL[2],aL[3],aL[4],aL[5],aL[6]},,,@nLin)
+
+dbSelectArea(cArqZFM)
+dbGoTop()
+While !eof()
+
+	If Interrupcao(@lAbortPrint)
+		Exit
+	Endif
+
+	cCfop	:= alltrim((cArqZFM)->CFOP)
+	lFirst:= .T. 
+    While !eof() .and.   alltrim((cArqZFM)->CFOP) == cCfop
+        If nLin>55
+			FmtLin(,aL[11],,,@nLin)
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+			nLin:=_PROW()+1
+			FmtLin({Replic("*",limite)},"#",,,@nLin)
+			nLin:=nLin+1
+			FmtLin(,{aL[1],aL[2],aL[3],aL[4],aL[5],aL[6]},,,@nLin)
+		Endif
+		aDados:=Array(6)
+        aDados[1]   :=  if(lFirst,Transform((cArqZFM)->CFOP,PESQPICT("SF3","F3_CFO")),"")
+		aDados[2]	:=	(cArqZFM)->EMISSAO
+		aDados[3]	:=	(cArqZFM)->NFISCAL
+		aDados[4]	:=	(cArqZFM)->VALOR
+		aDados[5]	:=	Transform((cArqZFM)->CNPJDES,"@R 99.999.999/9999-99")
+		aDados[6]	:=	(cArqZFM)->MUNICIP
+	   lFirst		:= .F. 
+	   nTotal		+=	(cArqZFM)->VALOR
+	   nTotGer		+=	(cArqZFM)->VALOR
+		FmtLin(@aDados,aL[7],cPictVal,,@nLin)
+		dbSkip()
+	EndDo
+	FmtLin(,aL[11],,,@nLin)
+	FmtLin({nTotal},aL[8],cPictVal,,@nLin)
+	if !eof()
+  		FmtLin(,aL[11],,,@nLin)
+	endif
+	nTotal	:= 0
+End
+
+FmtLin(,aL[12],,,@nLin)
+
+FmtLin({nTotGer},aL[9],cPictVal,,@nLin)
+
+FmtLin(,aL[10],,,@nLin)
+
+dbSelectArea(cAlias)
+
+return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function R972Apur(nTipo)
+
+Local cAlias		:= Alias()
+Local aTotais		:= array(11)
+Local nApurado		:= 0
+Local nOutrDeb		:= 0
+Local nEstCred      := 0
+Local nOutrCred     := 0
+Local nEstDebito    := 0
+Local nDeducoes      := 0
+nLin	:=	80
+
+afill(aTotais,0)
+R972LayOut(1)
+R972Contr()
+R972LayOut(7)
+nLin ++
+if nTipo == 1
+	FmtLin(,{aL[1],aL[2],aL[3],aL[4]},,,@nLin)
+Else
+	FmtLin(,{aL[4],aL[5],aL[6],aL[7]},,,@nLin)
+Endif
+
+If nLin>55
+	cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+	nLin:=_PROW()+1
+	FmtLin({Replic("*",limite)},"#",,,@nLin)
+	nLin ++
+	if nTipo == 1
+		FmtLin(,{aL[1],aL[2],aL[3],aL[4]},,,@nLin)
+	Else
+		FmtLin(,{aL[4],aL[5],aL[6],aL[7]},,,@nLin)
+	Endif
+Endif
+if nTipo == 1
+	nOutrDeb		:= aApuracao[2]
+	nEstCred      	:= aApuracao[3]
+	nOutrCred     	:= aApuracao[6]
+	nEstDebito    	:= aApuracao[7]
+ 	nDeducoes      	:= aApuracao[12]
+	aTotais[1]		:=	nTotDeb
+	aTotais[2]		:=	nTotCred
+	aTotais[3]		:=	nSaldPer
+	aTotais[4]		:=	nTotDeb+nOutrDeb+nEstCred
+	aTotais[5]		:=	nTotCred+nOutrCred+nEstdebito
+	aTotais[6]		:=	aTotais[5]+nSaldPer
+else
+	aTotais[1]		:=	nTDebST
+	aTotais[2]		:=	nTCredST
+	aTotais[3]		:=	nSaldoST
+	aTotais[4]		:=	nTDebST
+	aTotais[5]		:=	nTCredST
+	aTotais[6]		:=	nTCredST+nSaldoST
+Endif
+
+nApurado 		:= aTotais[4]-aTotais[6]
+
+if nApurado <= 0
+	aTotais[7]		:=	0
+	aTotais[8]		:=	0
+	aTotais[9]		:=	abs(nApurado)
+Else
+	aTotais[7]		:=	nApurado
+	aTotais[8]		:=	nApurado-nDeducoes
+	aTotais[9]		:=	0
+Endif
+
+if nTipo == 1 .and.  nRegime == 2
+	aTotais[11]	:=	nICMSFIX -aTotais[7]
+endIf
+FmtLin(,aL[08],,,@nLin)
+FmtLin(,aL[09],,,@nLin)
+FmtLin(,aL[10],,,@nLin)
+FmtLin({aTotais[01]},aL[11],cPictVal,,@nLin)
+FmtLin(,aL[12],,,@nLin)
+FmtLin({nOutrDeb},aL[13],cPictVal,,@nLin)
+FmtLin(,aL[14],cPictVal,,@nLin)
+FmtLin({nEstCred},aL[15],cPictVal,,@nLin)
+FmtLin(,aL[16],,,@nLin)
+FmtLin({aTotais[04]},aL[17],cPictVal,,@nLin)
+FmtLin(,aL[18],cPictVal,,@nLin)
+FmtLin(,aL[19],,,@nLin)
+FmtLin(,aL[20],,,@nLin)
+FmtLin({aTotais[02]},aL[21],cPictVal,,@nLin)
+FmtLin(,aL[22],,,@nLin)
+FmtLin({nOutrCred},aL[23],cPictVal,,@nLin)
+FmtLin(,aL[24],,,@nLin)
+FmtLin({nEstDebito},aL[25],cPictVal,,@nLin)
+FmtLin({aTotais[05]},aL[26],cPictVal,,@nLin)
+FmtLin({aTotais[03]},aL[27],cPictVal,,@nLin)
+FmtLin(,aL[28],,,@nLin)
+FmtLin({aTotais[06]},aL[29],cPictVal,,@nLin)
+FmtLin(,aL[30],,,@nLin)
+FmtLin(,aL[31],,,@nLin)
+FmtLin(,aL[32],,,@nLin)
+FmtLin({aTotais[07]},aL[33],cPictVal,,@nLin)
+if nTipo == 1 .and.  nRegime == 2
+	FmtLin({nDeducoes},aL[38],cPictVal,,@nLin)
+	FmtLin({nICMSFIX},aL[39],cPictVal,,@nLin)
+	FmtLin({aTotais[10],nICMSFIX},aL[40],cPictVal,,@nLin)
+else
+	FmtLin({nDeducoes},aL[34],cPictVal,,@nLin)
+Endif
+FmtLin({aTotais[08]},aL[35],cPictVal,,@nLin)
+if nTipo == 1 .and.  nRegime == 2
+ 	FmtLin({aTotais[11]},aL[41],cPictVal,,@nLin)
+	FmtLin({aTotais[10]},aL[36],cPictVal,,@nLin)
+else
+	FmtLin({aTotais[09]},aL[36],cPictVal,,@nLin)
+Endif
+
+
+FmtLin(,aL[37],,,@nLin)
+
+dbSelectArea(cAlias)
+
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function R972ESTADO(cCod)
+cUNIDADE := "SP"
+
+Do Case
+	Case cCOD == "01"
+		cUnidade	:= "AC"
+	Case cCOD == "02"
+		cUnidade	:= "AL"
+	Case cCOD == "03"
+		cUnidade	:= "AP"
+	Case cCOD == "04"
+		cUnidade	:= "AM"
+	Case cCOD == "05"
+		cUnidade	:= "BA"
+	Case cCOD == "06"
+		cUnidade	:= "CE"
+	Case cCOD == "07"
+		cUnidade	:= "DF"
+	Case cCOD == "08"
+		cUnidade	:=	"ES"
+	Case cCOD == "10"
+		cUnidade	:=	"GO"
+	Case cCOD == "12"
+		cUnidade	:=	"MA"
+	Case cCOD == "13"
+		cUnidade	:=	"MT"
+	Case cCOD == "28"
+		cUnidade	:= "MS"
+	Case cCOD == "14"
+		cUnidade	:=	"MG"
+	Case cCOD == "15"
+		cUnidade	:=	"PA"
+	Case cCOD == "16"
+		cUnidade	:=	"PB"
+	Case cCOD == "17"
+		cUnidade	:=	"PR"
+	Case cCOD == "18"
+		cUnidade	:=	"PE"
+	Case cCOD == "19"
+		cUnidade	:=	"PI"
+	Case cCOD == "22"
+		cUnidade	:=	"RJ"
+	Case cCOD == "20"
+		cUnidade	:=	"RN"
+	Case cCOD == "21"
+		cUnidade	:=	"RS"
+	Case cCOD == "23"
+		cUnidade	:= "RO"
+	Case cCOD == "24"
+		cUnidade	:= "RR"
+	Case cCOD == "25"
+		cUnidade	:=	"SC"
+	Case cCOD == "26"
+		cUnidade	:=	"SP"
+	Case cCOD == "27"
+		cUnidade	:=	"SE"
+	Case cCOD == "29"
+		cUnidade	:="TO"
+EndCase
+
+Return(cUNIDADE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSx1 (cPerg)
+	Local	aHelpPor	:=	{}
+	Local	aHelpEng	:=	{}
+	Local	aHelpSpa	:=	{}
+
+	Aadd( aHelpPor, If( cPaisLoc $ "ANG|PTG", "Indique a filial inicial no caso de pro-", "Informe a filial inicial no caso de pro-" ) )
+	Aadd( aHelpPor, If( cPaisLoc $ "ANG|PTG", "Cessamento consolidado.                 ", "cessamento consolidado.                 " ) )
+	Aadd( aHelpEng, If( cPaisLoc $ "ANG|PTG", "Indique a filial inicial no caso de pro-", "Informe a filial inicial no caso de pro-" ) )
+	Aadd( aHelpEng, If( cPaisLoc $ "ANG|PTG", "Cessamento consolidado.                 ", "cessamento consolidado.                 " ) )
+	Aadd( aHelpSpa, If( cPaisLoc $ "ANG|PTG", "Indique a filial inicial no caso de pro-", "Informe a filial inicial no caso de pro-" ) )
+	Aadd( aHelpSpa, If( cPaisLoc $ "ANG|PTG", "Cessamento consolidado.                 ", "cessamento consolidado.                 " ) )
+	PutSx1 (cPerg,"16","Filial De","Filial De","Filial De","mv_chp","C",2,0,0,"G","","","","","mv_par16","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+	aHelpPor	:=	{}
+	aHelpEng	:=	{}
+	aHelpSpa	:=	{}
+	Aadd( aHelpPor, If( cPaisLoc $ "ANG|PTG", "Indique a filial final  no caso de  pro-", "Informe a filial final  no caso de  pro-" ) )
+	Aadd( aHelpPor, If( cPaisLoc $ "ANG|PTG", "Cessamento consolidado.                 ", "cessamento consolidado.                 " ) )
+	Aadd( aHelpEng, If( cPaisLoc $ "ANG|PTG", "Indique a filial final  no caso de  pro-", "Informe a filial final  no caso de  pro-" ) )
+	Aadd( aHelpEng, If( cPaisLoc $ "ANG|PTG", "Cessamento consolidado.                 ", "cessamento consolidado.                 " ) )
+	Aadd( aHelpSpa, If( cPaisLoc $ "ANG|PTG", "Indique a filial final  no caso de  pro-", "Informe a filial final  no caso de  pro-" ) )
+	Aadd( aHelpSpa, If( cPaisLoc $ "ANG|PTG", "Cessamento consolidado.                 ", "cessamento consolidado.                 " ) )
+	PutSx1 (cPerg,"17",If( cPaisLoc $ "ANG|PTG", "Filial Até", "Filial Ate" ),If( cPaisLoc $ "ANG|PTG", "Filial Até", "Filial Ate" ),If( cPaisLoc $ "ANG|PTG", "Filial Até", "Filial Ate" ),"mv_chq","C",2,0,0,"G","","","","","mv_par17","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+	Aadd( aHelpPor, "Para notas de transferência de saldo    " )
+	Aadd( aHelpPor, "entre filiais, serão consideradas notas " )
+	Aadd( aHelpPor, "emitidas até o dia 9 do mês subseqüente." )
+	Aadd( aHelpPor, "1 - Sim;                                 ")
+	Aadd( aHelpPor, "2 - Não.                                 ")
+
+	Aadd( aHelpEng, "Para notas de transferência de saldo    " )
+	Aadd( aHelpEng, "entre filiais, serão consideradas notas " )
+	Aadd( aHelpEng, "emitidas até o dia 9 do mês subseqüente." )
+	Aadd( aHelpEng, "1 - Sim;                                 ")
+	Aadd( aHelpEng, "2 - Não.                                 ")
+
+	Aadd( aHelpSpa, "Para notas de transferência de saldo    " )
+	Aadd( aHelpSpa, "entre filiais, serão consideradas notas " )
+	Aadd( aHelpSpa, "emitidas até o dia 9 do mês subseqüente." )
+	Aadd( aHelpSpa, "1 - Sim;                                 ")
+	Aadd( aHelpSpa, "2 - Não.                                 ")
+
+
+
+	PutSx1( cPerg,"18","NF Transf. Filiais","NF Transf. Filiais","NF Transf. Filiais","mv_chl", "C",1,0,2,"C","","","","","mv_par18","Sim","Si","Yes","","Nao","No","No","","","","","","","","","", aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:=	{}
+aHelpEng	:=	{}
+aHelpSpa	:=	{}
+
+Aadd( aHelpPor, "Informe se deseja processar filiais." )
+Aadd( aHelpPor, "Neste caso, será aberta uma janela  " )
+Aadd( aHelpPor, "para informar quais filiais deseja  " )
+Aadd( aHelpPor, "processar, desconsiderando as per-  " )
+Aadd( aHelpPor, "guntas de filial de/ate.            " )
+Aadd( aHelpEng, "Informe se deseja processar filiais." )
+Aadd( aHelpEng, "Neste caso, será aberta uma janela  " )
+Aadd( aHelpEng, "para informar quais filiais deseja  " )
+Aadd( aHelpEng, "processar, desconsiderando as per-  " )
+Aadd( aHelpEng, "guntas de filial de/ate.            " )
+Aadd( aHelpSpa, "Informe se deseja processar filiais." )
+Aadd( aHelpSpa, "Neste caso, será aberta uma janela  " )
+Aadd( aHelpSpa, "para informar quais filiais deseja  " )
+Aadd( aHelpSpa, "processar, desconsiderando as per-  " )
+Aadd( aHelpSpa, "guntas de filial de/ate.            " )
+
+
+
+PutSx1(cPerg, "19", "Seleciona filiais?", "Seleciona filiais?", "Seleciona filiais?","mv_chm", "N", 1, 0, 2,"C", "","","","","mv_par19", "Sim", "Si",  "Yes", "","Nao", "No", "No", "", "", "", "", "", "","","","",aHelpPor,aHelpEng,aHelpSpa)
+Return

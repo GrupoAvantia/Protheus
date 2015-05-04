@@ -1,0 +1,56 @@
+/*/
+ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿
+³Rdmake    ³BB02      ³Autor  ³Cosme da Silva Nunes   ³Data  ³02/02/2004³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´
+³Descri‡ao ³Numero sequencial do registro no lote                       ³
+ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+/*/
+User Function BB02() 
+
+_cRegLt := StrZero(Val(GetMV("MV_CNABRL"))+1,5)
+PutMV("MV_CNABRL",_cRegLt)
+Return(_cRegLt)
+
+/*/
+ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿
+³Rdmake    ³BB03      ³Autor  ³Cosme da Silva Nunes   ³Data  ³31/03/2004³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´
+³Descri‡ao ³Recebe digito verificador codigo de barras / linha digitavel³
+ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+/*/
+User Function BB03()
+
+SetPrvt("cDigVer")
+
+If Len(Alltrim(SE2->E2_CODBAR)) == 44
+	cDigVer := Substr(SE2->E2_CODBAR,5,1)
+Else
+	If Len(Alltrim(SE2->E2_CODBAR)) > 44
+		cDigVer := Substr(SE2->E2_CODBAR,33,1)
+	EndIf
+EndIf	
+
+Return(cDigVer)
+
+/*/
+ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿
+³Rdmake    ³BB04      ³Autor  ³Cosme da Silva Nunes   ³Data  ³31/03/2004³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´
+³Descri‡ao ³Extrai campo livre codigo de barras / linha digitavel       ³
+ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+/*/
+User Function BB04()
+
+SetPrvt("cCF")
+
+If Len(Alltrim(SE2->E2_CODBAR)) == 44
+	cCF := Substr(SE2->E2_CODBAR,20,25)
+Else
+	If Len(Alltrim(SE2->E2_CODBAR)) > 44
+		cCF := Substr(SE2->E2_CODBAR,5,5)
+		cCF += Substr(SE2->E2_CODBAR,11,10)
+		cCF += Substr(SE2->E2_CODBAR,22,10)
+	EndIf	
+EndIf	
+
+Return(cCF)

@@ -1,0 +1,235 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\REPORT.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\fatr101.prx"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "PROTHEUS.CH"
+#line 3 "d:\totvs 11\microsiga\protheus\my projects\materiais\fatr101.prx"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FATR101.CH"
+#line 19 "d:\totvs 11\microsiga\protheus\my projects\materiais\fatr101.prx"
+Function Fatr101()
+Local oReport
+
+	Pergunte("FATR101", .F. )
+
+	oReport := Ftr101RptDef()
+	oReport:PrintDialog()
+
+Return( .T. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function Ftr101RptDef()
+Local oReport
+Local oSection1
+Local oSection2
+Local oSection3
+Local oSection4
+Local cAlias1 := "QRYORIG"
+
+
+	cAlias1		:= GetNextAlias()
+
+
+
+
+ oReport := TReport():New("FATR101", "OPORTUNIDADES ENTRANTES", "FATR101", {|oReport|Ftr101PrtRpt(oReport,cAlias1)} , "OPORTUNIDADES ENTRANTES",,,,,,,)
+oReport:SetPortrait()
+
+
+
+
+ oSection1 := TRSection():New(oReport, "ORIGEM", { "QRYORIG"}, ,, ,,,,,,,,,,,,,,,)
+
+
+
+
+
+ TRCell():New(oSection1, "ADK_NOME", "QRYORIG",,, 25,,,,,,,,,,,)
+ TRCell():New(oSection1, "JANEIRO", "QRYORIG",,,,,,,,,,,,,,)
+ TRCell():New(oSection1, "FEVEREIRO", "QRYORIG",,,,,,,,,,,,,,)
+ TRCell():New(oSection1, "MARCO", "QRYORIG",,,,,,,,,,,,,,)
+ TRCell():New(oSection1, "ABRIL", "QRYORIG",,,,,,,,,,,,,,)
+ TRCell():New(oSection1, "MAIO", "QRYORIG",,,,,,,,,,,,,,)
+ TRCell():New(oSection1, "JUNHO", "QRYORIG",,,,,,,,,,,,,,)
+ TRCell():New(oSection1, "JULHO", "QRYORIG",,,,,,,,,,,,,,)
+ TRCell():New(oSection1, "AGOSTO", "QRYORIG",,,,,,,,,,,,,,)
+ TRCell():New(oSection1, "SETEMBRO", "QRYORIG",,,,,,,,,,,,,,)
+ TRCell():New(oSection1, "OUTUBRO", "QRYORIG",,,,,,,,,,,,,,)
+ TRCell():New(oSection1, "NOVEMBRO", "QRYORIG",,,,,,,,,,,,,,)
+ TRCell():New(oSection1, "DEZEMBRO", "QRYORIG",,,,,,,,,,,,,,)
+ TRCell():New(oSection1, "TOTAL", "QRYORIG",,,,,,,,,,,,,,)
+
+oSection1:SetTotalInLine( .F. )
+oReport:SetTotalInLine( .F. )
+
+
+
+
+ TRFunction():New(oSection1:Cell("JANEIRO"),,"SUM",, "JANEIRO",,,,,, oSection1,,,)
+ TRFunction():New(oSection1:Cell("FEVEREIRO"),,"SUM",, "FEVEREIRO",,,,,, oSection1,,,)
+ TRFunction():New(oSection1:Cell("MARCO"),,"SUM",, If(cPaisLoc$"ANG|PTG","MARÇO","MARCO"),,,,,, oSection1,,,)
+ TRFunction():New(oSection1:Cell("ABRIL"),,"SUM",, "ABRIL",,,,,, oSection1,,,)
+ TRFunction():New(oSection1:Cell("MAIO"),,"SUM",, "MAIO",,,,,, oSection1,,,)
+ TRFunction():New(oSection1:Cell("JUNHO"),,"SUM",, "JUNHO",,,,,, oSection1,,,)
+ TRFunction():New(oSection1:Cell("JULHO"),,"SUM",, "JULHO",,,,,, oSection1,,,)
+ TRFunction():New(oSection1:Cell("AGOSTO"),,"SUM",, "AGOSTO",,,,,, oSection1,,,)
+ TRFunction():New(oSection1:Cell("SETEMBRO"),,"SUM",, "SETEMBRO",,,,,, oSection1,,,)
+ TRFunction():New(oSection1:Cell("OUTUBRO"),,"SUM",, "OUTUBRO",,,,,, oSection1,,,)
+ TRFunction():New(oSection1:Cell("NOVEMBRO"),,"SUM",, "NOVEMBRO",,,,,, oSection1,,,)
+ TRFunction():New(oSection1:Cell("DEZEMBRO"),,"SUM",, "DEZEMBRO",,,,,, oSection1,,,)
+ TRFunction():New(oSection1:Cell("TOTAL"),,"SUM",, If(cPaisLoc$"ANG|PTG","Total","TOTAL"),,,,,, oSection1,,,)
+
+Return oReport
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function Ftr101PrtRpt(oReport, cAlias1)
+Local oSection1 := oReport:Section(1)
+Local cFiltro	:= ""
+Local aVend := {}
+Local cVend := ""
+Local cVendFil := ""
+Local nI := 0
+
+cVend := Posicione("SA3",7,xFilial("SA3")+Alltrim(__CUserId),"A3_COD")
+aVend := Ft320Time( cVend )
+
+For nI := 1 To Len(aVend)
+
+	If aVend[nI] >= MV_PAR02 .And.  aVend[nI] <= MV_PAR03
+		If MV_PAR03 == MV_PAR04
+			cVendFil += (aVend[nI])
+			Exit
+		EndIf
+		If nI == 1
+			If Len(aVend) == 1
+				cVendFil += (aVend[nI])
+			Else
+				cVendFil += (aVend[nI] + "'" + ",")
+			EndIf
+		ElseIf nI == Len(aVend)
+			cVendFil += ("'" + aVend[nI])
+		Else
+			cVendFil += ("'" + aVend[nI] + "'" + ",")
+		EndIf
+	EndIf
+Next
+
+oSection1:BeginQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAlias1," SELECT ADK_NOME, SUM(CASE WHEN AD1_DATA >=  "+___SQLGetValue(MV_PAR01)+" || '0101' AND AD1_DATA <=  "+___SQLGetValue(MV_PAR01)+" || '0131' THEN 1 ELSE 0 END) JANEIRO, SUM(CASE WHEN AD1_DATA >=  "+___SQLGetValue(MV_PAR01)+" || '0201' AND AD1_DATA <=  "+___SQLGetValue(MV_PAR01)+" || '0231' THEN 1 ELSE 0 END) FEVEREIRO, SUM(CASE WHEN AD1_DATA >=  "+___SQLGetValue(MV_PAR01)+" || '0301' AND AD1_DATA <=  "+___SQLGetValue(MV_PAR01)+" || '0331' THEN 1 ELSE 0 END) MARCO, SUM(CASE WHEN AD1_DATA >=  "+___SQLGetValue(MV_PAR01)+" || '0401' AND AD1_DATA <=  "+___SQLGetValue(MV_PAR01)+" || '0431' THEN 1 ELSE 0 END) ABRIL, SUM(CASE WHEN AD1_DATA >=  "+___SQLGetValue(MV_PAR01)+" || '0501' AND AD1_DATA <=  "+___SQLGetValue(MV_PAR01)+" || '0531' THEN 1 ELSE 0 END) MAIO, SUM(CASE WHEN AD1_DATA >=  "+___SQLGetValue(MV_PAR01)+" || '0601' AND AD1_DATA <=  "+___SQLGetValue(MV_PAR01)+" || '0631' THEN 1 ELSE 0 END) JUNHO, SUM(CASE WHEN AD1_DATA >=  "+___SQLGetValue(MV_PAR01)+" || '0701' AND AD1_DATA <=  "+___SQLGetValue(MV_PAR01)+" || '0731' THEN 1 ELSE 0 END) JULHO, SUM(CASE WHEN AD1_DATA >=  "+___SQLGetValue(MV_PAR01)+" || '0801' AND AD1_DATA <=  "+___SQLGetValue(MV_PAR01)+" || '0831' THEN 1 ELSE 0 END) AGOSTO, SUM(CASE WHEN AD1_DATA >=  "+___SQLGetValue(MV_PAR01)+" || '0901' AND AD1_DATA <=  "+___SQLGetValue(MV_PAR01)+" || '0931' THEN 1 ELSE 0 END) SETEMBRO, SUM(CASE WHEN AD1_DATA >=  "+___SQLGetValue(MV_PAR01)+" || '1001' AND AD1_DATA <=  "+___SQLGetValue(MV_PAR01)+" || '1031' THEN 1 ELSE 0 END) OUTUBRO, SUM(CASE WHEN AD1_DATA >=  "+___SQLGetValue(MV_PAR01)+" || '1101' AND AD1_DATA <=  "+___SQLGetValue(MV_PAR01)+" || '1131' THEN 1 ELSE 0 END) NOVEMBRO, SUM(CASE WHEN AD1_DATA >=  "+___SQLGetValue(MV_PAR01)+" || '1201' AND AD1_DATA <=  "+___SQLGetValue(MV_PAR01)+" || '1231' THEN 1 ELSE 0 END) DEZEMBRO, SUM(CASE WHEN AD1_DATA >=  "+___SQLGetValue(MV_PAR01)+" || '0101' AND AD1_DATA <=  "+___SQLGetValue(MV_PAR01)+" || '1231' THEN 1 ELSE 0 END) TOTAL FROM  "+RetSqlName('AD1')+" AD1,  "+RetSqlName('ADK')+" ADK,  "+RetSqlName('SA3')+" SA3 WHERE AD1.AD1_FILIAL =  '" +xFilial('AD1')+"'  AND AD1.AD1_CANAL = ADK.ADK_COD AND AD1.AD1_VEND = SA3.A3_COD AND AD1.AD1_VEND IN ( "+___SQLGetValue(CVENDFIL)+") AND AD1.D_E_L_E_T_= ' ' AND ADK.D_E_L_E_T_= ' ' AND SA3.D_E_L_E_T_= ' ' GROUP BY ADK_NOME",{},.F.)
+oSection1:EndQuery(); If oSection1:bCompQuery <> NIL; oSection1:bRealQuery := {|__section| __runcb(__section:bCompQuery, .T. )}; EndIf
+
+oSection1:Print()
+
+Return( .T. )

@@ -1,0 +1,501 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATR720.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr720.prx"
+#line 1 ""
+#line 15 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr720.prx"
+Function MATR720()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And.  TRepInUse()
+
+	oReport := ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR720R3()
+EndIf
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportDef()
+
+Local oReport
+Local lValadi  := cPaisLoc == "MEX" .AND.  SD2->(FieldPos("D2_VALADI")) > 0
+
+	Local cAliasQry := GetNextAlias()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+oReport := TReport():New("MATR720",If( cPaisLoc $ "ANG|PTG", "Recibo Para Despacho", "RECIBO PARA DESPACHO" ),"MTR720", {|oReport| ReportPrint(oReport,cAliasQry)},If( cPaisLoc $ "ANG|PTG", "Este Relatório Irá Emitir A Relação De Recibos", "Este relatorio ira emitir a relacao de Recibos" ) + " " + If( cPaisLoc $ "ANG|PTG", "De despacho para as transportadoras.", "de Despacho para as transportadoras." ))
+oReport:SetPortrait()
+oReport:SetTotalInLine( .F. )
+
+Pergunte(oReport:uParam, .F. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+oRecDesp := TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Minuta De Despacho", "Minuta de Despacho" ),{"SF2"},,,)
+oReport:Section(1):SetLineStyle()
+oReport:Section(1):SetCols(1)
+
+TRCell():New(oRecDesp,"F2_DOC","SF2",RetTitle("F2_DOC"),PesqPict("SF2","F2_DOC"),TamSx3("F2_DOC")[1],,{|| (cAliasQry)->F2_DOC  }	)
+TRCell():New(oRecDesp,"F2_VALBRUT","SF2",RetTitle("F2_VALBRUT"),PesqPict("SF2","F2_VALBRUT"),TamSx3("F2_VALBRUT")[1],,{|| (cAliasQry)->F2_VALMERC+(cAliasQry)->F2_VALIPI+(cAliasQry)->F2_FRETE+(cAliasQry)->F2_SEGURO+(cAliasQry)->F2_ICMSRET  }	)
+If lValadi
+	TRCell():New(oRecDesp,"F2_VALADI","SF2",RetTitle("F2_VALADI"),PesqPict("SF2","F2_VALADI"),TamSx3("F2_VALADI")[1],,{|| (cAliasQry)->F2_VALADI  }	)
+EndIf
+
+TRCell():New(oRecDesp,"A1_NOME","SA1",RetTitle("A1_NOME"),PesqPict("SA1","A1_NOME"),TamSx3("A1_NOME")[1],,{|| SA1->A1_NOME  }	)
+TRCell():New(oRecDesp,"A1_END","SA1",RetTitle("A1_END"),PesqPict("SA1","A1_END"),TamSx3("A1_END")[1],,{|| SA1->A1_END  }	)
+TRCell():New(oRecDesp,"A1_ENDENT","SA1",RetTitle("A1_ENDENT"),PesqPict("SA1","A1_ENDENT"),TamSx3("A1_ENDENT")[1],,{|| SA1->A1_ENDENT  }	)
+TRCell():New(oRecDesp,"A1_BAIRRO","SA1",RetTitle("A1_BAIRRO"),PesqPict("SA1","A1_BAIRRO"),TamSx3("A1_BAIRRO")[1],,{|| SA1->A1_BAIRRO  }	)
+TRCell():New(oRecDesp,"A1_MUN","SA1",RetTitle("A1_MUN"),PesqPict("SA1","A1_MUN"),TamSx3("A1_MUN")[1],,{|| SA1->A1_MUN  }	)
+TRCell():New(oRecDesp,"A1_EST","SA1",RetTitle("A1_EST"),PesqPict("SA1","A1_EST"),TamSx3("A1_EST")[1],,{|| SA1->A1_EST  }	)
+
+TRCell():New(oRecDesp,"A2_NOME","SA2",RetTitle("A2_NOME"),PesqPict("SA2","A2_NOME"),TamSx3("A2_NOME")[1],,{|| SA2->A2_NOME  }	)
+TRCell():New(oRecDesp,"A2_END","SA2",RetTitle("A2_END"),PesqPict("SA2","A2_END"),TamSx3("A2_END")[1],,{|| SA2->A2_END  }	)
+TRCell():New(oRecDesp,"A2_BAIRRO","SA2",RetTitle("A2_BAIRRO"),PesqPict("SA2","A2_BAIRRO"),TamSx3("A2_BAIRRO")[1],,{|| SA2->A2_BAIRRO  }	)
+TRCell():New(oRecDesp,"A2_MUN","SA2",RetTitle("A2_MUN"),PesqPict("SA2","A2_MUN"),TamSx3("A2_MUN")[1],,{|| SA2->A2_MUN  }	)
+TRCell():New(oRecDesp,"A2_EST","SA2",RetTitle("A2_EST"),PesqPict("SA2","A2_EST"),TamSx3("A2_EST")[1],,{|| SA2->A2_EST  }	)
+
+TRCell():New(oRecDesp,"A4_NOME","SA4",RetTitle("A4_NOME"),PesqPict("SA4","A4_NOME"),TamSx3("A4_NOME")[1],,{|| SA4->A4_NOME  }	)
+TRCell():New(oRecDesp,"A4_END","SA4",RetTitle("A4_END"),PesqPict("SA4","A4_END"),TamSx3("A4_END")[1],,{|| SA4->A4_END  }	)
+TRCell():New(oRecDesp,"F2_PBRUTO","SF2",RetTitle("F2_PBRUTO"),PesqPict("SF2","F2_PBRUTO"),TamSx3("F2_PBRUTO")[1],,{|| (cAliasQry)->F2_PBRUTO  }	)
+TRCell():New(oRecDesp,"F2_PLIQUI","SF2",RetTitle("F2_PLIQUI"),PesqPict("SF2","F2_PLIQUI"),TamSx3("F2_PLIQUI")[1],,{|| (cAliasQry)->F2_PLIQUI  }	)
+TRCell():New(oRecDesp,"F2_ESPECI1","SF2",RetTitle("F2_ESPECI1"),PesqPict("SF2","F2_ESPECI1"),TamSx3("F2_ESPECI1")[1],,{|| (cAliasQry)->F2_ESPECI1  }	)
+TRCell():New(oRecDesp,"F2_VOLUME1","SF2",RetTitle("F2_VOLUME1"),PesqPict("SF2","F2_VOLUME1"),TamSx3("F2_VOLUME1")[1],,{|| (cAliasQry)->F2_VOLUME1  }	)
+TRCell():New(oRecDesp,"F2_ESPECI2","SF2",RetTitle("F2_ESPECI2"),PesqPict("SF2","F2_ESPECI2"),TamSx3("F2_ESPECI2")[1],,{|| (cAliasQry)->F2_ESPECI2  }	)
+TRCell():New(oRecDesp,"F2_VOLUME2","SF2",RetTitle("F2_VOLUME2"),PesqPict("SF2","F2_VOLUME2"),TamSx3("F2_VOLUME2")[1],,{|| (cAliasQry)->F2_VOLUME2  }	)
+TRCell():New(oRecDesp,"F2_ESPECI3","SF2",RetTitle("F2_ESPECI3"),PesqPict("SF2","F2_ESPECI3"),TamSx3("F2_ESPECI3")[1],,{|| (cAliasQry)->F2_ESPECI3  }	)
+TRCell():New(oRecDesp,"F2_VOLUME3","SF2",RetTitle("F2_VOLUME3"),PesqPict("SF2","F2_VOLUME3"),TamSx3("F2_VOLUME3")[1],,{|| (cAliasQry)->F2_VOLUME3  }	)
+TRCell():New(oRecDesp,"F2_ESPECI4","SF2",RetTitle("F2_ESPECI4"),PesqPict("SF2","F2_ESPECI4"),TamSx3("F2_ESPECI4")[1],,{|| (cAliasQry)->F2_ESPECI4  }	)
+TRCell():New(oRecDesp,"F2_VOLUME4","SF2",RetTitle("F2_VOLUME4"),PesqPict("SF2","F2_VOLUME4"),TamSx3("F2_VOLUME4")[1],,{|| (cAliasQry)->F2_VOLUME4  }	)
+
+Return(oReport)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportPrint(oReport,cAliasQry)
+
+Local nI 		:= 0
+Local cEspecie  := ""
+Local cVolume   := ""
+Local lValadi   := cPaisLoc == "MEX" .AND.  SD2->(FieldPos("D2_VALADI")) > 0
+Local cExpAdi	:= Iif(lValadi,"% ,F2_VALADI %","%%")
+
+
+
+
+
+
+
+
+
+MakeSqlExpr(oReport:uParam)
+
+
+
+
+dbSelectArea("SF2")
+dbSetOrder(1)
+
+
+
+
+	lQuery := .T. 
+	oReport:Section(1):BeginQuery()
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasQry," SELECT F2_FILIAL,F2_DOC,F2_CLIENTE,F2_LOJA,F2_VALBRUT,F2_PBRUTO,F2_PLIQUI,F2_VALMERC,F2_VALIPI,F2_FRETE, F2_SEGURO,F2_ICMSRET,F2_ESPECI1,F2_ESPECI2,F2_ESPECI3,F2_ESPECI4,F2_VOLUME1,F2_VOLUME2,F2_VOLUME3,F2_VOLUME4, F2_TIPO,F2_TRANSP,F2_SERIE  "+___SQLGetValue(CEXPADI)+" FROM  "+RetSqlName('SF2')+" SF2 WHERE F2_FILIAL =  '" +xFilial('SF2')+"'  AND F2_SERIE =  "+___SQLGetValue(MV_PAR01)+" AND F2_DOC >=  "+___SQLGetValue(MV_PAR02)+" AND F2_DOC <=  "+___SQLGetValue(MV_PAR03)+" AND SF2.D_E_L_E_T_= ' ' ORDER BY F2_DOC,F2_SERIE,F2_CLIENTE,F2_LOJA",{},.F.)
+	oReport:Section(1):EndQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TRPosition():New(oReport:Section(1),"SA1",1,{|| xFilial("SA1")+(cAliasQry)->F2_CLIENTE+(cAliasQry)->F2_LOJA})
+TRPosition():New(oReport:Section(1),"SA2",1,{|| xFilial("SA2")+(cAliasQry)->F2_CLIENTE+(cAliasQry)->F2_LOJA})
+TRPosition():New(oReport:Section(1),"SA4",1,{|| xFilial("SA4")+(cAliasQry)->F2_TRANSP})
+
+
+
+
+dbSelectArea(cAliasQry)
+dbGoTop()
+oReport:SetMeter((cAliasQry)->(LastRec()))
+oReport:Section(1):Init()
+while !oReport:Cancel() .And. !Eof() .and. F2_FILIAL==xFilial("SF2")
+
+	If !((cAliasQry)->F2_TIPO $ "DB")
+		oReport:Section(1):Cell("A1_NOME"):Enable()
+		oReport:Section(1):Cell("A1_END"):Enable()
+		oReport:Section(1):Cell("A1_ENDENT"):Enable()
+		oReport:Section(1):Cell("A1_BAIRRO"):Enable()
+		oReport:Section(1):Cell("A1_MUN"):Enable()
+		oReport:Section(1):Cell("A1_EST"):Enable()
+		oReport:Section(1):Cell("A2_NOME"):Disable()
+		oReport:Section(1):Cell("A2_END"):Disable()
+		oReport:Section(1):Cell("A2_BAIRRO"):Disable()
+		oReport:Section(1):Cell("A2_MUN"):Disable()
+		oReport:Section(1):Cell("A2_EST"):Disable()
+	Else
+		oReport:Section(1):Cell("A1_NOME"):Disable()
+		oReport:Section(1):Cell("A1_END"):Disable()
+		oReport:Section(1):Cell("A1_ENDENT"):Disable()
+		oReport:Section(1):Cell("A1_BAIRRO"):Disable()
+		oReport:Section(1):Cell("A1_MUN"):Disable()
+		oReport:Section(1):Cell("A1_EST"):Disable()
+		oReport:Section(1):Cell("A2_NOME"):Enable()
+		oReport:Section(1):Cell("A2_END"):Enable()
+		oReport:Section(1):Cell("A2_BAIRRO"):Enable()
+		oReport:Section(1):Cell("A2_MUN"):Enable()
+		oReport:Section(1):Cell("A2_EST"):Enable()
+	EndIf
+
+	For nI := 1 to 4
+		cEspecie := "F2_ESPECI" + AllTrim(Str(nI))
+		cVolume  := "F2_VOLUME" + AllTrim(Str(nI))
+		If !Empty(&cEspecie)
+			oReport:Section(1):Cell(cEspecie):Enable()
+			oReport:Section(1):Cell(cVolume):Enable()
+		Else
+			oReport:Section(1):Cell(cEspecie):Disable()
+			oReport:Section(1):Cell(cVolume):Disable()
+		EndIf
+	Next
+
+	oReport:Section(1):PrintLine()
+
+	oReport:PrintText("Data: _____/_____/_____",2500,500)
+	oReport:Line(2500,1800,2500,2300)
+	oReport:PrintText(If( cPaisLoc $ "ANG|PTG", "Carimbo E Assinatura", "CARIMBO E ASSINATURA" ),2530,1900)
+	oReport:EndPage( .T. )
+
+	dbSelectArea(cAliasQry)
+	dbSKip()
+	oReport:IncMeter()
+EndDo
+oReport:Section(1):Finish()
+
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function Matr720R3()
+
+
+
+LOCAL CbTxt
+LOCAL titulo := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Minuta De Despacho", "Minuta de Despacho" ))
+LOCAL cDesc1 := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Este Relatório Irá Emitir A Relação De Recibos", "Este relatorio ira emitir a relacao de Recibos" ))
+LOCAL cDesc2 := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "De despacho para as transportadoras.", "de Despacho para as transportadoras." ))
+LOCAL cDesc3 := ""
+LOCAL CbCont,cabec1,cabec2,wnrel
+LOCAL tamanho:= "P"
+LOCAL limite := 80
+LOCAL cString:= "SF2"
+
+PRIVATE aReturn := {If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ), 1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 2, 2, 1, "",1 }
+PRIVATE nomeprog:="MATR720"
+PRIVATE aLinha  := { },nLastKey := 0
+PRIVATE cPerg   :="MTR720"
+
+
+
+
+pergunte("MTR720", .F. )
+
+
+
+
+
+
+
+
+
+wnrel:="MATR720"
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3, .F. ,"",,Tamanho)
+
+If nLastKey==27
+	dbClearFilter()
+   Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey==27
+	dbClearFilter()
+   Return
+Endif
+
+RptStatus({|lEnd| C720Imp(@lEnd,wnRel,cString)},Titulo)
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function C720Imp(lEnd,WnRel,cString)
+
+
+
+LOCAL CbTxt
+LOCAL titulo := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Minuta De Despacho", "Minuta de Despacho" ))
+LOCAL CbCont,cabec1,cabec2
+LOCAL tamanho:= "P"
+LOCAL lContinua := lCab := .T. 
+
+
+
+
+titulo := If( cPaisLoc $ "ANG|PTG", "Recibo Para Despacho", "RECIBO PARA DESPACHO" )
+cabec1 := ""
+cabec2 := ""
+
+nTipo  := IIF(aReturn[4]=1,15,18)
+
+
+
+cbtxt    := SPACE(10)
+cbcont   := 0
+li       :=80
+m_pag    :=1
+
+
+
+
+dbSelectArea("SF2")
+dbSetOrder(1)
+Set( 9,"ON" )
+dbSeek(xFilial(Alias())+mv_par02+mv_par01)
+Set( 9,"OFF" )
+
+SetRegua(RecCount())
+
+while !Eof() .and. F2_FILIAL==xFilial(Alias())
+	ListaMin(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo,cbcont,cbtxt)
+	dbSKip()
+EndDo
+
+roda(cbcont,cbtxt,tamanho)
+
+dbSelectArea("SF2")
+dbClearFilter()
+dbSetOrder(1)
+Set( 20, "SCREEN" )
+
+If aReturn[5] = 1
+     Set( 24, "" )
+     dbCommitAll()
+     ourspool(wnrel)
+Endif
+
+MS_FLUSH()
+
+
+
+
+STATIC FuncTion ListaMin(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo,cbcont,cbtxt)
+LOCAL lImpr:= .T. 
+Local lNormal := .F. 
+LOCAL cX := " "
+LOCAL I  := 1
+
+If F2_SERIE <> mv_par01 .Or.  F2_FILIAL <> xFilial(Alias()) .Or.  F2_DOC < mv_par02 .Or.  F2_DOC > mv_par03
+	lImpr:= .F. 
+EndIf
+
+
+lNormal := !(SF2->F2_TIPO $ "DB")
+
+IncRegua()
+
+If lImpr
+	cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+	PrintOut(10,00,If(cPaisLoc$"ANG|PTG","Factura : ","Nota Fiscal : ")+F2_DOC,,)
+	PrintOut(10,51,"Valor : ",,)
+	PrintOut(10,59,(F2_VALMERC+F2_VALIPI+F2_FRETE+F2_SEGURO+F2_ICMSRET),TM((F2_VALMERC+F2_VALIPI+F2_FRETE+F2_SEGURO+F2_ICMSRET),16),)
+
+   dbSelectArea( If( lNormal,"SA1","SA2" ) )
+  	dbSeek(xFilial(Alias())+SF2->F2_CLIENTE+SF2->F2_LOJA)
+
+	PrintOut(12,00,"Cliente     : "+If(lNormal,SA1->A1_NOME,SA2->A2_NOME),,)
+
+   If lNormal
+	   If empty( SA1->A1_ENDENT )
+		   PrintOut(14,00,"Endereco    : "+SA1->A1_END,,)
+	   Else
+		   PrintOut(14,00,"Endereco    : "+SA1->A1_ENDENT,,)
+	   EndIf
+   Else
+      PrintOut(14,00,"Endereco    : "+SA2->A2_END,,)
+   EndIf
+
+	PrintOut(16,00,If(cPaisLoc$"ANG|PTG","Freguesia      : ","Bairro      : ")+If(lNormal,SA1->A1_BAIRRO,SA2->A2_BAIRRO),,)
+	PrintOut(16,48,"Cidade : "+If(lNormal,SA1->A1_MUN,SA2->A2_MUN),,)
+	PrintOut(16,72,If(cPaisLoc$"ANG|PTG","DT : ","UF : ")+If(lNormal,SA1->A1_EST,SA2->A2_EST),,)
+
+	dbSelectArea("SA4")
+	dbSeek(xFilial(Alias())+SF2->F2_TRANSP)
+
+	PrintOut(18,00,"Transportad.: "+A4_NOME,,)
+	PrintOut(20,00,"Endereco    : "+A4_END,,)
+	PrintOut(22,00,If(cPaisLoc$"ANG|PTG","Peso bruto  : ","Peso Bruto  : ")+Str(SF2->F2_PBRUTO),,)
+	PrintOut(24,00,If(cPaisLoc$"ANG|PTG","Peso liquido: ","Peso Liquido: ")+Str(SF2->F2_PLIQUI),,)
+	dbSelectArea("SF2")
+
+	Li   := 26
+	lCab := .T. 
+
+	FOR I:=1 TO 4
+		cX := Str(I,1)
+		If !empty(F2_ESPECI&cX)
+			If lCab
+				PrintOut(Li,15,REPLICATE("-",47),,)
+				Li++
+				PrintOut(Li,15,"E S P E C I E",,)
+				PrintOut(Li,47,If(cPaisLoc$"ANG|PTG","V o l u m e (s)","V O L U M E (S)"),,)
+				Li++
+				PrintOut(Li,15,REPLICATE("-",47),,)
+				Li++
+				lCab := .F. 
+				Li++
+			EndIf
+		PrintOut(Li,15,F2_ESPECI&cX,,)
+		PrintOut(Li,56,F2_VOLUME&cX,"999999",)
+		Li++
+		EndIf
+	next
+
+	PrintOut(56,00,"Data: ___/___/___"+SPACE(32)+"----------------------------",,)
+	PrintOut(57,53,If(cPaisLoc$"ANG|PTG","Carimbo E Assinatura","CARIMBO E ASSINATURA"),,)
+EndIf
+
+Return ( .T. )

@@ -1,0 +1,37 @@
+#include 'rwmake.ch'            
+
+/*
+  Autor: Diógenes Marinho
+  Data: 01/12/05
+  Desc.: Soma ao valor do titulo o acrescimo
+*/
+
+/*
+  Alterado por: Grayson B.Tavares
+  Motivo: Tratamento para titulos diferente de boleto
+          Quando for boleto nao considera os acrescimos
+          Quando nao for boleto considera os acrescimos
+*/
+
+
+
+User Function PAGVALPG  
+
+ //Private nJuros := 0
+ //Private dBaixa := CriaVar("E2_BAIXA")
+ Private _SOMA := 0
+                   
+// dbSelectArea("SEA")
+ 
+// fa080juros()
+ 
+ dbSelectArea("SE2")
+ 
+ If (!Empty(SE2->E2_X_CODBA)) .Or. (!Empty(SE2->E2_LINDIG))
+ 	_SOMA := SE2->(E2_VALOR)//+nJuros           
+ Else
+ 	_SOMA := SE2->(E2_VALOR+E2_ACRESC)//+nJuros           
+ EndIf	
+
+//Return(STRZERO(INT(_SOMA*100),15))  
+Return(STRZERO(INT(ROUND(_SOMA*100,2)),15))

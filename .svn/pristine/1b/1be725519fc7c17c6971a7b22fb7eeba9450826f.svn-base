@@ -1,0 +1,78 @@
+#include "rwmake.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³PAGDGAG_AP6ºAutor  ³Microsiga           º Data ³  12/27/02   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ PROGRAMA PARA CALCULO DO DIGITO DE CONTROLE DA AGENCIA     º±±
+±±º          ³ BRADESCO PAGFOR POSICAO ( 104 - 104 )                      º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ AP7                                                        º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+User Function PAGdgag()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Declaracao de variaveis utilizadas no programa atraves da funcao    ³
+//³ SetPrvt, que criara somente as variaveis definidas pelo usuario,    ³
+//³ identificando as variaveis publicas do sistema utilizadas no codigo ³
+//³ Incluido pelo assistente de conversao do AP6 IDE                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+SetPrvt("_RETDIG,_DIG1,_DIG2,_DIG3,_DIG4,_MULT")
+SetPrvt("_RESUL,_RESTO,_DIGITO,")
+
+_RETDIG  := " "
+
+If SEA->EA_MODELO == "31"
+	
+	IF SUBSTR(SE2->E2_X_CODBA,1,3) == "237"
+		
+		_RETDIG := " "
+		_DIG1   := SUBSTR(SE2->E2_X_CODBA,20,1)
+		_DIG2   := SUBSTR(SE2->E2_X_CODBA,21,1)
+		_DIG3   := SUBSTR(SE2->E2_X_CODBA,22,1)
+		_DIG4   := SUBSTR(SE2->E2_X_CODBA,23,1)
+		
+		_MULT   := (VAL(_DIG1)*5) +  (VAL(_DIG2)*4) +  (VAL(_DIG3)*3) +   (VAL(_DIG4)*2)
+		_RESUL  := INT(_MULT /11 )
+		_RESTO  := INT(_MULT % 11)
+		_DIGITO := 11 - _RESTO
+		
+		_RETDIG := IF( _RESTO == 0,"0",IF(_RESTO == 1,0,_DIGITO))
+		
+	EndIf
+	
+	If SUBSTR(SE2->E2_LINDIG,1,3) == "237"
+		
+		_RETDIG := " "
+		_DIG1   := SUBSTR(SE2->E2_LINDIG,05,1)
+		_DIG2   := SUBSTR(SE2->E2_LINDIG,06,1)
+		_DIG3   := SUBSTR(SE2->E2_LINDIG,07,1)
+		_DIG4   := SUBSTR(SE2->E2_LINDIG,08,1)
+		
+		_MULT   := (VAL(_DIG1)*5) +  (VAL(_DIG2)*4) +  (VAL(_DIG3)*3) +   (VAL(_DIG4)*2)
+		_RESUL  := INT(_MULT /11 )
+		_RESTO  := INT(_MULT % 11)
+		_DIGITO := 11 - _RESTO
+		
+		_RETDIG := IF( _RESTO == 0,"0",IF(_RESTO == 1,0,_DIGITO))
+		
+	EndIf
+	
+ELse
+	
+	IF !EMPTY(SE2->E2_X_DGAG)
+		
+		_RETDIG := SE2->E2_X_DGAG
+		
+	EndIf
+
+EndIf
+
+Return(_RETDIG)       

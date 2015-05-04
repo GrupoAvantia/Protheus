@@ -1,0 +1,47 @@
+#Include 'Protheus.ch'
+
+User Function FunCCBloq(cCentroDeCusto)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³ Programa   ³ FunCCBloq ³ Autor ³ Carlos A. Beltrão      ³ Data ³ 22/10/13 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Descri‡…o  ³ Essa função te como objetivo localizar algum funcionário em  ³±±
+±±³            ³ situação normal, férias e afastado no Centro de Custo        ³±±
+±±³            ³ passado no parametro gerando uma mensagem de alerta.         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Parametros ³ Centro de Custo que deseja fazer a verificação.              ³±±
+±±³            ³                                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Obs        ³                                                              ³±±
+±±³            ³                                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Retorno    ³  Caso condição seja verdadeira Retorna 2 numerico.           ³±±
+±±³            ³  Caso condição seja falsa Retorna 1 numerico.                ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+	
+	// Verifica se existe funcionário em situação normal no centro de custo
+	If SRA->(dbOrderNickName("SITFOLHA"), dbSeek(xFilial("SRA")+cCentroDeCusto+" "))
+		MSGALERT("Existe funcionário em situação NORMAL alocado neste Centro de Custo.","A  T  E  N  C  A  O  !  !  !")
+		Return("1")
+	
+	// Verifica se existe funcionário em situação de férias no centro de custo
+	ElseIf SRA->(dbOrderNickName("SITFOLHA"), dbSeek(xFilial("SRA")+cCentroDeCusto+"F"))
+		MSGALERT("Existe funcionário em situação de FÉRIAS alocado neste Centro de Custo.","A  T  E  N  C  A  O  !  !  !")
+		Return("1")
+	
+	// Verifica se existe funcionário em situação de afastamento no centro de custo
+	ElseIf SRA->(dbOrderNickName("SITFOLHA"), dbSeek(xFilial("SRA")+cCentroDeCusto+"A"))
+		MSGALERT("Existe funcionário em situação de AFASTAMENTO alocado neste Centro de Custo.","A  T  E  N  C  A  O  !  !  !")
+		Return("1")
+	Endif
+		
+		
+Return("1")
+

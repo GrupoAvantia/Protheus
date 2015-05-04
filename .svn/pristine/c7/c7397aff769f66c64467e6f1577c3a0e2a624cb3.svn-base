@@ -1,0 +1,2799 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Matr932.ch"
+#line 47 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr932.prx"
+FUNCTION Matr932()
+
+Local cArqCiap		:= ""
+LOCAL nSvApurICM 	:= 0
+LOCAL nSvApurIPI 	:= 0
+Private cIndxSF3  	:=""
+Private nCredAtivo	:=0
+
+
+
+
+lHouveMov:= .F. 
+
+
+
+nLargObs:=If(nTipoMov=1,42,46)
+
+
+
+cPictVl:=If(nTipoMov==1,"@E 999,999,999,999.99","@E 999,999,999,999.99")
+
+
+
+aL:=NIL
+R932LayOut()
+
+
+
+If nImpTerm == 1 .Or.  nImpTerm == 3
+
+
+
+
+	cArqTemp  :=EmiteLivro(If(nTipoMov==1,"E","S"),dDtIni,dDtFim,lLacuna,lServico,lDesconto,cNrLivro,cFilterUser,@cArqCiap,MV_PAR27,MV_PAR09,MV_PAR31,MV_PAR32,MV_PAR33,MV_PAR36,"MATR930")
+
+
+
+	nSvApurICM:=DefPeriodo(F3_ENTRADA,nApurICM)
+	nSvApurIPI:=DefPeriodo(F3_ENTRADA,nApurIPI)
+EndIf
+If !lAbortPrint
+	If nTipoMov==1
+		R932RegEntradas(nSvApurIcm,nSvApurIpi)
+	Else
+		R932RegSaidas(nSvApurIcm,nSvApurIpi)
+	Endif
+Endif
+
+
+
+
+
+
+If nImpTerm == 1 .Or.  nImpTerm == 3
+	dbSelectArea(cArqTemp)
+	dbCloseArea()
+	Ferase(cArqTemp+GetDbExtension())
+	Ferase(cArqTemp+OrdBagExt())
+EndIf
+If ( Select("CIAP")<>0 )
+	dbSelectArea("CIAP")
+	dbCloseArea()
+	Ferase(cArqCiap+GetDbExtension())
+	Ferase(cArqCiap+OrdBagExt())
+EndIf
+If ( Select(cArqSF3)<>0 )
+	dbSelectArea(cArqSF3)
+	dbCloseArea()
+	Ferase(cArqSF3+GetDbExtension())
+	Ferase(cIndxSF3+OrdBagExt())
+EndIf
+dbSelectArea(aSvArea[1])
+dbSetOrder(aSvArea[2])
+dbGoto(aSvArea[3])
+Return
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932RegEntradas(nSvApurIcm,nSvApurIpi)
+
+Local nTotICMS	:= 0
+
+Local aProdutor	:= {}
+Local dDataProd	:= cToD("  /  /  ")
+Local lApur 	:= .F. 
+Local aAreaSM0	:= SM0->(GetArea())
+Local lCredST	:= SF3->(FieldPos("F3_CREDST")) > 0
+Local lP1IcmST		:= GetNewPar("MV_P1ICMST", .F. )
+Local lProcST	:= .T. 
+Local lAliqstn  := GetNewPar ("MV_ALIQSTN", .T. )
+Local lMod55		:= GetNewPar ("MV_SPED55", .F. )
+Local cChaval	:= ""
+Local lEntAmb   := .F. 
+Local lImprZero	:= GetNewPar ("MV_IMPZNFC", .F. )
+aGrade			:= NIL
+
+
+
+
+If nImpTerm == 1 .Or.  nImpTerm == 3
+	dbSelectArea(cArqTemp)
+	dDiaAnt:=F3_ENTRADA
+	dDia:=dDiaAnt
+	SetRegua(LastRec())
+	While !Eof()
+		lTotGrade:= .F. 
+		IncRegua()
+		If Interrupcao(@lAbortPrint)
+			Exit
+		Endif
+
+
+
+
+
+
+
+
+
+		lProcST := .T. 
+		If lCredST
+			If (cArqTemp)->F3_CREDST == "4" .And.  lP1IcmST
+		       	lProcST := .T. 
+	       	Elseif (cArqTemp)->F3_CREDST == "4" .And.  !lP1IcmST
+				lProcST := .F. 
+		    Elseif (cArqTemp)->F3_CREDST == "4" .And.  (cArqTemp)->F3_OBSSOL>0
+   		       	lProcST := .F. 
+			Endif
+		Endif
+
+
+        If GetMv("MV_ESTADO")=="SP" .And.  Alltrim((cArqTemp)->F3_CFO)$"1904/2904"
+		    lEntAmb := .T. 
+		Else
+		    lEntAmb := .F. 
+		EndIf
+
+
+
+
+		If nLin>nLimPag .And.  !(cArqTemp)->SEMMOV
+			R932Cabec(dDia)
+		Endif
+
+
+
+		nTamNota:=nLin
+
+
+
+		If (cArqTemp)->SEMMOV
+			dDia:=(cArqTemp)->F3_ENTRADA
+			R932Cabec(dDia)
+			cLinha:=FmtLin(Array(16),aL[17],,,nLin, .F. )
+			R93xFillPage(cLinha,If( cPaisLoc $ "ANG|PTG", "*** não houve movimento ***", "*** NAO HOUVE MOVIMENTO ***" ),@nLin,nLimPag)
+			FmtLin(,aL[1],,,@nLin)
+			R932TermEnc()
+			(cArqTemp)->(dbSkip())
+			dDia:=(cArqTemp)->F3_ENTRADA
+			lHouveMov := .T. 
+			Loop
+		Endif
+
+
+
+
+		If !lApur
+			lApur := .T. 
+			nSvApurICM:=DefPeriodo(F3_ENTRADA,nApurICM)
+			nSvApurIPI:=DefPeriodo(F3_ENTRADA,nApurIPI)
+		Endif
+
+
+
+        Mtr930Fil(aAreaSM0,(cArqTemp)->FILCORR,1)
+
+
+
+		cContaContab := Alltrim(GetMV("MV_CTALFE"))
+		cContaContab :=	StrTran(cContaContab,"SF3->",)
+
+
+
+		cClieFor:=F3_CLIEFOR+F3_LOJA
+		If(F3_TIPO$"DB",dbSelectArea("SA1"),dbSelectArea("SA2"))
+		dbSeek(xFilial()+cClieFor)
+		dbSelectArea(cArqTemp)
+
+
+
+		Mtr930Fil(aAreaSM0,(cArqTemp)->FILCORR,2)
+
+		dbSelectArea(cArqTemp)
+
+
+
+		aObs:=LivrArrayObs(nLargObs,,lListaNFO)
+		R932IniGrade()
+		If lEntAmb
+			aGrade[1,2]:=0
+			aGrade[1,3]:=0
+			aGrade[2,2]:=0
+			aGrade[3,2]:=0
+	    	aGrade[1,4]:=0
+		Else
+			aGrade[1,2]:=F3_BASEICM
+			aGrade[1,3]:=F3_VALICM
+			aGrade[2,2]:=F3_ISENICM
+			aGrade[3,2]:=F3_OUTRICM
+			If SF3->(FieldPos("F3_VL43080"))>0
+	            If !Empty(F3_VL43080)
+	                aGrade[3,2]:=F3_VL43080
+	            EndIf
+	        EndIf
+			If SF3->(FieldPos("F3_VLINCMG"))>0
+	            If !Empty(F3_VLINCMG)
+	                aGrade[3,2]:=F3_VLINCMG
+	            EndIf
+	        EndIf
+			cChaval:=F3_NFISCAL+F3_SERIE+F3_CLIEFOR+F3_LOJA
+			SD1->(dbSetOrder(1))
+			SF4->(dbSetOrder(1))
+			If SD1->(dbSeek(xFilial("SD1")+cChaval))
+			    If SF4->(dbSeek(xFilial("SF4")+SD1->D1_TES))
+				    If SF4->F4_LFICM == "Z" .Or.  SF4->F4_LFIPI == "Z"
+			       	    aGrade[1,4]:=F3_VALCONT
+				    EndIf
+			    EndIf
+			EndIf
+		EndIf
+
+		IF cMV_ESTADO <> "SP" .OR.  lCat21
+            If lEntAmb
+		 	    aGrade[4,2]:=0
+			    aGrade[4,3]:=0
+			    aGrade[5,2]:=0
+			    aGrade[6,2]:=0
+            Else
+		 	    aGrade[4,2]:=F3_BASEIPI
+			    aGrade[4,3]:=F3_VALIPI
+			    aGrade[5,2]:=F3_ISENIPI
+			    aGrade[6,2]:=F3_OUTRIPI
+            EndIf
+        ENDIF
+
+		aDados:=Array(16)
+		aDados[1]:=DTOC(F3_ENTRADA)
+		aDados[2] := IIf(Empty(F3_ESPECIE),R930CFOTra(F3_CFO,F3_SERIE),Iif(lMod55 .And.  Alltrim(F3_ESPECIE) == "SPED","55",F3_ESPECIE))
+		aDados[3]:=F3_SERIE
+		aDados[4]:=F3_NFISCAL
+		aDados[5]:=DTOC(F3_EMISSAO)
+		aDados[6]:=F3_CLIEFOR+"-"+F3_LOJA
+		aDados[7]:=F3_ESTADO
+		If Empty(F3_DTCANC) .Or.  lImprZero
+			aDados[8]:=Iif(lEntAmb== .T. ,0,F3_VALCONT)
+			aDados[9]:=Substr(EvalMacro(cContaContabil),1,20)
+			aDados[10]:=If(substr(F3_CFO,1,3)$"999#000",,Transform(F3_CFO,PESQPICT("SF3","F3_CFO")))
+			If nModelo <> 5
+				If lEntAmb
+				    aDados[14]:=""
+				Else
+				    aDados[14]:=Iif(F3_ALIQICM > 0,Transform(F3_ALIQICM,"@E 99.99"),"")
+			    Endif
+			EndIf
+			nTotICMS += Iif(lEntAmb== .T. ,0,F3_VALICM)
+		Endif
+
+
+
+		R932ImpGrade()
+		nPosObs:=Ascan(aObs,{|x|x[2]})
+		While nPosObs>0
+			If nLin>=nLimPag
+				R932Filler()
+				R932Cabec()
+			EndIf
+			R932LoadObs()
+			If nPosObs>0
+				FmtLin(@aDados,aL[17],cPictVl,,@nLin)
+			Endif
+		End
+
+
+
+		If !Empty(cTitLivro) .and. F3_ICMSRET-F3_OBSSOL>0 .And.  lProcST
+			aDados[11]:="ICMS"
+			aDados[12]:="ST"
+			aDados[13]:=F3_BASERET
+			If nColuna == 1
+				aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(F3_ICMSRET-F3_OBSSOL,PESQPICT("SF3","F3_ICMSRET")))
+			ElseIf nColuna == 2
+				aDados[15]:=F3_ICMSRET-F3_OBSSOL
+			ElseIf nColuna == 3
+				If F3_TIPO == "D"
+					aDados[15]:=F3_ICMSRET-F3_OBSSOL
+				Else
+					aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(F3_ICMSRET-F3_OBSSOL,PESQPICT("SF3","F3_ICMSRET")))
+				Endif
+			EndIf
+			FmtLin(@aDados,aL[17],cPictVl,,@nLin)
+		Elseif (nColuna == 2 .Or.  nColuna == 3) .And.  F3_ICMSRET-F3_OBSSOL>0 .And.  lProcST
+			aDados[11]:="ICMS"
+			aDados[12]:="ST"
+			aDados[13]:=F3_BASERET
+			If nModelo <> 5
+				aDados[14]:= Iif(lAliqstn,"",Iif(F3_ALIQICM > 0,Transform(F3_ALIQICM,"@E 99.99"),""))
+			EndIf
+			aDados[15]:=F3_ICMSRET-F3_OBSSOL
+			FmtLin(@aDados,aL[17],cPictVl,,@nLin)
+		Endif
+
+
+
+		nLinNec:=nLin-nTamNota+If(lImpZer,3,0)
+		aTamNotas[1]:=Max(aTamNotas[1],nLinNec)
+		LivrAcumula(cArqTemp,@aTotDia,@aTotPerICM,@aTotPerIPI,@aTotMes,@aTransp,@aResumo,@aResCFO,cArqSF3)
+		dDiaAnt:=F3_ENTRADA
+
+
+
+
+		If lEmiteCiap
+			If Select("CIAP") > 0
+				dbSelectArea("CIAP")
+				If ( dbSeek(&(cArqTemp)->(Recno())) )
+					While ( !Eof() .And.  CIAP->SF3==&(cArqTemp)->(Recno()) )
+						dbSelectArea("SF9")
+						dbGoto(CIAP->SF9)
+						Begin Sequence; BeginTran()
+							RecLock("SF9", .F. )
+							SF9->F9_NLRE := Val(cLivro)
+							SF9->F9_FLRE := nPagina
+							MsUnlock()
+						EndTran(); end
+						dbSelectArea("CIAP")
+						dbSkip()
+					EndDo
+				Endif
+			EndIf
+		Endif
+
+		dbSelectArea(cArqTemp)
+		dDataProd 	:= F3_ENTRADA
+		nMes 		:= Month(F3_ENTRADA)
+		dbSkip()
+		If !Eof()
+			dDia:=F3_ENTRADA
+		Else
+			dDia:=UltimoDia(dDia)+1
+		EndIf
+
+
+
+		lTotGrade:= .T. 
+		lHouveMov:= .T. 
+		R932Totais(@nSvApurIcm,@nSvApurIpi)
+
+
+
+
+		If lProdutor .And.  nModelo == 2 .And.  Month(F3_ENTRADA) <> nMes
+			nMes := Month(F3_ENTRADA)
+			aProdutor := {}
+			aProdutor := Mtr930Apur(nApurICM,Year(dDataProd),Month(dDataProd),cNrLivro)
+			If Len(aProdutor) > 0
+				R932Cabec(dDataProd, .F. )
+				FmtLin(,aL[20],,,@nLin)
+				FmtLin(,aL[21],,,@nLin)
+				FmtLin(,aL[22],,,@nLin)
+				FmtLin({aProdutor[01][02]},aL[23],,,@nLin)
+				FmtLin(,aL[24],,,@nLin)
+				FmtLin({nTotICMS},aL[25],,,@nLin)
+				FmtLin(,aL[26],,,@nLin)
+				FmtLin({aProdutor[01][03]+aProdutor[01][04]},aL[27],,,@nLin)
+				FmtLin(,aL[28],,,@nLin)
+				FmtLin({aProdutor[01][01]},aL[29],,,@nLin)
+				FmtLin(,aL[30],,,@nLin)
+				FmtLin(,aL[31],,,@nLin)
+				FmtLin({(aProdutor[01][02]+nTotICMS)-(aProdutor[01][03]+aProdutor[01][01]+aProdutor[01][04])},aL[32],,,@nLin)
+				FmtLin(,aL[33],,,@nLin)
+				FmtLin(,aL[34],,,@nLin)
+				nLin := 80
+			Endif
+
+		Endif
+	End
+
+
+
+	If !lHouveMov
+		dDia:=dDtIni
+		R932Cabec(dDia)
+		cLinha:=FmtLin(Array(16),aL[17],,,nLin, .F. )
+		R93xFillPage(cLinha,If( cPaisLoc $ "ANG|PTG", "*** não houve movimento ***", "*** NAO HOUVE MOVIMENTO ***" ),@nLin,nLimPag)
+		FmtLin(,aL[1],,,@nLin)
+		R932TermEnc()
+	Endif
+Else
+
+
+
+	R932TermIni()
+
+
+
+	R932TermEnc()
+EndIf
+Return
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932RegSaidas(nSvApurIcm,nSvApurIpi)
+Local lMV_ESTCLI 	:= GetNewPar ("MV_ESTCLI", .F. )
+Local lEcfNotas 	:= GetNewPar ("MV_ECFNOTA", .F. )
+Local lApur			:= .F. 
+Local aAreaSM0 		:= SM0->(GetArea())
+Local lCredST		:= SF3->(FieldPos("F3_CREDST")) > 0
+Local lProcST		:= .T. 
+Local lImpSemMov	:= .F. 
+Local lImpTot		:= .F. 
+Local lAliqstn      := GetNewPar ("MV_ALIQSTN", .T. )
+Local dQbrDia       := ""
+Local lSaiAmb       := .F. 
+Local lImprZero		:= GetNewPar ("MV_IMPZNFC", .F. )
+Local lP1IcmST		:= GetNewPar("MV_P1ICMST", .F. )
+
+PRIVATE aGrade:={}
+
+
+
+
+
+If nImpTerm == 1 .Or.  nImpTerm == 3
+	dbSelectArea(cArqTemp)
+	dDiaAnt:=F3_ENTRADA
+	dDia:=dDiaAnt
+	SetRegua(LastRec())
+	While !Eof()
+		IncRegua()
+		If Interrupcao(@lAbortPrint)
+			Exit
+		Endif
+
+
+
+
+
+
+
+
+
+
+		lProcST := .T. 
+		If lCredST
+			If (cArqTemp)->F3_CREDST == "4" .And.  (cArqTemp)->F3_OBSSOL>0
+		       	lProcST := .F. 
+	       	Elseif (cArqTemp)->F3_CREDST == "4" .And.  !lP1IcmST
+				lProcST := .F. 
+			Endif
+		Endif
+
+
+        If GetMv("MV_ESTADO")=="SP" .And.  Alltrim((cArqTemp)->F3_CFO)$"/5904/6904"
+		    lSaiAmb := .T. 
+		Else
+		    lSaiAmb := .F. 
+		EndIf
+
+		If (!lLacuna .AND.  !Empty(F3_DTCANC))
+			If lHouveMov
+				dQbrDia:=F3_ENTRADA
+			EndIf
+			dbSelectArea(cArqTemp)
+			dbSkip()
+			If lHouveMov
+				dDia:=F3_ENTRADA
+			EndIf
+			lImpTot := .F. 
+
+
+
+
+			If lHouveMov .And.  (dQbrDia <> dDia)
+    			R932Totais(@nSvApurIcm,@nSvApurIpi)
+			Endif
+
+			loop
+		Endif
+
+
+
+		If nLin>nLimPag .And.  !(cArqTemp)->SEMMOV
+			R932Cabec(dDia)
+		Endif
+
+
+
+		If (cArqTemp)->SEMMOV
+			dDia:=(cArqTemp)->F3_ENTRADA
+			R932Cabec(dDia)
+			cLinha:=FmtLin(Array(14),aL[19],,,nLin, .F. )
+			R93xFillPage(cLinha,If( cPaisLoc $ "ANG|PTG", "*** não houve movimento ***", "*** NAO HOUVE MOVIMENTO ***" ),@nLin,nLimPag)
+			FmtLin(,aL[1],,,@nLin)
+			R932TermEnc()
+			(cArqTemp)->(dbSkip())
+			dDia:=(cArqTemp)->F3_ENTRADA
+			lHouveMov := .F. 
+			lImpSemMov:= .T. 
+			Loop
+		Endif
+
+
+
+
+		If !lApur
+			lApur := .T. 
+			nSvApurICM:=DefPeriodo(F3_ENTRADA,nApurICM)
+			nSvApurIPI:=DefPeriodo(F3_ENTRADA,nApurIPI)
+		Endif
+
+
+
+        Mtr930Fil(aAreaSM0,(cArqTemp)->FILCORR,1)
+
+
+
+		cContaContab := Alltrim(GetMV("MV_CTALFS"))
+		cContaContab :=	StrTran(cContaContab,"SF3->",)
+
+
+
+        lMV_ESTCLI 	:= GetNewPar ("MV_ESTCLI", .F. )
+
+
+
+		cClieFor:=F3_CLIEFOR+F3_LOJA
+		If(F3_TIPO$"DB",dbSelectArea("SA2"),dbSelectArea("SA1"))
+		dbSeek(xFilial()+cClieFor)
+
+
+
+		Mtr930Fil(aAreaSM0,(cArqTemp)->FILCORR,2)
+
+		dbSelectArea(cArqTemp)
+
+
+
+		nTamNota:=nLin
+
+
+
+		aObs:=LivrArrayObs(nLargObs,,lListaNFO)
+
+
+
+		aDados:=ARRAY(14)
+
+
+
+		aDados[1] := R931GetEcf(cArqTemp,1)
+		aDados[2] := R931GetEcf(cArqTemp,2)
+
+		IF lAglutina
+			aDados[3]:=F3_NFISCAL+" A "+IF(!EMPTY(F3_DTCANC),F3_NFISCAL,F3_DOCOR)
+		ELSE
+			aDados[3]:=F3_NFISCAL+" A "+IF((F3_TIPO$"L" .Or. F3_SERIE=="ECF") .And.  !lEcfNotas ,F3_DOCOR,F3_NFISCAL)
+		ENDIF
+
+
+
+
+		If lLeiECF .AND.  (SF3->(FieldPos("F3_NUMINI")) > 0 .AND.  SF3->(FieldPos("F3_NUMFIM")) > 0) .AND.  !Empty(F3_PDV)
+
+
+
+	        Mtr930Fil(aAreaSM0,(cArqTemp)->FILCORR,1)
+
+
+
+			aDados[3] := R931GetEcf(cArqTemp,3)
+
+			dbSelectArea(cArqTemp)
+
+
+
+			Mtr930Fil(aAreaSM0,(cArqTemp)->FILCORR,2)
+		Endif
+
+		aDados[4]:=StrZero(Day(F3_ENTRADA),2)
+
+		aDados[5]:=F3_ESTADO
+		If (lMV_ESTCLI)
+			aDados[5]:=Iif (F3_TIPO$"DB", SA2->A2_EST, SA1->A1_EST)
+		EndIf
+
+		If Empty(F3_DTCANC) .Or.  lImprZero
+			If lSaiAmb
+				aDados[6]:=0
+				aDados[7]:=Substr(EvalMacro(cContaContabil),1,20)
+				aDados[8]:=If(substr(F3_CFO,1,3)$"999#000",,Transform(F3_CFO,PESQPICT("SF3","F3_CFO")))
+				aDados[9]:=0
+	          	If nModelo <> 5
+				    aDados[10]:=""
+				EndIf
+				aDados[11]:=0
+				aDados[12]:=0
+				aDados[13]:=0
+			Else
+				aDados[6]:=F3_VALCONT
+				aDados[7]:=Substr(EvalMacro(cContaContabil),1,20)
+				aDados[8]:=If(substr(F3_CFO,1,3)$"999#000",,Transform(F3_CFO,PESQPICT("SF3","F3_CFO")))
+				aDados[9]:=F3_BASEICM
+				If nModelo <> 5
+					aDados[10]:=Iif(F3_ALIQICM > 0,Transform(F3_ALIQICM,"@E 99.99"),"")
+				EndIf
+				aDados[11]:=F3_VALICM
+				aDados[12]:=F3_ISENICM
+				aDados[13]:=F3_OUTRICM
+				If SF3->(FieldPos("F3_VL43080"))>0
+				    If !Empty(F3_VL43080)
+				        aDados[13]:=F3_VL43080
+				    EndIf
+				EndIf
+				If SF3->(FieldPos("F3_VLINCMG"))>0
+				    If !Empty(F3_VLINCMG)
+				        aDados[13]:=F3_VLINCMG
+				    EndIf
+				EndIf
+	        EndIf
+        Endif
+		R932LoadObs()
+		If Empty(cFilterUser) .Or.  (&cFilterUser)
+			FmtLin(@aDados,aL[19],cPictVl,,@nLin)
+		Endif
+		nPosObs:=Ascan(aObs,{|x|x[2]})
+		While nPosObs>0
+			If nLin>=nLimPag
+				R932Filler()
+				R932Cabec()
+			EndIf
+			R932LoadObs()
+			If nPosObs>0
+				FmtLin(@aDados,aL[19],cPictVl,,@nLin)
+			Endif
+		End
+
+
+
+
+
+		If !Empty(cTitLivro) .And.  F3_ICMSRET-F3_OBSSOL>0 .And.  lProcST
+			aDados[8]:="ST"
+			aDados[9]:=F3_BASERET
+			If nColuna == 1
+				aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(F3_ICMSRET-F3_OBSSOL,PESQPICT("SF3","F3_ICMSRET")))
+			ElseIf nColuna == 2
+				aDados[11]:=F3_ICMSRET-F3_OBSSOL
+			ElseIf nColuna == 3
+				If F3_TIPO == "D"
+					aDados[11]:=F3_ICMSRET-F3_OBSSOL
+				Else
+					aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(F3_ICMSRET-F3_OBSSOL,PESQPICT("SF3","F3_ICMSRET")))
+				Endif
+			EndIF
+			FmtLin(@aDados,aL[19],cPictVl,,@nLin)
+		ElseIf (nColuna == 2 .Or.  nColuna == 3) .And.  F3_ICMSRET-F3_OBSSOL>0 .And.  lProcST
+			aDados[8]:="ST"
+			aDados[9]:=F3_BASERET
+			If nModelo <> 5
+				aDados[10]:= Iif(lAliqstn,"",Iif(F3_ALIQICM > 0,Transform(F3_ALIQICM,"@E 99.99"),""))
+			EndIf
+			aDados[11]:=F3_ICMSRET-F3_OBSSOL
+			FmtLin(@aDados,aL[19],cPictVl,,@nLin)
+		Endif
+
+
+
+		nLinNec:=nLin-nTamNota
+		aTamNotas[1]:=Max(aTamNotas[1],nLinNec)
+		LivrAcumula(cArqTemp,@aTotDia,@aTotPerICM,@aTotPerIPI,@aTotMes,@aTransp,@aResumo,@aResCFO,cArqSF3)
+		dDiaAnt:=F3_ENTRADA
+		dbSelectArea(cArqTemp)
+		dbSkip()
+		If !Eof()
+			dDia:=F3_ENTRADA
+		Else
+			dDia:=UltimoDia(dDia)+1
+		EndIf
+
+
+
+		lHouveMov	:= .T. 
+		lImpTot		:= .T. 
+		R932Totais(@nSvApurIcm,@nSvApurIpi)
+	End
+
+
+
+
+	If lHouveMov .And.  	!lImpTot
+    	R932Totais(@nSvApurIcm,@nSvApurIpi)
+	Endif
+
+
+
+	If !lHouveMov .And.  !lImpSemMov
+		dDia:=dDtIni
+		R932Cabec(dDia)
+		cLinha:=FmtLin(Array(14),aL[19],,,nLin, .F. )
+		R93xFillPage(cLinha,If( cPaisLoc $ "ANG|PTG", "*** não houve movimento ***", "*** NAO HOUVE MOVIMENTO ***" ),@nLin,nLimPag)
+		FmtLin(,aL[1],,,@nLin)
+		R932TermEnc()
+	Endif
+Else
+
+
+
+	R932TermIni()
+
+
+
+	R932TermEnc()
+EndIf
+Return
+
+
+
+
+
+
+
+
+
+
+
+FUNCTION R932Cabec(dData,lImpDad)
+
+Local lLFisOrd := GetNewPar("MV_LFISORD", .F. )
+Local cTermoSAb := GetMv("MV_LSAIAB")
+Local cTermoEAb	:= GetMv("MV_LENTAB")
+If MV_PAR41 == 1 .And.  !Empty(SuperGetMv("MV_P2ABER",,"")) .And.  !Empty(SuperGetMv("MV_P1ABER",,""))
+	cTermoSAb := SuperGetMv("MV_P2ABER",,"")
+	cTermoEAb := SuperGetMv("MV_P1ABER",,"")
+EndIf
+
+dData	:= IIf(dData==NIL,dDiaAnt,dData)
+lImpDad := Iif(lImpDad==Nil, .T. ,lImpDad)
+
+cPeriodo:=aMeses[Month(dData)]+" / "+Str(Year(dData),4)
+
+
+
+aPagTerm:=CtrlPg(@nPagina,nQtFeixe,lReiniPg)
+cPagina :=Transform(StrZero(nPagina,6),"@R 999.999")
+If (nImpTerm == 2 .Or.  nImpTerm == 3) .and. aPagTerm[1]+aPagTerm[2]>0
+	If nTipoMov==1
+		ImprimeTermo(aPagTerm[1],nPagIni,nQtFeixe,GetMv("MV_LENTEN"),nLargMax,cPerg)
+		nPagIni:=ImprimeTermo(aPagTerm[2],nPagIni,nQtFeixe,cTermoEAb,nLargMax,cPerg)
+	Else
+		ImprimeTermo(aPagTerm[1],nPagIni,nQtFeixe,GetMv("MV_LSAIEN"),nLargMax,cPerg)
+		nPagIni:=ImprimeTermo(aPagTerm[2],nPagIni,nQtFeixe,cTermoSAb,nLargMax,cPerg)
+	Endif
+Endif
+
+
+
+nLin:=3
+FmtLin(,AvalImp(nLargMax),,,@nLin)
+FmtLin(,aL[1],,,@nLin)
+FmtLin({cTitLivro},aL[2],,,@nLin)
+FmtLin(,aL[3],,,@nLin)
+FmtLin({cNome},aL[4],,,@nLin)
+FmtLin(,aL[5],,,@nLin)
+FmtLin({cInscr,cCGC},aL[6],,,@nLin)
+FmtLin(,aL[7],,,@nLin)
+If !lLFisOrd
+	FmtLin({cPagina,cPeriodo},aL[8],,,@nLin)
+Else
+	FmtLin({cLivro,cPagina,cPeriodo},aL[8],,,@nLin)
+Endif
+If lImpDad
+	FmtLin(,{aL[9],aL[10],aL[11],aL[12],aL[13],aL[14],aL[15],aL[16]},,,@nLin)
+	If nTipoMov==2
+		FmtLin(,{aL[17],aL[18]},,,@nLin)
+	Endif
+Else
+	FmtLin(,{aL[9],aL[10],aL[11]},,,@nLin)
+Endif
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932LayOut
+
+Local nSubDiv	:= mv_par36
+Local lLFisOrd	:= GetNewPar("MV_LFISORD", .F. )
+Local lImp  	:= GetNewPar("MV_IMPCABE", .F. )
+Local lImpPag  	:= GetNewPar("MV_IMPPAGI", .F. )
+If nTipoMov==1
+	aL:=Array(34)
+	aL[01]:="+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+"
+
+
+
+
+
+	If cMV_ESTADO == "PE"
+		aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                                registo de entradas #                                                               |                  (*) código  de valores fiscais                     |", "|                                                                REGISTRO DE ENTRADAS #                                                               |                  (*) CODIGO DE VALORES FISCAIS                     |" )
+		aL[03]:="|                                                                                                                                                     |--------------------------------------------------------------------|"
+		aL[04]:=If( cPaisLoc $ "ANG|PTG", "| firma: #############################                                                                                                                | 1  - operações com crédito do imposto                              |", "| FIRMA: #############################                                                                                                                | 1  - OPERACOES COM CREDITO DO IMPOSTO                              |" )
+		aL[05]:="|                                                                                                                                                     |                                                                    |"
+		aL[06]:=If( cPaisLoc $ "ANG|PTG", "| insc.est: ###########           contr.: ##############                                                                                            | 2  - operações sem crédito do imposto - isentas ou não tributadas  |", "| INSC.EST: ###########           C.N.P.J.: ##############                                                                                            | 2  - OPERACOES SEM CREDITO DO IMPOSTO - ISENTAS OU NAO TRIBUTADAS  |" )
+		aL[07]:="|                                                                                                                                                     |                                                                    |"
+		aL[08]:=If( cPaisLoc $ "ANG|PTG", "| folha: #######                   mês ou período/ano: #######                                                                                        | 3  - operações sem crédito do imposto - outras                     |", "| FOLHA: #######                   MES OU PERIODO/ANO: #######                                                                                        | 3  - OPERACOES SEM CREDITO DO IMPOSTO - OUTRAS                     |" )
+		aL[09]:="|                                                                                                                                                     |                                                                    |"
+		aL[10]:="|                                                                                                                                                     | ST - CONTRIBUINTE-SUBSTITUIDO - ICMS NA FONTE                      |"
+	Else
+		If nSubDiv == 1
+
+
+
+
+	    	If cMV_ESTADO == "SE"
+		   		aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                           REGISTO DE ENTRADAS - MODELO P1A                                                         |                  (*) CÓDIGO DE VALORES FISCAIS                     |", "|                                                           REGISTRO DE ENTRADAS - MODELO P1A                                                         |                  (*) CODIGO DE VALORES FISCAIS                     |" )
+			Else
+				If lImp
+					aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                                registo de entradas # - p1a                                                         |                  (*) código de valores fiscais                     |", "|                                                                REGISTRO DE ENTRADAS # - P1A                                                         |                  (*) CODIGO DE VALORES FISCAIS                     |" )
+	            Else
+					aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                                registo de entradas #                                                               |                  (*) código  de valores fiscais                     |", "|                                                                REGISTRO DE ENTRADAS #                                                               |                  (*) CODIGO DE VALORES FISCAIS                     |" )
+	            Endif
+	    	EndIf
+
+		ElseIf nSubDiv == 2
+
+
+
+	   		If cMV_ESTADO == "SE"
+		    		aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                   LIVRO REGISTO DE ENTRADAS DISTRITAIS - MODELO P1A                                                 |                  (*) CODIGO DE VALORES FISCAIS                     |", "|                                                   LIVRO REGISTRO DE ENTRADAS ESTADUAIS - MODELO P1A                                                 |                  (*) CODIGO DE VALORES FISCAIS                     |" )
+			Else
+				If lImp
+					aL[02]:= If( cPaisLoc $ "ANG|PTG", "|                                                        livro de registo de entradas distitais # - p1a                                                 |                  (*) código de valores fiscais                     |", "|                                                        LIVRO REGISTRO DE ENTRADAS ESTADUAIS # - P1A                                                 |                  (*) CODIGO DE VALORES FISCAIS                     |" )
+				Else
+					aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                        livro de registo de entradas estatais #                                                       |                  (*) código de valores fiscais                     |", "|                                                        LIVRO REGISTRO DE ENTRADAS ESTADUAIS #                                                       |                  (*) CODIGO DE VALORES FISCAIS                     |" )
+			    Endif
+			EndIf
+
+		ElseIf nSubDiv == 3
+
+
+
+			If cMV_ESTADO == "SE"
+		    		aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                 LIVRO REGISTO DE ENTRADAS INTERDISTRITAIS - MODELO P1A                                              |                  (*) CODIGO DE VALORES FISCAIS                     |", "|                                                 LIVRO REGISTRO DE ENTRADAS INTERESTADUAIS - MODELO P1A                                              |                  (*) CODIGO DE VALORES FISCAIS                     |" )
+			Else
+				If lImp
+					aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                      livro de registo de entradas interestaduais # - p1a                                              |                  (*) código de valores fiscais                     |", "|                                                      LIVRO REGISTRO DE ENTRADAS INTERESTADUAIS # - P1A                                              |                  (*) CODIGO DE VALORES FISCAIS                     |" )
+				Else
+			   		aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                      livro de registo de entradas interestatais #                                                    |                  (*) código de valores fiscais                     |", "|                                                      LIVRO REGISTRO DE ENTRADAS INTERESTADUAIS #                                                    |                  (*) CODIGO DE VALORES FISCAIS                     |" )
+			    Endif
+			EndIf
+		Endif
+		aL[03]:="|                                                                                                                                                     |--------------------------------------------------------------------|"
+		aL[04]:=If( cPaisLoc $ "ANG|PTG", "| firma: #############################                                                                                                                |                                                                    |", "| FIRMA: #############################                                                                                                                |                                                                    |" )
+		aL[05]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                                                                     | 1 - operações com crédito do imposto                               |", "|                                                                                                                                                     | 1 - OPERACOES COM CREDITO DO IMPOSTO                               |" )
+		aL[06]:=If( cPaisLoc $ "ANG|PTG", "| insc.est: ###########           c.n.p.j.: ##############                                                                                            |                                                                    |", "| INSC.EST: ###########           C.N.P.J.: ##############                                                                                            |                                                                    |" )
+		aL[07]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                                                                     | 2 - operações sem crédito do imposto - isentas ou não tributadas   |", "|                                                                                                                                                     | 2 - OPERACOES SEM CREDITO DO IMPOSTO - ISENTAS OU NAO TRIBUTADAS   |" )
+		If lLFisOrd
+				aL[08]:=If( cPaisLoc $ "ANG|PTG", "| ordem/vencimento: ###-e / #######     mês ou período/ano: #######                                                                                                                                                             |", "| ORDEM/FOLHA: ###-E / #######     MES OU PERIODO/ANO: #######                                                                                                                                                             |" )
+			ElseIf lImpPag
+				aL[08]:=If( cPaisLoc $ "ANG|PTG", "| página : #######                    mês ou período /ano: #######                                                                                                                                                           |", "| PÁGINA: #######                    MES OU PERIODO/ANO: #######                                                                                                                                                           |" )
+			Else
+				aL[08]:=If( cPaisLoc $ "ANG|PTG", "| folha: #######                   mês ou período/ano: #######                                                                                        |                                                                    |", "| FOLHA: #######                   MES OU PERIODO/ANO: #######                                                                                        |                                                                    |" )
+		Endif
+		aL[09]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                                                                     | 3 - operações sem crédito do imposto - outras                      |", "|                                                                                                                                                     | 3 - OPERACOES SEM CREDITO DO IMPOSTO - OUTRAS                      |" )
+		aL[10]:="|                                                                                                                                                     |                                                                    |"
+	Endif
+	aL[11]:="|==========================================================================================================================================================================================================================|"
+	aL[12]:=If( cPaisLoc $ "ANG|PTG", "|          |             documentos fiscais                                 |                  |      codificação          |    |              valores fiscais                  |                                          |", "|          |             DOCUMENTOS FISCAIS                                 |                  |      CODIFICACAO          |    |              VALORES FISCAIS                  |                                          |" )
+	aL[13]:="|          |----------------------------------------------------------------|                  |---------------------------|    |-----------------------------------------------|                                          |"
+	aL[14]:=If( cPaisLoc $ "ANG|PTG", "|data de   |espe |  serie  |         |data      |código  do             | uf |                  |                    |      |icms|cod| base de cálculo  |     |      imposto     |                                          |", "|DATA DE   |ESPE |  SERIE  |         |DATA      |CODIGO DO             | UF |                  |                    |      |ICMS|COD| BASE DE CALCULO  |     |      IMPOSTO     |                                          |" )
+
+	If ("SP"$cMV_ESTADO .OR.  lCat21)
+		aL[15]:=If( cPaisLoc $ "ANG|PTG", "|entrada   |cie  |sub-série| número  |documento |emissor              |orig|  valor contabilístico  |    contabilístico        |fiscal|    |(*)|valor da operação |taxa|     creditado    |                   observações            |", "|ENTRADA   |CIE  |SUB-SERIE| NUMERO  |DOCUMENTO |EMITENTE              |ORIG|  VALOR CONTABIL  |    CONTABIL        |FISCAL|    |(*)|VALOR DA OPERACAO |ALIQ.|     CREDITADO    |                   OBSERVACOES            |" )
+	Else
+		aL[15]:=If( cPaisLoc $ "ANG|PTG", "|entrada   |cie  |sub-serie| número  |documento |emitente              |orig|  valor contabil  |    contabil        |fiscal|ipi |(*)|valor da operação |aliq.|     creditado    |                   observações            |", "|ENTRADA   |CIE  |SUB-SERIE| NUMERO  |DOCUMENTO |EMITENTE              |ORIG|  VALOR CONTABIL  |    CONTABIL        |FISCAL|IPI |(*)|VALOR DA OPERACAO |ALIQ.|     CREDITADO    |                   OBSERVACOES            |" )
+	EndIf
+
+    aL[16]:="|==========|=====+=========+=========+==========+======================+====|==================|====================+======|====|===+==================+=====+==================|==========================================|"
+	aL[17]:="|##########|#####|   ###   |#########|##########|######################| ## |##################|####################| #### |####| # |##################|#####|##################|##########################################|"
+	aL[18]:="|# # # #   |# #########################################################| ## |##################|####################| #### |####| # |##################|#####|##################|##########################################|"
+	aL[19]:="+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+"
+	aL[20]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                        recibo de créditos - artigor rural                                                                                        |", "|                                                                                        DEMONSTRATIVO DE CREDITOS - PRODUTOR RURAL                                                                                        |" )
+	aL[21]:="+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+"
+	aL[22]:="|                                                                                                                                                                                                                          |"
+	aL[23]:=If( cPaisLoc $ "ANG|PTG", "|                                                                      i   - saldo credor transportado do mês anterior           ####################                                                                      |", "|                                                                      I   - SALDO CREDOR TRANSPORTADO DO MES ANTERIOR           ####################                                                                      |" )
+	aL[24]:="|                                                                                                                                                                                                                          |"
+	aL[25]:=If( cPaisLoc $ "ANG|PTG", "|                                                                      ii  - créditos escriturados no mês                        ####################                                                                      |", "|                                                                      II  - CREDITOS ESCRITURADOS NO MES                        ####################                                                                      |" )
+	aL[26]:="|                                                                                                                                                                                                                          |"
+	aL[27]:=If( cPaisLoc $ "ANG|PTG", "|                                                                      iii - créditos utilizados no período                      ####################                                                                      |", "|                                                                      III - CREDITOS UTILIZADOS NO PERIODO                      ####################                                                                      |" )
+	aL[28]:="|                                                                                                                                                                                                                          |"
+	aL[29]:=If( cPaisLoc $ "ANG|PTG", "|                                                                      iv  - estornos de créditos efectuados                      ####################                                                                      |", "|                                                                      IV  - ESTORNOS DE CREDITOS EFETUADOS                      ####################                                                                      |" )
+	aL[30]:="|                                                                                                                                                                                                                          |"
+	aL[31]:="|                                                                                                                                                                                                                          |"
+	aL[32]:=If( cPaisLoc $ "ANG|PTG", "|                                                                      v   - saldo do período (i + ii) - (iii + iv)              ####################                                                                      |", "|                                                                      V   - SALDO DO PERIODO (I + II) - (III + IV)              ####################                                                                      |" )
+	aL[33]:="|                                                                                                                                                                                                                          |"
+	aL[34]:="+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+"
+Else
+	aL:=Array(20)
+	aL[01]:="+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+"
+	If nSubDiv == 1
+
+
+
+
+  		If cMV_ESTADO == "SE"
+    		aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                            REGISTO DE SAÍDAS - MODELO P2A                                                                                               |", "|                                                                                            REGISTRO DE SAIDAS - MODELO P2A                                                                                               |" )
+		Else
+			If lImp
+				aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                     registo de saídas # - p2a                                                                                           |", "|                                                                                                     REGISTRO DE SAIDAS # - P2A                                                                                           |" )
+			Else
+		   		aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                     registo de saidas #                                                                                                 |", "|                                                                                                     REGISTRO DE SAIDAS #                                                                                                 |" )
+		    Endif
+		EndIf
+
+	ElseIf nSubDiv == 2
+
+
+
+
+		If cMV_ESTADO == "SE"
+    		aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                         LIVRO REGISTO DE SAÍDAS DISTRITAIS - MODELO P2A                                                                                  |", "|                                                                                         LIVRO REGISTRO DE SAIDAS ESTADUAIS - MODELO P2A                                                                                  |" )
+	 	Else
+			If lImp
+				aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                             livro de registo de saídas distritais # - p2a                                                                                   |", "|                                                                                             LIVRO REGISTRO DE SAIDAS ESTADUAIS # - P2A                                                                                   |" )
+			Else
+				aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                             livro de registo de saídas estatais #                                                                                         |", "|                                                                                             LIVRO REGISTRO DE SAIDAS ESTADUAIS #                                                                                         |" )
+		    Endif
+		EndIf
+
+	ElseIf nSubDiv == 3
+
+
+
+
+		If cMV_ESTADO == "SE"
+    		aL[02]:= If( cPaisLoc $ "ANG|PTG", "|                                                                                    LIVRO REGISTO DE SAÍDAS INTERDISTRITAIS - MODELO P2A                                                                                  |", "|                                                                                    LIVRO REGISTRO DE SAIDAS INTERESTADUAIS - MODELO P2A                                                                                  |" )
+	 	Else
+			If lImp
+				aL[02]:= If( cPaisLoc $ "ANG|PTG", "|                                                                                          livro de registo de saídas interestaduais # - p2a                                                                                 |", "|                                                                                          LIVRO REGISTRO DE SAIDAS INTERESTADUAIS # - P2A                                                                                 |" )
+			Else
+				aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                          livro de registo de saídas interestatais #                                                                                       |", "|                                                                                          LIVRO REGISTRO DE SAIDAS INTERESTADUAIS #                                                                                       |" )
+	        Endif
+		EndIf
+
+	Endif
+	aL[03]:="|                                                                                                                                                                                                                          |"
+	aL[04]:=If( cPaisLoc $ "ANG|PTG", "| firma: #########################                                                                                                                                                                                         |", "| FIRMA: #########################                                                                                                                                                                                         |" )
+	aL[05]:="|                                                                                                                                                                                                                          |"
+	aL[06]:=If( cPaisLoc $ "ANG|PTG", "| insc.est: #########             c.n.p.j.: ##############                                                                                                                                                                 |", "| INSC.EST: #########             C.N.P.J.: ##############                                                                                                                                                                 |" )
+	aL[07]:="|                                                                                                                                                                                                                          |"
+	If lLFisOrd
+			aL[08]:=If( cPaisLoc $ "ANG|PTG", "| ordem/vencimento: ###-e / #######     mês ou período/ano: #######                                                                                                                                                             |", "| ORDEM/FOLHA: ###-E / #######     MES OU PERIODO/ANO: #######                                                                                                                                                             |" )
+		ElseIf lImpPag
+			aL[08]:=If( cPaisLoc $ "ANG|PTG", "| página : #######                    mês ou período /ano: #######                                                                                                                                                           |", "| PÁGINA: #######                    MES OU PERIODO/ANO: #######                                                                                                                                                           |" )
+		Else
+			aL[08]:=If( cPaisLoc $ "ANG|PTG", "| folha: #######                   mês ou período/ano: #######                                                                                                                                                             |", "| FOLHA: #######                   MES OU PERIODO/ANO: #######                                                                                                                                                             |" )
+	Endif
+	aL[09]:="|                                                                                                                                                                                                                          |"
+	aL[10]:="|                                                                                                                                                                                                                          |"
+	aL[11]:="|==========================================================================================================================================================================================================================|"
+	aL[12]:=If( cPaisLoc $ "ANG|PTG", "|         documentos fiscais               |                  |      codificação          |                                 valores fiscais                                 |                                              |", "|         DOCUMENTOS FISCAIS               |                  |      CODIFICACAO          |                                 VALORES FISCAIS                                 |                                              |" )
+	aL[13]:="|------------------------------------------|                  |---------------------------|---------------------------------------------------------------------------------|                                              |"
+	aL[14]:=If( cPaisLoc $ "ANG|PTG", "|     |     |                     |   |    |                  |                    |      |      operações com débito do imposto      |   operações sem débito do imposto   |                                              |", "|     |     |                     |   |    |                  |                    |      |      OPERACOES COM DEBITO DO IMPOSTO      |   OPERACOES SEM DEBITO DO IMPOSTO   |                                              |" )
+	aL[15]:=If( cPaisLoc $ "ANG|PTG", "|     |série|                     |   |    |                  |                    |      |-------------------------------------------|-------------------------------------|                                              |", "|     |SERIE|                     |   |    |                  |                    |      |-------------------------------------------|-------------------------------------|                                              |" )
+	aL[16]:=If( cPaisLoc $ "ANG|PTG", "|espe | sub-|                     |   | uf |      valor       |                    |      |     base de      |     |     imposto      |    isentas ou    |                  |                                              |", "|ESPE | SUB-|                     |   | UF |      VALOR       |                    |      |     BASE DE      |     |     IMPOSTO      |    ISENTAS OU    |                  |                                              |" )
+	aL[17]:=If( cPaisLoc $ "ANG|PTG", "|cie  |serie|       número        |dia|dest|     contabil     |   contabil         |fiscal|     cálculo      |aliq |     debitado     |  não tributadas  |      outras      |                observações                   |", "|CIE  |SERIE|       NUMERO        |DIA|DEST|     CONTABIL     |   CONTABIL         |FISCAL|     CALCULO      |ALIQ |     DEBITADO     |  NAO TRIBUTADAS  |      OUTRAS      |                OBSERVACOES                   |" )
+	aL[18]:="|=====+=====+=====================+===+====|==================|====================+======|==================+=====+==================|==================+==================|==============================================|"
+	aL[19]:="|#####|#####|#####################| ##| ## |##################|####################| #### |##################|#####|##################|##################|##################|##############################################|"
+	aL[20]:="|# #  |     |#####################| ##| ## |##################|####################| #### |##################|#####|##################|##################|##################|##############################################|"
+Endif
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932Transp(lTotal)
+
+Local nTamTransp := Len(LivrArrayObs(nLargObs,aTotMes))+Max(Len(aGrade),3)+2
+lTotal :=If(lTotal==Nil, .F. ,lTotal)
+If lTotal
+	nTamTransp*=2
+EndIf
+nMaior:=0
+AEval(aTamNotas,{|x|nMaior:=Max(nMaior,x)})
+aTamNotas[2]:=nMaior
+
+nLinNec:=aTamNotas[2]
+lTransp := nLimPag<=nLin+nTamTransp
+
+If lTransp
+	nTamTransp:=nLin
+	If nTipoMov==1
+
+		aObs:=LivrArrayObs(nLargObs,aTotMes)
+
+		R932IniGrade()
+
+		aGrade[1,2]:=aTransp[ColF3("F3_BASEICM")]
+		aGrade[1,3]:=aTransp[ColF3("F3_VALICM")]
+		aGrade[2,2]:=aTransp[ColF3("F3_ISENICM")]
+		aGrade[3,2]:=aTransp[ColF3("F3_OUTRICM")]
+		If SF3->(FieldPos("F3_VL43080"))>0
+		    If !Empty(aTransp[ColF3("F3_VL43080")])
+		        aGrade[3,2]:=aTransp[ColF3("F3_VL43080")]
+		    EndIf
+		EndIf
+		If SF3->(FieldPos("F3_VLINCMG"))>0
+		    If !Empty(aTransp[ColF3("F3_VLINCMG")])
+		        aGrade[3,2]:=aTransp[ColF3("F3_VLINCMG")]
+		    EndIf
+		EndIf
+		IF cMV_ESTADO <> "SP" .OR.  lCat21
+			aGrade[4,2]:=aTransp[ColF3("F3_BASEIPI")]
+			aGrade[4,3]:=aTransp[ColF3("F3_VALIPI")]
+			aGrade[5,2]:=aTransp[ColF3("F3_ISENIPI")]
+			aGrade[6,2]:=aTransp[ColF3("F3_OUTRIPI")]
+	    ENDIF
+		aDados:=ARRAY(16)
+		FmtLin(@aDados,aL[18],,,@nLin)
+		aDados[6]:=If( cPaisLoc $ "ANG|PTG", "A Transportar", "A TRANSPORTAR" )
+		aDados[8]:=aTransp[ColF3("F3_VALCONT")]
+
+
+
+
+		R932ImpGrade()
+
+		nPosObs:=Ascan(aObs,{|x|x[2]})
+		While nPosObs>0
+			R932LoadObs()
+			If nPosObs>0
+				FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+			Endif
+		End
+
+
+
+		If !Empty(cTitLivro) .and. aTransp[ColF3("F3_ICMSRET")]-aTransp[ColF3("F3_OBSSOL")]>0
+			aDados[11]:="ICMS"
+			aDados[12]:="ST"
+			aDados[13]:=aTransp[ColF3("F3_BASERET")]
+			If nColuna == 1
+				aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTransp[ColF3("F3_ICMSRET")]-aTransp[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+			ElseIf nColuna == 2
+				aDados[15]:=aTransp[ColF3("F3_ICMSRET")]-aTransp[ColF3("F3_OBSSOL")]
+			ElseIf nColuna == 3
+				If aTransp[ColF3("F3_TIPO")] == "D"
+					aDados[15]:=aTransp[ColF3("F3_ICMSRET")]-aTransp[ColF3("F3_OBSSOL")]
+				Else
+					aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTransp[ColF3("F3_ICMSRET")]-aTransp[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+				Endif
+			EndIf
+			FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+		ElseIf (nColuna == 2 .Or.  nColuna == 3) .And.  aTransp[ColF3("F3_ICMSRET")]-aTransp[ColF3("F3_OBSSOL")] >0
+			aDados[11]:="ICMS"
+			aDados[12]:="ST"
+			aDados[13]:=aTransp[ColF3("F3_BASERET")]
+			aDados[15]:=aTransp[ColF3("F3_ICMSRET")]-aTransp[ColF3("F3_OBSSOL")]
+			FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+		Endif
+		nLinNec:=nLin-nTamTransp
+		aTamNotas[2]:=Max(aTamNotas[2],nLinNec)
+
+		R932Filler()
+		R932Cabec()
+	Else
+
+
+
+		aObs:=LivrArrayObs(nLargObs,aTransp)
+		aDados:=ARRAY(14)
+		FmtLin(@aDados,aL[20],,,@nLin)
+		aDados[3]:=If( cPaisLoc $ "ANG|PTG", "A Transportar", "A TRANSPORTAR" )
+		aDados[6]:=aTransp[ColF3("F3_VALCONT")]
+		aDados[9]:=aTransp[ColF3("F3_BASEICM")]
+		aDados[11]:=aTransp[ColF3("F3_VALICM")]
+		aDados[12]:=aTransp[ColF3("F3_ISENICM")]
+		aDados[13]:=aTransp[ColF3("F3_OUTRICM")]
+	    If SF3->(FieldPos("F3_VL43080")) > 0
+		    If !Empty(aTransp[ColF3("F3_VL43080")])
+		        aDados[13]:=aTransp[ColF3("F3_VL43080")]
+		    EndIf
+		EndIf
+	    If SF3->(FieldPos("F3_VLINCMG")) > 0
+		    If !Empty(aTransp[ColF3("F3_VLINCMG")])
+		        aDados[13]:=aTransp[ColF3("F3_VLINCMG")]
+		    EndIf
+		EndIf
+		R932LoadObs()
+		FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+
+		nPosObs:=Ascan(aObs,{|x|x[2]})
+		While nPosObs>0
+			R932LoadObs()
+			If nPosObs>0
+				FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+			Endif
+		End
+
+
+
+		If !Empty(cTitLivro) .and.  aTransp[ColF3("F3_ICMSRET")]-aTransp[ColF3("F3_OBSSOL")]>0
+			aDados[8]:="ST"
+			aDados[9]:=aTransp[ColF3("F3_BASERET")]
+			If nColuna == 1
+				aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTransp[ColF3("F3_ICMSRET")]-aTransp[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+			ElseIf nColuna == 2
+				aDados[11]:=aTransp[ColF3("F3_ICMSRET")]-aTransp[ColF3("F3_OBSSOL")]
+			ElseIf nColuna == 3
+				If aTransp[ColF3("F3_TIPO")] == "D"
+					aDados[11]:=aTransp[ColF3("F3_ICMSRET")]-aTransp[ColF3("F3_OBSSOL")]
+				Else
+					aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTransp[ColF3("F3_ICMSRET")]-aTransp[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+				Endif
+			EndIf
+			FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+		Elseif (nColuna == 2 .Or.  nColuna == 3) .And.  aTransp[ColF3("F3_ICMSRET")]-aTransp[ColF3("F3_OBSSOL")]>0
+			aDados[8]:="ST"
+			aDados[9]:=aTransp[ColF3("F3_BASERET")]
+			aDados[11]:=aTransp[ColF3("F3_ICMSRET")]-aTransp[ColF3("F3_OBSSOL")]
+			FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+		Endif
+
+		nLinNec:=nLin-nTamTransp
+		aTamNotas[2]:=Max(aTamNotas[2],nLinNec)
+
+		R932Filler()
+		R932Cabec()
+	Endif
+Endif
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932TotDia
+Local nX := 0
+lTotDia:=(dDiaAnt<>dDia)
+
+If lTotDia .And.  !Empty(dDia)
+	aTamNotas[3]:=Max(aTamNotas[3],nLinNec)
+	nLinNec:=aTamNotas[3]
+	If nLimPag<=nLin+((nLinNec+1)*2)
+		R932Transp( .T. )
+	Endif
+
+	nTamTotDia:=nLin
+	If nTipoMov==1
+
+		aObs:=LivrArrayObs(nLargObs,aTotDia)
+
+		R932IniGrade()
+
+
+
+
+		aGrade[1,2]:=aTotDia[ColF3("F3_BASEICM")]
+		aGrade[1,3]:=aTotDia[ColF3("F3_VALICM")]
+		aGrade[2,2]:=aTotDia[ColF3("F3_ISENICM")]
+		aGrade[3,2]:=aTotDia[ColF3("F3_OUTRICM")]
+		If SF3->(FieldPos("F3_VL43080")) > 0
+		    If !Empty(aTotDia[ColF3("F3_VL43080")])
+		        aGrade[3,2]:=aTotDia[ColF3("F3_VL43080")]
+		    EndIf
+		EndIf
+		If SF3->(FieldPos("F3_VLINCMG")) > 0
+		    If !Empty(aTotDia[ColF3("F3_VLINCMG")])
+		        aGrade[3,2]:=aTotDia[ColF3("F3_VLINCMG")]
+		    EndIf
+		EndIf
+
+
+
+		IF cMV_ESTADO <> "SP" .OR.  lCat21
+			aGrade[4,2]:=aTotDia[ColF3("F3_BASEIPI")]
+			aGrade[4,3]:=aTotDia[ColF3("F3_VALIPI")]
+			aGrade[5,2]:=aTotDia[ColF3("F3_ISENIPI")]
+			aGrade[6,2]:=aTotDia[ColF3("F3_OUTRIPI")]
+	    ENDIF
+		aDados:=ARRAY(16)
+		FmtLin(@aDados,aL[18],,,@nLin)
+		aDados[6]:=If( cPaisLoc $ "ANG|PTG", "Total do dia ", "TOTAL DO DIA " )+StrZero(Day(dDiaAnt),2)
+		aDados[8]:=aTotDia[ColF3("F3_VALCONT")]
+
+
+
+
+		R932ImpGrade()
+
+		nPosObs:=Ascan(aObs,{|x|x[2]})
+		While nPosObs>0
+			R932LoadObs()
+			If nPosObs>0
+				FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+			Endif
+		End
+
+
+
+		If !Empty(cTitLivro) .and.  aTotDia[ColF3("F3_ICMSRET")]-aTotDia[ColF3("F3_OBSSOL")]>0
+			aDados[11]:="ICMS"
+			aDados[12]:="ST"
+			aDados[13]:=aTotDia[ColF3("F3_BASERET")]
+			If nColuna == 1
+				aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTotDia[ColF3("F3_ICMSRET")]-aTotDia[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+			ElseIf nColuna == 2
+				aDados[15]:=aTotDia[ColF3("F3_ICMSRET")]-aTotDia[ColF3("F3_OBSSOL")]
+			ElseIf nColuna == 3
+				If aTotDia[ColF3("F3_TIPO")] == "D"
+					aDados[15]:=aTotDia[ColF3("F3_ICMSRET")]-aTotDia[ColF3("F3_OBSSOL")]
+				Else
+					aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTotDia[ColF3("F3_ICMSRET")]-aTotDia[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+				Endif
+			Endif
+			FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+		ElseIf (nColuna == 2 .Or.  nColuna == 3) .And.  aTotDia[ColF3("F3_ICMSRET")]-aTotDia[ColF3("F3_OBSSOL")]>0
+			aDados[11]:="ICMS"
+			aDados[12]:="ST"
+			aDados[13]:=aTotDia[ColF3("F3_BASERET")]
+			aDados[15]:=aTotDia[ColF3("F3_ICMSRET")]-aTotDia[ColF3("F3_OBSSOL")]
+			FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+		Endif
+		FmtLin(@aDados,aL[18],,,@nLin)
+		nLinNec:=nLin-nTamTotDia
+		aTamNotas[3]:=Max(aTamNotas[3],nLinNec)
+	Else
+
+
+
+		aObs:=LivrArrayObs(nLargObs,aTotDia)
+		aDados:=ARRAY(14)
+		FmtLin(@aDados,aL[20],,,@nLin)
+		aDados[3]:=If( cPaisLoc $ "ANG|PTG", "Total do dia ", "TOTAL DO DIA " )+StrZero(Day(dDiaAnt),2)
+		aDados[6]:=aTotDia[ColF3("F3_VALCONT")]
+		aDados[9]:=aTotDia[ColF3("F3_BASEICM")]
+		aDados[11]:=aTotDia[ColF3("F3_VALICM")]
+		aDados[12]:=aTotDia[ColF3("F3_ISENICM")]
+		aDados[13]:=aTotDia[ColF3("F3_OUTRICM")]
+		If SF3->(FieldPos("F3_VL43080")) > 0
+		    If !Empty(aTotDia[ColF3("F3_VL43080")])
+		        aDados[13]:=aTotDia[ColF3("F3_VL43080")]
+		    EndIf
+		EndIf
+		If SF3->(FieldPos("F3_VLINCMG")) > 0
+		    If !Empty(aTotDia[ColF3("F3_VLINCMG")])
+		        aDados[13]:=aTotDia[ColF3("F3_VLINCMG")]
+		    EndIf
+		EndIf
+		R932LoadObs()
+		FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+
+		nPosObs:=Ascan(aObs,{|x|x[2]})
+		While nPosObs>0
+			R932LoadObs()
+			If nPosObs>0
+				FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+			Endif
+		End
+
+
+
+		If !Empty(cTitLivro) .and.  aTotDia[ColF3("F3_ICMSRET")]-aTotDia[ColF3("F3_OBSSOL")]>0
+			aDados[8]:="ST"
+			aDados[9]:=aTotDia[ColF3("F3_BASERET")]
+			If nColuna == 1
+				aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTotDia[ColF3("F3_ICMSRET")]-aTotDia[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+			ElseIf nColuna == 2
+				aDados[11]:=aTotDia[ColF3("F3_ICMSRET")]-aTotDia[ColF3("F3_OBSSOL")]
+			ElseIf nColuna == 3
+				If aTotDia[ColF3("F3_TIPO")] == "D"
+					aDados[11]:=aTotDia[ColF3("F3_ICMSRET")]-aTotDia[ColF3("F3_OBSSOL")]
+				Else
+					aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTotDia[ColF3("F3_ICMSRET")]-aTotDia[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+				Endif
+			Endif
+			FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+		ElseIf (nColuna == 2 .Or.  nColuna == 3) .And.  aTotDia[ColF3("F3_ICMSRET")]-aTotDia[ColF3("F3_OBSSOL")]>0
+			aDados[8]:="ST"
+			aDados[9]:=aTotDia[ColF3("F3_BASERET")]
+			aDados[11]:=aTotDia[ColF3("F3_ICMSRET")]-aTotDia[ColF3("F3_OBSSOL")]
+			FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+		Endif
+		FmtLin(@aDados,aL[20],,,@nLin)
+		nLinNec:=nLin-nTamTotDia
+		aTamNotas[3]:=Max(aTamNotas[3],nLinNec)
+	Endif
+Endif
+If nLimPag<=nLin+nLinNec
+	R932Transp()
+Endif
+If lTotDia
+	For nX := 1 to Len(aTotDia)
+	Do Case
+		Case ValType(aTotDia[nX]) == "C"
+			aTotDia[nX] := ""
+		Case ValType(aTotDia[nX]) == "N"
+			aTotDia[nX] := 0
+		OtherWise
+			aTotDia[nX] := Nil
+		end
+	next
+Endif
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932TotMes
+Local xx 		:= 1
+Local nPosicao 	:= 0
+Local nProcFil	:= mv_par31
+Local cFilDe	:= mv_par32
+Local cFilAte	:= mv_par33
+Local aArea		:= GetArea()
+Local aAreaSm0 	:= SM0->(GetArea())
+
+
+
+
+If nProcFil <> 1
+	cFilDe 	:= cFilAnt
+	cFilAte	:= cFilAnt
+Endif
+
+SM0->(dbSeek(cEmpAnt+cFilDe, .T. ))
+
+
+If lEmiteCiap
+	nPosicao :=Ascan((cArqTemp)->(dbstruct()),{ |x| ( "F3_VALICM" $ x[1] ) })
+	if nTipoMov==1 .and.  lTotMes
+		If nLin>=nLimPag .and. lImpMes
+			R932Transp()
+		Endif
+
+		dData := LASTDAY(DDIAANT)
+		SFA->(dbSetOrder(2))
+
+
+
+
+        while !SM0->(Eof()) .And. SM0->M0_CODIGO+SM0->M0_CODFIL<=cEmpAnt+cFilAte
+
+			cFilAnt	:= SM0->M0_CODFIL
+
+			If SFA->(dbSeek(xFilial("SFA")+dTos( dData )))
+				While SFA->(!EOF()) .and.  SFA->FA_FILIAL == xFilial("SFA") .and.  Dtos(SFA->FA_DATA)== dTos(ddata)
+					If ( SFA->FA_TIPO == "1" ) .and.  (SFA->FA_CREDIT =="1")
+						cMensagem:=Trim("Credito de ICMS relativo a entrada de Bem do Ativo ")+If(lColCiap,PADL(Transform(SFA->FA_VALOR,"@E 9,999,999.99"),58),"")
+						For xx:=1 to MlCount(cMensagem,nLargObs)
+							AADD(aObs,{MemoLine(cMensagem,nLargObs,xx), .T. })
+						next
+
+						SF9->(dbSeek(xFilial()+SFA->FA_CODIGO))
+						R932IniGrade()
+						aGrade[1,1]:="1"
+						If !lColCiap
+							aGrade[1,3]:=SFA->FA_VALOR
+						Endif
+						nCredAtivo  +=SFA->FA_VALOR
+
+						aDados:=Array(18)
+						If nLin>=nLimPag
+							R932Filler()
+							R932Cabec()
+						EndIf
+						FmtLin(@aDados,aL[18],,,@nLin)
+						aDados[10]	:= SF9->F9_CFOENT
+						R932ImpGrade()
+						nPosObs:=Ascan(aObs,{|x|x[2]})
+						While nPosObs>0
+							R932LoadObs()
+							If nPosObs>0
+								If nLin>=nLimPag
+									R932Filler()
+									R932Cabec()
+								EndIf
+								FmtLin(@aDados,aL[17],cPictVl,,@nLin)
+							Endif
+						Enddo
+					EndIf
+					SFA->(dBSkip())
+				EndDo
+			Endif
+			SM0->(dbSkip())
+		Enddo
+		aTotMes[nPosicao] +=nCredAtivo
+	EndIf
+Endif
+
+If lTotMes .and. lImpMes
+	If nLin>=nLimPag .and. lImpMes
+		R932Transp()
+	Endif
+	If nTipoMov==1
+
+		aObs:=LivrArrayObs(nLargObs,aTotMes)
+
+		R932IniGrade()
+
+		aGrade[1,2]:=aTotMes[ColF3("F3_BASEICM")]
+		aGrade[1,3]:=aTotMes[ColF3("F3_VALICM")]
+		aGrade[2,2]:=aTotMes[ColF3("F3_ISENICM")]
+		aGrade[3,2]:=aTotMes[ColF3("F3_OUTRICM")]
+		If SF3->(FieldPos("F3_VL43080")) > 0
+		    If !Empty(aTotMes[ColF3("F3_VL43080")])
+		        aGrade[3,2]:=aTotMes[ColF3("F3_VL43080")]
+		    EndIf
+		EndIf
+		If SF3->(FieldPos("F3_VLINCMG")) > 0
+		    If !Empty(aTotMes[ColF3("F3_VLINCMG")])
+		        aGrade[3,2]:=aTotMes[ColF3("F3_VLINCMG")]
+		    EndIf
+		EndIf
+		IF cMV_ESTADO <> "SP" .OR.  lCat21
+			aGrade[4,2]:=aTotMes[ColF3("F3_BASEIPI")]
+			aGrade[4,3]:=aTotMes[ColF3("F3_VALIPI")]
+			aGrade[5,2]:=aTotMes[ColF3("F3_ISENIPI")]
+			aGrade[6,2]:=aTotMes[ColF3("F3_OUTRIPI")]
+	    ENDIF
+		aDados:=ARRAY(16)
+		FmtLin(@aDados,aL[18],,,@nLin)
+		aDados[6]:=If( cPaisLoc $ "ANG|PTG", "Total Do Mês", "TOTAL DO MES" )
+		aDados[8]:=aTotMes[ColF3("F3_VALCONT")]
+
+
+
+
+		R932ImpGrade()
+
+		nPosObs:=Ascan(aObs,{|x|x[2]})
+		While nPosObs>0
+			R932LoadObs()
+			If nPosObs>0
+				FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+			Endif
+		End
+
+
+
+		If !Empty(cTitLivro) .and. aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]>0
+			aDados[11]:="ICMS"
+			aDados[12]:="ST"
+			aDados[13]:=aTotMes[ColF3("F3_BASERET")]
+			If nColuna == 1
+				aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+			ElseIf nColuna == 2
+				aDados[15]:=aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]
+			ElseIf nColuna == 3
+				If aTotMes[ColF3("F3_TIPO")] == "D"
+					aDados[15]:=aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]
+				Else
+					aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+				Endif
+			Endif
+			FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+		ElseIf (nColuna == 2 .Or.  nColuna == 3) .And.  aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]>0
+			aDados[11]:="ICMS"
+			aDados[12]:="ST"
+			aDados[13]:=aTotMes[ColF3("F3_BASERET")]
+			aDados[15]:=aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]
+			FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+		Endif
+		FmtLin(@aDados,aL[18],,,@nLin)
+	Else
+
+
+
+		aObs:=LivrArrayObs(nLargObs,aTotMes)
+		aDados:=ARRAY(14)
+		FmtLin(@aDados,aL[20],,,@nLin)
+		aDados[3]:=If( cPaisLoc $ "ANG|PTG", "Total Do Mês", "TOTAL DO MES" )
+		aDados[6]:=aTotMes[ColF3("F3_VALCONT")]
+		aDados[9]:=aTotMes[ColF3("F3_BASEICM")]
+		aDados[11]:=aTotMes[ColF3("F3_VALICM")]
+		aDados[12]:=aTotMes[ColF3("F3_ISENICM")]
+		aDados[13]:=aTotMes[ColF3("F3_OUTRICM")]
+		If SF3->(FieldPos("F3_VL43080")) > 0
+		    If !Empty(aTotMes[ColF3("F3_VL43080")])
+		        aDados[13]:=aTotMes[ColF3("F3_VL43080")]
+		    EndIf
+		EndIf
+		If SF3->(FieldPos("F3_VLINCMG")) > 0
+		    If !Empty(aTotMes[ColF3("F3_VLINCMG")])
+		        aDados[13]:=aTotMes[ColF3("F3_VLINCMG")]
+		    EndIf
+		EndIf
+		R932LoadObs()
+		FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+
+		nPosObs:=Ascan(aObs,{|x|x[2]})
+		While nPosObs>0
+			R932LoadObs()
+			If nPosObs>0
+				FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+			Endif
+		End
+
+
+
+		If !Empty(cTitLivro) .and.  aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]>0
+			aDados[8]:="ST"
+			aDados[9]:=aTotMes[ColF3("F3_BASERET")]
+			If nColuna == 1
+				aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+			ElseIf nColuna == 2
+				aDados[11]:=aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]
+			ElseIf nColuna == 3
+				If aTotMes[ColF3("F3_TIPO")] == "D"
+					aDados[11]:=aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]
+				Else
+					aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+				Endif
+			Endif
+			FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+		Elseif (nColuna == 2 .Or.  nColuna == 3) .And.  aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]>0
+			aDados[8]:="ST"
+			aDados[9]:=aTotMes[ColF3("F3_BASERET")]
+			aDados[11]:=aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]
+			FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+		Endif
+		FmtLin(@aDados,aL[20],,,@nLin)
+	Endif
+	If !Eof()
+		R932Filler()
+	Endif
+
+	For xx := 1 to Len(aTransp)
+		If ValType(aTransp[xx]) == "N"
+			aTransp[xx] := 0
+		Else
+			aTransp[xx] := "NULL"
+		Endif
+	Next
+
+	For xx := 1 to Len(aTotMes)
+		If ValType(aTotMes[xx]) == "N"
+			aTotMes[xx] := 0
+		Else
+			aTotMes[xx] := "NULL"
+		Endif
+	Next
+
+	For xx := 1 to Len(aTamNotas)
+		If ValType(aTamNotas[xx]) == "N"
+			aTamNotas[xx] := 0
+		Else
+			aTamNotas[xx] := "NULL"
+		Endif
+	Next
+
+Endif
+
+
+
+
+RestArea(aAreaSm0)
+cFilAnt	:= SM0->M0_CODFIL
+RestArea(aArea)
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932TotPer(nSvApurIcm,nSvApurIpi)
+Local nCntFor	:=1
+Local nX		:=0
+Local lContZer	:= .F. 
+Local cChave3	:= ""
+nLinNec2:=0
+
+If lTotPerICM
+	aTamNotas[4]:=Max(aTamNotas[4],nLinNec)
+	nLinNec2:=nLinNec2+aTamNotas[4]
+Endif
+If lTotPerIPI
+	aTamNotas[5]:=Max(aTamNotas[5],nLinNec)
+	nLinNec2:=nLinNec2+aTamNotas[5]
+Endif
+
+If lTotPerICM .or. lTotPerIPI
+	nLinNec:=nLinNec2
+	If nLimPag<=nLin+nLinNec
+		R932Transp()
+	Endif
+	If nTipoMov==1
+
+		aObs:={}
+
+		R932IniGrade()
+
+		If lTotPerICM
+			aObs:=LivrArrayObs(nLargObs,aTotPerICM)
+			aGrade[1,2]:=aTotPerICM[ColF3("F3_BASEICM")]
+			aGrade[1,3]:=aTotPerICM[ColF3("F3_VALICM")]
+			aGrade[2,2]:=aTotPerICM[ColF3("F3_ISENICM")]
+			aGrade[3,2]:=aTotPerICM[ColF3("F3_OUTRICM")]
+			If SF3->(FieldPos("F3_VL43080")) > 0
+			    If !Empty(aTotPerICM[ColF3("F3_VL43080")])
+			        aGrade[3,2]:=aTotPerICM[ColF3("F3_VL43080")]
+			    EndIf
+			EndIf
+			If SF3->(FieldPos("F3_VLINCMG")) > 0
+			    If !Empty(aTotPerICM[ColF3("F3_VLINCMG")])
+			        aGrade[3,2]:=aTotPerICM[ColF3("F3_VLINCMG")]
+			    EndIf
+			EndIf
+		Endif
+		If lTotPerIPI
+			IF cMV_ESTADO <> "SP" .OR.  lCat21
+				aGrade[4,2]:=aTotPerIPI[ColF3("F3_BASEIPI")]
+				aGrade[4,3]:=aTotPerIPI[ColF3("F3_VALIPI")]
+				aGrade[5,2]:=aTotPerIPI[ColF3("F3_ISENIPI")]
+				aGrade[6,2]:=aTotPerIPI[ColF3("F3_OUTRIPI")]
+			ENDIF
+		Endif
+		aDados:=ARRAY(16)
+		nTamTotPer:=nLin
+
+
+
+
+		cICM:="ICMS"
+		cIPI:="IPI"
+		nVlContICM:=aTotPerICM[ColF3("F3_VALCONT")]
+		nVlContIPI:=aTotPerIPI[ColF3("F3_VALCONT")]
+
+		lImprime:= .F. 
+		For nx:=1 to Len(aGrade)
+			If !lImpZer .and. (aGrade[nx,2]+aGrade[nx,3])==0
+				Loop
+			Endif
+			If nx<=3.and.!Empty(cICM)
+				aDados[6]:=If( cPaisLoc $ "ANG|PTG", "Total do período ", "TOTAL DO PERIODO " )
+				aDados[8]:=nVlContICM
+				aDados[11]:=cICM
+				cICM:=NIL
+				lImprime:= .T. 
+			Endif
+			If nx>3.and.!Empty(cIPI)
+				aDados[6]:=If( cPaisLoc $ "ANG|PTG", "Total do período ", "TOTAL DO PERIODO " )
+				aDados[8]:=nVlContIPI
+				aDados[11]:=cIPI
+				cIPI:=NIL
+				lImprime:= .T. 
+			Endif
+		cChave3 := F3_NFISCAL+F3_SERIE+F3_CLIEFOR+F3_LOJA
+		SD1->(dbSetOrder(1))
+		SF4->(dbSetOrder(1))
+		If SD1->(dbSeek(xFilial("SD1")+cChave3))
+		If SF4->(dbSeek(xFilial("SF4")+SD1->D1_TES))
+			If aTotPerICM[ColF3("F3_VALCONT")] > 0 .And.  aTotPerICM[ColF3("F3_BASEICM")] <= 0 .And.  SF4->F4_LFICM == "Z" .Or.  SF4->F4_LFIPI == "Z"
+				aDados[12]:= "2"
+				lContZer := .T. 
+			Endif
+		Endif
+		Else
+				aDados[12]:=aGrade[nx,1]
+		EndIf
+			aDados[13]:=aGrade[nx,2]
+			aDados[15]:=If(aGrade[nx,3]>0,aGrade[nx,3],NIL)
+
+
+
+			If lImprime
+				R932LoadObs()
+				If !lIcmIpZer .and.  ((aGrade[nx,2]+aGrade[nx,3])==0)
+					aDados[11]:= NIL
+					aDados[15]:= NIL
+					aDados[12]:= NIL
+					aDados[13]:= NIL
+					aDados[14]:= NIL
+					aDados[16]:= NIL
+					FmtLin(@aDados,(!lTotGrade,aL[17],aL[18]),cPictVl,,@nLin)
+				Else
+					If aDados[12] == "2" .And.  lImpZer .And.  lContZer .And.  SF4->F4_LFICM == "Z" .Or.  SF4->F4_LFIPI == "Z"
+						FmtLin({,,,,,,,,,,,"1",,,,},If(!lTotGrade,aL[17],aL[18]),cPictVl,,@nLin)
+						FmtLin(@aDados,If(!lTotGrade,aL[17],aL[18]),cPictVl,,@nLin)
+						FmtLin({,,,,,,,,,,,"3",,,,},If(!lTotGrade,aL[17],aL[18]),cPictVl,,@nLin)
+						Exit
+					Else
+						FmtLin(@aDados,If(!lTotGrade,aL[17],aL[18]),cPictVl,,@nLin)
+					EndIf
+				EndIf
+			Endif
+		next
+
+		nPosObs:=Ascan(aObs,{|x|x[2]})
+		While nPosObs>0.and.lTotPerICM
+			R932LoadObs()
+			If nPosObs>0
+				FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+			Endif
+		End
+
+
+
+
+		If lTotPerICM
+			If !Empty(cTitLivro) .and.  aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]>0
+				aDados[11]:="ICMS"
+				aDados[12]:="ST"
+				aDados[13]:=aTotMes[ColF3("F3_BASERET")]
+				If nColuna == 1
+					aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+				ElseIf nColuna == 2
+					aDados[15]:=aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]
+				ElseIf nColuna == 3
+					If aTotMes[ColF3("F3_TIPO")] == "D"
+						aDados[15]:=aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]
+					Else
+						aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+					Endif
+				EndIf
+				FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+			ElseIf (nColuna == 2 .Or.  nColuna == 3) .And.  aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]>0
+				aDados[11]:="ICMS"
+				aDados[12]:="ST"
+				aDados[13]:=aTotMes[ColF3("F3_BASERET")]
+				aDados[15]:=aTotMes[ColF3("F3_ICMSRET")]-aTotMes[ColF3("F3_OBSSOL")]
+				FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+			Endif
+		Endif
+		If lTotPerICM
+			nLinNec:=nLin-nTamTotPer
+			aTamNotas[4]:=Max(aTamNotas[4],nLinNec)
+		Endif
+		If lTotPerIPI
+			nLinNec:=nLin-nTamTotPer
+			aTamNotas[5]:=Max(aTamNotas[5],nLinNec)
+		Endif
+		FmtLin(@aDados,aL[18],,,@nLin)
+	Else
+
+
+
+		If lTotPerIcm
+			nTamTotPer:=nLin
+			aObs:=LivrArrayObs(nLargObs,aTotPerICM)
+			aDados:=ARRAY(14)
+			aDados[3]:=If( cPaisLoc $ "ANG|PTG", "Total Do Periodo ", "TOTAL DO PERIODO" )
+			aDados[6]:=aTotPerICM[ColF3("F3_VALCONT")]
+			aDados[9]:=aTotPerICM[ColF3("F3_BASEICM")]
+			aDados[11]:=aTotPerICM[ColF3("F3_VALICM")]
+			aDados[12]:=aTotPerICM[ColF3("F3_ISENICM")]
+			aDados[13]:=aTotPerICM[ColF3("F3_OUTRICM")]
+            If SF3->(FieldPos("F3_VL43080")) > 0
+                If !Empty(aTotPerICM[ColF3("F3_VL43080")])
+                    aDados[13]:=aTotPerICM[ColF3("F3_VL43080")]
+                EndIf
+            EndIf
+            If SF3->(FieldPos("F3_VLINCMG")) > 0
+                If !Empty(aTotPerICM[ColF3("F3_VLINCMG")])
+                    aDados[13]:=aTotPerICM[ColF3("F3_VLINCMG")]
+                EndIf
+            EndIf
+			R932LoadObs()
+			FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+
+			nPosObs:=Ascan(aObs,{|x|x[2]})
+			While nPosObs>0
+				R932LoadObs()
+				If nPosObs>0
+					FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+				Endif
+			End
+
+
+
+			If !Empty(cTitLivro) .and.  aTotPerICM[ColF3("F3_ICMSRET")]-aTotPerICM[ColF3("F3_OBSSOL")]>0
+				aDados[8]:="ST"
+				aDados[9]:=aTotPerICM[ColF3("F3_BASERET")]
+				If nColuna == 1
+					aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTotPerICM[ColF3("F3_ICMSRET")]-aTotPerICM[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+				ElseIf nColuna == 2
+					aDados[11]:=aTotPerICM[ColF3("F3_ICMSRET")]-aTotPerICM[ColF3("F3_OBSSOL")]
+				ElseIf nColuna == 3
+					If aTotPerICM[ColF3("F3_TIPO")] == "D"
+						aDados[11]:=aTotPerICM[ColF3("F3_ICMSRET")]-aTotPerICM[ColF3("F3_OBSSOL")]
+					Else
+						aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aTotPerICM[ColF3("F3_ICMSRET")]-aTotPerICM[ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+					Endif
+				EndIf
+				FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+			Elseif (nColuna == 2 .Or.  nColuna == 3) .And.  aTotPerICM[ColF3("F3_ICMSRET")]-aTotPerICM[ColF3("F3_OBSSOL")]>0
+				aDados[8]:="ST"
+				aDados[9]:=aTotPerICM[ColF3("F3_BASERET")]
+				aDados[11]:=aTotPerICM[ColF3("F3_ICMSRET")]-aTotPerICM[ColF3("F3_OBSSOL")]
+				FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+			EndIf
+			FmtLin(@aDados,aL[20],,,@nLin)
+
+			nLinNec:=nLin-nTamTotPer
+			aTamNotas[4]:=Max(aTamNotas[4],nLinNec)
+		Endif
+	Endif
+	If lTotPerICM .Or. !(Month(dDia)==Month(dDiaAnt))
+		For nCntFor := 1 to Len(aTotPerICM)
+			If ValType(aTransp[nCntFor]) == "N"
+				aTotPerICM[nCntFor] := 0
+			Else
+				aTotPerICM[nCntFor] := "NULL"
+			Endif
+		Next
+		nSvApurICM:=DefPeriodo(dDia,nApurICM)
+	Endif
+	If lTotPerIPI .Or. !(Month(dDia)==Month(dDiaAnt))
+		For nCntFor := 1 to Len(aTotPerIPI)
+			If ValType(aTotPerIPI[nCntFor]) == "N"
+				aTotPerIPI[nCntFor] := 0
+			Else
+				aTotPerIPI[nCntFor] := "NULL"
+			Endif
+		Next
+		nSvApurIPI:=DefPeriodo(dDia,nApurIPI)
+	Endif
+Endif
+Return
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932ResCfo
+Local i	:=0
+Local cChave3	:= ""
+
+If (Len(aResCFO)==0 .Or.  !(lTotPerIcm .Or.  lTotPerIPI)) .And.  !Eof()
+   If nLin<nLimPag
+      R932Filler()
+   Endif
+   Return
+Endif
+
+
+
+
+aResCFO:=Asort(aResCFO,,,{|x,y|x[ColF3("F3_CFO")]<y[ColF3("F3_CFO")]})
+
+
+
+
+
+
+
+aCFOS:={If( cPaisLoc $ "ANG|PTG", "1.000 Entradas Do Distrito", "1.000 ENTRADAS DO ESTADO" ),	If( cPaisLoc $ "ANG|PTG", "2.000 Entradas De Fora Do Distrito", "2.000 ENTRADAS DE FORA DO ESTADO" ),	If( cPaisLoc $ "ANG|PTG", "3.000 Entradas Do Exterior", "3.000 ENTRADAS DO EXTERIOR" ),	"", If( cPaisLoc $ "ANG|PTG", "5.000 Saidas Para O Distrito", "5.000 SAIDAS PARA O ESTADO" ),	If( cPaisLoc $ "ANG|PTG", "6.000 Saidas Para Fora Do Estado", "6.000 SAIDAS PARA FORA DO ESTADO" ),	If( cPaisLoc $ "ANG|PTG", "7.000 Saidas Para O Exterior", "7.000 SAIDAS PARA O EXTERIOR" )}
+
+cSvCFO:="X"
+If nLin<nLimPag
+	R932Filler()
+Endif
+nLin:=80
+For i:=1 to Len(aResCFO)
+	If nLin>nLimPag
+		R932Cabec()
+	EndIf
+	aObs:=LivrArrayObs(nLargObs,aResCFO[i])
+	cCFO:=Trim(aResCFO[i,ColF3("F3_CFO")])
+	If nTipoMov==1
+
+		If i==1
+			FmtLin(@aDados,aL[18],,,@nLin)
+			aDados[6]:=If( cPaisLoc $ "ANG|PTG", "Resumo Das Operações E Prestações Por Código  Fiscal", "RESUMO DAS OPERACOES E PRESTACOES POR CODIGO FISCAL" )
+			FmtLin(@aDados,aL[18],,,@nLin)
+			aDados[6]:="==================================================="
+			FmtLin(@aDados,aL[18],,,@nLin)
+		EndIf
+
+		R932IniGrade()
+		aGrade[1,2]:=aResCFO[i,ColF3("F3_BASEICM")]
+		aGrade[1,3]:=aResCFO[i,ColF3("F3_VALICM")]
+		aGrade[2,2]:=aResCFO[i,ColF3("F3_ISENICM")]
+		aGrade[3,2]:=aResCFO[i,ColF3("F3_OUTRICM")]
+		If SF3->(FieldPos("F3_VL43080")) > 0
+	    	If !Empty(aResCFO[i,ColF3("F3_VL43080")])
+		        aGrade[3,2]:=aResCFO[i,ColF3("F3_VL43080")]
+		    EndIf
+		EndIf
+		If SF3->(FieldPos("F3_VLINCMG")) > 0
+	    	If !Empty(aResCFO[i,ColF3("F3_VLINCMG")])
+		        aGrade[3,2]:=aResCFO[i,ColF3("F3_VLINCMG")]
+		    EndIf
+		EndIf
+
+		cChave3 := F3_NFISCAL+F3_SERIE+F3_CLIEFOR+F3_LOJA
+		SD1->(dbSetOrder(1))
+		SF4->(dbSetOrder(1))
+		If SD1->(dbSeek(xFilial("SD1")+cChave3))
+			If SF4->(dbSeek(xFilial("SF4")+SD1->D1_TES))
+				If SF4->F4_LFICM == "Z" .Or.  SF4->F4_LFIPI == "Z"
+					aGrade[1,4]:=aResCFO[i,ColF3("F3_VALCONT")]
+				Endif
+			Endif
+		Endif
+
+		IF cMV_ESTADO <> "SP" .OR.  lCat21
+			aGrade[4,2]:=aResCFO[i,ColF3("F3_BASEIPI")]
+			aGrade[4,3]:=aResCFO[i,ColF3("F3_VALIPI")]
+			aGrade[5,2]:=aResCFO[i,ColF3("F3_ISENIPI")]
+			aGrade[6,2]:=aResCFO[i,ColF3("F3_OUTRIPI")]
+		ENDIF
+		aDados:=ARRAY(16)
+		If !(Substr(cCFO,1,1)==cSvCFO) .and. !(ALLTRIM(cCFO)$"TTT") .And.  !Empty (cCfo)
+			If (nLin+3)>nLimPag
+				R932Filler()
+				R932Cabec()
+			EndIf
+			FmtLin(@aDados,aL[18],,,@nLin)
+			cSvCFO:=Substr(cCFO,1,1)
+			aDados[6]:=If(cSvCFO="0",,aCFOS[Val(cSvCFO)])
+			FmtLin(@aDados,aL[18],,,@nLin)
+			aDados[6]:=Replic("=",If(cSvCFO="0",3,Len(aCFOS[Val(cSvCFO)])))
+			FmtLin(@aDados,aL[18],,,@nLin)
+		Endif
+		If ("TT"$cCFO)
+			If (nLin+1)>nLimPag
+				R932Filler()
+				R932Cabec()
+			EndIf
+			FmtLin(@aDados,aL[18],,,@nLin)
+			aDados[6]:=If(ALLTRIM(cCFO)=="TTT",If( cPaisLoc $ "ANG|PTG", "Total", "TOTAL" ),If( cPaisLoc $ "ANG|PTG", "Sub-total", "SUB-TOTAL" ))
+		Else
+			aDados[10]:=TransForm(cCFO,PESQPICT("SF3","F3_CFO"))
+		Endif
+		aDados[8]:=aResCFO[i,ColF3("F3_VALCONT")]
+
+
+
+
+		R932ImpGrade()
+
+		nPosObs:=Ascan(aObs,{|x|x[2]})
+		While nPosObs>0
+			R932LoadObs()
+			If nPosObs>0
+				If (nLin+1)>nLimPag
+					R932Filler()
+					R932Cabec()
+				EndIf
+				FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+			Endif
+		End
+
+
+
+		If !Empty(cTitLivro) .and.  aResCFO[i,ColF3("F3_ICMSRET")]-aResCFO[i,ColF3("F3_OBSSOL")]>0
+			aDados[11]:="ICMS"
+			aDados[12]:="ST"
+			aDados[13]:=aResCFO[i,ColF3("F3_BASERET")]
+			If nColuna == 1
+				aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aResCFO[i,ColF3("F3_ICMSRET")]-aResCFO[i,ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+			ElseIf nColuna == 2
+				aDados[15]:=aResCFO[i,ColF3("F3_ICMSRET")]-aResCFO[i,ColF3("F3_OBSSOL")]
+			ElseIf nColuna == 3
+				If aResCFO[i,ColF3("F3_TIPO")] == "D"
+					aDados[15]:=aResCFO[i,ColF3("F3_ICMSRET")]-aResCFO[i,ColF3("F3_OBSSOL")]
+				Else
+					aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aResCFO[i,ColF3("F3_ICMSRET")]-aResCFO[i,ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+				Endif
+			Endif
+			FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+		ElseIF (nColuna == 2 .Or.  nColuna == 3) .And.  aResCFO[i,ColF3("F3_ICMSRET")]-aResCFO[i,ColF3("F3_OBSSOL")]>0
+			aDados[11]:="ICMS"
+			aDados[12]:="ST"
+			aDados[13]:=aResCFO[i,ColF3("F3_BASERET")]
+			aDados[15]:=aResCFO[i,ColF3("F3_ICMSRET")]-aResCFO[i,ColF3("F3_OBSSOL")]
+			FmtLin(@aDados,aL[18],cPictVl,,@nLin)
+		Endif
+	Else
+
+
+
+		If Val(Substr(cCFO,1,1))<5 .AND.  !(ALLTRIM(cCFO)=="TTT")
+			Loop
+		Endif
+		If i==1
+			If mv_par27 == 1 .And.  nTotIcmDeb > 0
+				FmtLin(@aDados,aL[20],,,@nLin)
+				aDados[14]:= If( cPaisLoc $ "ANG|PTG", "Icms a ser debitado: ", "ICMS A SER DEBITADO: " )+Transform(nTotIcmDeb,PESQPICT("SF3","F3_ICMSRET"))
+				FmtLin(@aDados,aL[20],,,@nLin)
+			Endif
+
+			FmtLin(@aDados,aL[20],,,@nLin)
+			aDados[3]:=If( cPaisLoc $ "ANG|PTG", "Resumo Das Operações E Prestações Por Código  Fiscal", "RESUMO DAS OPERACOES E PRESTACOES POR CODIGO FISCAL" )
+			FmtLin(@aDados,aL[20],,,@nLin)
+			aDados[3]:="==================================================="
+			FmtLin(@aDados,aL[20],,,@nLin)
+		EndIf
+
+
+
+		aDados:=ARRAY(14)
+
+		If !(Substr(cCFO,1,1)==cSvCFO) .and. !(ALLTRIM(cCFO)=="TTT")
+			If (nLin+3)>nLimPag
+				R932Filler()
+				R932Cabec()
+			EndIf
+			FmtLin(@aDados,aL[20],,,@nLin)
+			cSvCFO:=Substr(cCFO,1,1)
+			aDados[3]:=If(cSvCFO="0",,aCFOS[Val(cSvCFO)])
+			FmtLin(@aDados,aL[20],,,@nLin)
+			aDados[3]:=Replic("=",If(cSvCFO="0",3,Len(aCFOS[Val(cSvCFO)])))
+			FmtLin(@aDados,aL[20],,,@nLin)
+		Endif
+		If ("TT"$cCFO)
+			If (nLin+1)>nLimPag
+				R932Filler()
+				R932Cabec()
+			EndIf
+			FmtLin(@aDados,aL[20],,,@nLin)
+			aDados[3]:=If(ALLTRIM(cCFO)=="TTT",If( cPaisLoc $ "ANG|PTG", "Total", "TOTAL" ),If( cPaisLoc $ "ANG|PTG", "Sub-total", "SUB-TOTAL" ))
+		Else
+			aDados[8]:=TransForm(cCFO,PESQPICT("SF3","F3_CFO"))
+		Endif
+		aDados[6]:=aResCFO[i,ColF3("F3_VALCONT")]
+		aDados[9]:=aResCFO[i,ColF3("F3_BASEICM")]
+		aDados[11]:=aResCFO[i,ColF3("F3_VALICM")]
+		aDados[12]:=aResCFO[i,ColF3("F3_ISENICM")]
+		aDados[13]:=aResCFO[i,ColF3("F3_OUTRICM")]
+		If SF3->(FieldPos("F3_VL43080")) > 0
+		    If !Empty(aResCFO[i,ColF3("F3_VL43080")])
+		        aDados[13]:=aResCFO[i,ColF3("F3_VL43080")]
+		    EndIf
+		EndIf
+		If SF3->(FieldPos("F3_VLINCMG")) > 0
+	    	If !Empty(aResCFO[i,ColF3("F3_VLINCMG")])
+		        aDados[13]:=aResCFO[i,ColF3("F3_VLINCMG")]
+		    EndIf
+		EndIf
+		R932LoadObs()
+		If (nLin+1)>nLimPag
+			R932Filler()
+			R932Cabec()
+		EndIf
+		FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+
+		nPosObs:=Ascan(aObs,{|x|x[2]})
+		While nPosObs>0
+			R932LoadObs()
+			If nPosObs>0
+				If (nLin+1)>nLimPag
+					R932Filler()
+					R932Cabec()
+				EndIf
+				FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+			Endif
+		End
+		If (nLin+1)>nLimPag
+			R932Filler()
+			R932Cabec()
+		EndIf
+
+
+
+		If !Empty(cTitLivro) .and.  aResCFO[i,ColF3("F3_ICMSRET")]-aResCFO[i,ColF3("F3_OBSSOL")]>0
+			aDados[8]:="ST"
+			aDados[9]:=aResCFO[i,ColF3("F3_BASERET")]
+			If nColuna == 1
+				aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aResCFO[i,ColF3("F3_ICMSRET")]-aResCFO[i,ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+			ElseIf nColuna == 2
+				aDados[11]:=aResCFO[i,ColF3("F3_ICMSRET")]-aResCFO[i,ColF3("F3_OBSSOL")]
+			ElseIf nColuna == 3
+				If aResCFO[i,ColF3("F3_TIPO")] == "D"
+					aDados[11]:=aResCFO[i,ColF3("F3_ICMSRET")]-aResCFO[i,ColF3("F3_OBSSOL")]
+				Else
+					aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aResCFO[i,ColF3("F3_ICMSRET")]-aResCFO[i,ColF3("F3_OBSSOL")],PESQPICT("SF3","F3_ICMSRET")))
+				Endif
+			Endif
+			FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+		Elseif (nColuna == 2 .Or.  nColuna == 3) .And.  aResCFO[i,ColF3("F3_ICMSRET")]-aResCFO[i,ColF3("F3_OBSSOL")]>0
+			aDados[8]:="ST"
+			aDados[9]:=aResCFO[i,ColF3("F3_BASERET")]
+			aDados[11]:=aResCFO[i,ColF3("F3_ICMSRET")]-aResCFO[i,ColF3("F3_OBSSOL")]
+			FmtLin(@aDados,aL[20],cPictVl,,@nLin)
+		Endif
+	Endif
+
+
+
+	If i==Len(aResCFO)
+		If nTipoMov==1
+			FmtLin(@aDados,aL[18],,,@nLin)
+		Else
+			FmtLin(@aDados,aL[20],,,@nLin)
+		Endif
+		aResCfo:={}
+		R932Filler()
+	ElseIf nLin+nLinNec>nLimPag
+		R932Filler()
+	Endif
+next
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932ResEst
+
+Local lFirstCO:= .T. 
+Local lFirstNC:= .T. 
+Local nTotvlrctb:=0
+Local nTotvlrbsc:=0
+Local nTotimpdeb	:=0
+Local nTotisenta	:=0
+Local nTotoutras	:=0
+Local nTotIcmCre	:=0
+Local nTotIPICre	:=0
+Local nTotBasIPI	:=0
+Local i				:=0
+Local j				:=0
+Local lAntiICM		:= (SF3->(FieldPos("F3_VALANTI")) > 0 .And.  SuperGetMv("MV_ESTADO")=="SP")
+Local cChares		:= ""
+Local lGrade		:= .F. 
+
+If (Len(aResumo)==0 .Or.  !(lTotPerIcm .Or.  lTotPerIPI)) .And.  !Eof()
+   Return
+Endif
+
+nLin:=80
+
+
+
+aResumo:=ASort(aResumo,,,{|x,y|x[1]+x[2]<y[1]+y[2]})
+For i:=1 to Len(aResumo)
+	If nLin>nLimPag
+   		If nLin<>80
+   			FmtLin({},aL[01],,,@nLin)
+   		EndIf
+		R932Cabec()
+	Endif
+	If nTipoMov==1
+	   aDados:=ARRAY(17)
+
+
+
+	   If (lLisEstOri .Or. (!lLisEstOri .And. cMV_Estado<>aResumo[i,2]))
+		  If i==1
+			 FmtLin(@aDados,aL[17],,,@nLin)
+			 aDados[8]:=If( cPaisLoc $ "ANG|PTG", "Demonstrativo Por Distrito De Origem Da Mercadoria Ou De Inicio Da Prestação De Serviço  ", "DEMONSTRATIVO POR ESTADO DE ORIGEM DA MERCADORIA OU DE INICIO DA PRESTACAO DE SERVICO" )
+			 FmtLin(@aDados,aL[17],,,@nLin)
+			 aDados[8]:="====================================================================================="
+			 FmtLin(@aDados,aL[17],,,@nLin)
+			 FmtLin(@aDados,aL[17],,,@nLin)
+		  Endif
+		  aGrade:={}
+
+          If mv_par26 == 1
+ 		     If aResumo[i,4]>0
+			    AADD(aGrade,{"1",aResumo[i,4]})
+			 Endif
+
+			cChares := SF3->F3_NFISCAL+SF3->F3_SERIE+SF3->F3_CLIEFOR+SF3->F3_LOJA
+			SD1->(dbSetOrder(1))
+			SF4->(dbSetOrder(1))
+			If SD1->(dbSeek(xFilial("SD1")+cChares))
+			If SF4->(dbSeek(xFilial("SF4")+SD1->D1_TES))
+				If (aResumo[i,7]>0 .And.  lLisIsenta) .Or.  (aResumo[i,3]>0 .And.  aResumo[i,4]<=0 .And.  (SF4->F4_LFICM == "Z" .Or.  SF4->F4_LFIPI == "Z"))
+			    	AADD(aGrade,{"2",aResumo[i,7]})
+			    	lGrade := .T. 
+			 	Else
+					If (aResumo[i,7]>0 .And.  lLisIsenta)
+			    		AADD(aGrade,{"2",aResumo[i,7]})
+			    		lGrade := .T. 
+					EndIf
+				Endif
+			EndIf
+			Else
+		   		If (aResumo[i,7]>0 .And.  lLisIsenta)
+		    		AADD(aGrade,{"2",aResumo[i,7]})
+		    		lGrade := .T. 
+				EndIf
+			EndIf
+
+			 If aResumo[i,5]>0
+			    AADD(aGrade,{"3",aResumo[i,5]})
+			    lGrade := .T. 
+			 Else
+				 If aResumo[i,19]>0
+				    AADD(aGrade,{"3",aResumo[i,19]})
+				    lGrade := .T. 
+				 EndIf
+			 Endif
+			 aDados[7]:=aResumo[i,2]
+			 aDados[8]:=aResumo[i,3]
+			 If lGrade
+			 aDados[11]:="ICMS"
+			 EndIf
+             If aResumo[i,8]>0
+			    aDados[15] :=aResumo[i,8]
+             EndIf
+
+             If nModelo == 1
+                If aResumo[i,9]>0
+				   aDados[16] :=aResumo[i,9]
+			    Endif
+			 Endif
+		  Else
+ 		     If aResumo[i,4]>0
+			    AADD(aGrade,{"1",aResumo[i,4]})
+			 Endif
+		cChares := SF3->F3_NFISCAL+SF3->F3_SERIE+SF3->F3_CLIEFOR+SF3->F3_LOJA
+		SD1->(dbSetOrder(1))
+		SF4->(dbSetOrder(1))
+		If SD1->(dbSeek(xFilial("SD1")+cChares))
+			If SF4->(dbSeek(xFilial("SF4")+SD1->D1_TES))
+				If (aResumo[i,7]>0 .And.  lLisIsenta) .Or.  (aResumo[i,3]>0 .And.  aResumo[i,4]<=0 .And.  (SF4->F4_LFICM == "Z" .Or.  SF4->F4_LFIPI == "Z"))
+				   	AADD(aGrade,{"2",aResumo[i,7]})
+				Else
+				If (aResumo[i,7]>0 .And.  lLisIsenta)
+			    	AADD(aGrade,{"2",aResumo[i,7]})
+				EndIf
+				Endif
+			EndIf
+		Else
+		   	If (aResumo[i,7]>0 .And.  lLisIsenta)
+		    	AADD(aGrade,{"2",aResumo[i,7]})
+			EndIf
+		EndIf
+
+			 If aResumo[i,5]>0
+			    AADD(aGrade,{"3",aResumo[i,5]})
+			 Else
+			 	 If aResumo[i,19]>0
+				    AADD(aGrade,{"3",aResumo[i,19]})
+	             EndIf
+			 Endif
+			 aDados[7]:=aResumo[i,2]
+			 aDados[8]:=aResumo[i,3]
+			 aDados[11]:="ICMS"
+		  Endif
+
+		  If aResumo[i,6]>0 .and.  (nColuna == 1 .Or.  nColuna == 3)
+			 aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aResumo[i,6],PESQPICT("SF3","F3_ICMSRET")))
+		  Endif
+
+
+
+
+
+		  If MV_PAR25 == 1
+     		 nTotvlrctb:= nTotvlrctb + aResumo[i,3]
+
+		     If aResumo[i,4]>0
+			 	nTotvlrbsc +=	aResumo[i,4]
+		   	 Endif
+             If aResumo[i,7]>0 .And.  lLisIsenta
+                  nTotvlrbsc +=	aResumo[i,7]
+             EndIf
+             If aResumo[i,5]>0
+			 	 nTotvlrbsc +=	aResumo[i,5]
+             Else
+                 If aResumo[i,19]>0
+	    		 	 nTotvlrbsc +=	aResumo[i,19]
+                 EndIf
+		     Endif
+
+	    	 If mv_par26 == 1
+			    nTotIcmCre	+=aResumo[i,08]
+			    nTotIPICre	+=aResumo[i,10]
+			    nTotBasIPI	+=aResumo[i,09]
+	    	 Endif
+	 	  Endif
+
+		  if Len(aGrade)>0
+			 For j:=1 to Len(aGrade)
+				 aDados[12]:=aGrade[j,1]
+				 aDados[13]:=aGrade[j,2]
+				 FmtLin(@aDados,aL[17],cPictVl,,@nLin)
+			 next
+		  Else
+			 FmtLin(@aDados,aL[17],cPictVl,,@nLin)
+		  EndIf
+		  If aResumo[i,13]>0 .and.  (nColuna == 1 .Or.  nColuna == 3)
+			  aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms normal: ", "ICMS NORMAL: " )+Alltrim(Transform(aResumo[i,13],PESQPICT("SF3","F3_OBSICM")))
+			  FmtLin(@aDados,aL[17],cPictVl,,@nLin)
+		  Endif
+		  If aResumo[i,14]>0 .and.  (nColuna == 1 .Or.  nColuna == 3)
+			  If lAntiICM
+				  aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms st. int.: ", "ICMS ST. INT.: " )+Alltrim(Transform((aResumo[i,14]-aResumo[i,17]),PESQPICT("SF3","F3_OBSSOL")))
+			  Else
+				  aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Icms st. int.: ", "ICMS ST. INT.: " )+Alltrim(Transform(aResumo[i,14],PESQPICT("SF3","F3_OBSSOL")))
+			  Endif
+			  FmtLin(@aDados,aL[17],cPictVl,,@nLin)
+		  EndIf
+		  If aResumo[i,15]>0 .and.  (nColuna == 1 .Or.  nColuna == 3)
+			aDados[16]:=If( cPaisLoc $ "ANG|PTG", "Cred. pres. st: ", "CRED. PRES. ST: " )+Alltrim (Transform (aResumo[i,15], PESQPICT("SF3","F3_CRPRST")))
+			FmtLin(@aDados,aL[17],cPictVl,,@nLin)
+		  Endif
+	   Endif
+	Else
+	   aDados:=ARRAY(14)
+
+
+
+	   If (lLisEstOri .Or. (!lLisEstOri .And. cMV_Estado<>aResumo[i,2]))
+		  If i==1
+			 FmtLin(@aDados,aL[19],,,@nLin)
+			 aDados[7]:=If( cPaisLoc $ "ANG|PTG", "Demonstrativo Por Distrito De Destino Da Mercadoria Ou Da Prestação De Serviço  ", "DEMONSTRATIVO POR ESTADO DE DESTINO DA MERCADORIA OU DA PRESTACAO DE SERVICO" )
+			 FmtLin(@aDados,aL[19],,,@nLin)
+			 aDados[7]:="============================================================================"
+			 FmtLin(@aDados,aL[19],,,@nLin)
+			 FmtLin(@aDados,aL[19],,,@nLin)
+		  Endif
+		  If lFirstCO .and. aResumo[i,1]=="CO"
+			 lFirstCO:= .F. 
+			 aDados[9]:=If( cPaisLoc $ "ANG|PTG", "Operações Realizadas Com Contribuintes", "OPERACOES REALIZADAS COM CONTRIBUINTES" )
+			 FmtLin(@aDados,aL[19],,,@nLin)
+			 aDados[9]:="======================================"
+			 FmtLin(@aDados,aL[19],,,@nLin)
+		  Endif
+		  If lFirstNC .and. aResumo[i,1]=="NC"
+			 lFirstNC:= .F. 
+			 aDados[9]:=If( cPaisLoc $ "ANG|PTG", "Operações Realizadas Com Não Contribuintes", "OPERACOES REALIZADAS COM NAO CONTRIBUINTES" )
+			 FmtLin(@aDados,aL[19],,,@nLin)
+			 aDados[9]:="=========================================="
+			 FmtLin(@aDados,aL[19],,,@nLin)
+		  Endif
+		  If mv_par26 == 1
+		     aDados[05]:=aResumo[i,2]
+		     aDados[06]:=aResumo[i,3]
+		     aDados[09]:=aResumo[i,4]
+		     aDados[11]:=aResumo[i,8]
+		     aDados[12]:=aResumo[i,7]
+		     If aResumo[i,5]>0
+		     aDados[13]:=aResumo[i,5]
+		     Else
+   		         If aResumo[i,19]>0
+		             aDados[13]:=aResumo[i,19]
+		         EndIf
+		     Endif
+		  Else
+		     aDados[5]:=aResumo[i,2]
+		     aDados[6]:=aResumo[i,3]
+			 aDados[9]:=aResumo[i,4]
+		  Endif
+
+		  If aResumo[i,6]>0 .and.  (nColuna == 1 .Or.  nColuna == 3)
+		     aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms retido: ", "ICMS RETIDO: " )+Alltrim(Transform(aResumo[i,6],PESQPICT("SF3","F3_ICMSRET"))	)
+		  Endif
+
+          If mv_par25 == 1
+   	 	     nTotvlrctb +=aResumo[i,3]
+	         nTotvlrbsc +=aResumo[i,4]
+             If mv_par26 == 1
+   	 	        nTotimpdeb +=aResumo[i,8]
+	            nTotisenta +=aResumo[i,7]
+	            If aResumo[i,5]>0
+   	 	            nTotoutras +=aResumo[i,5]
+   	 	        Else
+	                If aResumo[i,19]>0
+   	 	                nTotoutras +=aResumo[i,19]
+   	 	            EndIf
+   	 	        EndIf
+   	 	     Endif
+     	  Endif
+			FmtLin(@aDados,aL[19],cPictVl,,@nLin)
+		Endif
+		If aResumo[i,13]>0 .and.  (nColuna == 1 .Or.  nColuna == 3)
+			aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms normal: ", "ICMS NORMAL: " )+Alltrim(Transform(aResumo[i,13],PESQPICT("SF3","F3_OBSICM")))
+			FmtLin(@aDados,aL[19],cPictVl,,@nLin)
+		Endif
+		If aResumo[i,14]>0 .and.  (nColuna == 1 .Or.  nColuna == 3)
+		    If lAntiICM
+			    aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms st. int.: ", "ICMS ST. INT.: " )+Alltrim(Transform((aResumo[i,14]-aResumo[i,17]),PESQPICT("SF3","F3_OBSSOL")))
+		    Else
+			    aDados[14]:=If( cPaisLoc $ "ANG|PTG", "Icms st. int.: ", "ICMS ST. INT.: " )+Alltrim(Transform(aResumo[i,14],PESQPICT("SF3","F3_OBSSOL")))
+		    Endif
+		    FmtLin(@aDados,aL[19],cPictVl,,@nLin)
+	   Endif
+	Endif
+
+
+
+	If i==Len(aResumo)
+
+	   IF nTipoMov == 2 .AND.  MV_PAR25 == 1
+          aDados[03]:=If( cPaisLoc $ "ANG|PTG", "Total", "TOTAL" )
+          aDados[06]:=nTotvlrctb
+          aDados[09]:=nTotvlrbsc
+          If mv_par26 == 1
+	         aDados[11]:=nTotimpdeb
+		     aDados[12]:=nTotisenta
+			 aDados[13]:=nTotoutras
+		  Endif
+          FmtLin(@aDados,aL[19],cPictVl,,@nLin)
+       ELSE
+          IF nTipoMov==1 .AND.  MV_PAR25 == 1
+             aDados[5]		:=If( cPaisLoc $ "ANG|PTG", "Total", "TOTAL" )
+             aDados[8]		:=	 nTotvlrctb
+             aDados[13]	:=	 nTotvlrbsc
+         	 If mv_par26 == 1
+	   	        aDados[15]	:= nTotIcmCre
+	   	     	If nModelo == 1
+		     	   aDados[16]	:= nTotIPICre
+		     	Endif
+		   	 Endif
+
+             FmtLin(@aDados,aL[17],cPictVl,,@nLin)
+          ENDIF
+       ENDIF
+	   R932Filler()
+	Endif
+next
+aResumo:={}
+Return
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932LoadObs
+
+nPosObs:=Ascan(aObs,{|x|x[2]})
+If nPosObs>0
+	aDados[If(nTipoMov==1,16,14)]:=aObs[nPosObs,1]
+	aObs[nPosObs,2]:= .F. 
+Endif
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932Totais(nSvApurIcm,nSvApurIpi)
+R932Transp()
+If lTotalDia
+	R932TotDia()
+Endif
+
+lTotPerICM:=(nSvApurICM<>DefPeriodo(dDia,nApurICM)) .Or.  IIf(nApurIcm==3,Month(dDia)<>Month(dDiaAnt), .F. )
+lTotPerIPI:=(nSvApurIPI<>DefPeriodo(dDia,nApurIPI)) .Or.  IIf(nApurIpi==3,Month(dDia)<>Month(dDiaAnt), .F. )
+lTotMes:=(Month(dDiaAnt)<>Month(dDia))
+
+R932TotPer(@nSvApurIcm,@nSvApurIpi)
+R932TotMes()
+
+
+
+If lTotMes
+
+
+
+	R932ResCfo()
+
+
+
+	R932ResEst()
+Endif
+
+
+
+
+R932TermEnc()
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932TermIni()
+Local cTermoSAb := GetMv("MV_LSAIAB")
+Local cTermoEAb	:= GetMv("MV_LENTAB")
+If MV_PAR41 == 1 .And.  !Empty(SuperGetMv("MV_P2ABER",,"")) .And.  !Empty(SuperGetMv("MV_P1ABER",,""))
+	cTermoSAb := SuperGetMv("MV_P2ABER",,"")
+	cTermoEAb := SuperGetMv("MV_P1ABER",,"")
+EndIf
+
+nPagina:=1
+
+
+
+aPagTerm:=CtrlPg(@nPagina,nQtFeixe,lReiniPg)
+cPagina :=Transform(StrZero(nPagina,6),"@R 999.999")
+If (nImpTerm == 2 .Or.  nImpTerm == 3) .and. aPagTerm[1]+aPagTerm[2]>0
+	If nTipoMov==1
+		ImprimeTermo(aPagTerm[1],nPagIni,nQtFeixe,GetMv("MV_LENTEN"),nLargMax,cPerg)
+		nPagIni:=ImprimeTermo(aPagTerm[2],nPagIni,nQtFeixe,cTermoEAb,nLargMax,cPerg)
+	Else
+		ImprimeTermo(aPagTerm[1],nPagIni,nQtFeixe,GetMv("MV_LSAIEN"),nLargMax,cPerg)
+		nPagIni:=ImprimeTermo(aPagTerm[2],nPagIni,nQtFeixe,cTermoSAb,nLargMax,cPerg)
+	Endif
+Endif
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932TermEnc
+If ((Eof() .Or. !lHouveMov) .and.  nImpTerm == 3) .Or.  (nImpTerm == 2)
+	If nTipoMov==1
+		ImprimeTermo(nPagina,nPagIni,nQtFeixe,GetMv("MV_LENTEN"),nLargMax,cPerg)
+	Else
+		ImprimeTermo(nPagina,nPagIni,nQtFeixe,GetMv("MV_LSAIEN"),nLargMax,cPerg)
+	Endif
+Endif
+Return
+
+
+
+
+
+
+
+
+
+
+
+FUNCTION R932Filler
+IF nLin<67
+    While nLin<=nLimPag
+	    FmtLin(@aDados,If(nTipoMov==1,aL[17],aL[19]),,,@nLin)
+    End
+    If nLin>=nLimPag
+        FmtLin(@aDados,aL[1],,,@nLin)
+    ENdif
+ENDIF
+Return
+Return
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932IniGrade
+
+
+
+
+
+
+IF cMV_ESTADO == "SP" .And.  !lCat21
+	aGrade:={{"1",0,0,0},{"2",0,0,0},{"3",0,0,0}}
+ELSE
+
+	aGrade:={{"1",0,0,0},{"2",0,0,0},{"3",0,0,0},			{"1",0,0,0},{"2",0,0,0},{"3",0,0,0}}
+ENDIF
+Return
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R932ImpGrade
+Local lImprimiu := .F. 
+Local nX		:=0
+Local cChave	:= ""
+Local cChave2	:= ""
+Local lContZer	:= .F. 
+
+cICMS:="ICMS"
+cIPI :="IPI"
+For nx:=1 to Len(aGrade)
+	If !lImpZer .and.  ((aGrade[nx,2]+aGrade[nx,3]+aGrade[nx,4])==0)
+		Loop
+	Endif
+	lImprimiu:= .T. 
+	If nx<=3
+		aDados[11]:=cICMS
+		cICMS:=NIL
+	Else
+		aDados[11]:=cIPI
+		cIPI:=NIL
+	Endif
+	cChave2 := F3_NFISCAL+F3_SERIE+F3_CLIEFOR+F3_LOJA
+	SD1->(dbSetOrder(1))
+	SF4->(dbSetOrder(1))
+	If SD1->(dbSeek(xFilial("SD1")+cChave2))
+		If SF4->(dbSeek(xFilial("SF4")+SD1->D1_TES))
+			If Iif(nx<=3,SF4->F4_LFICM == "Z",SF4->F4_LFIPI == "Z")
+				aDados[12]:="2"
+				lContZer := .T. 
+			Else
+				aDados[12]:=aGrade[nx,1]
+			EndIf
+		Else
+			aDados[12]:=aGrade[nx,1]
+		EndIf
+	Else
+		aDados[12]:=aGrade[nx,1]
+	EndIf
+	aDados[13]:=aGrade[nx,2]
+	aDados[15]:=If(aGrade[nx,3]>0,aGrade[nx,3],NIL)
+	If aGrade[nx,4] > 0 .And.  aGrade[nx,2] <= 0 .And.  SF4->F4_LFICM == "Z"
+		aDados[12]:="2"
+		lContZer := .T. 
+	EndIf
+
+
+
+	If !lIcmIpZer .and.  ((aGrade[nx,2]+aGrade[nx,3])==0)
+
+
+
+		aDados[11]:= NIL
+		aDados[15]:= NIL
+		aDados[12]:= NIL
+		aDados[13]:= NIL
+		aDados[14]:= NIL
+		aDados[16]:= NIL
+		R932LoadObs()
+		FmtLin(@aDados,If(!lTotGrade,aL[17],aL[18]),cPictVl,,@nLin)
+	Else
+		R932LoadObs()
+		If lIcmIpZer
+			If aDados[12] == "2" .And.  lImpZer .And.  lContZer .And.  SF4->F4_LFICM == "Z"
+				FmtLin({,,,,,,,,,,,"1",,,,},If(!lTotGrade,aL[17],aL[18]),cPictVl,,@nLin)
+				FmtLin(@aDados,If(!lTotGrade,aL[17],aL[18]),cPictVl,,@nLin)
+				FmtLin({,,,,,,,,,,,"3",,,,},If(!lTotGrade,aL[17],aL[18]),cPictVl,,@nLin)
+				Exit
+			Else
+				FmtLin(@aDados,If(!lTotGrade,aL[17],aL[18]),cPictVl,,@nLin)
+			EndIf
+		Else
+			FmtLin(@aDados,If(!lTotGrade,aL[17],aL[18]),cPictVl,,@nLin)
+		EndIF
+	EndIf
+next
+
+
+
+
+If !lImprimiu .And.  !Empty(aDados[1]) .And.  F3_VALCONT>0 .And.  lIcmIpZer
+	cChave := F3_NFISCAL+F3_SERIE+F3_CLIEFOR+F3_LOJA
+	SD1->(dbSetOrder(1))
+	SF4->(dbSetOrder(1))
+	If SD1->(dbSeek(xFilial("SD1")+cChave))
+		If SF4->(dbSeek(xFilial("SF4")+SD1->D1_TES))
+
+
+
+
+			aDados[11]:=cICMS
+			cICMS:=NIL
+		    If (SF4->F4_LFICM == "Z" .Or.  SF4->F4_LFIPI == "Z")
+				aDados[12]:="2"
+			Else
+				aDados[12]:="1"
+			EndIf
+			aDados[13]:=0
+			aDados[15]:=0
+
+
+
+
+			If SF4->F4_LFICM == "Z"
+				R932LoadObs()
+				FmtLin(@aDados,If(!lTotGrade,aL[17],aL[18]),cPictVl,,@nLin)
+			EndIf
+
+
+
+
+			aDados[11]:=cIPI
+			cIPI:=NIL
+			If (SF4->F4_LFICM == "Z" .Or.  SF4->F4_LFIPI == "Z" .Or.  SF4->F4_LFIPI == "I" )
+				aDados[12]:="2"
+			ElseIf SF4->F4_LFIPI == "O"
+				aDados[12]:="3"
+			Else
+				aDados[12]:="1"
+			Endif
+			aDados[13]:=0
+			aDados[15]:=0
+
+
+
+
+			If SF4->F4_LFIPI == "Z"
+				R932LoadObs()
+				FmtLin(@aDados,If(!lTotGrade,aL[17],aL[18]),cPictVl,,@nLin)
+			EndIf
+		EndIf
+	EndIf
+Endif
+
+Return

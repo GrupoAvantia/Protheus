@@ -1,0 +1,583 @@
+#include "rwmake.ch"
+#include "topconn.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณCODORC    บAutor  ณGrayson B.Tavares   บ Data ณ  29/12/08   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณExecblock para gera็ใo do codigo do orcamento no formato    บฑฑ
+ฑฑบ          ณ999999MMAA                                                  บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณGestใo de Projetos                                         บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+User Function CodOrc()
+
+cCod := space(10)
+
+dbSelectArea("SX6")
+dbSetOrder(1)
+
+If !SX6->(dbSeek("  "+Padr("MV_SEQPRJ",10)))
+	RecLock("SX6",.T.)
+	SX6->X6_FIL      := "  "
+	SX6->X6_VAR   	 := "MV_SEQPRJ"
+	SX6->X6_TIPO  	 := "C"
+	SX6->X6_DESCRIC  := SX6->X6_DSCSPA  := 	SX6->X6_DSCENG  := "Sequencial Orcamento/Projeto"
+	SX6->X6_CONTEUD  := SX6->X6_CONTSPA :=  SX6->X6_CONTENG := "0001"
+	SX6->X6_PROPRI   := 'U'
+	SX6->(MsUnlock())
+	
+	cCod := Alltrim(SX6->X6_CONTEUD)+Substr(dtos(dDatabase),5,2)+Substr(dtos(dDatabase),3,2)+"001" // ".01" 
+Else
+   cQuery:="SELECT COUNT(R_E_C_N_O_) AS TOTREG "
+   cQuery+="FROM "+RetSqlName("AF1")+" "
+   cQuery+="WHERE D_E_L_E_T_ <> '*' "
+   cQuery+="AND LEFT(RTRIM(LTRIM(AF1_DATA)),4) = '"+substr(dtos(dDatabase),1,4)+"' "
+   
+   TCQUERY cQuery NEW ALIAS "XAF8"
+   
+   dbSelectArea("XAF8")
+            
+   nPrjAno := XAF8->TOTREG
+   
+   dbSelectArea("XAF8")
+   dbCloseArea()
+	
+	If nPrjAno > 0
+		cCod := Alltrim(SX6->X6_CONTEUD)+Substr(dtos(dDatabase),5,2)+Substr(dtos(dDatabase),3,2)+"000"//".00"
+	Else
+		RecLock("SX6",.F.)
+		SX6->X6_CONTEUD  := SX6->X6_CONTSPA :=  SX6->X6_CONTENG := "0001"
+		SX6->(MsUnlock())
+		
+		cCod := Alltrim(SX6->X6_CONTEUD)+Substr(dtos(dDatabase),5,2)+Substr(dtos(dDatabase),3,2)+"000"//".00"
+	EndIf	
+EndIf
+
+Return cCod
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณCODPJR    บAutor  ณGrayson B.Tavares   บ Data ณ  29/12/08   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณExecblock para gera็ใo do codigo do projeto no formato      บฑฑ
+ฑฑบ          ณ999999MMAA                                                  บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณGestใo de Projetos                                         บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+User Function CodPrj()
+
+lRet := .t.
+
+mv_par01 := AF1->AF1_ORCAME
+
+Return lRet
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณSEQCOMP   บAutor  ณGrayson B.Tavares   บ Data ณ  06/10/09   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณFun็ใo para gera็ใo automatica do codigo da composi็ใo      บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณGestao de Projetos                                         บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+User Function SeqComp
+
+_cGrupo := M->AE1_GRPCOM
+
+cQuery := "SELECT COUNT(R_E_C_N_O_) AS QTDREG "
+cQuery += "FROM "+RetSqlName("AE1")+" "
+cQuery += "WHERE D_E_L_E_T_ <> '*' "
+cQuery += "AND AE1_GRPCOM = '"+_cGrupo+"' "
+
+TCQUERY cQuery NEW ALIAS "XAE1"
+dbSelectArea("XAE1")
+
+cCod := M->AE1_GRPCOM+StrZero(XAE1->QTDREG+1,4)
+M->AE1_COMPOS := cCod
+
+dbSelectArea("XAE1")
+dbCloseArea()
+
+Return M->AE1_GRPCOM
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณALTIND    บAutor  ณGrayson B.Tavares   บ Data ณ  07/01/09   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณExecblock para replicar o indice para os outros itens da    บฑฑ
+ฑฑบ          ณcomposi็ใo                                                  บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณGestao de Projetos                                         บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+User Function AltInd
+
+Local lRet := .t.
+
+Local nPCustD  := ASCAN(aHeader,{|x|x[2] = "AF3_CUSTD"})
+Local nPQuant  := ASCAN(aHeader,{|x|x[2] = "AF3_QUANT"})
+Local nPQtdOri := ASCAN(aHeader,{|x|x[2] = "AF3_QTDORI"})
+Local nPQtdAnt := ASCAN(aHeader,{|x|x[2] = "AF3_QTDANT"})
+Local nPRefAnt := ASCAN(aHeader,{|x|x[2] = "AF3_REFANT"})
+Local nPComp   := ASCAN(aHeader,{|x|x[2] = "AF3_COMP"})
+Local nPIndice := ASCAN(aHeader,{|x|x[2] = "AF3_INDICE"})
+Local nPUM     := ASCAN(aHeader,{|x|x[2] = "AF3_UM"})
+
+Local cComp   := aCols[n,nPComp]
+Local cUM     := aCols[n,nPUM]
+Local nIndice := M->AF3_INDICE
+
+Local nTCusUni := 0
+Local nTCusVen := 0
+Local nTTotUni := 0
+Local nTTotVen := 0
+
+/*For _nx:=1 To Len(aCols)
+	If _nx <> n
+		If aCols[_nx,nPComp]==cComp 
+			aCols[_nx,nPIndice] := nIndice
+			If aCols[_nx,nPQtdAnt] = 0
+				aCols[_nx,nPQtdAnt] := aCols[_nx,nPQuant]
+			EndIf
+			If aCols[_nx,nPRefAnt] = 0
+				aCols[_nx,nPRefAnt] := aCols[_nx,nPQtdOri]
+			EndIf
+			aCols[_nx,nPUM]     := cUM
+			aCols[_nx,nPQtdOri] := (nIndice*aCols[_nx,nPQtdOri])/(aCols[_nx,nPQtdOri]/aCols[_nx,nPRefAnt])
+			aCols[_nx,nPQuant ] := aCols[_nx,nPQtdOri]*nIndice//(aCols[_nx,nPQtdOri]*M->AF2_QUANT)*nIndice
+		EndIf		
+    EndIf    
+Next*/
+
+GetDRefresh()
+
+Return lRet
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณCALCAF3   บAutor  ณGrayson B.Tavares   บ Data ณ  07/01/09   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณExecblock para recalculo dos custo da tarefa                บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณGestao de Projetos                                         บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+User Function CalcAF3(cCampo)
+
+Local nQtdTrf  := M->AF2_QUANT
+Local nBDI     := IIf(M->AF2_BDI>0,M->AF2_BDI,AF1->AF1_BDI)
+Local nENC     := AF1->AF1_ENCARG
+
+Local nPIndice := ASCAN(aHeader,{|x|x[2] = "AF3_INDICE"})
+Local nPCustD  := ASCAN(aHeader,{|x|x[2] = "AF3_CUSTD"})
+Local nPQtdOri := ASCAN(aHeader,{|x|x[2] = "AF3_QTDORI"})
+Local nPQuant  := ASCAN(aHeader,{|x|x[2] = "AF3_QUANT"})
+//Local nPRefAnt := ASCAN(aHeader,{|x|x[2] = "AF3_REFANT"})
+
+Local nIndice  := aCols[n,nPIndice]
+Local nCustD   := aCols[n,nPCustD]
+Local nQtdOri  := aCols[n,nPQtdOri]
+Local nQuant   := aCols[n,nPQuant]
+//Local nRefAnt  := aCols[n,nPRefAnt]
+
+Local nPFldDes := 2
+Local nPFldPrd := 1
+Local nPFldRec := 4
+
+Local nPQtdPrd := U_RetPosSV("AF3_QUANT",1)//7
+Local nPCstPrd := U_RetPosSV("AF3_CUSTD",1)//9
+
+Local nPQtdRec := U_RetPosSV("AF3_QUANT",4)//6
+Local nPCstRec := U_RetPosSV("AF3_CUSTD",4)//7
+Local nPCHrRec := U_RetPosSV("AF3_CUSTHR",4)//7
+
+Local nPTotDes := U_RetPosSV("AF4_VALOR",2)//7
+
+Local nTCusUni := 0
+Local nTCusVen := 0
+Local nTTotUni := 0
+Local nTTotVen := 0
+Local nTotEnc  := 0
+
+If M->AF2_UTIBDI == "2"
+	nBDI := 0
+EndIf
+
+Do Case
+Case cCampo == "AF3_INDICE"
+	nIndice := M->AF3_INDICE
+Case cCampo == "AF3_CUSTD"
+	nCustD  := M->AF3_CUSTD
+Case cCampo == "AF3_QTDORI"
+	nQtdOri := M->AF3_QTDORI
+EndCase
+
+//nQtdOri := NoRound(nQtdOri,2)
+
+For _nx:=1 To Len(aCols)        
+    nQtdRef:=nQtdOri//IIf(nRefAnt==0,nQtdOri,nRefAnt)
+    nCusUni:=0
+    nCusTot:=0
+    
+    If aCols[_nx,len(aHeader)+1] == .f.
+	    If _nx <> n    	
+	    	nCusUni:=NoRound((aCols[_nx,nPQuant]*aCols[_nx,nPCustD]),2)
+	    	nCusTot:=NoRound((nCusUni*nQtdTrf),2)
+		Else
+	    	nCusUni:=NoRound((nIndice*nQtdOri)*nCustD,2)//((nIndice*nQtdOri)/(nQtdOri/nQtdRef))*nIndice*nCustD
+	    	nCusTot:=NoRound((nCusUni*nQtdTrf),2)
+	    EndIf	
+    EndIf
+    
+    If OFOLDER:NOPTION==nPFldRec
+       nCusHr :=NoRound(aCols[_nx,nPQuant]*aCols[_nx,nPCHrRec],2)
+    	nTotEnc+=NoRound((nCusUni-nCusHr)*nQtdTrf,2)
+    EndIf
+    
+	nTCusUni += nCusUni
+	nTCusVen += nCusUni+(nCusUni*(nBDI/100))
+	nTTotUni += nCusTot
+	nTTotVen += nCusTot+(nCusTot*(nBDI/100))
+Next 
+
+If OFOLDER:NOPTION==nPFldPrd//se estiver na pasta produtos soma a pasta recursos
+	For _nx:= 1 to len(aColsSv[nPFldRec])
+		If aColsSv[nPFldRec,_nx,Len(aHeaderSv[nPFldRec])+1] == .f.
+			nCusUni:=NoRound(aColsSv[nPFldRec][_nx][nPQtdRec]*aColsSv[nPFldRec][_nx][nPCstRec],2)
+		    nCusTot:=(nCusUni*nQtdTrf)
+			
+			nTCusUni += nCusUni                                        
+			nTCusVen += nCusUni+(nCusUni*(nBDI/100))
+			nTTotUni += nCusTot
+			nTTotVen += nCusTot+(nCusTot*(nBDI/100))
+			
+			nCusHr   :=NoRound(aColsSv[nPFldRec][_nx][nPQtdRec]*aColsSv[nPFldRec][_nx][nPCHrRec],2)
+			nTotEnc  +=NoRound((nCusUni-nCusHr)*nQtdTrf,2)
+		EndIf	
+	Next
+ElseIf OFOLDER:NOPTION==nPFldRec //se estiver na pasta recursos soma a pasta produtos
+	For _nx:= 1 to len(aColsSv[nPFldPrd])
+		If aColsSv[nPFldPrd,_nx,Len(aHeaderSv[nPFldPrd])+1] == .f.
+			nCusUni:=NoRound((aColsSv[nPFldPrd][_nx][nPQtdPrd]*aColsSv[nPFldPrd][_nx][nPCstPrd]),2)
+		    nCusTot:=NoRound((nCusUni*nQtdTrf),2)
+			
+			nTCusUni += nCusUni
+			nTCusVen += nCusUni+(nCusUni*(nBDI/100))
+			nTTotUni += nCusTot
+			nTTotVen += nCusTot+(nCusTot*(nBDI/100))
+		EndIf	
+	Next
+EndIf
+
+//Calculo das Despesas
+For _nx:= 1 to len(aColsSv[nPFldDes])
+	If aColsSv[nPFldDes][_nx][Len(aHeaderSv[nPFldDes])+1]==.f.
+		nCusUni:=aColsSv[nPFldDes][_nx][nPTotDes]
+	    nCusTot:=NoRound((nCusUni*nQtdTrf),2)
+		
+		nTCusUni += nCusUni
+		nTCusVen += nCusUni+(nCusUni*(nBDI/100))
+		nTTotUni += nCusTot
+		nTTotVen += nCusTot+(nCusTot*(nBDI/100))
+	EndIf	
+Next
+
+M->AF2_TOTAL  := NoRound(nTCusVen,2) * nQtdTrf 
+//M->AF2_CUSTO  := nTCusUni
+M->AF2_CUSTO  := nTTotUni
+M->AF2_VALBDI := NoRound((nTCusUni*(nBDI/100)) * nQtdTrf,2)
+M->AF2_TOTCUS := nTTotUni
+M->AF2_TOTVEN := NoRound(nTCusVen,2) * nQtdTrf//nTTotVen
+M->AF2_TOTENC := nTotEnc
+M->AF2_SEMENC := nTTotUni-nTotEnc
+		
+//Gravar dados para exibi็ใo na tela de Gerenciamento do Or็amento // Josu้
+//M->AF2_X_CUSB := M->AF2_CUSTO
+M->AF2_X_CUSB := nTCusUni
+M->AF2_X_TOTB := NoRound(nTCusUni*(nBDI/100+1),2)//NoRound(nTCusVen,2) * nQtdTrf//nTCusVen
+M->AF2_X_TVEB := nTTotVen
+M->AF2_X_TBRW := 0
+
+//Zera variaveis de outras moedas
+M->AF2_CUSTO2  := 0
+M->AF2_CUSTO3  := 0
+M->AF2_CUSTO4  := 0
+M->AF2_CUSTO5  := 0
+
+M->AF2_TXMO2   := 0
+M->AF2_TXMO3   := 0
+M->AF2_TXMO4   := 0
+M->AF2_TXMO5   := 0
+
+GetDRefresh()
+
+Return &("M->"+cCampo)
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณCALCAF4   บAutor  ณGrayson B.Tavares   บ Data ณ  07/01/09   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณExecblock para recalculo dos custo da tarefa                บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณGestao de Projetos                                         บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+User Function CalcAF4(cCampo)
+//Chamado pelo gatilho no campo AF4_VALOR
+
+Local nQtdTrf  := M->AF2_QUANT
+Local nBDI     := IIf(M->AF2_BDI>0,M->AF2_BDI,AF1->AF1_BDI)
+Local nENC     := AF1->AF1_ENCARG
+Local nPValor  := ASCAN(aHeader,{|x|x[2] = "AF4_VALOR"})
+Local nPQuant  := ASCAN(aHeader,{|x|x[2] = "AF4_QUANT"})
+Local nPVlrUni := ASCAN(aHeader,{|x|x[2] = "AF4_VLRUNI"})
+
+Local nPFldPrd  := 1
+Local nPFldDes  := 2
+Local nPFldRec  := 4
+
+Local nPQtdPrd := U_RetPosSV("AF3_QUANT",1)//7
+Local nPCstPrd := U_RetPosSV("AF3_CUSTD",1)//9
+
+Local nPQtdRec := U_RetPosSV("AF3_QUANT",4)//6
+Local nPCstRec := U_RetPosSV("AF3_CUSTD",4)//7
+Local nPCHrRec := U_RetPosSV("AF3_CUSTHR",4)//7
+
+Local nValor   := aCols[n,nPValor]
+Local nQuant   := aCols[n,nPQuant]
+Local nPVlrUni := aCols[n,nPVlrUni]
+
+Local nTCusUni := 0
+Local nTCusVen := 0
+Local nTTotUni := 0
+Local nTTotVen := 0
+Local nTotEnc  := 0
+
+If M->AF2_UTIBDI == "2"
+	nBDI := 0
+EndIf
+
+Do Case
+Case cCampo == "AF4_VALOR"
+	nValor := M->AF4_VALOR
+Case cCampo == "AF4_QUANT"
+	nQuant  := M->AF4_QUANT
+Case cCampo == "AF4_VLRUNI"
+	nPVlrUni := M->AF4_VLRUNI
+EndCase
+
+//nQuant := NoRound(nQuant,2)
+
+//Calcula Despesas
+For _nx:=1 To Len(aCols)	        
+    If _nx <> n
+    	If aColsSv[_nx,Len(aHeaderSv[nPFldDes])+1] == .f.
+	    	nCusUni:=aCols[_nx,nPValor]
+	    	nCusTot:=NoRound(nCusUni*nQtdTrf,2)
+    	EndIf
+    Else
+    	nCusUni:=NoRound(nPVlrUni*nQuant,2)
+    	nCusTot:=NoRound(nCusUni*nQtdTrf,2)
+    EndIf	
+    
+	nTCusUni += nCusUni
+	nTCusVen += nCusUni+(nCusUni*(nBDI/100))
+	nTTotUni += nCusTot
+	nTTotVen += nCusTot+(nCusTot*(nBDI/100))
+Next 
+
+//Calcula Recursos
+For _nx:= 1 to len(aColsSv[nPFldRec])
+	If aColsSv[nPFldRec,_nx,Len(aHeaderSv[nPFldRec])+1] == .f.
+		nCusUni:=NoRound(aColsSv[nPFldRec][_nx][nPQtdRec]*aColsSv[nPFldRec][_nx][nPCstRec],2)
+	    nCusTot:=NoRound(nCusUni*nQtdTrf,2)
+		
+		nTCusUni += nCusUni                                        
+		nTCusVen += nCusUni+(nCusUni*(nBDI/100))
+		nTTotUni += nCusTot
+		nTTotVen += nCusTot+(nCusTot*(nBDI/100))
+		nTotMO   := NoRound(aColsSv[nPFldRec][_nx][nPQtdRec]*aColsSv[nPFldRec][_nx][nPCHrRec],2)
+		nTotEnc  += NoRound((nCusUni-nTotMO)*nQtdTrf,2)
+	EndIf	
+Next
+
+//Calcula Produtos
+For _nx:= 1 to len(aColsSv[nPFldPrd])
+	If aColsSv[nPFldPrd,_nx,Len(aHeaderSv[nPFldPrd])+1] == .f.
+		nCusUni:=NoRound((aColsSv[nPFldPrd][_nx][nPQtdPrd]*aColsSv[nPFldPrd][_nx][nPCstPrd]),2)
+	    nCusTot:=NoRound(nCusUni*nQtdTrf,2)
+		
+		nTCusUni += nCusUni
+		nTCusVen += nCusUni+(nCusUni*(nBDI/100))
+		nTTotUni += nCusTot
+		nTTotVen += nCusTot+(nCusTot*(nBDI/100))
+	EndIf	
+Next
+
+M->AF2_TOTAL  := NoRound(nTCusVen,2) * nQtdTrf 
+//M->AF2_CUSTO  := nTCusUni
+M->AF2_CUSTO  := nTTotUni
+M->AF2_VALBDI := NoRound((nTCusUni*(nBDI/100)) * nQtdTrf,2)
+M->AF2_TOTCUS := nTTotUni
+M->AF2_TOTVEN := NoRound(nTCusVen,2) * nQtdTrf//nTTotVen
+M->AF2_TOTENC := nTotEnc
+M->AF2_SEMENC := nTTotUni-nTotEnc
+
+//Gravar dados para exibi็ใo na tela de Gerenciamento do Or็amento // Josu้
+//M->AF2_X_CUSB := M->AF2_CUSTO
+M->AF2_X_CUSB := nTCusUni
+M->AF2_X_TOTB := NoRound(nTCusUni*(nBDI/100+1),2)//NoRound(nTCusVen,2) * nQtdTrf//nTCusVen
+M->AF2_X_TVEB := nTTotVen
+M->AF2_X_TBRW := 0
+
+//Zera variaveis de outras moedas
+M->AF2_CUSTO2  := 0
+M->AF2_CUSTO3  := 0
+M->AF2_CUSTO4  := 0
+M->AF2_CUSTO5  := 0
+
+M->AF2_TXMO2   := 0
+M->AF2_TXMO3   := 0
+M->AF2_TXMO4   := 0
+M->AF2_TXMO5   := 0
+
+GetDRefresh()
+
+Return &("M->"+cCampo)
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณGTREFANT  บAutor  ณTotvs Nordeste      บ Data ณ  10/02/13   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณFun็ใo para retornar a referencia anterior                  บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ SIGAPMS                                                   บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+User Function GTREFANT()
+
+Local nRefAnt := 0
+Local nPRefPrd:= 6
+Local nPRefRec:= 4
+
+If OFOLDER:NOPTION==1
+	nRefAnf := aCols[n,nPRefPrd]
+Else
+	nRefAnf := aCols[n,nPRefRec]
+EndIf
+
+Return nRefAnf
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณGTQUANT   บAutor  ณTotvs Nordeste      บ Data ณ  10/02/13   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณFun็ใo para calculo da quantidade total em fun็ใo do indice บฑฑ
+ฑฑบ          ณe da quantidade de referencia                               บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ SIGAPMS                                                   บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+User Function GTQUANT()
+
+Local nQuant := 0
+Local nIndPrd:= 6
+Local nRefPrd:= 7
+Local nIndRec:= 4
+Local nRefRec:= 5
+
+If OFOLDER:NOPTION==1
+	nQuant := aCols[n,nIndPrd]*aCols[n,nRefPrd]
+Else
+	nQuant := aCols[n,nIndRec]*aCols[n,nRefRec]
+EndIf
+
+Return nQuant
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณRetPosSV  บAutor  ณTotvs Nordeste      บ Data ณ  10/02/13   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณRetorna a posi็ใo do campo no array aColsSv                 บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ SIGAPMS                                                   บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+User Function RetPosSV(cCampo,nFolder)
+
+Local nPos := 0
+//Local nFld := OFOLDER:NOPTION
+
+Do Case
+Case nFolder == 1
+	For nx:=1 to len(aHeaderSV[1])
+		If Alltrim(aHeaderSV[1,nx,2]) == Alltrim(cCampo)
+			nPos := nx
+		EndIf
+	Next
+Case nFolder == 2
+	For nx:=1 to len(aHeaderSV[2])
+		If Alltrim(aHeaderSV[2,nx,2]) == Alltrim(cCampo)
+			nPos := nx
+		EndIf
+	Next
+Case nFolder == 4
+	For nx:=1 to len(aHeaderSV[4])
+		If Alltrim(aHeaderSV[4,nx,2]) == Alltrim(cCampo)
+			nPos := nx
+		EndIf
+	Next
+End Case
+
+Return nPos

@@ -1,0 +1,232 @@
+#Include 'Protheus.ch'
+#include "rwmake.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³ Funcao    ³ ExpVT1  ³ Autor ³ Carlos Beltrão     ³ Data ³ 14.03.14    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Descricao ³ Programa para exportar as informações do vale-transporte. ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso       ³ Gestão de Pessoal                                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+User Function ExpVT1()
+
+	Local bProcesso	:= { |oSelf| ExpVT2(oSelf)}
+	Local cPergCal  	:= "ExpVT"
+	Local cCadastro	:= "Exportação Arquivo Vale-Transporte"
+	Local cDescricao	:= "Este programa gera um arquivo texto com as informações do vale-transporte para serem importadas no site da Grande Recife."
+	
+	Private aLog			:= {}
+	Private aTitle		:= {}
+	Private lErro			:= .F.
+	
+	ExpVT4()
+	
+	Pergunte(cPergCal,.F.)
+	
+	tNewProcess():New("ExpVT", cCadastro, bProcesso, cDescricao, cPergCal, , , , , .T., .T.) 
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³ Funcao    ³ ExpVT2  ³ Autor ³ Carlos Beltrão     ³ Data ³ 14.03.14    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Descricao ³ Programa para criar o arquivo de saída.                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso       ³ Gestão de Pessoal                                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static function ExpVT2(oSelf)
+
+	local nHdl
+	local cArqTxt := AllTrim(mv_par11)+"\VT.txt"
+
+	cAlias := "SAH"
+
+	dbSelectArea((cAlias))
+
+	(cAlias)->(dbSetOrder(1))
+
+	nHdl := fCreate(cArqTxt)
+	
+	if nHdl == -1
+		msgAlert("Não foi possível criar o arquivo de saída."+chr(13)+"Favor verificar parâmetros.", "Atenção.")
+	else
+		Processa({|| ExpVT3(nHdl) }, "Processando...")
+	endif
+
+	fClose(nHdl)
+	nDhl := nil
+
+return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³ Funcao    ³ ExpVT3  ³ Autor ³ Carlos Beltrão     ³ Data ³ 14.03.14    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Descricao ³ Programa para escrever as informações no arquivo.         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso       ³ Gestão de Pessoal                                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static function ExpVT3(nHdl)
+
+	local cEOL 			:= chr(13) + chr(10)
+	local cLin				:= "0200" + cEOL
+	local cCpo
+	local nRecLote, nLenLote
+	local cCpf 			:= ""
+	local cQtdDias 		:= ""
+	local cValorDiario	:= ""
+	local cNome			:= ""
+
+	// Carregando paramentros do sistema
+	local cFilDe		:= mv_par01
+	local cFilAte		:= mv_par02
+	local cCcDe		:= mv_par03
+	local cCcAte		:= mv_par04
+	local cMatDe		:= mv_par05
+	local cMatAte		:= mv_par06
+	local cNomDe		:= AllTrim(mv_par07)
+	local cNomAte		:= AllTrim(mv_par08)
+	local cTranDe		:= mv_par09
+	local cTranAte	:= mv_par10
+	local cPeriodo	:= mv_par12
+
+	nLenLote := recCount()
+	
+	if nLenLote > 100
+		procRegua(100)
+		nLenLote := int(nLenLote * 0.05)
+	Else
+		procRegua(nLenLote)
+	EndIf
+	
+	// Linha obrigatória e padrão do sistema Grande Recife
+	if fWrite(nHdl, cLin, len(cLin)) != len(cLin)
+		if ! msgAlert("Ocorreu um erro na gravacao da primeira linha do arquivo. Continua?","Atenção.")
+			Return()				
+		EndIf
+	EndIf
+	
+	nRecLote := 0
+	
+	cQryMA:="SELECT RA_CIC 'CPF', CASE WHEN AVG(RG2_DIAPRO) = 0 THEN AVG(RG2_DUTILM) ELSE AVG(RG2_DIAPRO) END 'QTD_DIAS', SUM(RG2_VTDUTE*RG2_CUSUNI) 'VALOR_DIARIO', RA_NOME 'NOME' "
+	cQryMA+="FROM "+RetSqlName("RG2")+" RG2 "
+	cQryMA+="INNER JOIN "+RetSqlName("SRA")+" SRA "
+	cQryMA+="ON RA_FILIAL = RG2_FILIAL "
+	cQryMA+="AND RA_MAT = RG2_MAT "
+	cQryMA+="WHERE RG2.D_E_L_E_T_ <> '*' "
+	cQryMA+="AND SRA.D_E_L_E_T_ <> '*' "
+	cQryMA+="AND RG2_VALCAL <> 0 "
+	cQryMA+="AND RG2_CODIGO >= '"+cTranDe+"' "
+	cQryMA+="AND RG2_CODIGO <= '"+cTranAte+"' "	
+	cQryMA+="AND RG2_PERIOD = '"+cPeriodo+"' "
+	cQryMA+="AND SRA.D_E_L_E_T_ <> '*' "
+	cQryMA+="AND RA_SITFOLH <> 'D' "
+	cQryMA+="AND RA_FILIAL >= '"+cFilDe+"' "
+	cQryMA+="AND RA_FILIAL <= '"+cFilAte+"' "
+	cQryMA+="AND RA_CC >= '"+cCcDe+"' "
+	cQryMA+="AND RA_CC <= '"+cCcAte+"' "
+	cQryMA+="AND RA_MAT >= '"+cMatDe+"' "
+	cQryMA+="AND RA_MAT <= '"+cMatAte+"' "
+	cQryMA+="AND RA_NOME >= '"+cNomDe+"' "
+	cQryMA+="AND RA_NOME <= '"+cNomAte+"' "	
+	cQryMA+="GROUP BY RA_CIC, RA_NOME, RG2_PERIOD "
+	cQryMA+="ORDER BY RA_NOME "
+	
+	dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"XMA",.F.,.T.)
+	 
+	XMA->(dbGoTop())
+	 
+	while XMA->(!EOF())
+
+		if (nRecLote > nLenLote)
+			incProc()
+			nRecLote := 0
+		EndIf
+
+		// Carregando as variáveis
+		cCpf 			:= XMA->CPF
+		cQtdDias 		:= AllTrim(Transform(XMA->QTD_DIAS,"@E 99"))
+		cValorDiario	:= AllTrim(StrTran(Transform(XMA->VALOR_DIARIO,"@E 999.99"),","))
+		cNome			:= AllTrim(XMA->NOME)
+
+		// Alinhando as variáveis
+		cLin :=  cCpf + "|"
+		cLin +=  cQtdDias + "|"
+ 		cLin +=  cValorDiario + "|"
+		cLin +=  cNome + cEOL
+
+		if fWrite(nHdl, cLin, len(cLin)) != len(cLin)
+			if ! msgAlert("Ocorreu um erro na gravacao do arquivo. Continua?","Atenção.")
+				Return()				
+			EndIf
+		EndIf
+
+		nRecLote++
+		XMA->(dbSkip())
+	EndDo
+
+	dbSelectArea("XMA")
+	dbCloseArea()
+	
+	MsgAlert("Gerado com sucesso","A T E N Ç Ã O !!!")
+		
+Return( NIL )
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³ Funcao    ³ ExpVT4  ³ Autor ³ Carlos Beltrão     ³ Data ³ 14.03.14    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Descricao ³ Grava as configurações do parametro.                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso       ³ Gestão de Pessoal                                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function ExpVT4()
+
+	local aPergs := {}
+	Local aAreaAnt := GetArea()
+	
+	dbSelectArea("SX1")
+	dbSetOrder(1)
+	If !SX1->(dbSeek("ExpVT"))
+		Aadd(aPergs,{ "De Filial              ?", "", "","mv_ch1", "C", 2, 	0, 0, "G", "", "mv_par01", "","", "","","","", "","","","", "","","","", "","","","", "", "","","","","","XM0"})
+		Aadd(aPergs,{ "Ate Filial             ?", "", "","mv_ch2", "C", 2, 	0, 0, "G", "", "mv_par02", "","", "","","","", "","","","", "","","","", "","","","", "", "","","","","","XM0"})
+		Aadd(aPergs,{ "De Centro de Custo     ?", "", "","mv_ch3", "C", 9, 	0, 0, "G", "", "mv_par03", "","", "","","","", "","","","", "","","","", "","","","", "", "","","","","","CTT"})
+		Aadd(aPergs,{ "Ate Centro de Custo    ?", "", "","mv_ch4", "C", 9, 	0, 0, "G", "", "mv_par04", "","", "","","","", "","","","", "","","","", "","","","", "", "","","","","","CTT"})
+		Aadd(aPergs,{ "De Matricula           ?", "", "","mv_ch5", "C", 6, 	0, 0, "G", "", "mv_par05", "","", "","","","", "","","","", "","","","", "","","","", "", "","","","","","SRA"})
+		Aadd(aPergs,{ "Ate Matricula          ?", "", "","mv_ch6", "C", 6, 	0, 0, "G", "", "mv_par06", "","", "","","","", "","","","", "","","","", "","","","", "", "","","","","","SRA"})
+		Aadd(aPergs,{ "De Nome                ?", "", "","mv_ch7", "C", 30, 	0, 0, "G", "", "mv_par07", "","", "","","","", "","","","", "","","","", "","","","", "", "","",""})
+		Aadd(aPergs,{ "Ate Nome               ?", "", "","mv_ch8", "C", 30, 	0, 0, "G", "", "mv_par08", "","", "","","","", "","","","", "","","","", "","","","", "", "","",""})
+		Aadd(aPergs,{ "De Meio de Transporte  ?", "", "","mv_ch9", "C", 2, 	0, 0, "G", "", "mv_par09", "","", "","","","", "","","","", "","","","", "","","","", "", "","","","","","SRN"})
+		Aadd(aPergs,{ "Ate Meio de Transporte ?", "", "","mv_chA", "C", 2, 	0, 0, "G", "", "mv_par10", "","", "","","","", "","","","", "","","","", "","","","", "", "","","","","","SRN"})
+		Aadd(aPergs,{ "Caminho do Arquivo     ?", "", "","mv_chB", "C", 90, 	0, 0, "G", "", "mv_par11", "","", "","","","", "","","","", "","","","", "","","","", "", "","",""})
+		Aadd(aPergs,{ "Periodo (AAAAMM)       ?", "", "","mv_chC", "C", 6, 	0, 0, "G", "", "mv_par12", "","", "","","","", "","","","", "","","","", "","","","", "", "","",""})
+		AjustaSx1("ExpVT",aPergs)
+	EndIf
+	RestArea(aAreaAnt)
+	
+Return

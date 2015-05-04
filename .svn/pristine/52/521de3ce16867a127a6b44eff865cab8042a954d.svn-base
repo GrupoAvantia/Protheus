@@ -1,0 +1,108 @@
+#include "rwmake.ch"
+
+User Function IMPCOMP
+
+
+Processa({|| ExecProc()},"Processando")
+
+Return
+
+
+
+
+Static Function ExecProc    
+
+//dbUseArea( .T.,__LocalDriver,cArq,"TRB", If(.F. .OR. .T., !.T., NIL), .F. )
+
+dbUseArea( .T.,, "\COMP.DBF", "CMP", .F., .F. ) 
+
+cIndCond := "GRP_PRT+SUB_PRT+COD_CMP"
+cArqNtx  := CriaTrab(NIL,.f.)
+IndRegua("CMP",cArqNtx,cIndCond,,,"Abrindo arquivo temporario")
+
+cGrp    := "###"
+
+dbSelectArea("CMP")
+dbGoTop()
+
+While CMP->(!EOF())
+	dbSelectArea("AE5")
+	dbSetOrder(1)
+	If !AE5->(dbSeek(xFilial("AE5")+Alltrim(CMP->GRP_PRT)))
+		RecLock("AE5",.t.)
+		Replace AE5->AE5_FILIAL With xFilial("AE5")
+		Replace AE5->AE5_GRPCOM With Alltrim(CMP->GRP_PRT)
+		Replace AE5->AE5_DESCRI With CMP->DSC_PRT
+		MsUnlock()
+	EndIf
+
+	dbSelectArea("AE5")
+	dbSetOrder(1)
+	If !AE5->(dbSeek(xFilial("AE5")+Alltrim(CMP->GRP_PRT)+Substr(CMP->SUB_PRT,2,2)))
+		RecLock("AE5",.t.)
+		Replace AE5->AE5_FILIAL With xFilial("AE5")
+		Replace AE5->AE5_GRPCOM With Alltrim(CMP->GRP_PRT)+Substr(CMP->SUB_PRT,2,2)
+		Replace AE5->AE5_DESCRI With CMP->DSC_GRP
+		MsUnlock()
+	EndIf
+	
+	CMP->(dbSkip())
+EndDo
+
+cCmp    := "###"
+
+dbSelectArea("CMP")
+dbGoTop()
+
+While CMP->(!EOF())
+	If cCmp # Alltrim(CMP->CMP_PRT)
+		cCmp := Alltrim(CMP->CMP_PRT)
+		RecLock("AE1",.t.)
+		Replace AE1->AE1_FILIAL With xFilial("AE1")
+		Replace AE1->AE1_COMPOS With CMP->CMP_PRT
+		Replace AE1->AE1_DESCRI With CMP->DSC_CMP
+		Replace AE1->AE1_GRPCOM With Alltrim(CMP->GRP_PRT)+Substr(CMP->SUB_PRT,2,2)
+		Replace AE1->AE1_UM     With CMP->UM_PRT
+		Replace AE1->AE1_USO    With "1"
+		Replace AE1->AE1_ULTATU With dDatabase
+		Replace AE1->AE1_PRIORI With 500
+		MsUnlock()
+		
+		nItem := 0
+		nItSub:= 0
+		
+		While CMP->(!EOF()) .And. cCmp == Alltrim(CMP->CMP_PRT)
+			
+			If Substr(CMP->IT_PRT,1,1)=="C"
+				nItSub++
+				RecLock("AE4",.t.)
+				Replace AE4->AE4_FILIAL With xFilial("AE2")
+				Replace AE4->AE4_COMPOS With CMP->CMP_PRT
+				Replace AE4->AE4_ITEM   With StrZero(nItSub,2)
+				Replace AE4->AE4_SUBCOM With CMP->IT_PRT
+				Replace AE4->AE4_QUANT  With CMP->QTD_IT
+				MsUnlock()
+			Else
+				nItem++
+				//dbSelectArea("AE2")
+				//dbSetOrder(1)
+				//If !AE2->(dbSeek(xFilial("AE2")+CMP->CMP_PRT))
+					RecLock("AE2",.t.)
+					Replace AE2->AE2_FILIAL With xFilial("AE2")
+					Replace AE2->AE2_COMPOS With CMP->CMP_PRT
+					Replace AE2->AE2_ITEM   With StrZero(nItem,2)
+					Replace AE2->AE2_PRODUT With CMP->IT_PRT
+					Replace AE2->AE2_QUANT  With CMP->QTD_IT
+					MsUnlock()
+				//EndIf	
+			EndIf
+			
+			CMP->(dbSkip())
+			
+		EndDo	
+	Else
+		CMP->(dbSkip())
+	EndIf	
+EndDo
+
+Return

@@ -1,0 +1,2134 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "Protheus.Ch"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr922.prw"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATR922.Ch"
+#line 23 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr922.prw"
+Function MATR922 ()
+	Local	cArqCfp		:=	"RELRIO.CFP"
+	Local	nOpca		:=	0
+	Local 	NomeProg	:= 	"RELRIO"
+	Local 	aArea		:= 	GetArea ()
+	Local 	cPerg		:= 	"RELRIO"
+	Local	lRet		:= .T. 
+	Local 	cTitulo  	:= If( cPaisLoc $ "ANG|PTG", "Relatório De Informações Operacionais - Rio.", "Relatorio de Informacoes Operacionais - RIO." )
+	Local 	cDesc1  	:= If( cPaisLoc $ "ANG|PTG", "Este relatório imprime a listagem de acompanhamento dos meios-magnéticos", "Este relatorio imprime a listagem de acompanhamento dos meios-magnetivos" )
+	Local 	cDesc2  	:= ""
+	Local 	cDesc3  	:= ""
+	Local 	wnrel   	:= NomeProg
+	Local	cString		:=	""
+	Local 	Tamanho 	:= 	"P"
+	Local	nCompLinha	:=	248
+	Private Limite 	:= 	80
+	Private lEnd    	:= .F. 
+	Private m_pag   	:= 	1
+	Private nLastKey	:=	0
+	Private aReturn 	:= {If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ), 1, If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 2, 2, 1, "", 1 }
+
+	AjustaSx1 (cPerg)
+	Pergunte (cPerg, .F. )
+
+
+
+
+
+
+
+
+
+
+	FormBatch (OemToAnsi (If( cPaisLoc $ "ANG|PTG", "Relatório De Informações Operacionais - Rio.", "Relatorio de Informacoes Operacionais - RIO." )), {OemToAnsi (If( cPaisLoc $ "ANG|PTG", "Permite-se Através Desta Tela A Parametrização Do Relatório, Onde Através Do Botão Editar", "Permite-se atraves desta tela a parametrizacao do relatorio, onde atraves do botao EDITAR" )), OemToAnsi (If( cPaisLoc $ "ANG|PTG", "Abaixo configura-se o desenho do mesmo conforme necessidade da organização antes da sua ", "abaixo configura-se o layout do mesmo conforme necessidade da organizacao antes da sua " )), OemToAnsi (If( cPaisLoc $ "ANG|PTG", "Utilização.", "utilizacao." )), OemToAnsi (If( cPaisLoc $ "ANG|PTG", "Obs: na primeira execução, será necessário a configuração do desenho.", "OBS: Na primeira execucao, sera necessario a configuracäo do layout." )), OemToAnsi ("")}, {{05, .T. , {|o| nOpca := 0, Pergunte (cPerg, .T. )}},	{ 11, .T. , {|o| nOpca := 1, CfpRio (cArqCfp, nCompLinha)}},	{ 01, .T. , {|o| nOpca := 2, o:oWnd:End()}}, { 02, .T. , {|o| nOpca := 3, o:oWnd:End()}}})
+
+	If (nOpca==3)
+		Return (lRet)
+	EndIf
+
+
+
+	wnrel	:=	SetPrint (cString, NomeProg, cPerg, @cTitulo, cDesc1, cDesc2, cDesc3, .F. ,, .F. , Tamanho,, .F. )
+
+	If (nLastKey==27)
+		Return (lRet)
+	Endif
+
+	SetDefault (aReturn, cString)
+
+	If (nLastKey==27)
+		Return (lRet)
+	Endif
+
+
+
+	RptStatus ({|lEnd| MontRIO (@lEnd, cArqCfp, nCompLinha)}, cTitulo)
+
+	If (aReturn[5]==1)
+		Set( 24, "" )
+	   	ourspool(wnrel)
+	Endif
+	MS_FLUSH()
+
+
+
+	RestArea (aArea)
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function MontRIO (lEnd, cArqCfp, nCompLinha)
+	Local		lRet		:= .T. 
+	Local		cQuery		:=	""
+	Local		cChave		:=	""
+	Local		cIndSd3		:=	""
+	Local		aInfCfp		:=	{}
+	Local		aTrb		:=	CriaDelTrb (1)
+	Local		cArqGrvRIo	:=	"ARQGRV.CFP"
+	Local		aColsX		:=	{}
+	Local		nQtdFolders	:=	0
+	Local		nX			:=	0
+	Local		aArqCfp		:=	LeCfpRio (cArqCfp)
+	Private	cAlsSd3		:=	"SD3"
+
+
+
+	For nX := 1 To Len (aArqCfp)
+		If !(Empty (aArqCfp[nX][2]))
+			nQtdFolders++
+		EndIf
+	next
+
+
+
+	aColsX	:=	Array (nQtdFolders)
+	For nX := 1 To nQtdFolders
+		aColsX[nX] 		:= {}
+ 	next
+
+
+
+	LoadRio (cArqGrvRIo, 2, @aColsX, nQtdFolders, nCompLinha)
+
+
+		If (TcSrvType ()<>"AS/400")
+		    cAlsSd3	:= 	"MontRIO"
+
+			cQuery	:=	"SELECT "
+			cQuery	+=	"SD3.D3_FILIAL, SD3.D3_COD, SD3.D3_QUANT, SD3.D3_UM, SD3.D3_SEGUM, SB1.B1_CONV "
+			cQuery	+=	"FROM "
+			cQuery	+=	RetSqlName("SD3")+" SD3, "+RetSqlName("SB1")+" SB1 "
+			cQuery	+=	"WHERE "
+
+
+			cQuery	+=	"SD3.D3_FILIAL='"+xFilial ("SD3")+"' AND SB1.B1_FILIAL='"+xFilial ("SB1")+"' AND SD3.D3_COD=SB1.B1_COD AND "
+
+
+			cQuery	+=	"SD3.D3_FILIAL='"+xFilial ("SD3")+"' AND "
+			cQuery	+=	"SD3.D3_EMISSAO>='"+DToS (MV_PAR01)+"' AND "
+			cQuery	+=	"SD3.D3_EMISSAO<='"+DToS (MV_PAR02)+"' AND "
+			cQuery	+=	"SD3.D3_CF IN ('PR0', 'PR1') AND "
+			cQuery	+=	"SD3.D3_ESTORNO NOT IN ('S') AND "
+			cQuery	+=	"SD3.D_E_L_E_T_='' AND SB1.D_E_L_E_T_='' "
+
+			cQuery 	:= 	ChangeQuery (cQuery)
+
+			DbUseArea ( .T. , "TOPCONN", TcGenQry (,,cQuery), cAlsSd3, .T. , .T. )
+		Else
+
+			DbSelectArea (cAlsSd3)
+			cIndSd3		:=	CriaTrab (NIL, .F. )
+			cChave		:=	IndexKey ()
+			cQuery		:=	"SD3->D3_FILIAL=='"+xFilial ("SD3")+"' "
+			cQuery		+=	".And. (DToS (SD3->D3_EMISSAO)>='"+DToS (MV_PAR01)+"') .And. (DToS (SD3->D3_EMISSAO)<='"+DToS (MV_PAR02)+"') "
+			cQuery		+=	".And.  AllTrim (SD3->D3_CF)$'PR0/PR1' .And. !'S'$SD3->D3_ESTORNO "
+
+			IndRegua (cAlsSd3, cIndSd3, cChave,, cQuery, If( cPaisLoc $ "ANG|PTG", "Selec.notas fiscais...", "Selec.Notas fiscais..." ))
+
+		Endif
+
+
+	DbSelectArea (cAlsSd3)
+		SetRegua ((cAlsSd3)->(LastRec ()))
+	(cAlsSd3)->(DbGoTop ())
+	while !(cAlsSd3)->(Eof())
+
+		IncRegua ()
+		If Interrupcao(lEnd)
+			Return (lRet)
+		Endif
+
+
+
+		aInfCfp	:=	{}
+		aInfCfp	:=	VerGrupoPr (aColsX, cAlsSd3)
+		If (Len (aInfCfp)>0)
+
+
+
+
+
+
+			DbSelectArea (aTrb[1][1])
+			If ((aTrb[1][1])->(DbSeek (aInfCfp[1]+aInfCfp[2])))
+				RecLock (aTrb[1][1], .F. )
+
+						(aTrb[1][1])->TRB_QUANT	+=	(cAlsSd3)->D3_QUANT*(cAlsSd3)->B1_CONV
+
+
+
+				MsUnLock ()
+			Else
+				nPos	:=	aScan (aArqCfp, {|aArq| AllTrim (aInfCfp[1])$aArq[1]})
+
+				DbSelectArea (aTrb[1][1])
+				RecLock (aTrb[1][1], .T. )
+					(aTrb[1][1])->TRB_CODGRP	:=	aInfCfp[1]
+					(aTrb[1][1])->TRB_DESGRP	:=	aArqCfp[nPos][2]
+					(aTrb[1][1])->TRB_CODITE	:=	aInfCfp[2]
+					(aTrb[1][1])->TRB_DESITE	:=	aInfCfp[3]
+
+						(aTrb[1][1])->TRB_QUANT	:=	(cAlsSd3)->D3_QUANT*(cAlsSd3)->B1_CONV
+
+
+
+					(aTrb[1][1])->TRB_UM  		:=	(cAlsSd3)->D3_UM
+					(aTrb[1][1])->TRB_SEGUM	:=	(cAlsSd3)->D3_SEGUM
+				MsUnLock ()
+			EndIf
+		EndIf
+
+		DbSelectArea (cAlsSd3)
+		(cAlsSd3)->(DbSkip ())
+	EndDo
+
+
+
+	GerQuaCS (lEnd, aTrb)
+
+
+
+	GerQuaCE (lEnd, aTrb)
+
+	ImpRio (aTrb)
+
+	CriaDelTrb (2, aTrb)
+
+
+		(cAlsSd3)->(DbCloseArea ())
+
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function GerQuaCS (lEnd, aTrb)
+	Local	lRet		:= .T. 
+	Local	cAlsSf2		:=	"SF2"
+	Local	cQuery		:=	""
+	Local	cChave		:=	""
+	Local	cIndSf2		:=	""
+	Local	cDescPais	:=	""
+	Local	cQuadroC	:=	""
+
+
+		If (TcSrvType ()<>"AS/400")
+		    cAlsSf2	:= 	"GerQuaC"
+
+			cQuery	:=	"SELECT "
+			cQuery	+=	"SF2.F2_FILIAL,SF2.F2_DOC,SF2.F2_SERIE,SF2.F2_CLIENTE,SF2.F2_LOJA,SF2.F2_EMISSAO,SD2.D2_TES,SD2.D2_CF,SD2.D2_COD,SD2.D2_QUANT,SD2.D2_UM,SD2.D2_SEGUM,SA1.A1_EST,SA1.A1_PAIS,SB1.B1_CONV "
+			cQuery	+=	"FROM "
+			cQuery	+=	RetSqlName("SF2")+" SF2, "+RetSqlName("SD2")+" SD2, "+RetSqlName("SF4")+" SF4, "+RetSqlName("SA1")+" SA1, "+RetSqlName("SB1")+" SB1 "
+			cQuery	+=	"WHERE "
+
+
+			cQuery	+=	"SF2.F2_FILIAL='"+xFilial ("SF2")+"' AND "
+			cQuery	+=	"SD2.D2_FILIAL='"+xFilial ("SD2")+"' AND "
+			cQuery	+=	"SF2.F2_DOC=SD2.D2_DOC AND "
+			cQuery	+=	"SF2.F2_SERIE=SD2.D2_SERIE AND "
+			cQuery	+=	"SF2.F2_CLIENTE=SD2.D2_CLIENTE AND "
+			cQuery	+=	"SF2.F2_LOJA=SD2.D2_LOJA AND "
+
+
+			cQuery	+=	"SF4.F4_FILIAL='"+xFilial ("SF4")+"' AND "
+			cQuery	+=	"SF4.F4_CODIGO=SD2.D2_TES AND "
+
+
+			cQuery	+=	"SA1.A1_FILIAL='"+xFilial ("SA1")+"' AND "
+			cQuery	+=	"SA1.A1_COD=SF2.F2_CLIENTE AND "
+			cQuery	+=	"SA1.A1_LOJA=SF2.F2_LOJA AND "
+
+
+			cQuery	+=	"SD2.D2_FILIAL='"+xFilial ("SD2")+"' AND "
+			cQuery	+=	"SB1.B1_FILIAL='"+xFilial ("SB1")+"' AND "
+			cQuery	+=	"SD2.D2_COD=SB1.B1_COD AND "
+
+
+			cQuery	+=	"SF2.F2_FILIAL='"+xFilial ("SF2")+"' AND SF4.F4_DUPLIC IN ('S') AND "
+			cQuery	+=	"SF2.F2_EMISSAO>='"+DToS (MV_PAR01)+"' AND "
+			cQuery	+=	"SF2.F2_EMISSAO<='"+DToS (MV_PAR02)+"' AND "
+			cQuery	+=	"SF2.F2_TIPO NOT IN ('C', 'B', 'D') AND "
+			cQuery	+=	"SUBSTRING(SD2.D2_CF, 1, 1) IN ('6', '7') AND "
+			cQuery	+=	"SF2.D_E_L_E_T_='' AND SD2.D_E_L_E_T_='' AND SF4.D_E_L_E_T_='' AND SA1.D_E_L_E_T_='' AND SB1.D_E_L_E_T_='' "
+
+			cQuery 	:= 	ChangeQuery (cQuery)
+
+			DbUseArea ( .T. , "TOPCONN", TcGenQry (,,cQuery), cAlsSF2, .T. , .T. )
+		Else
+
+			DbSelectArea (cAlsSf2)
+			cIndSf2		:=	CriaTrab (NIL, .F. )
+			cChave		:=	IndexKey ()
+			cQuery		:=	"SF2->F2_FILIAL=='"+xFilial ("SF2")+"' "
+			cQuery		+=	".And. (DToS(SF2->F2_EMISSAO)>='"+DToS (MV_PAR01)+"') .And. (DToS (SF2->F2_EMISSAO)<='"+DToS (MV_PAR02)+"') "
+			cQuery		+=	".And. !SF2->F2_TIPO$'CBD' "
+
+			IndRegua (cAlsSf2, cIndSf2, cChave,, cQuery, If( cPaisLoc $ "ANG|PTG", "Selec.notas fiscais...", "Selec.Notas fiscais..." ))
+
+		Endif
+
+
+	DbSelectArea (cAlsSf2)
+		SetRegua ((cAlsSf2)->(LastRec ()))
+	(cAlsSf2)->(DbGoTop ())
+	while !(cAlsSf2)->(Eof())
+
+		IncRegua ()
+		If Interrupcao(lEnd)
+			Return (lRet)
+		Endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			DbSelectArea ("SYA")
+				SYA->(DbSetOrder (1))
+			cDescPais	:=	Space (20)
+			If (SYA->(DbSeek (xFilial ("SYA")+(cAlsSf2)->A1_PAIS)))
+				cDescPais	:=	SubStr (SYA->YA_DESCR, 1, 20)
+			EndIf
+
+
+
+			If (SubStr (AllTrim ((cAlsSf2)->D2_CF), 1, 1)$"67")
+				cQuadroC	:=	""
+				If (SubStr (AllTrim ((cAlsSf2)->D2_CF), 1, 1)$"6")
+					cQuadroC	:=	"1"
+				Else
+					cQuadroC	:=	"2"
+				EndIf
+
+				DbSelectArea (aTrb[2][1])
+				If ((aTrb[2][1])->(DbSeek (cQuadroC+cDescPais+(cAlsSf2)->A1_EST+(cAlsSf2)->D2_COD+"E")))
+					RecLock (aTrb[2][1], .F. )
+						(aTrb[2][1])->TRC_QUANT	+=	(cAlsSf2)->D2_QUANT*(cAlsSf2)->B1_CONV
+					MsUnLock ()
+				Else
+					RecLock (aTrb[2][1], .T. )
+						(aTrb[2][1])->TRC_ITQC		:=	cQuadroC
+						(aTrb[2][1])->TRC_PAIS		:=	cDescPais
+						(aTrb[2][1])->TRC_UF		:=	(cAlsSf2)->A1_EST
+						(aTrb[2][1])->TRC_PROD		:=	(cAlsSf2)->D2_COD
+						(aTrb[2][1])->TRC_IMPEXP	:=	"E"
+						(aTrb[2][1])->TRC_QUANT	:=	(cAlsSf2)->D2_QUANT*(cAlsSf2)->B1_CONV
+						(aTrb[2][1])->TRC_UM  		:=	(cAlsSf2)->D2_UM
+						(aTrb[2][1])->TRC_SEGUM	:=	(cAlsSf2)->D2_SEGUM
+					MsUnLock ()
+				EndIf
+			EndIf
+
+
+		(cAlsSf2)->(DbSkip ())
+	EndDo
+
+
+		(cAlsSf2)->(DbCloseArea ())
+
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function GerQuaCE (lEnd, aTrb)
+	Local	cAlsSf1		:=	"SF1"
+	Local	cIndSf1		:=	""
+	Local	cQuery		:=	""
+	Local	cChave		:=	""
+	Local	lRet		:= .T. 
+	Local	cDescPais	:=	""
+	Local	cQuadroC	:=	""
+
+
+		If (TcSrvType ()<>"AS/400")
+		    cAlsSf1	:= 	"GerQuaC"
+
+			cQuery	:=	"SELECT "
+			cQuery	+=	"SF1.F1_FILIAL,SF1.F1_DOC,SF1.F1_SERIE,SF1.F1_FORNECE,SF1.F1_LOJA,SF1.F1_EMISSAO,SD1.D1_TES,SD1.D1_CF,SD1.D1_COD,SD1.D1_QUANT,SD1.D1_UM,SD1.D1_SEGUM,SA2.A2_EST,SA2.A2_PAIS,SB1.B1_CONV "
+			cQuery	+=	"FROM "
+			cQuery	+=	RetSqlName("SF1")+" SF1, "+RetSqlName("SD1")+" SD1, "+RetSqlName("SF4")+" SF4, "+RetSqlName("SA2")+" SA2, "+RetSqlName("SB1")+" SB1 "
+			cQuery	+=	"WHERE "
+
+
+			cQuery	+=	"SF1.F1_FILIAL='"+xFilial ("SF1")+"' AND "
+			cQuery	+=	"SD1.D1_FILIAL='"+xFilial ("SD1")+"' AND "
+			cQuery	+=	"SF1.F1_DOC=SD1.D1_DOC AND "
+			cQuery	+=	"SF1.F1_SERIE=SD1.D1_SERIE AND "
+			cQuery	+=	"SF1.F1_FORNECE=SD1.D1_FORNECE AND "
+			cQuery	+=	"SF1.F1_LOJA=SD1.D1_LOJA AND "
+
+
+			cQuery	+=	"SF4.F4_FILIAL='"+xFilial ("SF4")+"' AND "
+			cQuery	+=	"SF4.F4_CODIGO=SD1.D1_TES AND "
+
+
+			cQuery	+=	"SA2.A2_FILIAL='"+xFilial ("SA2")+"' AND "
+			cQuery	+=	"SA2.A2_COD=SF1.F1_FORNECE AND "
+			cQuery	+=	"SA2.A2_LOJA=SF1.F1_LOJA AND "
+
+
+			cQuery	+=	"SD1.D1_FILIAL='"+xFilial ("SD1")+"' AND "
+			cQuery	+=	"SB1.B1_FILIAL='"+xFilial ("SB1")+"' AND "
+			cQuery	+=	"SD1.D1_COD=SB1.B1_COD AND "
+
+
+			cQuery	+=	"SF1.F1_FILIAL='"+xFilial ("SF1")+"' AND SF4.F4_DUPLIC IN ('S') AND "
+			cQuery	+=	"SF1.F1_EMISSAO>='"+DToS (MV_PAR01)+"' AND "
+			cQuery	+=	"SF1.F1_EMISSAO<='"+DToS (MV_PAR02)+"' AND "
+			cQuery	+=	"SF1.F1_TIPO NOT IN ('C', 'B', 'D') AND "
+			cQuery	+=	"SUBSTRING(SD1.D1_CF, 1, 1) IN ('2', '3') AND "
+			cQuery	+=	"SF1.D_E_L_E_T_='' AND SD1.D_E_L_E_T_='' AND SF4.D_E_L_E_T_='' AND SA2.D_E_L_E_T_='' AND SB1.D_E_L_E_T_='' "
+
+			cQuery 	:= 	ChangeQuery (cQuery)
+
+			DbUseArea ( .T. , "TOPCONN", TcGenQry (,,cQuery), cAlsSF1, .T. , .T. )
+		Else
+
+			DbSelectArea (cAlsSf1)
+			cIndSf1		:=	CriaTrab (NIL, .F. )
+			cChave		:=	IndexKey ()
+			cQuery		:=	"SF1->F1_FILIAL=='"+xFilial ("SF1")+"' "
+			cQuery		+=	".And. (DToS(SF1->F1_EMISSAO)>='"+DToS (MV_PAR01)+"') .And. (DToS (SF1->F1_EMISSAO)<='"+DToS (MV_PAR02)+"') "
+			cQuery		+=	".And. !SF1->F1_TIPO$'CBD' "
+
+			IndRegua (cAlsSf1, cIndSf1, cChave,, cQuery, "Selec.Notas fiscais...")
+
+		Endif
+
+
+	DbSelectArea (cAlsSf1)
+		SetRegua ((cAlsSf1)->(LastRec ()))
+	(cAlsSf1)->(DbGoTop ())
+	while !(cAlsSf1)->(Eof())
+
+		IncRegua ()
+		If Interrupcao(lEnd)
+			Return (lRet)
+		Endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			DbSelectArea ("SYA")
+				SYA->(DbSetOrder (1))
+			cDescPais	:=	Space (20)
+			If (SYA->(DbSeek (xFilial ("SYA")+(cAlsSf1)->A2_PAIS)))
+				cDescPais	:=	SubStr (SYA->YA_DESCR, 1, 20)
+			EndIf
+
+			If (SubStr (AllTrim ((cAlsSf1)->D1_CF), 1, 1)$"23")
+				cQuadroC	:=	""
+				If (SubStr (AllTrim ((cAlsSf1)->D1_CF), 1, 1)$"2")
+					cQuadroC	:=	"1"
+				Else
+					cQuadroC	:=	"2"
+				EndIf
+
+				DbSelectArea (aTrb[2][1])
+				If ((aTrb[2][1])->(DbSeek (cQuadroC+cDescPais+(cAlsSf1)->A2_EST+(cAlsSf1)->D1_COD+"I")))
+					RecLock (aTrb[2][1], .F. )
+						(aTrb[2][1])->TRC_QUANT	+=	(cAlsSf1)->D1_QUANT*(cAlsSf1)->B1_CONV
+					MsUnLock ()
+				Else
+					RecLock (aTrb[2][1], .T. )
+						(aTrb[2][1])->TRC_ITQC		:=	cQuadroC
+						(aTrb[2][1])->TRC_PAIS		:=	cDescPais
+						(aTrb[2][1])->TRC_UF		:=	(cAlsSf1)->A2_EST
+						(aTrb[2][1])->TRC_PROD		:=	(cAlsSf1)->D1_COD
+						(aTrb[2][1])->TRC_IMPEXP	:=	"I"
+						(aTrb[2][1])->TRC_QUANT	:=	(cAlsSf1)->D1_QUANT*(cAlsSf1)->B1_CONV
+						(aTrb[2][1])->TRC_UM  		:=	(cAlsSf1)->D1_UM
+						(aTrb[2][1])->TRC_SEGUM	:=	(cAlsSf1)->D1_SEGUM
+					MsUnLock ()
+				EndIf
+			EndIf
+
+
+		(cAlsSf1)->(DbSkip ())
+	EndDo
+
+
+		(cAlsSf1)->(DbCloseArea ())
+
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function VerGrupoPr (aColsX, cAlsSd3)
+	Local	aInfCfp	:=	{}
+	Local	nInd	:=	0
+	Local	nY		:=	0
+	Local	lAchou	:= .F. 
+
+	For nInd	:= 1 To Len (aColsX)
+		For nY := 1 To Len (aColsX[nInd])
+			If (AllTrim ((cAlsSd3)->D3_COD)$AllTrim (aColsX[nInd][nY][3]))
+				aAdd (aInfCfp, aColsX[nInd][nY][1])
+				aAdd (aInfCfp, aColsX[nInd][nY][2])
+				aAdd (aInfCfp, aColsX[nInd][nY][4])
+				aAdd (aInfCfp, aColsX[nInd][nY][5])
+				lAchou	:= .T. 
+				Exit
+			EndIf
+		next
+
+		If (lAchou)
+			Exit
+		EndIf
+	next
+Return (aInfCfp)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function CfpRio (cArqCfp, nCompLinha)
+	Local 	cValid 		:= ""
+	Local 	nI	 		:= 1
+	Local 	nOpcA	 	:= 2
+	Local 	oDlgGet
+	Local	cBarra		:=	If( cPaisLoc $ "ANG|PTG", "Parâmetros Adicionais Do Procedimento", "Parametros adicionais da Rotina" )
+	Local	cTitJan		:=	If( cPaisLoc $ "ANG|PTG", "Entrar Com Os Grupos De Artigos Para O Quadro B.", "Entrar com os grupos de produtos para o Quadro B." )
+	Local	aArqCfp		:=	{}
+
+	Private	aSel		:= {}
+	Private 	aListBox	:= {}
+	Private	aMsg	  	:= {}
+	Private	aValid	  	:= {}
+	Private	aConteudo 	:= {}
+
+	aAdd (aListBox, Upper (OemToAnsi (If( cPaisLoc $ "ANG|PTG", "Títulos Das Pastas Que Se Refere O Elemento B-realizações Do Estabelecimento Do Relatório Rio.", "Titulos das pastas que se refere o Item B-Realizacoes do Estabelecimento do relatorio RIO." ))))		; aAdd (aSel, .F. ) ; aAdd (aMsg, "")					; aAdd (aValid, "")
+	aAdd (aListBox, "") 	  	 						; aAdd (aSel, .F. ) ; aAdd (aMsg, "")                	; aAdd (aValid, "")
+	aAdd (aListBox, OemToAnsi ("0001"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0001"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, OemToAnsi ("0002"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0002"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, OemToAnsi ("0003"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0003"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, OemToAnsi ("0004"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0004"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, OemToAnsi ("0005"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0005"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, OemToAnsi ("0006"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0006"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, OemToAnsi ("0007"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0007"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, OemToAnsi ("0008"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0008"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, OemToAnsi ("0009"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0009"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, OemToAnsi ("0010"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0010"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, OemToAnsi ("0011"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0011"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, OemToAnsi ("0012"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0012"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, OemToAnsi ("0013"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0013"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, OemToAnsi ("0014"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0014"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, OemToAnsi ("0015"))				; aAdd (aSel, .T. ) ; aAdd (aMsg, OemToAnsi("0015"))	; aAdd (aValid, "VldCfp ('C', 'NOMEPAST')")
+	aAdd (aListBox, "") 	  	 						; aAdd (aSel, .F. ) ; aAdd (aMsg, "")                	; aAdd (aValid, "")
+
+	For nI := 1 To (Len (aListBox))
+		aListBox [nI]	:=	OemToAnsi (aListBox [nI])
+		aMsg [nI]		:=	OemToAnsi (aMsg [nI])
+	next
+
+
+
+	LoadRio (cArqCfp)
+
+
+
+	oDlgGet = MsDialog():New( 180, 110, 550, 700, OemToAnsi(cBarra),,,.F.,,,,, oMainWnd,.T.,, ,.F. )
+	 TSay():New( 010, 020,{||  OemToAnsi(cTitJan)},oDlgGet,,,.F.,.F.,.F.,.T.,,, 140, 007,.F.,.F.,.F.,.F.,.F.,.F. )
+	 TGroup():New( 026, 018, 155, 277, "", oDlgGet,,,.T., )
+	 oListBox := Var := cVar := TWBrowse():New( 033, 022, 250, 115,,{ ""},,, ,,,,{|nRow,nCol,nFlags|(ListRio(oListBox))},,,,,,,.F.,,.T.,,.F.,,, )
+
+	oListBox:SetArray (aListBox)
+	oListBox:bLine := {||{aListBox[oListBox:nAt]}}
+
+	 SButton():New( 165, 220,1,{||  (nOpca:=1,oDlgGet:End())}, oDlgGet,.T.,,)
+	 SButton():New( 165, 248,2,{||  (nOpca:=2,oDlgGet:End())}, oDlgGet,.T.,,)
+
+	oDlgGet:Activate( oDlgGet:bLClicked, oDlgGet:bMoved, oDlgGet:bPainted,.T.,,,, oDlgGet:bRClicked, )
+
+	If (nOpcA==1)
+
+
+
+		GravaItRio (cArqCfp)
+
+		aArqCfp		:=	LeCfpRio (cArqCfp)
+		EditRel (aArqCfp, nCompLinha)
+	Endif
+Return (aArqCfp)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function LoadRio (ArqIni, nOpcao, aColsX, nQtdFolders, nCompLinha)
+	Local 	nI			:=	0
+	Local 	cConteudo	:=	""
+	Local 	lRet		:= .T. 
+	Local	aPart		:=	{}
+	Local	nX			:=	0
+	Local	cPart		:=	""
+	Local	nIAcols		:=	1
+
+	nOpcao := If( nOpcao == nil, 1, nOpcao ) ;
+
+	If (File (ArqIni))
+		If (nOpcao==1)
+			For nI := 1 To (Len (aListBox))
+				cConteudo	:=	""
+				If (IsDigit (SubStr (aListBox[nI], 2, 4)))
+					cConteudo	:=	LerRio (ArqIni, Substr (aListBox[nI], 2, 4))
+					If (Len (cConteudo)<254)
+						cConteudo	:=	cConteudo+Space (254-Len (cConteudo))
+					EndIf
+				Endif
+				aAdd (aConteudo, cConteudo)
+			Next
+		ElseIf (nOpcao==2)
+			nIAcols	:=	1
+			For nI := 1 To (Len (aColsX))
+				cConteudo	:=	LerRio (ArqIni, StrZero (nIAcols, 3),, 2, nCompLinha)
+
+
+
+
+
+				while SubStr(cConteudo,1,3)==StrZero(nI,3)
+					If (Len (cConteudo)<nCompLinha)
+						cConteudo	:=	cConteudo+Space (nCompLinha-Len (cConteudo))
+					EndIf
+
+					aPart	:=	{}
+					cPart	:=	""
+					For nX := 1 To Len (cConteudo)
+						If (SubStr (cConteudo, nX, 1)=="|") .Or.  (Len (cConteudo)==nX)
+							If	(Len (cConteudo)==nX)
+								aAdd (aPart, Val (cPart))
+							Else
+								aAdd (aPart, cPart)
+							EndIf
+							cPart	:=	""
+						Else
+							cPart	+=	SubStr (cConteudo, nX, 1)
+						EndIf
+					next
+					aAdd (aPart, .F. )
+
+					aAdd (aColsX[nI], aPart)
+
+					nIAcols++
+					cConteudo	:=	LerRio (ArqIni, StrZero (nIAcols, 3),, 2, nCompLinha)
+				EndDo
+			next
+		EndIf
+	Else
+
+
+
+
+		If (nOpcao==1)
+			For nI := 1 To (Len (aListBox))
+				aAdd (aConteudo, Space (254))
+			Next
+		EndIf
+	Endif
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function GravaItRio (ArqIni, nOpcao, aArrayGrv)
+	Local	cArqBkp	:=	StrTran (ArqIni, ".CFP", ".#CF")
+	Local	aGravar	:=	{}
+	Local	nI		:=	0
+	Local	lRet	:= .T. 
+	Local	cGravar	:=	""
+
+	nOpcao := If( nOpcao == nil, 1, nOpcao ) ;
+
+	If File(cArqBkp)
+		Ferase(cArqBkp)
+	Endif
+	FRename(ArqIni,cArqBkp)
+	nHandle	:=	MSFCREATE(ArqIni)
+
+	If (nOpcao==1)
+		For nI := 1 To (Len (aListBox))
+			If (IsDigit (Substr (aListBox[nI], 2, 4)))
+				aAdd (aGravar, "["+Substr (aListBox[nI], 2, 4)+"]="+Rtrim (aConteudo[nI])+Chr(13)+Chr(10))
+			EndIf
+		Next
+		For nI := 1 To (Len (aGravar))
+			FWrite (nHandle, aGravar[nI], Len(aGravar[nI]))
+		Next
+	Else
+		For nI := 1 To (Len (aArrayGrv))
+			cGravar	:=	aArrayGrv[nI]+Chr(13)+Chr(10)
+			FWrite (nHandle, cGravar, Len(cGravar))
+		Next
+	EndIF
+	FClose(nHandle)
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ListRio (oListBox)
+	Local oDlgGet2
+	Local nOpcaGet	:=	2
+	Local lUpdated	:= .F. 
+	Local bValid
+	Local lRet		:= .T. 
+	Private cCampo	:=	"cCpoItem"
+
+	nAt	:=	oListBox:nAt
+
+	Private cValid	:=	"{||"+aValid[nAt]+"}"
+
+	If (aSel[nAt])
+		&cCampo	:=	aConteudo[nAt]
+		bValid	:=	&(cValid)
+
+		oDlgGet2 = MsDialog():New( 300, 100, 400, 620, aMsg[nAt],,,.F.,,,,, oListBox,.T.,, ,.F. )
+		 TGroup():New( 08, 20, 27, 237, "", oDlgGet2,,,.T., )
+		 TGet():New( 15, 24, { | u | If( PCount() == 0,&cCampo,&cCampo := u ) },oDlgGet2, 210, 08, "@!",{||  Eval(bValid)},,,,.F.,,.T.,,.F.,,.F.,.F.,,.F.,.F. ,,cCampo,,,, )
+
+		 SButton():New( 032, 182,1,{||  (lUpdated:= .t. ,oDlgGet2:End())}, oDlgGet2,.T.,,)
+		 SButton():New( 032, 210,2,{||  (lUpdated:= .f. ,oDlgGet2:End())}, oDlgGet2,.T.,,)
+
+		oDlgGet2:Activate( oDlgGet2:bLClicked, oDlgGet2:bMoved, oDlgGet2:bPainted,.T.,,,, oDlgGet2:bRClicked, )
+
+		If (lUpdated)
+			aConteudo[nAt]	:=	StrTran (&cCampo,'"',"'")
+		Endif
+	Endif
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function LerRio (cArqIni, cCPO, lEnd, nOpcao, nCompLinha)
+	Local cIni		:=	""
+	Local cConteudo	:=	""
+	Local nI		:=	0
+
+	nOpcao := If( nOpcao == nil, 1, nOpcao ) ;
+
+	lEnd := If (lEnd==NIL, .F. , lEnd)
+	If (nOpcao==1)
+		cCPO := "["+cCPO+"]="
+	EndIf
+
+	If !File (cArqIni)
+		If (nOpcao==1)
+			Help (" ",1,"RELRIO.CFP")
+		ElseIf (nOpcao==2)
+			Help (" ",1,"ARQGRV.CFP")
+		EndIf
+		lContinua	:= .F. 
+		lEnd		:= .T. 
+		Return (cIni)
+	Else
+		cConteudo	:=	MemoRead (cArqIni)
+		If (nOpcao==1)
+			nLinhas		:=	MlCount (cConteudo, 254)
+
+			For nI := 1 To nLinhas
+				cLinha	:=	AllTrim (MemoLine (cConteudo, 254, nI))
+				If (cCPO$cLinha)
+					cIni := SubStr (cLinha, 7)
+					Exit
+				Endif
+			Next
+		ElseIf (nOpcao==2)
+			nLinhas		:=	MlCount (cConteudo, nCompLinha)
+
+			For nI := 1 To nLinhas
+				cLinha	:=	AllTrim (MemoLine (cConteudo, nCompLinha, nI))
+				If (cCPO$SubStr (cLinha, 1, 3))
+					cIni := SubStr (cLinha, 5)
+					Exit
+				EndIf
+			Next
+		EndIf
+	Endif
+Return(cIni)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function VldCfp (cTipo, cCampo)
+	Local	lRet		:= .T. 
+	Local	cConteudo	:=	&(ReadVar())
+	Local	nI			:=	0
+
+	cTipo := If( cTipo == nil, "", cTipo ) ;
+	cCampo := If( cCampo == nil, "", cCampo ) ;
+
+	cConteudo	:=	Alltrim (cConteudo)
+
+	If (cCampo=="NOMEPAST")
+
+
+
+
+
+
+	EndIf
+Return(lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function LeCfpRio (cArquivo)
+	Local	cConteudo	:=	MemoRead (cArquivo)
+	Local	nLinhas		:= MlCount (cConteudo, 254)
+	Local	nI			:=	0
+	Local	aRet		:=	{}
+
+	For nI := 1 To nLinhas
+		cLinha	:=	AllTrim (MemoLine (cConteudo, 254, nI))
+		aAdd (aRet, {SubStr (cLinha, 2, 3), SubStr (cLinha, 7)})
+	Next
+Return (aRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function CriaDelTrb (nOpc, aTrb)
+	Local	aStruTrb	:=	{}
+	Local	cArqTrb		:=	""
+	Local	cArqTrb1	:=	""
+	Local	nX			:=	0
+
+	If nOpc==1
+
+
+
+		aStruTrb	:=	{}
+		aAdd (aStruTrb, {"TRB_CODGRP",	"C",	003,	0})
+		aAdd (aStruTrb, {"TRB_DESGRP",	"C",	030,	0})
+		aAdd (aStruTrb, {"TRB_CODITE",	"C",	006,	0})
+		aAdd (aStruTrb, {"TRB_DESITE",	"C",	030,	0})
+		aAdd (aStruTrb, {"TRB_QUANT",	"N",	011,	2})
+		aAdd (aStruTrb, {"TRB_UM",		"C",	002,	0})
+		aAdd (aStruTrb, {"TRB_SEGUM",	"C",	002,	0})
+
+		cArqTrb	:=	CriaTrab (aStruTrb)
+		dbUseArea ( .T. , __LocalDriver, cArqTrb, "TRB")
+		IndRegua ("TRB", cArqTrb, "TRB_CODGRP+TRB_CODITE")
+
+
+
+		aStruTrb	:=	{}
+		aAdd (aStruTrb, {"TRC_ITQC",	"C",	001,	0})
+		aAdd (aStruTrb, {"TRC_PAIS",	"C",	020,	0})
+		aAdd (aStruTrb, {"TRC_UF",		"C",	002,	0})
+		aAdd (aStruTrb, {"TRC_PROD",	"C",	015,	0})
+		aAdd (aStruTrb, {"TRC_IMPEXP",	"C",	001,	0})
+		aAdd (aStruTrb, {"TRC_QUANT",	"N",	011,	2})
+		aAdd (aStruTrb, {"TRC_UM",		"C",	002,	0})
+		aAdd (aStruTrb, {"TRC_SEGUM",	"C",	002,	0})
+
+		cArqTrb1	:=	CriaTrab (aStruTrb)
+		dbUseArea ( .T. , __LocalDriver, cArqTrb1, "TRC")
+		IndRegua ("TRC", cArqTrb1, "TRC_ITQC+TRC_PAIS+TRC_UF+TRC_PROD+TRC_IMPEXP")
+	Else
+		For nX := 1 To Len (aTrb)
+			DbSelectArea (aTrb[nX][1])
+			dbCloseArea()
+			Ferase (aTrb[nX][2]+GetDBExtension())
+			Ferase (aTrb[nX][2]+OrdBagExt())
+		next
+	EndIf
+Return ({{"TRB", cArqTrb}, {"TRC", cArqTrb1}})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function LayRio ()
+	Local	aLayRio	:=	{}
+
+
+	aAdd (aLayRio, 	"+------------------------------------------------------------------+------------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|ministério da agricultura                                         |relatório   |", "|MINISTERIO DA AGRICULTURA                                         |RELATORIO   |" ))
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|esquadra federal de agricultura em santa catarina                |informações |", "|DELEGACIA FEDERAL DE AGRICULTURA EM SANTA CATARINA                |INFORMACOES |" ))
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|serviço de fiscalização e fomento da produção animal              |operacionais|", "|SERVICO DE FISCALIZACAO E FOMENTO DA PRODUCAO ANIMAL              |OPERACIONAIS|" ))
+	aAdd (aLayRio, 	"+------------------------------------------------------------------+------------+")
+	aAdd (aLayRio, 	"                                                                                 ")
+	aAdd (aLayRio, 	"                                             De:#################################")
+	aAdd (aLayRio, 	"+-------------------------------------------------------------------------------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|a. identificação                                                               |", "|A. IDENTIFICACAO                                                               |" ))
+	aAdd (aLayRio, 	"+------------------------------------------------------------------+------------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|01-nome do estabelecimento                                        |02-s.i.f.   |", "|01-Nome do Estabelecimento                                        |02-S.I.F.   |" ))
+	aAdd (aLayRio, 	"+------------------------------------------------------------------+------------+")
+	aAdd (aLayRio, 	"|##################################################################|############|")
+	aAdd (aLayRio, 	"+------------------------------------------------------------------+------------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|03-razão social                                                                |", "|03-Razao Social                                                                |" ))
+	aAdd (aLayRio, 	"+-------------------------------------------------------------------------------+")
+	aAdd (aLayRio, 	"|###############################################################################|")
+	aAdd (aLayRio, 	"+------------------------------------------------------------------------+------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|04-localidade                                                           |05-distrito |", "|04-Localidade                                                           |05-UF |" ))
+	aAdd (aLayRio, 	"+------------------------------------------------------------------------+------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|########################################################################|  sc  |", "|########################################################################|  SC  |" ))
+	aAdd (aLayRio, 	"+-----------------------------------------------------------------+------+------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|06-nome director/gerente de operações                             |07-mês|08-ano|", "|06-Nome Diretor/Gerente de Operacoes                             |07-Mes|08-Ano|" ))
+	aAdd (aLayRio, 	"+-----------------------------------------------------------------+------+------+")
+	aAdd (aLayRio, 	"|################################################################ |  ##  | #### |")
+	aAdd (aLayRio, 	"+-----------------------------------------------------------------+------+------+")
+	aAdd (aLayRio, 	"                                                                                 ")
+	aAdd (aLayRio, 	"+-------------------------------------------------------------------------------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|b. realizações do estabelecimento                                              |", "|B. REALIZACOES DO ESTABELECIMENTO                                              |" ))
+	aAdd (aLayRio, 	"+---------------------------------------+---------------------------------------+")
+	aAdd (aLayRio, 	"|##-####################################|##-####################################|")
+	aAdd (aLayRio, 	"+-------------------+-------------------+-------------------+-------------------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|discriminação      |quantidade (kg)    |discriminação      |quantidade (kg)    |", "|Discriminacao      |Quantidade (KG)    |Discriminacao      |Quantidade (KG)    |" ))
+	aAdd (aLayRio, 	"+-------------------+-------------------+-------------------+-------------------+")
+	aAdd (aLayRio, 	"|###################|###################|###################|###################|")
+	aAdd (aLayRio, 	"+-------------------+-------------------+-------------------+-------------------+")
+	aAdd (aLayRio, 	"                                                                                 ")
+	aAdd (aLayRio, 	"+-------------------------------------------------------------------------------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|c. comercialização                                                             |", "|C. COMERCIALIZACAO                                                             |" ))
+	aAdd (aLayRio, 	"+-------------------------------------------------------------------------------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|##-interdistrital                                                               |", "|##-Interestadual                                                               |" ))
+	aAdd (aLayRio, 	"+--+------------------------------------+--+------------------------------------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|  |            exportação              |  |          importação                |", "|  |            Exportacao              |  |          Importacao                |" ))
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|uf+----------------+-------------------+uf+----------------+-------------------+", "|UF+----------------+-------------------+UF+----------------+-------------------+" ))
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|  |artigo         |quantidade (t)     |  |artigo         |quantidade (t)     |", "|  |Produto         |Quantidade (T)     |  |Produto         |Quantidade (T)     |" ))
+	aAdd (aLayRio, 	"+--+----------------+-------------------+--+----------------+-------------------+")
+	aAdd (aLayRio, 	"|##|############### |###################|##|############### |###################|")
+	aAdd (aLayRio, 	"+--+----------------+-------------------+--+----------------+-------------------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|##-internacional                                                               |", "|##-Internacional                                                               |" ))
+	aAdd (aLayRio, 	"+--------------------+----------------------------+-----------------------------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|países              |          exportação        |          importação         |", "|Paises              |          Exportacao        |          Importacao         |" ))
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|                    |artigo        |qtd (t)     |artigo        |qtd (t)      |", "|                    |Produto        |Qtd (T)     |Produto        |Qtd (T)      |" ))
+	aAdd (aLayRio, 	"+--------------------+---------------+------------+---------------+-------------+")
+	aAdd (aLayRio, 	"|####################|###############|############|###############|############ |")
+	aAdd (aLayRio, 	"+--------------------+---------------+------------+---------------+-------------+")
+	aAdd (aLayRio, 	"                                                                                 ")
+	aAdd (aLayRio, 	"+-------------------------------------------------------------------------------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|d. fonte das informações                                                       |", "|D. FONTE DAS INFORMACOES                                                       |" ))
+	aAdd (aLayRio, 	"+---------------------------------------------+---------------------------------+")
+	aAdd (aLayRio, 	If( cPaisLoc $ "ANG|PTG", "|##-local e data emissão                      |##-responsável pelas informações |", "|##-Local e Data Emissao                      |##-Responsavel pelas informacoes |" ))
+	aAdd (aLayRio, 	"+----------------------------------+--+--+----+---------------------------------+")
+	aAdd (aLayRio, 	"|##################################|##|##|####|#################################|")
+	aAdd (aLayRio, 	"+----------------------------------+--+--+----+---------------------------------+")
+Return (aLayRio)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ImpRio (aTrb)
+	Local	lFlag		:= .F. 
+	Local	lRet		:= .T. 
+	Local  aLayRio		:=	LayRio ()
+	Local	nInd		:=	0
+	Local	nLinInicial	:=	2
+	Local	nLin		:=	nLinInicial
+	Local	nQtdLinPag	:=	55
+	Local	aColE		:=	{}
+	Local	aColD		:=	{}
+	Local	lImp1		:= .T. 
+	Local	lImp2		:= .T. 
+	Local	cChave		:=	""
+	Local	cChaveTrb	:=	""
+	Local	nX			:=	0
+	Local	cDescAcol	:=	""
+	Local	aTitQuadro	:=	Array (1)
+	Local	aBaseQuadro	:=	{}
+	Local	nControle	:=	0
+
+	dbSelectArea("SM0")
+
+
+
+
+	For nInd := 1 To 6
+		FmtLin (, aLayRio[nInd],,, @nLin++)
+	next
+	FmtLin ({""}, aLayRio[7],,, @nLin++)
+
+	For nInd := 8 To 12
+		FmtLin (, aLayRio[nInd],,, @nLin++)
+	next
+	FmtLin ({SM0->M0_NOME, MV_PAR03}, aLayRio[13],,, @nLin++)
+
+	For nInd := 14 To 16
+		FmtLin (, aLayRio[nInd],,, @nLin++)
+	next
+	FmtLin ({SM0->M0_NOMECOM}, aLayRio[17],,, @nLin++)
+
+	For nInd := 18 To 20
+		FmtLin (, aLayRio[nInd],,, @nLin++)
+	next
+	FmtLin ({SM0->M0_ENDENT}, aLayRio[21],,, @nLin++)
+
+	For nInd := 22 To 24
+		FmtLin (, aLayRio[nInd],,, @nLin++)
+	next
+	nInd	:=	25
+	FmtLin ({MV_PAR04,StrZero (Month (MV_PAR01), 2), StrZero (Year (MV_PAR01), 4)}, aLayRio[nInd],,, @nLin++)
+	nInd	:=	26
+	FmtLin (, aLayRio[nInd],,, @nLin++)
+
+
+
+
+
+
+	DbSelectArea (aTrb[1][1])
+		(aTrb[1][1])->(DbGoTop ())
+
+	cChave		:=	"E"
+	cChaveTrb	:=	(aTrb[1][1])->TRB_CODGRP
+	while !((aTrb[1][1])->(Eof()))
+		If (cChaveTrb<>(aTrb[1][1])->TRB_CODGRP)
+			If ("D"$cChave)
+				cChave	:=	"E"
+			Else
+				cChave	:=	"D"
+			EndIf
+
+			cChaveTrb	:=	(aTrb[1][1])->TRB_CODGRP
+		EndIf
+
+		If ("E"$cChave)
+			aAdd (aColE, {(aTrb[1][1])->TRB_DESGRP, SubStr ((aTrb[1][1])->TRB_DESITE, 1, 19), Transform ((aTrb[1][1])->TRB_QUANT, "@E 999,999,999,999.99")})
+		Else
+			aAdd (aColD, {(aTrb[1][1])->TRB_DESGRP, SubStr ((aTrb[1][1])->TRB_DESITE, 1, 19), Transform ((aTrb[1][1])->TRB_QUANT, "@E 999,999,999,999.99")})
+		EndIf
+
+		(aTrb[1][1])->(DbSkip ())
+	EndDo
+
+	If Len (aColE)>0
+		For nInd := 27 To 29
+			FmtLin (, aLayRio[nInd],,, @nLin++)
+		next
+	EndIf
+
+
+
+	cDescAcol	:=	""
+	nInd		:=	30
+	If (Len (aColE)>=Len (aColD)) .And.  (Len (aColE)>0)
+		aBaseQuadro	:=	Array (1)
+
+		For nX := 1 To Len (aColE)
+			If (nLin>=nQtdLinPag)
+				nInd	:=	36
+				FmtLin (, aLayRio[nInd],,, @nLin++)
+				PrintOut(nLin,0,"Continua na próxima página.",,)
+				nLin	:=	nLinInicial
+				PrintOut(nLin,0,"Continuação da página anterior.",,)
+				nLin++
+				FmtLin (, aLayRio[nInd],,, @nLin++)
+			EndIf
+
+			If !(aColE[nX][1]$cDescAcol)
+				cDescAcol	:=	aColE[nX][1]
+				If (Len (aColD)>=nX) .And.  (Len (aColD)<>0)
+					nInd	:=	36
+					FmtLin (, aLayRio[nInd],,, @nLin++)
+					nInd	:=	31
+					aTitQuadro	:=	{StrZero (nX+8, 2), aColE[nX][1], StrZero (nX+9, 2), aColD[nX][1]}
+					FmtLin (aTitQuadro, aLayRio[nInd],,, @nLin++)
+					nInd	:=	32
+					FmtLin (, aLayRio[nInd],,, @nLin++)
+					nInd	:=	33
+					FmtLin (, aLayRio[nInd],,, @nLin++)
+					nInd	:=	34
+					FmtLin (, aLayRio[nInd],,, @nLin++)
+				Else
+					nInd	:=	36
+					FmtLin (, aLayRio[nInd],,, @nLin++)
+					nInd	:=	31
+					aTitQuadro	:=	{StrZero (nX+8, 2), aColE[nX][1], "", ""}
+					FmtLin (aTitQuadro, aLayRio[nInd],,, @nLin++)
+					nInd	:=	32
+					FmtLin (, aLayRio[nInd],,, @nLin++)
+					nInd	:=	33
+					FmtLin (, aLayRio[nInd],,, @nLin++)
+					nInd	:=	34
+					FmtLin (, aLayRio[nInd],,, @nLin++)
+				EndIf
+			EndIf
+
+			nInd	:=	35
+			If (Len (aColD)>=nX) .And.  (Len (aColD)<>0)
+				aBaseQuadro	:=	{aColE[nX][2], aColE[nX][3], aColD[nX][2], aColD[nX][3]}
+			Else
+				aBaseQuadro	:=	{aColE[nX][2], aColE[nX][3], "", ""}
+			EndIf
+			FmtLin (aBaseQuadro, aLayRio[nInd],,, @nLin++)
+
+		next
+		nInd	:=	36
+		If (Len (aBaseQuadro)>0)
+			FmtLin (, aLayRio[nInd],,, @nLin++)
+		EndIf
+	EndIf
+	aBaseQuadro	:=	{}
+	nControle	:=	0
+	nControle	:=	Len (aColE)+8
+
+
+
+
+	lFlag	:= .F. 
+	lImp1	:= .T. 
+	lImp2	:= .T. 
+	DbSelectArea (aTrb[2][1])
+		(aTrb[2][1])->(DbGoTop ())
+	If !(aTrb[2][1])->(DbSeek ("1"))
+		If ((aTrb[2][1])->(DbSeek ("2")))
+			aBaseQuadro	:=	Array (1)
+		EndIf
+	EndIF
+
+	lFlag	:=	"1"$(aTrb[2][1])->TRC_ITQC
+	cItQuadroC	:=	""
+
+	while !((aTrb[2][1])->(Eof()))
+		If !((aTrb[2][1])->TRC_ITQC$cItQuadroC)
+			cItQuadroC	+=	(aTrb[2][1])->TRC_ITQC
+		EndIf
+
+		If ("2"$(aTrb[2][1])->TRC_ITQC)
+			If (lImp2)
+				If (lFlag)
+					For nInd := 48 To 53
+						If (nInd==49)
+							FmtLin ({StrZero (++nControle, 2)}, aLayRio[nInd],,, @nLin++)
+						Else
+							FmtLin (, aLayRio[nInd],,, @nLin++)
+						EndIf
+					next
+				Else
+					For nInd := 49 To 53
+						If !(nInd==49)
+							FmtLin (, aLayRio[nInd],,, @nLin++)
+						Else
+							FmtLin (, aLayRio[37],,, @nLin++)
+							FmtLin (, aLayRio[38],,, @nLin++)
+							FmtLin (, aLayRio[39],,, @nLin++)
+							FmtLin (, aLayRio[40],,, @nLin++)
+							FmtLin ({StrZero (++nControle, 2)}, aLayRio[nInd],,, @nLin++)
+						EndIf
+					next
+				EndIf
+				lImp2	:= .F. 
+			EndIf
+			nInd := 54
+		Else
+			If (lImp1)
+				For nInd := 37 To 46
+					If nInd==41
+						FmtLin ({StrZero (++nControle, 2)}, aLayRio[nInd],,, @nLin++)
+					Else
+						FmtLin (, aLayRio[nInd],,, @nLin++)
+					EndIF
+				next
+				lImp1	:= .F. 
+			EndIf
+			nInd	:=	47
+		EndIf
+
+		If ("E"$(aTrb[2][1])->TRC_IMPEXP)
+			If ((aTrb[2][1])->TRC_ITQC=="1")
+				aBaseQuadro	:=	{(aTrb[2][1])->TRC_UF, (aTrb[2][1])->TRC_PROD, Transform ((aTrb[2][1])->TRC_QUANT, "@E 9,999,999.99"), "", "", ""}
+			Else
+				aBaseQuadro	:=	{(aTrb[2][1])->TRC_PAIS, (aTrb[2][1])->TRC_PROD, Transform ((aTrb[2][1])->TRC_QUANT, "@E 9,999,999.99"), "", ""}
+			EndIf
+		Else
+			If ((aTrb[2][1])->TRC_ITQC=="1")
+				aBaseQuadro	:=	{"", "", "", (aTrb[2][1])->TRC_UF, (aTrb[2][1])->TRC_PROD, Transform ((aTrb[2][1])->TRC_QUANT, "@E 9,999,999.99")}
+			Else
+				aBaseQuadro	:=	{(aTrb[2][1])->TRC_PAIS, "", "", (aTrb[2][1])->TRC_PROD, Transform ((aTrb[2][1])->TRC_QUANT, "@E 9,999,999.99")}
+			EndIf
+		EndIf
+		FmtLin (aBaseQuadro, aLayRio[nInd],,, @nLin++)
+
+		If (nLin>=nQtdLinPag)
+			If ("2"$(aTrb[2][1])->TRC_ITQC)
+				nInd	:=	55
+				FmtLin (, aLayRio[nInd],,, @nLin++)
+			Else
+				nInd	:=	46
+				FmtLin (, aLayRio[nInd],,, @nLin++)
+			EndIF
+			PrintOut(nLin,0,"Continua na próxima página.",,)
+			nLin	:=	nLinInicial
+			PrintOut(nLin,0,"Continuação da página anterior.",,)
+			nLin++
+		EndIf
+
+		(aTrb[2][1])->(DbSkip ())
+	EndDo
+
+	If (Len (aBaseQuadro)>0)
+		If ("1"$cItQuadroC)
+			nInd	:=	48
+		EndIf
+
+		If ("2"$cItQuadroC)
+			nInd	:=	55
+		EndIf
+
+		FmtLin (, aLayRio[nInd],,, @nLin++)
+	EndIf
+
+	aBaseQuadro	:=	{}
+
+	If (nLin>=nQtdLinPag)
+		PrintOut(nLin,0,"Continua na próxima página.",,)
+		nLin	:=	nLinInicial
+		PrintOut(nLin,0,"Continuação da página anterior.",,)
+		nLin++
+	EndIf
+
+
+
+	For nInd := 56 To 61
+		If nInd==60
+			FmtLin ({StrZero (++nControle, 2), StrZero (++nControle, 2)}, aLayRio[nInd],,, @nLin++)
+		Else
+			FmtLin (, aLayRio[nInd],,, @nLin++)
+		EndIf
+	next
+	aBaseQuadro	:=	{SubStr (SM0->M0_CIDENT, 1, 34), StrZero (Day (dDataBase), 2), StrZero (Month (dDataBase), 2), StrZero (Year (dDataBase), 4), SubStr ("", 1, 33)}
+
+	nInd	:=	62
+	FmtLin (aBaseQuadro, aLayRio[nInd],,, @nLin++)
+	nInd	:=	63
+	FmtLin (aBaseQuadro, aLayRio[nInd],,, @nLin++)
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSx1 (cPerg)
+	Local	lRet	:= .T. 
+	Local	aHelpPor 	:=	{}
+	Local	aHelpEng 	:=	{}
+	Local	aHelpSpa 	:=	{}
+
+
+
+	aAdd (aHelpPor, "Informe a Data Inicial para a geração   ")
+	aAdd (aHelpPor, "do relatório.                          ")
+
+	aAdd (aHelpEng, "Informe a Data Inicial para a geração   ")
+	aAdd (aHelpEng, "do relatório.                          ")
+
+	aAdd (aHelpSpa, "Informe a Data Inicial para a geração   ")
+	aAdd (aHelpSpa, "do relatório.                          ")
+
+
+
+	PutSx1 (cPerg, "01", If( cPaisLoc $ "ANG|PTG", "Data inicial ?", "Data Inicial ?" ), If( cPaisLoc $ "ANG|PTG", "Data inicial ?", "Data Inicial ?" ), If( cPaisLoc $ "ANG|PTG", "Data inicial ?", "Data Inicial ?" ), "mv_ch1", "D", 8, 0, 0, "G", "naovazio", "", "", "", "MV_PAR01", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+	PutSX1Help("P."+cPerg+"01.",aHelpPor,aHelpEng,aHelpSpa, .T. )
+	aHelpPor	:=	{}
+	aHelpEng 	:=	{}
+	aHelpSpa 	:=	{}
+
+
+
+
+
+	aAdd (aHelpPor, "Informe a Data Final para a geração     ")
+	aAdd (aHelpPor, "do relatório.                          ")
+
+	aAdd (aHelpEng, "Informe a Data Final para a geração     ")
+	aAdd (aHelpEng, "do relatório.                          ")
+
+	aAdd (aHelpSpa, "Informe a Data Final para a geração     ")
+	aAdd (aHelpSpa, "do relatório.                          ")
+
+
+
+	PutSx1 (cPerg, "02", If( cPaisLoc $ "ANG|PTG", "Data final ?", "Data Final ?" ), If( cPaisLoc $ "ANG|PTG", "Data final ?", "Data Final ?" ), If( cPaisLoc $ "ANG|PTG", "Data final ?", "Data Final ?" ), "mv_ch2", "D", 8, 0, 0, "G", "naovazio", "", "", "", "MV_PAR02", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+	PutSX1Help("P."+cPerg+"02.",aHelpPor,aHelpEng,aHelpSpa, .T. )
+	aHelpPor	:=	{}
+	aHelpEng 	:=	{}
+	aHelpSpa 	:=	{}
+
+
+
+
+
+
+
+	aAdd (aHelpPor, "Informe o número do registro junto ao   ")
+	aAdd (aHelpPor, If( cPaisLoc $ "ANG|PTG", "Sefa/sc. ex: sc25252                    ", "SEFA/SC. Ex: SC25252                    " ))
+
+	aAdd (aHelpEng, "Informe o número do registro junto ao   ")
+	aAdd (aHelpEng, If( cPaisLoc $ "ANG|PTG", "Sefa/sc. ex: sc25252                    ", "SEFA/SC. Ex: SC25252                    " ))
+
+	aAdd (aHelpSpa, "Informe o número do registro junto ao   ")
+	aAdd (aHelpSpa, If( cPaisLoc $ "ANG|PTG", "Sefa/sc. ex: sc25252                    ", "SEFA/SC. Ex: SC25252                    " ))
+
+
+
+	PutSx1 (cPerg, "03", If( cPaisLoc $ "ANG|PTG", "Num. S.i.f.", "Num. S.I.F." ), If( cPaisLoc $ "ANG|PTG", "Num. S.i.f.", "Num. S.I.F." ), If( cPaisLoc $ "ANG|PTG", "Num. S.i.f.", "Num. S.I.F." ), "mv_ch3", "C", 7, 0, 0, "G", "naovazio", "", "", "", "MV_PAR03", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+	PutSX1Help("P."+cPerg+"03.",aHelpPor,aHelpEng,aHelpSpa, .T. )
+	aHelpPor	:=	{}
+	aHelpEng 	:=	{}
+	aHelpSpa 	:=	{}
+
+
+
+
+
+	aAdd (aHelpPor, If( cPaisLoc $ "ANG|PTG", "Indique o nome do director ou gerente    ", "Informe o nome do Diretor ou Gerente    " ))
+	aAdd (aHelpPor, "de operações.                           ")
+
+	aAdd (aHelpEng, If( cPaisLoc $ "ANG|PTG", "Indique o nome do director ou gerente    ", "Informe o nome do Diretor ou Gerente    " ))
+	aAdd (aHelpEng, "de operações.                           ")
+
+	aAdd (aHelpSpa, If( cPaisLoc $ "ANG|PTG", "Indique o nome do director ou gerente    ", "Informe o nome do Diretor ou Gerente    " ))
+	aAdd (aHelpSpa, "de operações.                           ")
+
+
+
+	PutSx1 (cPerg, "04", If( cPaisLoc $ "ANG|PTG", "Nome Dir./ger.", "Nome Dir./Ger." ), If( cPaisLoc $ "ANG|PTG", "Nome Dir./ger.", "Nome Dir./Ger." ), If( cPaisLoc $ "ANG|PTG", "Nome Dir./ger.", "Nome Dir./Ger." ), "mv_ch4", "C", 40, 0, 0, "G", "naovazio", "", "", "", "MV_PAR04", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+	PutSX1Help("P."+cPerg+"04.",aHelpPor,aHelpEng,aHelpSpa, .T. )
+	aHelpPor	:=	{}
+	aHelpEng 	:=	{}
+	aHelpSpa 	:=	{}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function EditRel (aArqCfp, nCompLinha)
+	Local		lRet		:= .T. 
+	Local 		nX
+	Local		nOpcx 		:= 	4
+	Local		nOpca 		:= 	1
+	Local 		cCadastro 	:= 	"Configuração do quadro B-REALIZAÇÕES DO ESTABELECIMENTO"
+	Local 		aPosObj   	:= 	{}
+	Local 		aObjects  	:= 	{}
+	Local 		aSize     	:= 	MsAdvSize()
+	Local 		aTitles   	:= 	{}
+	Local 		nGd1      	:= 	2
+	Local 		nGd2      	:= 	2
+	Local 		nGd3      	:= 	0
+	Local 		nGd4      	:= 	0
+	Local 		nQtdFolders	:= 	0
+	Local 		oDlg
+	Local	 	aColsX		:=	{}
+	Local	 	aHeaderX	:=	{}
+	Local	 	aAlterX		:=	{}
+	Local	 	aColsY		:=	{}
+	Local	 	aHeaderY	:=	{}
+	Local		aGetDad		:= 	{}
+	Local		cArqGrvRIo	:=	"ARQGRV.CFP"
+	Local		aArrayGrv	:=	{}
+	Local		nY			:=	0
+	Local		nLin		:=	0
+	Local		nColDelete	:=	6
+	Private 	oFolder
+
+
+
+
+	Private	aRotina 	:= 	{	{ OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Permite-se Através Desta Tela A Parametrização Do Relatório, Onde Através Do Botão Editar", "Permite-se atraves desta tela a parametrizacao do relatorio, onde atraves do botao EDITAR" ))	,"AxPesqui"  	,0,1},									{ OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Abaixo configura-se o desenho do mesmo conforme necessidade da organização antes da sua ", "abaixo configura-se o layout do mesmo conforme necessidade da organizacao antes da sua " ))	,"AxAlter"		,0,2},									{ OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Utilização.", "utilizacao." ))	,"AxInclui"		,0,3},									{ OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Obs: na primeira execução, será necessário a configuração do desenho.", "OBS: Na primeira execucao, sera necessario a configuracäo do layout." ))	,"AxAlter"		,0,4},									{ OemToAnsi("0001")	,"AxAlter"		,0,5} }
+
+
+
+	For nX := 1 To Len (aArqCfp)
+		If !(Empty (aArqCfp[nX][2]))
+			aAdd (aTitles, aArqCfp[nX][2])
+		EndIf
+	next
+
+
+
+
+	nQtdFolders	:= 	Len (aTitles)
+	aGetDad		:=	Array (nQtdFolders)
+	aColsX 		:= 	Array (nQtdFolders)
+	aAlterX		:=	Array (nQtdFolders)
+	aHeaderX	:=	Array (nQtdFolders)
+	For nX := 1 To nQtdFolders
+		aColsX[nX] 		:= {}
+		aAlterX[nX]		:=	{}
+ 		aHeaderX[nX]	:=	{}
+ 	next
+
+
+
+
+	LoadRio (cArqGrvRIo, 2, @aColsX, nQtdFolders, nCompLinha)
+
+	For nX := 1 To nQtdFolders
+		If (Len (aColsX[nX])==0)
+			aAdd (aColsX[nX], {StrZero (nX, 3),StrZero (nX, 3)+".00", Space (15), Space (100), 0, .F. })
+		EndIf
+
+
+
+		aAdd (aHeaderX[nX], {"Linha",	"cLinha",	"@!",			003,	0,	".T.",			"û",	"C",	" ",	" "})
+		aAdd (aHeaderX[nX], {"Código",	"cCodigo",	"@!",			006,	0,	"VldCod()",		"û",	"C",	" ",	" "})
+		aAdd (aHeaderX[nX], {If( cPaisLoc $ "ANG|PTG", "Cód. Produto", "Cod. Produto" ),	"cCodProd",	"@!",			015,	0,	"VldCodPr()",	"û",	"C",	" ",	" "})
+		aAdd (aHeaderX[nX], {"Descrião Produto",	"cDescPrd",	"@!",			100,	0,	".T.",			"û" ,	"C",	" ",	" "})
+		aAdd (aHeaderX[nX], {"Fator Conversão",	"cFator",	"999,999.99",	010,	2,	".T.",			"û" ,	"N",	" ",	" "})
+ 	next
+
+
+
+	aObjects := {}
+	AAdd (aObjects, {  60, 100, .t. , .t.  })
+
+	aInfo 	:= { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 3, 3 }
+	aPosObj := MsObjSize( aInfo, aObjects )
+
+	nGd3 	:= aPosObj[1,3]-aPosObj[1,1]-15
+	nGd4 	:= aPosObj[1,4]-aPosObj[1,2]-4
+
+
+
+	oDlg = MsDialog():New( aSize[7], 00, aSize[6], aSize[5], cCadastro,,,.F.,,,,, oMainWnd,.T.,, ,.F. )
+	oFolder := TFolder ():New (aPosObj[1,1], aPosObj[1,2], aTitles, {"","","","","","",""}, oDlg,,,, .T. , .F. , aPosObj[1,4]-aPosObj[1,2], aPosObj[1,3]-aPosObj[1,1])
+
+
+
+	For nX := nQtdFolders To 1 Step -1
+		aColsY		:=	aColsX[nX]
+		aHeaderY	:=	aHeaderX[nX]
+
+		aHeader  := aClone (aHeaderY)
+		aCols    := aClone (aColsY)
+
+		aGetDad[nX] := MSGetDados():New (nGd1, nGd2, nGd3, nGd4, nOpcX, "xLinOk", "AlwaysTrue", "", nOpcx<>2, aAlterX[nX], 3,, Len (aColsY),,,,, oFolder:aDialogs[nX])
+		aGetDad[nX]:oBrowse:lDisablePaint := .T. 
+		aGetDad[nX]:oBrowse:bDrawSelect 	:= {|| aGetDad[oFolder:nOption]:oBrowse:aAlter := {"cCodigo", "cCodProd"}, aGetDad[oFolder:nOption]:oBrowse:oMother:aAlter := {"cCodigo", "cCodProd"}}
+	next
+
+
+
+	oFolder:bSetOption := {|nAtu| FtFld (nAtu, oFolder:nOption, oFolder, @aGetDad, @aColsX, @aHeaderX)}
+
+
+
+
+	oDlg:Activate( oDlg:bLClicked, oDlg:bMoved, oDlg:bPainted,,,,{|Self|(FtRefre(@aGetDad),EnchoiceBar(oDlg,{||nOpca:=Iif(FtFld(oFolder:nOption,oFolder:nOption,oFolder,@aGetDad,@aColsX,@aHeaderX),1,0),Iif(nOpcA==1,oDlg:End(),Nil)},{||nOpca:=0,oDlg:End()},,{{"BMPINCLUIR",{||AddAcols(@aGetDad[oFolder:nOption],nColDelete,oFolder:nOption)},If(cPaisLoc$"ANG|PTG","Incluir Linhas","Inclui Linhas"),If(cPaisLoc$"ANG|PTG","Incluir Linhas","Inclui Linhas")}}))}, oDlg:bRClicked, )
+
+
+
+	If (nOpca==1)
+		nLin	:=	1
+
+
+
+
+
+
+
+
+
+
+
+
+
+		For nX := 1 To Len (aColsX)
+			For nY := 1 To Len (aColsX[nX])
+				If !(aColsX[nX][nY][Len (aColsX[nX][nY])])
+					aAdd (aArrayGrv, StrZero (nLin, 3)+"="+aColsX[nX][nY][1]+"|"+aColsX[nX][nY][2]+"|"+aColsX[nX][nY][3]+"|"+aColsX[nX][nY][4]+"|"+StrZero (aColsX[nX][nY][5], 10, 2))
+
+					nLin++
+				EndIf
+			next
+		next
+
+		GravaItRio (cArqGrvRio, 2, aArrayGrv)
+	EndIf
+
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function FtFld (nFldDst, nFldAtu, oFolder, aGetDad, aColsX, aHeaderX)
+	Local lRet	:= .F. 
+
+
+
+	If (Len (aColsX)>0)
+		If (aGetDad[nFldAtu]:TudoOk ())
+			lRet	:= .T. 
+			aGetDad[nFldAtu]:oBrowse:lDisablePaint := .T. 
+
+			aColsX[nFldAtu] 	:= aClone(aCols)
+			aHeaderX[nFldAtu] 	:= aClone(aHeader)
+
+			N := Max (aGetDad[nFldDst]:oBrowse:nAt, 1)
+
+			aCols  	:= aClone(aColsX[nFldDst])
+			aHeader := aClone(aHeaderX[nFldDst])
+
+			aGetDad[nFldDst]:oBrowse:lDisablePaint := .F. 
+			aGetDad[nFldDst]:oBrowse:Refresh( .T. )
+		EndIf
+	Else
+		lRet	:= .T. 
+	EndIf
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AddAcols (oGetDad, nColDelete, nFolder)
+	Local 	nI		:=	0
+	Local	nPos	:=	0
+	Local 	cTipo	:=	""
+	Local	lRet	:= .T. 
+	Local	aGetDad	:=	{}
+
+	If (oGetDad<>NIL)
+		If (".00"$AllTrim (aCols[n][2]))
+		    If (Empty (aCols[n][3])) .And.  !aCols[n][nColDelete]
+				Help (" ", 1, "CONTINVAL",, If( cPaisLoc $ "ANG|PTG", "Todos os campos devem ser indicados.", "Todos os campos devem ser informados." ), 3, 0)
+				Return (lRet)
+		    EndIf
+
+			nPos := n-1
+		    aEval (aCols, {|x| Iif (x[nColDelete]== .F. , nPos++,)})
+		    nPos++
+			aCols := Asize (aCols, Len(aCols)+1)
+			aCols := Ains (aCols, nPos)
+			aCols[nPos] := Array (Len (aHeader)+1)
+
+			For nI := 1 To Len(aHeader)
+				cTipo := aHeader[nI][8]
+				If cTipo $ "CM"
+					aCols[nPos][nI] := Space(aHeader[nI][4])
+				ElseIf cTipo == "N"
+					aCols[nPos][nI] := 0
+				ElseIf cTipo == "L"
+					aCols[nPos][nI] := .F. 
+				ElseIf cTipo == "D"
+					aCols[nPos][nI] := Ctod("")
+				EndIf
+			Next
+
+			aCols[nPos][1] := StrZero (nFolder, 3)
+			aCols[nPos][Len (aHeader)+1] := .F. 
+			oGetDad:GOTO (nPos)
+			Eval (oGetDad:obrowse:bDrawSelect)
+		EndIf
+		aGetDad	:=	{oGetDad}
+		FtRefre (@aGetDad)
+	EndIf
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function FtRefre (aGetDad)
+	Local 	nLoop 	:= 0
+	Local	lRet	:= .T. 
+
+	For nLoop := 1 To Len (aGetDad)
+		aGetDad[nLoop]:oBrowse:lDisablePaint := .F. 
+		aGetDad[nLoop]:oBrowse:Refresh( .T. )
+	next
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function xLinOk ()
+	Local	lRet	:= .T. 
+
+	If !(SubStr (AllTrim (aCols[n][2]), 4, 3)$".00") .And.  !aCols[n][6]
+		If (Empty (aCols[n][3])) .Or.  (Empty (aCols[n][4]))
+			Help (" ", 1, "CONTINVAL",, If( cPaisLoc $ "ANG|PTG", "Todos os campos devem ser indicados.", "Todos os campos devem ser informados." ), 3, 0)
+			lRet	:= .F. 
+		EndIf
+	EndIf
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function VldCod ()
+	Local	lRet	:= .T. 
+	Local	nX		:=	0
+
+	For nX := 1 To Len (aCols)
+		If (AllTrim (M->cCodigo)$aCols[nX][2]) .And.  !aCols[nX][6] .And.  nX<>n
+			Help (" ", 1, "CCODEXST",, "Código ja existente nesta coluna.", 3, 0)
+			lRet	:= .F. 
+		EndIf
+	next
+
+	If !(Left (M->cCodigo, 3)$aCols[n][1])
+		Help (" ", 1, "CCODCONT",, "As tres primeiras posições do campo código deve ser igual ao código da linha a esquerda.", 3, 0)
+		lRet	:= .F. 
+	EndIf
+
+	If (n==1) .And.  !(".00"$SubStr (AllTrim (M->cCodigo),4,3))
+		Help (" ", 1, "NAOALT",, "O código desta linha não deve ser alterado.", 3, 0)
+		lRet	:= .F. 
+	EndIf
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function VldCodPr ()
+	Local	lRet	:= .T. 
+
+	SB1->(DbSetOrder (1))
+	If (SB1->(DbSeek (xFilial ("SB1")+M->cCodProd)))
+		aCols[n][4]	:=	SB1->B1_DESC
+		aCols[n][5]	:=	SB1->B1_CONV
+	Else
+		Help (" ", 1, "NAOPRD",, "Produto não encontrado no cadastro.", 3, 0)
+		lRet	:= .F. 
+	EndIf
+Return (lRet)

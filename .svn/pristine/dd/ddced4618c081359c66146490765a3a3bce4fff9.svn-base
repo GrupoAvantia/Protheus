@@ -1,0 +1,526 @@
+#Include "Protheus.ch"
+#Include "Rwmake.ch"
+#Include "Topconn.ch"
+#Include "Colors.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ PROGRAMA   ณ Proposta de Preco          บ AUTOR ณ Carlos Beltrao    บ DATA ณ 19/03/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Tela para atualizacao da porcentagem do markup e dos valores de venda.     บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ ARGA005(cOrcam)                                                            บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ String                                                                     บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Projeto                                                          บฑฑ
+ฑฑฬออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ                      ATUALIZACOES SOFRIDAS DESDE A CONTRUCAO INICIAL                    บฑฑ
+ฑฑวฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤถฑฑ
+ฑฑบ    PROGRAMADOR     ณ    DATA    ณ                  MOTIVO DA ALTERACAO                  บฑฑ
+ฑฑวฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤถฑฑ
+ฑฑบ                    ณ            ณ                                                       บฑฑ 
+ฑฑบ                    ณ            ณ                                                       บฑฑ
+ฑฑศออออออออออออออออออออฯออออออออออออฯอออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+User Function ARGA005(cOrcamento)
+
+	Local aCampos := {"ARG_PORC"} 
+	Local aCols := {}
+	Local aHeader := {}
+	
+	Private cDescOrc := space(30)
+	Private cOrcam := cOrcamento
+	Private nMarkup  := 0
+	Private oTGet
+	Private oDlg
+	Private aRotina := {{"Pesquisar" ,"AxPesqui", 0, 1},;
+	                    {"Visualizar","AxVisual", 0, 2},;
+	                    {"Incluir"   ,"AxInclui", 0, 3},;
+	                    {"Alterar"   ,"AxAltera", 0, 4},;
+	                    {"Excluir"   ,"AxDeleta", 0, 5}}
+	
+	Aadd(aHeader, {"Descri็ใo", 	"ARG_DESC", 	"@!", 					50, 0, "", "", "C", "", ""})
+	Aadd(aHeader, {"%", 				"ARG_PORC", 	"@E 999.99", 			06, 2, "", "", "N", "", ""})
+	Aadd(aHeader, {"Mใo de Obra", 	"ARG_MO", 		"@E 999,999,999.99",	14, 2, "", "", "N", "", ""})
+	Aadd(aHeader, {"Material", 		"ARG_MA", 		"@E 999,999,999.99", 14, 2, "", "", "N", "", ""})
+	Aadd(aHeader, {"Total", 			"ARG_TOTAL", 	"@E 999,999,999.99", 14, 2, "", "", "N", "", ""})  
+
+	oFONTE1 := TFONT():NEW("MONO AS REGULAR", , 16, , .T., , , , .F., .F.)
+	oFONTE2 := TFONT():NEW("MONO AS REGULAR", , 16, , .T., , , , .F., .F.)             		
+	
+	DEFINE MSDIALOG oDlg TITLE "Fechamento de Propostas de Pre็o" FROM 00,00 TO 630,1000 PIXEL
+	
+	TSAY():NEW(20, 10, {||"Orcamento"}, oDlg, , oFONTE1, , , , .T., )
+	@ 20,50 GET cOrcam SIZE 50,20 PICTURE "@!" When .F. 
+	@ 20,120 GET cDescOrc SIZE 250,20 PICTURE "@!" When .F.
+	cDescOrc := POSICIONE("AF1", 1, xFilial("AF1") + cOrcam, "AF1_DESCRI")
+	
+	TSAY():NEW(20, 410, {||"% Markup"}, oDlg, , oFONTE1, , , , .T., )
+	nMarkup  := POSICIONE("AF1", 1, xFilial("AF1") + cOrcam, "AF1_BDI")
+	@ 20, 450 MSGET oTGet VAR nMarkup SIZE 50, 10 OF oDlg PICTURE "@E 999.99" COLORS 0, 16777215 PIXEL
+	
+	oGetDados := MsNewGetDados():New(40, 10, 260, 500, GD_UPDATE, , , , aCampos, 0, 999, "U_ARG5AtCampo(aCols)", , , oDlg, aHeader, aCols)
+	oGetDados:oBrowse:lUseDefaultColors := .F.
+	oGetDados:oBrowse:SetBlkBackColor({|| GetBackColor(oGetDados:nAt)})
+	oGetDados:oBrowse:SetBlkColor({|| GetFontColor(oGetDados:nAt)})
+	
+	CarregarTabela(cOrcam, aCols)
+	
+	AtualizarTabela(aCols)
+	
+	ACTIVATE MSDIALOG oDlg ON INIT ENCHOICEBAR(oDlg, {||Processa({||GravarDados(cOrcamento), oDlg:end()}, "Aguarde...")}, {||oDlg:end()} , , )
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Carregar Tabela            บ AUTOR ณ Carlos Beltrao    บ DATA ณ 19/03/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Essa funcao carrega os valores necessarios para a realizacao do calculo.   บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ CarregarTabela()                                                           บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Projeto                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function CarregarTabela(cOrcam, aCols)
+
+	Local nCustoMA
+	Local nCustoMO
+	Local nCustoTotal
+	Local nAdmEsc
+	Local nIss
+	Local nCofins
+	Local nPis
+	Local nParLuc
+	Local nLucOpe
+	Local nIrpj
+	Local nCssl
+	Local nLucLiq
+	Local cQryMA
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Calculando Valor Total de Material.                                 ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	cQryMA:="SELECT SUM((AF3_QUANT * AF2_QUANT) * AF3_CUSTD) AS TOTALMA "
+	cQryMA+="FROM " + RetSqlname("AF3") + " AF3 "
+	cQryMA+="INNER JOIN " + RetSqlName("AF2") + " AF2 "
+	cQryMA+="ON AF3.AF3_FILIAL = AF2.AF2_FILIAL "
+	cQryMA+="AND AF3.AF3_ORCAME = AF2.AF2_ORCAME "
+	cQryMA+="AND AF3_TAREFA = AF2_TAREFA "
+	cQryMA+="WHERE AF3.D_E_L_E_T_ <> '*' "
+	cQryMA+="AND AF2.D_E_L_E_T_ <> '*' "
+	cQryMA+="AND AF3_ORCAME = '" + cOrcam + "' "
+	cQryMA+="AND AF3_FILIAL = '" + xFilial("AF3") + "' "
+	cQryMA+="AND AF3_RECURS = '' "
+
+	DbUseArea(.T., "TOPCONN", TCGenQry( , , cQryMA), "XMA", .F., .T.)
+
+	nCustoMA := XMA->TOTALMA
+
+	DbSelectArea("XMA")
+	DbCloseArea() 
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Calculando Valor Total de Mao de Obra.                              ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	cQryMA:="SELECT SUM((AF3_QUANT * AF2_QUANT) * AF3_CUSTD) AS TOTALMO "
+	cQryMA+="FROM " + RetSqlname("AF3") + " AF3 "
+	cQryMA+="INNER JOIN " + RetSqlName("AF2") + " AF2 "
+	cQryMA+="ON AF3.AF3_FILIAL = AF2.AF2_FILIAL "
+	cQryMA+="AND AF3.AF3_ORCAME = AF2.AF2_ORCAME "
+	cQryMA+="AND AF3_TAREFA = AF2_TAREFA "
+	cQryMA+="WHERE AF3.D_E_L_E_T_ <> '*' "
+	cQryMA+="AND AF2.D_E_L_E_T_ <> '*' "
+	cQryMA+="AND AF3_ORCAME = '" + cOrcam + "' " 
+	cQryMA+="AND AF3_FILIAL =  '" + xFilial("AF3") + "' "
+	cQryMA+="AND AF3_RECURS <> '' "
+
+	DbUseArea(.T., "TOPCONN", TCGenQry( , , cQryMA), "XMB", .F., .T.)
+
+	nCustoMO := XMB->TOTALMO
+
+	DbSelectArea("XMB")
+	DbCloseArea()
+	
+	nCustoTotal := nCustoMA + nCustoMO
+	nAdmEsc 	:= POSICIONE("AF1", 1, xFilial("AF1") + cOrcam, "AF1_X_ADME")
+	nIss 		:= POSICIONE("AF1", 1, xFilial("AF1") + cOrcam, "AF1_X_ISS")
+	nCofins 	:= POSICIONE("AF1", 1, xFilial("AF1") + cOrcam, "AF1_X_COFI")
+	nPis 		:= POSICIONE("AF1", 1, xFilial("AF1") + cOrcam, "AF1_X_PIS")
+	nParLuc	:= POSICIONE("AF1", 1, xFilial("AF1") + cOrcam, "AF1_X_PLUC")
+	nIrpj 		:= 25
+	nCssl 		:= 9
+	nLucLiq	:= POSICIONE("AF1", 1, xFilial("AF1") + cOrcam, "AF1_X_LLIQ")
+	nLucOpe 	:= (nLucLiq / (1 - (nIrpj / 100) - (nCssl / 100))) * 100
+	
+	aCols := {}
+
+	aadd(aCols, {"Custo", 							"", 		nCustoMO, 	nCustoMA, 	nCustoTotal, 	.F.})
+	aadd(aCols, {Space(50), 							"", 		"", 		"", 		"",				.F.})
+	aadd(aCols, {"Administra็ใo do Escrit๓rio", 	nAdmEsc, 	0, 			0, 			0, 				.F.})
+	aadd(aCols, {"ISS", 								nIss, 		0, 			0, 			0, 				.F.})
+	aadd(aCols, {"COFINS", 							nCofins, 	0, 			0, 			0, 				.F.})
+	aadd(aCols, {"PIS", 								nPis, 		0, 			0, 			0, 				.F.})
+	aadd(aCols, {"Participa็ใo nos Lucros",		nParLuc,	0, 			0, 			0, 				.F.})
+	aadd(aCols, {Space(50), 							"", 		"", 		"", 		"",				.F.})
+	aadd(aCols, {"Lucro Operacional", 				nLucOpe, 	0, 			0, 			0, 				.F.})
+	aadd(aCols, {Space(50), 							"", 		"", 		"", 		"",				.F.})
+	aadd(aCols, {"IRPJ + Adicional", 				nIrpj, 	0, 			0, 			0, 				.F.})
+	aadd(aCols, {"CSSL", 							nCssl,		0, 			0, 			0, 				.F.})
+	aadd(aCols, {Space(50), 							"", 		"", 		"", 		"",				.F.})
+	aadd(aCols, {"Lucro Lํquido", 					nLucLiq,	0, 			0, 			0, 				.F.})
+	aadd(aCols, {Space(50), 							"", 		"", 		"", 		"",				.F.})
+	aadd(aCols, {"Pre็o de Venda", 					"", 		0, 			0, 			0, 				.F.})
+	
+	oGetDados:SetArray(aCols,.T.)
+	oGetDados:Refresh()
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Atualizar Tabela           บ AUTOR ณ Carlos Beltrao    บ DATA ณ 19/03/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Essa funcao calcula/recalcula os valores da tabela.                        บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ AtualizarTabela()                                                          บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Projeto                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function AtualizarTabela(aCols)
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Porcentagem.                                                        ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	Local nAdmEsc	
+	Local nIss
+	Local nCofins
+	Local nPis
+	Local nParLuc
+	Local nLucOpe
+	Local nIrpj 
+	Local nCssl
+	Local nLucLiq
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Valores.                                                            ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	Local nCustoMO
+	Local nCustoMA
+	Local nAdmEscMO
+	Local nAdmEscMA
+	Local nIssMO
+	Local nCofinsMO
+	Local nCofinsMA
+	Local nPisMO
+	Local nPisMA
+	Local nParLucMO
+	Local nParLucMA
+	Local nLucOpeMO
+	Local nLucOpeMA
+	Local nIrpjMO
+	Local nIrpjMA
+	Local nCsslMO
+	Local nCsslMA
+	Local nLuLiqMO
+	Local nLuLiqMA
+	Local nPVendaMO
+	Local nPVendaMA
+
+	nAdmEsc	:= aCols[3][2]   / 100
+	nIss		:= aCols[4][2]   / 100
+	nCofins	:= aCols[5][2]   / 100
+	nPis		:= aCols[6][2]   / 100
+	nParLuc	:= aCols[7][2]   / 100
+	nIrpj 		:= aCols[11][2]  / 100
+	nCssl		:= aCols[12][2]  / 100
+	nLucLiq	:= aCols[14][2]  / 100
+	nLucOpe	:= nLucLiq / (1 - nIrpj - nCssl)
+	
+	nCustoMO := aCols[1][3]
+	nCustoMA := aCols[1][4]
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Calculando Preco de Venda.                                          ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	nPVendaMO := nCustoMO / (1 - (nAdmEsc + nLucOpe + nIss + nCofins + nPis + nParLuc * nLucLiq))
+	nPVendaMA := nCustoMA / (1 - (nAdmEsc + nLucOpe + nCofins + nPis + nParLuc * nLucLiq))
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Calculando Administracao do Escritorio.                             ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	nAdmEscMO := nPVendaMO * nAdmEsc
+	nAdmEscMA := nPVendaMA * nAdmEsc
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Calculando ISS.                                                     ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	nIssMO := nPVendaMO * nIss
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Calculando COFINS.                                                  ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	nCofinsMO := nPVendaMO * nCofins
+	nCofinsMA := nPVendaMA * nCofins
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Calculando PIS.                                                     ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	nPisMO := nPVendaMO * nPis
+	nPisMA := nPVendaMA * nPis
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Calculando Lucro Operacional.                                       ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	nLucOpeMO := nPVendaMO * nLucOpe
+	nLucOpeMA := nPVendaMA * nLucOpe
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Calculando IRPJ + Adicional.                                        ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	nIrpjMO := nLucOpeMO * nIrpj
+	nIrpjMA := nLucOpeMA * nIrpj
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Calculando CSSL.                                                    ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	nCsslMO := nLucOpeMO * nCssl
+	nCsslMA := nLucOpeMA * nCssl
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Calculando Lucro Liquido.                                           ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	nLuLiqMO := nLucOpeMO - nIrpjMO - nCsslMO
+	nLuLiqMA := nLucOpeMA - nIrpjMA - nCsslMA
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Calculando Participacao nos Lucros.                                 ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	nParLucMO := nLuLiqMO * nParLuc
+	nParLucMA := nLuLiqMA * nParLuc
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Carregando os Valores em Tela.                                      ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	aCols[9][2] := nLucOpe * 100
+	
+	aCols[3][3] := nAdmEscMO
+	aCols[3][4] := nAdmEscMA
+	aCols[3][5] := nAdmEscMO + nAdmEscMA
+
+	aCols[4][3] := nIssMO
+	aCols[4][5] := nIssMO
+
+	aCols[5][3] := nCofinsMO
+	aCols[5][4] := nCofinsMA
+	aCols[5][5] := nCofinsMO + nCofinsMA
+
+	aCols[6][3] := nPisMO
+	aCols[6][4] := nPisMA
+	aCols[6][5] := nPisMO + nPisMA
+
+	aCols[7][3] := nParLucMO
+	aCols[7][4] := nParLucMA
+	aCols[7][5] := nParLucMO + nParLucMA
+	
+	aCols[9][3] := nLucOpeMO
+	aCols[9][4] := nLucOpeMA
+	aCols[9][5] := nLucOpeMO + nLucOpeMA
+
+	aCols[11][3] := nIrpjMO
+	aCols[11][4] := nIrpjMA
+	aCols[11][5] := nIrpjMO + nIrpjMA
+
+	aCols[12][3] := nCsslMO
+	aCols[12][4] := nCsslMA
+	aCols[12][5] := nCsslMO + nCsslMA
+	
+	aCols[14][3] := nLuLiqMO
+	aCols[14][4] := nLuLiqMA
+	aCols[14][5] := nLuLiqMO + nLuLiqMA
+	
+	aCols[16][3] := nPVendaMO
+	aCols[16][4] := nPVendaMA
+	aCols[16][5] := nPVendaMO + nPVendaMA
+
+	nMarkup := ((nPVendaMO + nPVendaMA) / (nCustoMO + nCustoMA) - 1) * 100
+
+	oTGet:CtrlRefresh()
+
+	oGetDados:SetArray(aCols,.T.)
+	oGetDados:Refresh()
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Atualizar Campo            บ AUTOR ณ Carlos Beltrao    บ DATA ณ 19/03/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Essa funcao atualiza o campo que foi alterado no aCols.                    บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ ARG5AtCampo()                                                              บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Projeto                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+User Function ARG5AtCampo(aCols)
+	
+	Local cVar
+	Local nVar
+	
+	cVar := SUBSTR(ReadVar(), 4)
+	nVar := &(ReadVar())
+	GDFieldPut(cVar, nVar)
+	
+	AtualizarTabela(aCols)
+
+Return .T.
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Gravar Dados               บ AUTOR ณ Carlos Beltrao    บ DATA ณ 19/03/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Funcao responsavel por gravar os dados da tela.                            บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ GravarDados()                                                              บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Projeto                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function GravarDados(cOrcam)
+
+	Local aDados := {}
+	
+	aDados := aClone(oGetDados:aCols)
+
+	DbSelectArea("AF1")
+	DbSetOrder(1)     
+	DbSeek(xFilial("AF1") + cOrcam)
+	IF FOUND()
+		RECLOCK("AF1", .F.)
+			AF1->AF1_X_ADME 	:= aDados[3][2]
+			AF1->AF1_X_ISS 	:= aDados[4][2]
+			AF1->AF1_X_COFI 	:= aDados[5][2]
+			AF1->AF1_X_PIS 	:= aDados[6][2]
+			AF1->AF1_X_PLUC	:= aDados[7][2]
+			AF1->AF1_X_LLIQ 	:= aDados[14][2]
+			AF1->AF1_BDI 		:= nMarkup
+		MSUNLOCK()
+		U_PMA103FI()
+		Alert("Dados gravados com sucesso.")
+	Else
+		Alert("Nใo foi possํvel gravar as altera็๕es.")
+	EndIf
+	
+	DbCloseArea("AF1")
+	
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Seleciona Cor De Fundo     บ AUTOR ณ Carlos Beltrao    บ DATA ณ 19/03/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Funcao que seleciona a cor de fundo das linhas do grid.                    บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ GetBackColor(nLinha)                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Number                                                                     บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Number                                                                     บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Projeto                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function GetBackColor(nLinha)
+
+	Local nRet := CLR_WHITE
+	
+	If nLinha == 1 .Or. nLinha == 9 .Or. nLinha == 14 .Or. nLinha == 16
+		nRet := CLR_YELLOW
+	ElseIf nLinha == 2 .Or. nLinha == 8 .Or. nLinha == 10 .Or. nLinha == 13 .Or. nLinha == 15
+		nRet := CLR_WHITE
+	Else
+		nRet := CLR_HCYAN
+	EndIf
+	
+Return nRet
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Seleciona Cor Da Fonte     บ AUTOR ณ Carlos Beltrao    บ DATA ณ 19/03/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Funcao que seleciona a cor da fonte das linhas do grid.                    บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ GetFontColor(nLinha)                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Number                                                                     บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Number                                                                     บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Projeto                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function GetFontColor(nLinha)
+
+	Local nRet := CLR_BLACK
+	
+	If nLinha == 2 .Or. nLinha == 8 .Or. nLinha == 10 .Or. nLinha == 13 .Or. nLinha == 15
+		nRet := CLR_WHITE
+	EndIf
+	
+Return nRet

@@ -1,0 +1,1522 @@
+#INCLUDE "Protheus.ch"
+#INCLUDE "TOPCONN.ch"
+#INCLUDE "rwmake.ch"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³PosCCusto º Autor ³ Josue Izidio       º Data ³  03/11/2008 º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescricao ³ Posicao dos titulos  por centro de custo e natureza        º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ AP6 IDE                                                    º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+User Function NPosCCusto()
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Declaracao de Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Local cDesc1         := "Este programa tem como objetivo imprimir relatorio "
+Local cDesc2         := "de acordo com os parametros informados pelo usuario."
+Local cDesc3         := ""
+Local cPict          := ""
+Local titulo       := "Posicao por Centro de Custo"
+Local nLin         := 80
+Local Cabec1       := "Natureza                   Centro de Custo"                                             
+Local Cabec2       := " Titulo  Tipo    Dt.Venc     Dt.Baixa   For/Cli              Razao Social             Despesas          Receitas         Valores"
+Local imprime      := .T.
+Local aOrd := {}
+Private lEnd         := .F.
+Private lAbortPrint  := .F.
+Private CbTxt        := ""
+Private limite           := 132
+Private tamanho          := "M"
+Private nomeprog         := "POSCCUSTO" 
+Private nTipo            := 15
+Private aReturn          := { "Zebrado", 1, "Administracao", 1, 2, 1, "", 1}
+Private nLastKey        := 0
+Private cbtxt      := Space(10)
+Private cbcont     := 00
+Private CONTFL     := 01
+Private m_pag      := 01
+Private wnrel      := "POSCCUSTO" 
+
+Private cString := ""
+Private cPerg:="POSCC"
+Pergunte(cPerg,.F.)
+
+Alert("LJ")
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Monta a interface padrao com o usuario...                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+wnrel := SetPrint(cString,NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.T.,aOrd,.T.,Tamanho,,.T.)
+
+If MV_PAR16 == 2
+  Titulo:= Alltrim(Titulo)+" Realizado"
+Else
+  Titulo:=Alltrim(Titulo)+ " Previsto e Realizado"
+Endif
+
+If nLastKey == 27
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+   Return
+Endif
+
+nTipo := If(aReturn[4]==1,15,18)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Processamento. RPTSTATUS monta janela com a regua de processamento. ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+RptStatus({|| RunReport(Cabec1,Cabec2,Titulo,nLin) },Titulo)
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºFun‡„o    ³RUNREPORT º Autor ³ AP6 IDE            º Data ³  17/09/20   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescri‡„o ³ Funcao auxiliar chamada pela RPTSTATUS. A funcao RPTSTATUS º±±
+±±º          ³ monta a janela com a regua de processamento.               º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Programa principal                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
+
+Local nOrdem
+Local nSUbTotCompras:=nSubTotFaturamento:=nTotCompras:=nTotFaturamento:=0
+lOCAL nTotCCCompras:=nTotCCFaturamento:=0
+Local cQuery:=""
+Private _cTipo  := MV_PAR11
+Private _cTipoS := MV_PAR14
+Private aPosCC :={} 
+
+
+If !Empty(_cTipo)
+    _cTipo:=_ctipo+"'" +"NIL'"
+Else
+    _cTipo:="'Nil'"
+Endif     
+
+If !Empty(_cTipoS)
+    _cTipoS:=_ctipoS+"'" +"NIL'"
+Else
+    _cTipoS:="'Nil'"
+Endif
+
+
+/*
+MV_PAR01 - Da Filial
+MV_PAR02 - Ate a Filial
+MV_PAR03 - Do Centro de Custo
+MV_PAR04 - Ate o Centro de Custo
+MV_PAR05 - Da Natureza
+MV_PAR06 - Ate a Natureza
+MV_PAR07 - Do Cliente
+MV_PAR08 - Ate o Cliente
+MV_PAR09 - Do Fornecedor
+MV_PAR10 - Ate o Fornecedor
+MV_PAR11 - Tipo de Documento de Saida
+MV_PAR12 - Da Emissao
+MV_PAR13 - Ate a Emissao
+MV_PAR14 - Tipo de Documento de Entrada
+MV_PAR15 - Movimentacao
+*/
+
+
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Posicionamento do primeiro registro e loop principal. Pode-se criar ³
+//³ a logica da seguinte maneira: Posiciona-se na filial corrente e pro ³
+//³ cessa enquanto a filial do registro for a filial corrente. Por exem ³
+//³ plo, substitua o dbGoTop() e o While !EOF() abaixo pela sintaxe:    ³
+//³                                                                     ³
+//³ dbSeek(xFilial())                                                   ³
+//³ While !EOF() .And. xFilial() == A1_FILIAL                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+            
+If MV_PAR15 == 1
+   MvtEntradas()
+   MvtSaidas()
+Elseif MV_PAR15 == 2   
+   MvtEntradas()
+Else 
+   MvtSaidas()
+Endif   
+
+//Classificar o Vetor
+aSort(aPosCC,,,   {|a,b| a[12]  <  b[12]}) 
+
+
+i:=1
+
+
+While i <=  Len(aPosCC)
+   //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   //³ Verifica o cancelamento pelo usuario...                             ³
+   //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   If lAbortPrint
+      @nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
+      Exit
+   Endif
+
+   //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   //³ Impressao do cabecalho do relatorio. . .                            ³
+   //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   If nLin > 55 // Salto de Página. Neste caso o formulario tem 55 linhas...
+      Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+      nLin := 9
+   Endif
+
+//"Titulo  Doct Dt.Emissao For/Cli  Nome Fantasia  Receita    Despesa      Valor"
+//          10         20        30        40        50        60        70        80        90        100       110       120
+// 0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890 
+// 999999  XXX 11/11/1111  999999 XXXXXXXXXXXXXXX 999.999,99  999.999,99  999.999,99
+   cCusto:=aPosCC[i][1]
+   nCol:=(132-Len(Rtrim(aPosCC[i][1])+" - " + Rtrim(aPosCC[i][2]))) / 2
+   @ nLin++,nCol Psay Rtrim(aPosCC[i][1])+" - " + Rtrim(aPosCC[i][2]) // Centro de Custo
+   @ nLin++,nCol Psay Replicate("-",Len(Rtrim(aPosCC[i][1])+" - " + Rtrim(aPosCC[i][2])))
+   nlin++
+   While cCusto = aPosCC[i][1]  .And. i <= Len(aPosCC)
+         cNat := aPosCC[i][3]
+         @ nLin++,001 Psay "[ "+Rtrim(aPosCC[i][3])+" - " + Rtrim(aPosCC[i][4])+" ]" // Natureza
+         nlin++
+         lProcessou:=.F.
+         While cNat = aPosCC[i][3] .And. cCusto = aPosCC[i][1] .And. i<= Len(aPosCC)
+               lProcessou:=.T. 
+               If  aPosCC[i][10]   = 0 
+                   i++
+                   If i > Len(aPosCC)
+                     Exit
+                   Endif
+                   Loop
+               Endif                 
+               @nLin,001 Psay Alltrim(aPosCC[i][05]) // Titulo
+               @nLin,011 Psay Alltrim(aPosCC[i][06]) // Tipo
+               @nLin,016 Psay FormData(aPosCC[i][07]) // Emissao  
+               @nLin,028 Psay FormData(aPosCC[i][13]) // Baixa              
+               @nLin,040 Psay Rtrim(aPosCC[i][08]) // Cliente/Fornecedor 
+               @nLin,048 Psay Left(aPosCC[i][09],30) // Nome Reduzido   
+               If aPosCC[i][11] == "C"
+                  @nLin,082 Psay aPosCC[i][10]   Picture "@E 999,999,999.99" // Compras
+                  @nLin,100 Psay 0               Picture "@E 999,999,999.99"  // Faturamento  059
+               Else
+                  @nLin,082 Psay 0               Picture "@E 999,999,999.99" // Compras
+                  @nLin,100 Psay aPosCC[i][10]   Picture "@E 999,999,999.99"  // Faturamento  059
+               Endif
+               @nLin++,117 Psay aPosCC[i][10] Picture "@E 999,999,999.99" // Valor
+               Iif(aPosCC[i][11] == "C",nSubTotCompras+=aPosCC[i][10],nSubTotFaturamento+=aPosCC[i][10])
+               Iif(aPosCC[i][11] == "C",nTotCompras+=aPosCC[i][10],nTotFaturamento+=aPosCC[i][10])
+               If nLin > 76 // Salto de Página. Neste caso o formulario tem 55 linhas...
+                  Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+                  nLin := 9
+                  @ nLin++,nCol Psay Rtrim(aPosCC[i][1])+" - " + Rtrim(aPosCC[i][2])+" (Continuacao...)" // Centro de Custo
+                  @ nLin++,nCol Psay Replicate("-",Len(Rtrim(aPosCC[i][1])+" - " + Rtrim(aPosCC[i][2])))
+                  nLin++
+                  @ nLin++,001 Psay "[ "+Rtrim(aPosCC[i][3])+" - " + Rtrim(aPosCC[i][4])+ " ] (Continuacao...)" // Natureza
+                  nLin++
+               Endif
+               i++
+               If i > Len(aPosCC)
+                  Exit
+               Endif
+         Enddo 
+            nLin++
+            @ nLin,000   Psay "Total da Natureza " + Alltrim(cNat)+ " ---> "
+            @ nLin,082   Psay nSubTotCompras     Picture "@E 999,999,999.99"
+            @ nLin,100   Psay nSubTotFaturamento Picture "@E 999,999,999.99"    
+            @ nLin++,117 Psay  nSubTotFaturamento - nSubTotCompras         Picture "@E 999,999,999.99"
+            nLin++
+            nTotCCCompras     += nSubTotCompras
+            nTotCCFaturamento += nSubTotFaturamento
+            nSubTotal:=nSubTotCompras:=nSubTotFaturamento:=0            
+         If i > Len(aPosCC)
+            Exit
+         Endif                        
+   Enddo
+   
+   @nLin++,000 Psay __PrtThinLine()
+   @ nLin,000 Psay "Total do Centro de Custo " + Alltrim(cCusto)+ " ---> "
+   @ nLin,082 Psay nTotCCCompras     Picture "@E 999,999,999.99"
+   @ nLin,100 Psay nTotCCFaturamento Picture "@E 999,999,999.99"    
+   @ nLin++,117 Psay  nTotCCFaturamento - nTotCCCompras         Picture "@E 999,999,999.99"  
+   @nLin++,000 Psay __PrtThinLine()   
+   nLin++;nLin++
+   nTotCCCompras     := 0
+   nTotCCFaturamento := 0
+ 
+
+Enddo
+
+nLin++
+@nLin++,000 PSay __PrtThinLine()
+@nLin++,000 Psay Padc("T O T A I S ",80,"")
+@nLin++,000 PSay __PrtThinLine()
+@nLin++,020 Psay "Despesas----->" +Padr(Transform(nTotCompras,    "@E 99,999,999.99"),20,"")
+@nLin++,020 Psay "Receitas----->" +Padr(Transform(nTotFaturamento,"@E 99,999,999.99"),20,"")
+@nLin++,020 Psay "Total-------->" +Padr(Transform(nTotFaturamento - nTotCompras,    "@E 99,999,999.99"),20,"")
+@nLin++,000 PSay __PrtThinLine()
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Finaliza a execucao do relatorio...                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+SET DEVICE TO SCREEN
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Se impressao em disco, chama o gerenciador de impressao...          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+If aReturn[5]==1
+   dbCommitAll()
+   SET PRINTER TO
+   OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return
+
+
+Static Function MvtEntradas()
+
+/*
+------------   COMPRAS  ------------
+NOTA FISCAL RATEADA POR CENTRO DE CUSTO (TABELA SDE) 
+O CAMPO D1_CC ESTA EM BRANCO
+ ** TABELAS ** 
+SDE -- EXCLUSIVO
+SD1 -- EXCLUSIVO
+SE2 -- EXCLUSIVO
+CTT -- EXCLUSIVO
+SED -- COMPARTILHADO
+SA2 -- COMPARTILHADO
+*/
+
+cQuery:="SELECT              " 
+cQuery+="        D1_FORNECE CLIFOR, D1_LOJA, D1_ITEM, D1_EMISSAO, D1_NATUREZ COD_NAT, ED_DESCRIC DESC_NAT, A2_NOME NOME, CTT_FILIAL,CTT_DESC01 DESC_CC, 
+cQuery+="        DE_FILIAL, DE_DOC DOCUMENTO, DE_SERIE, DE_CC COD_CC, E2_TIPO TIPO, E2_NUM,E2_PREFIXO,E2_BAIXA BAIXA, E2_VENCTO VENCIMENTO,E2_EMISSAO EMISSAO,
+cQuery+="        DE_PERC, ROUND((SUM(D1_TOTAL)* DE_PERC) / 100,2) VALOR 
+cQuery+="FROM "
+cQuery+="	   " + RetSqlName("SA2") + " SA2, "	
+cQuery+="	   " + RetSqlName("SE2") + " SE2, "	
+cQuery+="  	   " + RetSqlName("CTT") + " CTT, "	
+cQuery+="      " + RetSqlName("SD1") + " SD1, "	
+cQuery+="	   " + RetSqlName("SDE") + " SDE, "	
+cQuery+="	   " + RetSqlName("SED") + " SED  "
+cQuery+="WHERE "
+cQuery+="        DE_FILIAL = D1_FILIAL AND CTT_FILIAL = D1_FILIAL AND E2_FILIAL = D1_FILIAL "
+cQuery+="        AND E2_NUM = D1_DOC AND E2_FORNECE = D1_FORNECE AND E2_LOJA = D1_LOJA "
+cQuery+="        AND D1_DOC = DE_DOC AND D1_SERIE = DE_SERIE AND D1_FORNECE = DE_FORNECE AND A2_COD = D1_FORNECE "
+cQuery+="        AND D1_ITEM = DE_ITEMNF AND D1_FORNECE = DE_FORNECE AND CTT_CUSTO = DE_CC AND D1_NATUREZ = ED_CODIGO" 
+
+cQuery+="		AND D1_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="		DE_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="		E2_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="		CTT_FILIAL BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+
+cQuery+="       D1_CC = ' ' AND (E2_PARCELA = ' ' OR E2_PARCELA = '1' OR E2_PARCELA = 'A' )
+cQuery+="       AND SDE.D_E_L_E_T_ <> '*' AND CTT.D_E_L_E_T_ <> '*' AND SED.D_E_L_E_T_ <> '*' AND SA2.D_E_L_E_T_ <> '*' AND SE2.D_E_L_E_T_ <> '*' AND SD1.D_E_L_E_T_ <> '*' 
+
+cQuery+="		AND CTT_CUSTO  BETWEEN '"+mv_par03+"' AND '"+mv_par04+"' AND "
+cQuery+="		CTT_CUSTO  >= '210100001' AND "
+cQuery+="		D1_NATUREZ BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="		ED_CODIGO  BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="		D1_FORNECE BETWEEN '"+mv_par09+"' AND '"+mv_par10+"' AND "
+cQuery+="		E2_VENCTO  BETWEEN '"+DTOS(mv_par12)+"' AND '"+DTOS(mv_par13)+"' "
+
+If Len(Alltrim(_cTipo)) > 5
+      cQuery+="		AND E2_TIPO IN ("+_cTipo+") "
+Endif      
+If MV_PAR16 == 2//Realizado
+    cQuery+= " AND E2_BAIXA <> '' AND " 
+Endif
+
+cQuery+="GROUP BY D1_FORNECE, D1_LOJA, D1_ITEM, D1_EMISSAO,D1_NATUREZ, ED_DESCRIC, A2_NOME, CTT_FILIAL, CTT_DESC01, "
+cQuery+="         DE_FILIAL,DE_DOC, DE_SERIE, DE_CC, E2_TIPO, E2_NUM, E2_PREFIXO, E2_BAIXA,E2_VENCTO,E2_EMISSAO,DE_PERC"
+/*
+cQuery:="SELECT              " 
+cQuery+="		DE_LOJA,         "
+cQuery+="		DE_ITEMNF,       "
+cQuery+="		A2_NOME NOME ,  "
+cQuery+="		CTT_FILIAL,  "
+cQuery+="		CTT_DESC01 DESC_CC,  "
+cQuery+="		D1_FILIAL,   "
+cQuery+="		D1_FORNECE CLIFOR , "
+cQuery+="		D1_EMISSAO , "
+cQuery+="		D1_NATUREZ , "
+cQuery+="		D1_CC , "   
+cQuery+="		D1_DOC ,    "
+cQuery+="		DE_FILIAL,   "
+cQuery+="		DE_DOC DOCUMENTO ,     "
+cQuery+="		DE_SERIE ,   "
+cQuery+="		DE_CC COD_CC,      " 
+cQuery+="       DE_ITEMNF, "
+cQuery+="		E2_TIPO TIPO ,    "
+cQuery+="		E2_FORNECE ,    "
+cQuery+="		E2_LOJA,    " 
+cQuery+="		E2_NUM ,    "      
+cQuery+="       E2_PREFIXO, "
+cQuery+="       E2_PARCELA, "
+cQuery+="		E2_BAIXA BAIXA ,   "  
+cQuery+="		E2_VENCTO VENCIMENTO, "    
+cQuery+="		E2_EMISSAO EMISSAO, "
+cQuery+="		ED_CODIGO COD_NAT ,  "
+cQuery+="		ED_DESCRIC DESC_NAT ,  "
+cQuery+="       DE_PERC, "
+cQuery+="	    ROUND((SUM(D1_TOTAL)* DE_PERC) / 100,2) VALOR "
+cQuery+="FROM  "
+cQuery+="	   " + RetSqlName("SA2") + " SA2, "	
+cQuery+="	   " + RetSqlName("SE2") + " SE2, "	
+cQuery+="  	   " + RetSqlName("CTT") + " CTT, "	
+cQuery+="      " + RetSqlName("SD1") + " SD1, "	
+cQuery+="	   " + RetSqlName("SDE") + " SDE, "	
+cQuery+="	   " + RetSqlName("SED") + " SED  "
+cQuery+="WHERE "
+cQuery+="		D1_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="		DE_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="		E2_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="		CTT_FILIAL BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="		DE_FILIAL  = D1_FILIAL AND "
+cQuery+="		CTT_FILIAL = D1_FILIAL AND " 
+cQuery+="		E2_FILIAL  = D1_FILIAL AND "
+cQuery+="		E2_NUM     = D1_DOC    AND "
+cQuery+="		E2_FORNECE = D1_FORNECE AND "
+cQuery+="		E2_LOJA    = D1_LOJA    AND "
+cQuery+="		CTT_CUSTO  BETWEEN '"+mv_par03+"' AND '"+mv_par04+"' AND "
+cQuery+="		CTT_CUSTO  >= '210100001' AND "
+cQuery+="		D1_NATUREZ BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="		ED_CODIGO  BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="		D1_FORNECE BETWEEN '"+mv_par09+"' AND '"+mv_par10+"' AND "
+cQuery+="		E2_VENCTO  BETWEEN '"+DTOS(mv_par12)+"' AND '"+DTOS(mv_par13)+"' AND "
+If Len(Alltrim(_cTipo)) > 5
+      cQuery+="		E2_TIPO IN ("+_cTipo+")  AND  "
+Endif      
+If MV_PAR16 == 2//Realizado
+    cQuery+= " E2_BAIXA <> '' AND " 
+Endif
+cQuery+="		D1_ITEM    = DE_ITEMNF      AND "
+cQuery+="		D1_FORNECE = DE_FORNECE     AND "
+cQuery+="		CTT_CUSTO  = DE_CC          AND "
+cQuery+="		D1_NATUREZ = ED_CODIGO      AND "
+cQuery+="		D1_DOC     = DE_DOC         AND "
+cQuery+="		D1_SERIE   = DE_SERIE       AND "
+cQuery+="		D1_FORNECE = DE_FORNECE     AND " 
+cQuery+="		D1_CC      = ''             AND " 
+cQuery+="		A2_COD     = D1_FORNECE     AND "
+cQuery+="      (E2_PARCELA = '' OR E2_PARCELA = '1' OR E2_PARCELA = 'A' ) AND "
+cQuery+="		SDE.D_E_L_E_T_ <> '*'       AND "
+cQuery+="		CTT.D_E_L_E_T_ <> '*'       AND "
+cQuery+="		SED.D_E_L_E_T_ <> '*'       AND "
+cQuery+="		SA2.D_E_L_E_T_ <> '*'       AND "
+cQuery+="		SE2.D_E_L_E_T_ <> '*'       AND "
+cQuery+="		SD1.D_E_L_E_T_ <> '*'           "
+cQuery+="GROUP BY "
+cQuery+="		DE_LOJA,         "
+cQuery+="		DE_ITEMNF,       "
+cQuery+="		A2_COD,          "
+cQuery+="		A2_NOME  ,  "
+cQuery+="		CTT_FILIAL,  "
+cQuery+="		CTT_DESC01 ,  "
+cQuery+="		D1_FILIAL,   "
+cQuery+="		D1_FORNECE  , "
+cQuery+="		D1_EMISSAO , "
+cQuery+="		D1_NATUREZ , "
+cQuery+="		D1_CC , "   
+cQuery+="		D1_DOC ,    "
+cQuery+="		DE_FILIAL,   "
+cQuery+="		DE_DOC  ,     "
+cQuery+="		DE_SERIE ,   "
+cQuery+="		DE_CC ,      " 
+cQuery+="       DE_ITEMNF, "
+cQuery+="		E2_TIPO ,    "
+cQuery+="		E2_FORNECE ,    "
+cQuery+="		E2_LOJA,    "       
+cQuery+="		E2_BAIXA ,    " 
+cQuery+="		E2_NUM ,    "  
+cQuery+="		E2_VENCTO,   "   
+cQuery+="       E2_PREFIXO, "
+cQuery+="		E2_EMISSAO,   "
+cQuery+="		E2_BAIXA,   "
+cQuery+="		ED_CODIGO  ,  "
+cQuery+="		ED_DESCRIC  ,  "
+cQuery+="       DE_PERC "
+cQuery+="ORDER BY "
+cQuery+="		DE_CC, "
+cQuery+="		D1_NATUREZ,"
+cQuery+="		E2_VENCTO, "
+cQuery+="		DE_DOC,
+cQuery+="		VALOR "
+*/
+cQuery := ChangeQuery(cQuery)
+
+dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery),'qSQL', .F., .T.)
+
+SetRegua(qSql->(Reccount()))
+
+
+AlmArray("C")
+
+qSql->(dbCloseArea())
+
+
+/*
+--TITULOS DO SD1 NOTAS DE ENTRADA SEM RATEIO DE CENTRO DE CUSTO 
+SD1 -- EXCLUSIVO
+SE2 -- EXCLUSIVO
+CTT -- EXCLUSIVO
+SED -- COMPARTILHADO
+SA2 -- COMPARTILHADO
+*/
+
+cQuery:="SELECT D1_FILIAL,"
+cQuery+="       D1_DOC DOCUMENTO ,   "
+cQuery+="       D1_SERIE, "
+cQuery+="       D1_CC COD_CC,    "
+cQuery+="       D1_FORNECE CLIFOR,"
+cQuery+="       D1_EMISSAO,"
+cQuery+="       CTT_DESC01 DESC_CC,"
+cQuery+="       E2_FILIAL, "
+cQuery+="       D1_NATUREZ COD_NAT,"
+cQuery+="		E2_VENCTO VENCIMENTO, "  
+cQuery+="		E2_EMISSAO EMISSAO, "   
+cQuery+="		E2_BAIXA BAIXA, "
+cQuery+="		E2_TIPO TIPO , " 
+cQuery+="       E2_PREFIXO, "
+cQuery+="       ED_CODIGO,"
+cQuery+="       ED_DESCRIC DESC_NAT,"
+cQuery+="       SUM(D1_TOTAL) VALOR,"
+cQuery+="       A2_COD,             "
+cQuery+="       A2_NOME NOME,          "
+cQuery+="       CTT_FILIAL,          "
+cQuery+="       E2_LOJA          "
+cQuery+="FROM   "
+cQuery+="	   " + RetSqlName("SE2") + " SE2, "	
+cQuery+="  	   " + RetSqlName("CTT") + " CTT, "	
+cQuery+="      " + RetSqlName("SED") + " SED, "	
+cQuery+="	   " + RetSqlName("SD1") + " SD1, "	
+cQuery+="	   " + RetSqlName("SA2") + " SA2  "
+cQuery+="WHERE                      "
+cQuery+="	   D1_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	   E2_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	   CTT_FILIAL BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	   D1_FILIAL  = E2_FILIAL AND "
+cQuery+="	   CTT_FILIAL = E2_FILIAL AND "
+cQuery+="	   CTT_CUSTO  BETWEEN '"+mv_par03+"' AND '"+mv_par04+"' AND "
+cQuery+="	   CTT_CUSTO  >= '210100001' AND "
+cQuery+="	   D1_NATUREZ BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="	   ED_CODIGO  BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="	   E2_FORNECE BETWEEN '"+mv_par09+"' AND '"+mv_par10+"' AND "
+cQuery+="	   E2_VENCTO  BETWEEN '"+DTOS(mv_par12)+"' AND '"+DTOS(mv_par13)+"' AND "
+If Len(Alltrim(_cTipo)) > 5
+    cQuery+="      E2_TIPO IN ("+_cTipo+")  AND  "
+Endif
+If MV_PAR16 == 2 //realizado
+    cQuery+= " E2_BAIXA <> '' AND " 
+Endif
+cQuery+="      E2_NUM     = D1_DOC         AND "
+cQuery+="      (E2_PARCELA = '' OR E2_PARCELA = '1' OR E2_PARCELA = 'A' ) AND "
+cQuery+="      E2_PREFIXO = D1_SERIE       AND "
+cQuery+="      E2_FORNECE = D1_FORNECE     AND "
+cQuery+="      E2_LOJA    = D1_LOJA        AND "
+cQuery+="      CTT_CUSTO  = D1_CC          AND "
+cQuery+="      D1_NATUREZ = ED_CODIGO      AND "
+cQuery+="      A2_COD     = D1_FORNECE     AND "
+cQuery+="      D1_CC      <> ''            AND "
+cQuery+="      SE2.D_E_L_E_T_ <> '*'       AND "
+cQuery+="      CTT.D_E_L_E_T_ <> '*'       AND "
+cQuery+="      SED.D_E_L_E_T_ <> '*'       AND "
+cQuery+="      SA2.D_E_L_E_T_ <> '*'       AND "
+cQuery+="      SD1.D_E_L_E_T_ <> '*'           "
+cQuery+="Group By                              "
+cQuery+="       E2_TIPO,                       "
+cQuery+="       E2_FILIAL,                     "
+cQuery+="       D1_FILIAL,                     "
+cQuery+="       CTT_FILIAL,                    "
+cQuery+="       D1_DOC,                        "
+cQuery+="       D1_SERIE,                      "
+cQuery+="       D1_CC,                         "
+cQuery+="       D1_FORNECE,                    "
+cQuery+="       D1_EMISSAO,                    "
+cQuery+="       D1_NATUREZ,                    "
+cQuery+="       CTT_DESC01,                    "
+cQuery+="       E2_VENCTO,                     " 
+cQuery+="       E2_EMISSAO,                    "
+cQuery+="       E2_PREFIXO,                    "
+cQuery+="       E2_LOJA,                       "
+cQuery+="       ED_DESCRIC,                    "
+cQuery+="       A2_COD,                        "
+cQuery+="       ED_CODIGO,                     "
+cQuery+="       A2_NOME,                       "
+cQuery+="		E2_BAIXA                       " 
+cQuery+="ORDER BY                              "
+cQuery+="       D1_CC,                         "
+cQuery+="       D1_NATUREZ,                    "
+cQuery+="       E2_VENCTO ,                    "
+cQuery+="       D1_DOC,                        "
+cQuery+="       VALOR                          "
+
+cQuery := ChangeQuery(cQuery)
+
+dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery),'qSQL', .F., .T.)
+SetRegua(qSql->(Reccount()))
+
+AlmArray("C")
+qSql->(dbCloseArea())
+
+
+
+
+
+/*
+---------  FINANCEIRO   -------
+-- TITULOS DO SE2 CONTAS A PAGAR QUE NAO FORAM RATEADOS POR NATUREZA
+SE2 -- EXCLUSIVO
+CTT -- EXCLUSIVO
+SED -- COMPARTILHADO
+SA2 -- COMPARTILHADO
+*/
+
+cQuery:="SELECT "
+cQuery+="       E2_FILIAL,"
+cQuery+="       E2_NUM DOCUMENTO,"
+cQuery+="       E2_PREFIXO, "
+cQuery+="       E2_TIPO TIPO,"
+cQuery+="       E2_CCD COD_CC,"
+cQuery+="       E2_FORNECE CLIFOR, "
+cQuery+="       E2_VENCTO VENCIMENTO,"    
+cQuery+="       E2_EMISSAO EMISSAO,"
+cQuery+="       E2_BAIXA BAIXA,"
+cQuery+="       CTT_FILIAL,"
+cQuery+="       CTT_DESC01 DESC_CC,"
+cQuery+="       E2_NATUREZ COD_NAT,"
+cQuery+="       ED_DESCRIC DESC_NAT, "
+If MV_PAR16 == 2 //realizado
+   cQuery+="       SUM(E2_VALLIQ) VALOR, " 
+Else   
+   //cQuery+="       SUM(E2_VALOR+E2_ISS+E2_IRRF+E2_INSS+E2_COFINS+E2_PIS+E2_CSLL) AS VALOR, " 
+//   cQuery+="       SUM(E2_VALLIQ+E2_ISS+E2_IRRF+E2_INSS+E2_COFINS+E2_PIS+E2_CSLL) AS VALOR, " //LJ_26082009
+   cQuery+="       SUM(E2_VALOR) AS VALOR, " //LJ_26082009
+Endif   
+cQuery+="       A2_COD,  "
+cQuery+="       A2_NOME NOME "
+cQuery+="FROM "
+cQuery+="	   " + RetSqlName("SE2") + " SE2, "	
+cQuery+="  	   " + RetSqlName("CTT") + " CTT, "	
+cQuery+="      " + RetSqlName("SED") + " SED, "	
+cQuery+="	   " + RetSqlName("SA2") + " SA2  "	
+cQuery+="WHERE "
+cQuery+="	    E2_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	    CTT_FILIAL BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	    CTT_CUSTO  BETWEEN '"+mv_par03+"' AND '"+mv_par04+"' AND "
+cQuery+="		CTT_CUSTO  >= '210100001' AND "
+cQuery+="	    E2_NATUREZ BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="	    ED_CODIGO  BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="	    E2_FORNECE BETWEEN '"+mv_par09+"' AND '"+mv_par10+"' AND "
+cQuery+="  	    E2_VENCTO  BETWEEN '"+DTOS(mv_par12)+"' AND '"+DTOS(mv_par13)+"' AND "
+If Len(Alltrim(_cTipo)) > 5
+  cQuery+="		E2_TIPO IN ("+_cTipo+")  AND  "
+Endif
+If MV_PAR16 == 2 //realizado
+    cQuery+= " E2_BAIXA <> '' AND " 
+Endif
+cQuery+="	    CTT_FILIAL = E2_FILIAL AND "
+cQuery+="       E2_ORIGEM <> 'MATA100'         AND "
+cQuery+="       E2_ARQRAT = ''                 AND "
+cQuery+="       E2_MULTNAT = '2'         AND  "
+cQuery+="       CTT_CUSTO  = E2_CCD          AND  "
+cQuery+="       E2_NATUREZ = ED_CODIGO      AND  "
+cQuery+="       A2_COD     = E2_FORNECE     AND "
+cQuery+="       SE2.D_E_L_E_T_ <> '*'       AND "
+cQuery+="       CTT.D_E_L_E_T_ <> '*'       AND "
+cQuery+="       SED.D_E_L_E_T_ <> '*'       AND "
+cQuery+="       SA2.D_E_L_E_T_ <> '*'
+cQuery+="Group By "
+cQuery+="         E2_FILIAL,  "
+cQuery+="         E2_NUM,  "
+cQuery+="         E2_PREFIXO, "
+cQuery+="         E2_CCD, "
+cQuery+="         E2_FORNECE, "
+cQuery+="         E2_VENCTO ,"    
+cQuery+="         E2_EMISSAO,"
+cQuery+="         E2_BAIXA  ,"
+cQuery+="         E2_TIPO, "
+cQuery+="         CTT_FILIAL, "
+cQuery+="         CTT_DESC01, "
+cQuery+="         E2_NATUREZ,  "
+cQuery+="         ED_DESCRIC, "
+cQuery+="         A2_COD,   "
+cQuery+="         A2_NOME "
+cQuery+="ORDER BY   "
+cQuery+="         E2_CCD,  "
+cQuery+="         E2_NATUREZ,   "
+cQuery+="         E2_VENCTO ,"    
+cQuery+="         E2_NUM   " 
+
+
+cQuery := ChangeQuery(cQuery)
+
+dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery),'qSQL', .F., .T.)
+SetRegua(qSql->(Reccount()))
+AlmArray("C")
+qSql->(dbCloseArea())
+
+/*
+-- TITULO RATEADOS POR NATUREZA (SEV - MULTIPLAS NATUREZA POR TITULO)
+-- NESSE SELECT NAO FOI RATEADO O CENTRO DE CUSTO NA TABELA SEZ
+
+SEV -- EXCLUSIVO
+SE2 -- EXCLUSIVO
+CTT -- EXCLUSIVO
+SED -- COMPARTILHADO
+SA2 -- COMPARTILHADO
+*/
+
+cQuery:="SELECT "
+cQuery+="       EV_FILIAL,  "
+cQuery+="       EV_NUM DOCUMENTO,     "
+cQuery+="       EV_CLIFOR CLIFOR,  "
+cQuery+="       EV_LOJA,    "
+cQuery+="       CTT_FILIAL, "
+cQuery+="       CTT_DESC01 DESC_CC, "
+cQuery+="       E2_FILIAL,  "
+cQuery+="       E2_PREFIXO, "
+cQuery+="       E2_TIPO TIPO,  "
+cQuery+="       EV_NATUREZ , "
+cQuery+="       E2_EMISSAO EMISSAO, "
+cQuery+="       E2_VENCTO  VENCIMENTO,"
+cQuery+="       E2_BAIXA BAIXA,"
+cQuery+="       ED_DESCRIC DESC_NAT, "
+cQuery+="       SUM(EV_VALOR) VALOR, "
+cQuery+="       A2_COD,   "
+cQuery+="       A2_NOME NOME,"
+cQuery+="       E2_CCD COD_CC,   "
+cQuery+="       EV_NATUREZ COD_NAT "
+cQuery+="FROM     "
+cQuery+="	   " + RetSqlName("SEV") + " SEV, "	
+cQuery+="  	   " + RetSqlName("SE2") + " SE2, "	
+cQuery+="      " + RetSqlName("CTT") + " CTT, "	
+cQuery+="	   " + RetSqlName("SED") + " SED, "	
+cQuery+="	   " + RetSqlName("SA2") + " SA2  "
+cQuery+="WHERE  "
+cQuery+="	    E2_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	    EV_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	    CTT_FILIAL BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	    CTT_CUSTO  BETWEEN '"+mv_par03+"' AND '"+mv_par04+"' AND "
+cQuery+="		CTT_CUSTO  >= '210100001' AND "
+cQuery+="	    EV_NATUREZ BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "  
+cQuery+="	    EV_NATUREZ BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="	    ED_CODIGO  BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="	    E2_FORNECE BETWEEN '"+mv_par09+"' AND '"+mv_par10+"' AND "
+cQuery+="  	    E2_VENCTO  BETWEEN '"+DTOS(mv_par12)+"' AND '"+DTOS(mv_par13)+"' AND "
+If Len(Alltrim(_cTipo)) > 5
+  cQuery+="		E2_TIPO IN ("+_cTipo+")  AND  "
+Endif  
+If MV_PAR16 == 2 // realizado
+    cQuery+= " E2_BAIXA <> '' AND " 
+Endif
+cQuery+="	    E2_MULTNAT = '1'            AND " //LJ_26082009
+cQuery+="	    E2_RATEIO  = 'N'            AND " //LJ_26082009
+cQuery+="	    EV_FILIAL  = E2_FILIAL      AND "
+cQuery+="	    CTT_FILIAL = E2_FILIAL      AND "
+cQuery+="       E2_PREFIXO = EV_PREFIXO     AND "
+cQuery+="       E2_NUM     = EV_NUM         AND "
+cQuery+="       E2_ORIGEM <> 'MATA100'         AND "
+cQuery+="       E2_ARQRAT = ''                 AND "
+cQuery+="       E2_FORNECE = EV_CLIFOR      AND "
+cQuery+="       E2_LOJA    = EV_LOJA        AND "
+cQuery+="       CTT_CUSTO  = E2_CCD         AND "
+cQuery+="       EV_NATUREZ = ED_CODIGO      AND "
+cQuery+="       A2_COD     = EV_CLIFOR      AND "
+cQuery+="       A2_LOJA    = EV_LOJA        AND "
+cQuery+="       E2_PARCELA = EV_PARCELA     AND " //LJ_26082009
+cQuery+="       E2_TIPO    = EV_TIPO        AND " //LJ_26082009
+cQuery+="      (E2_PARCELA = '' OR E2_PARCELA = '1' OR E2_PARCELA = 'A' ) AND "
+cQuery+="       EV_RATEICC <> '1'           AND "
+cQuery+="       EV_IDENT   = '1'            AND "
+cQuery+="       SEV.D_E_L_E_T_ <> '*'       AND "
+cQuery+="       SE2.D_E_L_E_T_ <> '*'       AND "
+cQuery+="       CTT.D_E_L_E_T_ <> '*'       AND "
+cQuery+="       SA2.D_E_L_E_T_ <> '*'       "
+cQuery+="Group By "
+cQuery+="       EV_FILIAL, "
+cQuery+="       EV_NUM,    "
+cQuery+="       EV_CLIFOR, "
+cQuery+="       EV_LOJA,   "
+cQuery+="       CTT_FILIAL,"
+cQuery+="       CTT_DESC01,"
+cQuery+="       E2_FILIAL, "
+cQuery+="       EV_NATUREZ,"
+cQuery+="       E2_EMISSAO,"  
+cQuery+="       E2_VENCTO,"
+cQuery+="       E2_BAIXA,"
+cQuery+="       E2_TIPO,"
+cQuery+="       ED_DESCRIC,"
+cQuery+="       A2_COD,   "
+cQuery+="       A2_NOME,"
+cQuery+="       E2_CCD,   "
+cQuery+="       E2_PREFIXO, "
+cQuery+="       EV_NATUREZ "
+cQuery+="ORDER BY    "
+cQuery+="       E2_CCD, "
+cQuery+="       EV_NATUREZ,"
+cQuery+="       E2_VENCTO,    "
+cQuery+="       EV_NUM,"
+cQuery+="       VALOR "
+
+cQuery := ChangeQuery(cQuery)
+
+dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery),'qSQL', .F., .T.)
+SetRegua(qSql->(Reccount()))
+AlmArray("C")
+qSql->(dbCloseArea())
+
+/*
+
+- TITULO RATEADOS POR NATUREZA (SEV - MULTIPLAS NATUREZA POR TITULO)
+-- NESSE SELECT  FOI RATEADO O CENTRO DE CUSTO NA TABELA SEZ
+
+SEZ -- EXCLUSIVO
+SE2 -- EXCLUSIVO
+CTT -- EXCLUSIVO
+SED -- COMPARTILHADO
+SA2 -- COMPARTILHADO
+
+*/
+
+cQuery:="SELECT "
+cQuery+="      EZ_FILIAL,"
+cQuery+="      EZ_NUM DOCUMENTO ,"
+cQuery+="      EZ_CLIFOR CLIFOR , "
+cQuery+="      EZ_LOJA, "
+cQuery+="      EZ_NATUREZ COD_NAT,"
+cQuery+="      CTT_FILIAL, "
+cQuery+="      CTT_DESC01 DESC_CC, "
+cQuery+="      E2_FILIAL, "
+cQuery+="      E2_TIPO TIPO, "
+cQuery+="      E2_EMISSAO EMISSAO ,"
+cQuery+="      E2_VENCTO  VENCIMENTO,"
+cQuery+="      E2_BAIXA BAIXA,"
+cQuery+="      E2_PREFIXO, "
+cQuery+="      ED_DESCRIC DESC_NAT,"
+cQuery+="      SUM(EZ_VALOR) VALOR, "
+cQuery+="      A2_COD, "
+cQuery+="      A2_NOME NOME,"
+cQuery+="      EZ_CCUSTO COD_CC "
+cQuery+="FROM "
+cQuery+="	   " + RetSqlName("SEZ") + " SEZ, "	
+cQuery+="  	   " + RetSqlName("SE2") + " SE2, "	
+cQuery+="      " + RetSqlName("CTT") + " CTT, "	
+cQuery+="	   " + RetSqlName("SED") + " SED, "	
+cQuery+="	   " + RetSqlName("SA2") + " SA2  "
+cQuery+="WHERE   "
+cQuery+="	   E2_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	   EZ_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	   CTT_FILIAL BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	   CTT_CUSTO  BETWEEN '"+mv_par03+"' AND '"+mv_par04+"' AND "
+cQuery+="	   CTT_CUSTO  >= '210100001' AND "
+cQuery+="	   EZ_NATUREZ BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="	   ED_CODIGO  BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="	   E2_FORNECE BETWEEN '"+mv_par09+"' AND '"+mv_par10+"' AND "
+cQuery+="  	   E2_VENCTO  BETWEEN '"+DTOS(mv_par12)+"' AND '"+DTOS(mv_par13)+"' AND "
+If Len(Alltrim(_cTipo)) > 5
+   cQuery+="	   E2_TIPO IN ("+_cTipo+")  AND  "
+Endif   
+If MV_PAR16 == 2 //realizado
+    cQuery+= " E2_BAIXA <> '' AND " 
+Endif
+cQuery+="	   E2_MULTNAT = '1'            AND " //LJ_26082009
+cQuery+="	   E2_RATEIO = 'N'             AND " //LJ_26082009
+cQuery+="	   CTT_FILIAL = E2_FILIAL      AND "
+cQuery+="	   EZ_FILIAL  = E2_FILIAL      AND "
+cQuery+="      E2_PREFIXO = EZ_PREFIXO     AND "
+cQuery+="      E2_NUM     = EZ_NUM         AND "
+cQuery+="      E2_FORNECE = EZ_CLIFOR      AND "
+cQuery+="      E2_LOJA    = EZ_LOJA        AND "
+cQuery+="      E2_ORIGEM <> 'MATA100'         AND "
+cQuery+="      CTT_CUSTO  = EZ_CCUSTO      AND "
+cQuery+="      EZ_NATUREZ = ED_CODIGO      AND "
+cQuery+="      A2_COD     = EZ_CLIFOR      AND "
+cQuery+="      A2_LOJA    = EZ_LOJA        AND "
+cQuery+="      E2_PARCELA = EZ_PARCELA     AND " //LJ_26082009
+cQuery+="      E2_TIPO    = EZ_TIPO        AND " //LJ_26082009
+cQuery+="      SEZ.D_E_L_E_T_ <> '*'       AND "
+cQuery+="      SE2.D_E_L_E_T_ <> '*'       AND "
+cQuery+="      CTT.D_E_L_E_T_ <> '*'       AND "
+cQuery+="      SA2.D_E_L_E_T_ <> '*'      "
+cQuery+="Group By      "
+cQuery+="       EZ_FILIAL, "
+cQuery+="       EZ_NUM,    "
+cQuery+="       EZ_CLIFOR, "
+cQuery+="       EZ_LOJA,   "
+cQuery+="       EZ_NATUREZ,"
+cQuery+="       E2_TIPO,"
+cQuery+="       CTT_FILIAL,"
+cQuery+="       CTT_DESC01,"
+cQuery+="       E2_FILIAL, "
+cQuery+="       E2_EMISSAO,"
+cQuery+="       E2_VENCTO ,"
+cQuery+="       E2_BAIXA, "
+cQuery+="       E2_PREFIXO,"
+cQuery+="       ED_DESCRIC,"
+cQuery+="       A2_COD,    "
+cQuery+="       A2_NOME, "
+cQuery+="       EZ_CCUSTO  "
+cQuery+="ORDER BY "
+cQuery+="       EZ_CCUSTO, "
+cQuery+="       EZ_NATUREZ, "
+cQuery+="       E2_VENCTO, "
+cQuery+="       EZ_NUM, "
+cQuery+="       E2_TIPO, "
+cQuery+="       VALOR "
+cQuery := ChangeQuery(cQuery)
+
+dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery),'qSQL', .F., .T.) 
+SetRegua(qSql->(Reccount()))
+AlmArray("C")
+qSql->(dbCloseArea())
+
+
+/*
+
+- TITULO RATEADOS CENTRO DE CUSTO CONTABIL DA TABELA CV4
+
+SE2 -- EXCLUSIVO
+CTT -- EXCLUSIVO
+CV4 -- EXCLUSIVO
+SED -- COMPARTILHADO
+SA2 -- COMPARTILHADO
+
+*/
+
+cQuery:="SELECT "
+cQuery+="       E2_FILIAL,"
+cQuery+="       E2_NUM DOCUMENTO,"
+cQuery+="       E2_PREFIXO, "
+cQuery+="       CV4_FILIAL,"
+cQuery+="       E2_TIPO TIPO,"
+cQuery+="       CV4_CCD COD_CC,"
+cQuery+="       E2_FORNECE CLIFOR, "
+cQuery+="       E2_EMISSAO EMISSAO,"
+cQuery+="       E2_VENCTO  VENCIMENTO,"
+cQuery+="       E2_BAIXA BAIXA,"
+cQuery+="       CTT_FILIAL,"
+cQuery+="       CTT_DESC01 DESC_CC,"
+cQuery+="       E2_NATUREZ COD_NAT,"
+cQuery+="       ED_DESCRIC DESC_NAT, "
+cQuery+="       SUM(CV4_VALOR) VALOR, "
+cQuery+="       A2_COD,  "
+cQuery+="       A2_NOME NOME "
+cQuery+="FROM "
+cQuery+="	   " + RetSqlName("SE2") + " SE2, "	
+cQuery+="  	   " + RetSqlName("CTT") + " CTT, "	
+cQuery+="      " + RetSqlName("SED") + " SED, "	
+cQuery+="	   " + RetSqlName("SA2") + " SA2,  "	
+cQuery+="	   " + RetSqlName("CV4") + " CV4  "	
+cQuery+="WHERE "
+cQuery+="	    E2_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	    CV4_FILIAL BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	    CTT_FILIAL BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	    CTT_CUSTO  BETWEEN '"+mv_par03+"' AND '"+mv_par04+"' AND "
+cQuery+="		CTT_CUSTO  >= '210100001' AND "
+cQuery+="	    CV4_CCD    BETWEEN '"+mv_par03+"' AND '"+mv_par04+"' AND "
+cQuery+="	    E2_NATUREZ BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="	    ED_CODIGO  BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="	    E2_FORNECE BETWEEN '"+mv_par09+"' AND '"+mv_par10+"' AND "
+cQuery+="  	    E2_VENCTO  BETWEEN '"+DTOS(mv_par12)+"' AND '"+DTOS(mv_par13)+"' AND "
+cQuery+="  	    E2_ARQRAT =  CV4_FILIAL+CV4_DTSEQ+CV4_SEQUEN   AND "
+If Len(Alltrim(_cTipo)) > 5
+   cQuery+="		E2_TIPO IN ("+_cTipo+")  AND  "
+Endif   
+If MV_PAR16 == 2 //realizado
+    cQuery+= " E2_BAIXA <> '' AND " 
+Endif
+cQuery+="	    E2_MULTNAT = '2'            AND " //LJ_26082009
+cQuery+="	    E2_RATEIO  = 'S'            AND " //LJ_26082009
+
+cQuery+="	    CTT_FILIAL = E2_FILIAL AND "
+cQuery+="	    CV4_FILIAL = E2_FILIAL AND "
+cQuery+="       E2_ORIGEM <> 'MATA100'         AND "
+cQuery+="       E2_ARQRAT <> ''                AND "
+cQuery+="       CTT_CUSTO  = CV4_CCD         AND  "
+cQuery+="       E2_NATUREZ = ED_CODIGO      AND  "
+cQuery+="       A2_COD     = E2_FORNECE     AND "
+cQuery+="       SE2.D_E_L_E_T_ <> '*'       AND "
+cQuery+="       CTT.D_E_L_E_T_ <> '*'       AND "
+cQuery+="       SED.D_E_L_E_T_ <> '*'       AND "
+cQuery+="       CV4.D_E_L_E_T_ <> '*'       AND "
+cQuery+="       SA2.D_E_L_E_T_ <> '*'
+cQuery+="Group By "
+cQuery+="       E2_FILIAL,"
+cQuery+="       E2_NUM ,"
+cQuery+="       E2_PREFIXO, "
+cQuery+="       CV4_FILIAL,"
+cQuery+="       E2_TIPO ,"
+cQuery+="       CV4_CCD ,"
+cQuery+="       E2_FORNECE , "
+cQuery+="       E2_EMISSAO ,"
+cQuery+="       E2_VENCTO ,"
+cQuery+="       E2_BAIXA, "
+cQuery+="       CTT_FILIAL,"
+cQuery+="       CTT_DESC01 ,"
+cQuery+="       E2_NATUREZ ,"
+cQuery+="       ED_DESCRIC , "
+cQuery+="       A2_COD,  "
+cQuery+="       A2_NOME "
+cQuery+="ORDER BY   "
+cQuery+="         CV4_CCD,  "
+cQuery+="         E2_NATUREZ,   "
+cQuery+="         E2_VENCTO ,"
+cQuery+="         E2_NUM,VALOR   "
+
+dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery),'qSQL', .F., .T.) 
+SetRegua(qSql->(Reccount()))
+AlmArray("C")
+qSql->(dbCloseArea())
+
+Return
+
+Static Function MvtSaidas()
+
+/*
+
+- TITULO DO FATURAMENTO DO CONTAS A RECEBER
+
+SF2 -- EXCLUSIVO
+SE1 -- EXCLUSIVO
+CTT -- EXCLUSIVO
+SED -- COMPARTILHADO
+ 
+*/
+cQuery:="SELECT E1_FILIAL,"
+cQuery+="       E1_NUM DOCUMENTO,   "
+cQuery+="       E1_TIPO TIPO ,  "
+cQuery+="       E1_PREFIXO as e2_prefixo,"
+cQuery+="       E1_EMISSAO EMISSAO,"   
+cQuery+="       E1_VENCTO  VENCIMENTO,"
+cQuery+="       E1_CLIENTE CLIFOR ,"
+cQuery+="       E1_NOMCLI NOME, "
+cQuery+="       E1_NATUREZ COD_NAT,"
+cQuery+="       E1_CCC COD_CC,    "
+If MV_PAR16 == 2 //realizado
+   cQuery+="       SUM(E1_VALLIQ) VALOR, " 
+Else   
+   cQuery+="       SUM(E1_VALOR) VALOR, " 
+Endif   
+cQuery+="       CTT_CUSTO,          "
+cQuery+="       CTT_DESC01 DESC_CC,         "
+cQuery+="       CTT_FILIAL,         "
+cQuery+="       ED_CODIGO,          "
+cQuery+="       ED_DESCRIC DESC_NAT,         "
+cQuery+="       E1_BAIXA BAIXA   "
+cQuery+="FROM   "
+cQuery+="	   " + RetSqlName("SE1") + " SE1, "	
+cQuery+="  	   " + RetSqlName("SED") + " SED, "	
+cQuery+="      " + RetSqlName("CTT") + " CTT  "	
+cQuery+="WHERE  "
+cQuery+="	   E1_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	   CTT_FILIAL BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	   CTT_CUSTO  BETWEEN '"+mv_par03+"' AND '"+mv_par04+"' AND "
+cQuery+="	   CTT_CUSTO  >= '210100001' AND "
+cQuery+="	   E1_NATUREZ BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="	   ED_CODIGO  BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="	   E1_CLIENTE BETWEEN '"+mv_par07+"' AND '"+mv_par08+"' AND " 
+cQuery+="  	   E1_VENCTO  BETWEEN '"+DTOS(mv_par12)+"' AND '"+DTOS(mv_par13)+"' AND "
+cQuery+="      E1_PREFIXO+E1_NUM+E1_EMISSAO+E1_TIPO "   //Talvez esta chave esteja fraca
+cQuery+="      IN (SELECT F2_SERIE+F2_DOC+F2_EMISSAO+'NF' "
+cQuery+="      FROM " + RetSqlName("SF2") + " SF2 "	 
+cQuery+="      WHERE "
+cQuery+="	   F2_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="      F2_CC <> '' AND "
+cQuery+="	   F2_CC      BETWEEN '"+mv_par03+"' AND '"+mv_par04+"' AND "
+cQuery+="	   F2_CLIENTE BETWEEN '"+mv_par07+"' AND '"+mv_par08+"' AND " 
+cQuery+="  	   F2_EMISSAO BETWEEN '"+DTOS(mv_par12)+"' AND '"+DTOS(mv_par13)+"' AND "
+cQuery+="      F2_FILIAL = E1_FILIAL AND "
+cQuery+="      D_E_L_E_T_ <> '*') AND "
+cQuery+="      CTT_FILIAL = E1_FILIAL AND "
+cQuery+="      CTT_CUSTO = E1_CCC AND     "
+cQuery+="      ED_CODIGO = E1_NATUREZ AND " 
+If Len(Alltrim(_cTipoS)) > 5
+  cQuery+="	   E1_TIPO IN ("+_cTipoS+")  AND  "
+Endif  
+If MV_PAR16 == 2 //realizado
+    cQuery+= " E1_BAIXA <> '' AND " 
+Endif
+cQuery+="      SE1.D_E_L_E_T_ <> '*' AND  "
+cQuery+="      SED.D_E_L_E_T_ <> '*' AND  "
+cQuery+="      CTT.D_E_L_E_T_ <> '*'      "
+cQuery+="GROUP BY " 
+cQuery+="      E1_FILIAL, "
+cQuery+="      E1_NUM,    "
+cQuery+="      E1_TIPO,   "
+cQuery+="      E1_PREFIXO,"
+cQuery+="      E1_EMISSAO,"  
+cQuery+="      E1_VENCTO,"
+cQuery+="      E1_CLIENTE,"
+cQuery+="      E1_NOMCLI, "
+cQuery+="      E1_NATUREZ,"
+cQuery+="      E1_BAIXA,  "
+cQuery+="      E1_CCC,    "
+cQuery+="      CTT_CUSTO, "
+cQuery+="      CTT_DESC01,"
+cQuery+="      CTT_FILIAL,"
+cQuery+="      ED_CODIGO, "
+cQuery+="      ED_DESCRIC "
+cQuery+="ORDER BY "
+cQuery+="         CTT_CUSTO, "
+cQuery+="         E1_NATUREZ,"
+cQuery+="         E1_VENCTO,"
+cQuery+="         E1_NUM,VALOR"
+
+dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery),'qSQL', .F., .T.)
+SetRegua(qSql->(Reccount()))
+AlmArray("F")
+qSql->(dbCloseArea())	
+
+
+/*
+
+- TITULO DO FATURAMENTO DO CONTAS A RECEBER DIGITADOS MANUALMENTE
+
+SF2 -- EXCLUSIVO
+SE1 -- EXCLUSIVO
+CTT -- EXCLUSIVO
+SED -- COMPARTILHADO
+ 
+*/
+cQuery:="SELECT E1_FILIAL,"
+cQuery+="       E1_NUM DOCUMENTO,   "
+cQuery+="       E1_TIPO TIPO ,  "
+cQuery+="       E1_PREFIXO as e2_prefixo,"
+cQuery+="       E1_EMISSAO EMISSAO,"
+cQuery+="       E1_VENCTO  VENCIMENTO,"
+cQuery+="       E1_CLIENTE CLIFOR ,"
+cQuery+="       E1_NOMCLI NOME, "
+cQuery+="       E1_NATUREZ COD_NAT,"
+cQuery+="       E1_CCC COD_CC,    "
+If MV_PAR16 == 2 //realizado
+   cQuery+="       SUM(E1_VALLIQ) VALOR, " 
+Else   
+   cQuery+="       SUM(E1_VALOR) VALOR, " 
+Endif   
+cQuery+="       CTT_CUSTO,          "
+cQuery+="       CTT_DESC01 DESC_CC,         "
+cQuery+="       CTT_FILIAL,         "
+cQuery+="       ED_CODIGO,          "
+cQuery+="       ED_DESCRIC DESC_NAT,         "
+cQuery+="       E1_BAIXA BAIXA   "
+cQuery+="FROM    "
+cQuery+="	   " + RetSqlName("SE1") + " SE1, "	
+cQuery+="  	   " + RetSqlName("SED") + " SED, "	
+cQuery+="      " + RetSqlName("CTT") + " CTT  "	
+cQuery+="WHERE 
+cQuery+="	   E1_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	   CTT_FILIAL BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	   CTT_CUSTO  BETWEEN '"+mv_par03+"' AND '"+mv_par04+"' AND "
+cQuery+="	   CTT_CUSTO  >= '210100001' AND "
+cQuery+="	   E1_NATUREZ BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="	   ED_CODIGO  BETWEEN '"+mv_par05+"' AND '"+mv_par06+"' AND "
+cQuery+="	   E1_CLIENTE BETWEEN '"+mv_par07+"' AND '"+mv_par08+"' AND " 
+cQuery+="  	   E1_VENCTO BETWEEN '"+DTOS(mv_par12)+"' AND '"+DTOS(mv_par13)+"' AND "
+//cQuery+="  	   E1_PREFIXO  = 'MAN'       AND "
+cQuery+="  	   E1_ORIGEM   Like 'FINA%'       AND "
+cQuery+="      CTT_FILIAL = E1_FILIAL AND "
+cQuery+="      CTT_CUSTO = E1_CCC AND     "
+cQuery+="      ED_CODIGO = E1_NATUREZ AND " 
+If Len(Alltrim(_cTipoS)) > 5
+   cQuery+="	   E1_TIPO IN ("+_cTipoS+")  AND  "
+Endif 
+If MV_PAR16 == 2 //realizado
+    cQuery+= " E1_BAIXA <> '' AND " 
+Endif
+ 
+cQuery+="      E1_BAIXA <>  ''        AND " 
+cQuery+="      SE1.D_E_L_E_T_ <> '*' AND  "
+cQuery+="      SED.D_E_L_E_T_ <> '*' AND  "
+cQuery+="      CTT.D_E_L_E_T_ <> '*'      "
+cQuery+="GROUP BY " 
+cQuery+="      E1_FILIAL, "
+cQuery+="      E1_NUM,    "
+cQuery+="      E1_TIPO,   "
+cQuery+="      E1_PREFIXO,"
+cQuery+="      E1_EMISSAO,"
+cQuery+="      E1_VENCTO  ,"
+cQuery+="      E1_CLIENTE,"
+cQuery+="      E1_NOMCLI, "
+cQuery+="      E1_NATUREZ,"
+cQuery+="      E1_BAIXA,  "
+cQuery+="      E1_CCC,    "
+cQuery+="      CTT_CUSTO, "
+cQuery+="      CTT_DESC01,"
+cQuery+="      CTT_FILIAL,"
+cQuery+="      ED_CODIGO, "
+cQuery+="      ED_DESCRIC "
+cQuery+="ORDER BY "
+cQuery+="         CTT_CUSTO, "
+cQuery+="         E1_NATUREZ,"
+cQuery+="         E1_VENCTO,"
+cQuery+="         E1_NUM,VALOR"
+
+dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery),'qSQL', .F., .T.)
+SetRegua(qSql->(Reccount()))
+AlmArray("F")
+qSql->(dbCloseArea())	
+
+
+
+Return
+
+
+Static Function FormData(cData)
+Local cReturn
+cReturn:=Substr(cData,7,2)+"/"
+cReturn+=Substr(cData,5,2)+"/"
+cReturn+=Substr(cData,1,4)
+Return(cReturn)
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o	 ³ OrdR300C   ³ Autor ³ AlexandreRS        ³ Data ³ NOV/2006 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Listbox para marcar as opcoes disponiveis do parametro    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+User Function NMarkTipo(cTipo)
+Local oOk		:= LoadBitmap(GetResources(), "LBOK")
+Local oNo		:= LoadBitmap(GetResources(), "LBNO")
+Local _lExec	:= .F.
+Private _aOpcoes:= {}
+Private oTipo
+
+//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+// Montagem das opcoes disponiveis
+//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+If cTipo = "E"
+   Aadd(_aOpcoes, {Iif("CR/"$mv_par11,.T.,.F.)  , "Credito"    })
+   Aadd(_aOpcoes, {Iif("NF/"$mv_par11,.T.,.F.)  , "Nota Fiscal"})
+   Aadd(_aOpcoes, {Iif("RC/"$mv_par11,.T.,.F.)  , "Recibo"})
+   Aadd(_aOpcoes, {Iif("PR/"$mv_par11,.T.,.F.)  , "Titulos Provisorios"   })
+   Aadd(_aOpcoes, {Iif("CH/"$mv_par11,.T.,.F.)  , "Cheques"               })
+   Aadd(_aOpcoes, {Iif("N/"$mv_par11,.T.,.F.)   , "Normal"               })
+                                               
+Else
+   Aadd(_aOpcoes, {Iif("BOL/"$mv_par11,.T.,.F.),  "Boleto"    })
+   Aadd(_aOpcoes, {Iif("CH"$mv_par11,.T.,.F.)  ,  "Cheque"})
+   Aadd(_aOpcoes, {Iif("FT/"$mv_par11,.T.,.F.)  , "Fatura"   })
+   Aadd(_aOpcoes, {Iif("PF/"$mv_par11,.T.,.F.)  , "Financiamento"})
+   Aadd(_aOpcoes, {Iif("NF/"$mv_par11,.T.,.F.)  , "Nota Fiscal"})
+   Aadd(_aOpcoes, {Iif("NP/"$mv_par11,.T.,.F.)  , "Nota Promissoria"})
+   Aadd(_aOpcoes, {Iif("OP/"$mv_par11,.T.,.F.)  , "Ordem de Pagamento"})
+   Aadd(_aOpcoes, {Iif("RC/"$mv_par11,.T.,.F.)  , "Recibo"})
+Endif
+   
+
+//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+// Monta markbrowse para selecao das situacoes possiveis
+//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+If len(_aOpcoes)>0
+	@ 001,001 TO 260,214 DIALOG _dSelec TITLE OemToAnsi("Tipo de Documentos") //235
+
+	@ 03,03 LISTBOX oTipo FIELDS HEADER "","Tipos" FIELDSIZES 5,35 SIZE 100,90 PIXEL
+	oTipo:SetArray(_aOpcoes)
+	oTipo:bLDblClick := {|| AtualOrdem()} 
+	oTipo:bLine      := {|| {If(_aOpcoes[oTipo:nAt,1],oOk,oNo),_aOpcoes[oTipo:nAt,2]}}
+
+    @ 100,05 Button "Todos"      Size 35,10 Action SelTodos()
+    @ 100,45 Button "Nenhum"     Size 35,10 Action LimpTodos()
+	@ 115,05 Button "Sair"       Size 35,10 Action Close(_dSelec)
+	@ 115,45 Button "Confirmar"  Size 35,10 Action (_lExec := .T.,Close(_dSelec))
+
+
+	ACTIVATE DIALOG _dSelec CENTERED
+ 
+
+
+   Aadd(_aOpcoes, {Iif("BOL/"$mv_par11,.T.,.F.),  "Boleto"    })
+   Aadd(_aOpcoes, {Iif("CH"$mv_par11,.T.,.F.)  ,  "Cheque"})
+   Aadd(_aOpcoes, {Iif("FT/"$mv_par11,.T.,.F.)  , "Fatura"   })
+   Aadd(_aOpcoes, {Iif("PF/"$mv_par11,.T.,.F.)  , "Financiamento"})
+   Aadd(_aOpcoes, {Iif("NF/"$mv_par11,.T.,.F.)  , "Nota Fiscal"})
+   Aadd(_aOpcoes, {Iif("NP/"$mv_par11,.T.,.F.)  , "Nota Promissoria"})
+   Aadd(_aOpcoes, {Iif("OP/"$mv_par11,.T.,.F.)  , "Ordem de Pagamento"})
+   Aadd(_aOpcoes, {Iif("RC/"$mv_par11,.T.,.F.)  , "Recibo"})    
+   Aadd(_aOpcoes, {Iif("N/"$mv_par11,.T.,.F.)  , "Normal"})
+
+
+
+
+	If _lExec
+        If cTipo = 'E'
+           mv_par11 := Iif(_aOpcoes[1,1],"'CR',","")
+		   mv_par11 += Iif(_aOpcoes[2,1],"'NF',","")
+		   mv_par11 += Iif(_aOpcoes[3,1],"'RC',","")	
+		   mv_par11 += Iif(_aOpcoes[4,1],"'PR',","")
+		   mv_par11 += Iif(_aOpcoes[5,1],"'CH',","")
+		Else
+           mv_par14 := Iif(_aOpcoes[1,1],"'BOL',","")
+		   mv_par14 += Iif(_aOpcoes[2,1],"'CH',","")
+		   mv_par14 += Iif(_aOpcoes[3,1],"'FT',","")	
+		   mv_par14 += Iif(_aOpcoes[4,1],"'PF',","")
+		   mv_par14 += Iif(_aOpcoes[5,1],"'NF',","")	
+		   mv_par14 += Iif(_aOpcoes[6,1],"'NP',","")	
+		   mv_par14 += Iif(_aOpcoes[7,1],"'OP',","")
+		   mv_par14 += Iif(_aOpcoes[8,1],"'RC',","")	
+
+		Endif   
+	Endif
+Endif   
+
+Return .T.
+
+Static Function AtualOrdem()
+
+If  _aOpcoes[oTipo:nAt,1] == .T.
+   _aOpcoes[oTipo:nAt,1] := .F.
+Else
+   _aOpcoes[oTipo:nAt,1] := .T.
+Endif
+	oTipo:Refresh()
+Return
+
+
+Static Function LimpTodos()
+Local _nI
+	For _nI := 1 to len(_aOpcoes)
+			_aOpcoes[_nI,1]:= .F.
+	Next _nI
+	oTipo:Refresh()
+Return
+
+Static Function SelTodos()
+Local _nI
+	For _nI := 1 to len(_aOpcoes)
+			_aOpcoes[_nI,1]:= .T.
+	Next _nI
+	oTipo:Refresh()
+Return
+
+
+//Tem que olhar essa funcao com carinho........
+Static Function AlmArray(cTipo)
+While qSql->(!Eof())
+	AADD(aPosCC,{qSQL->COD_CC,;
+	qSQL->DESC_CC,;
+	qSQL->COD_NAT,;
+	qSQL->DESC_NAT,;
+	qSQL->DOCUMENTO,;
+	qSQL->TIPO,;
+	qSQL->VENCIMENTO,;
+	qSQL->CLIFOR,;
+	qSQL->NOME,;
+	qSQL->VALOR,;
+	cTipo,;
+	qSQL->COD_CC+qSQL->COD_NAT+qSQL->VENCIMENTO,;
+	qSQL->BAIXA,;
+	qSQL->E2_PREFIXO})
+		
+	//Verificar se existe Baixa no SE5 - caso exista lancar no vetor acima.
+	nPosAtual:=Len(aPosCC)
+	aArea:=GetArea()
+	cQuery2:="SELECT "
+	cQuery2+="       E5_FILIAL,"
+	cQuery2+="       E5_TIPO         ,"
+	cQuery2+="       E5_NUMERO , "
+	cQuery2+="       E5_PREFIXO   ,"
+	cQuery2+="       E5_VALOR         , "
+	cQuery2+="       E5_DATA          ,    " 
+	cQuery2+="       E5_PARCELA,   "      
+	cQuery2+="       E5_TIPODOC   "
+	cQuery2+="FROM "
+	cQuery2+="	   " + RetSqlName("SE5") + " SE5 "
+	cQuery2+="WHERE "
+	cQuery2+="	    E5_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+	cQuery2+="	    E5_TIPO    ='"+aPosCC[nPosAtual][6]+"' AND "
+	cQuery2+="	    E5_NUMERO  ='"+aPosCC[nPosAtual][5]+"' AND "
+	cQuery2+="		E5_PREFIXO ='"+aPosCC[nPosAtual][14]+"' AND   "    
+	cQuery2+="		E5_CLIFOR  ='"+aPosCC[nPosAtual][08]+"' AND   " 		
+	cQuery2+="	    E5_RECPAG =  'P' AND "
+	cQuery2+="	    E5_SITUACA <>  'C' AND "
+	cQuery2+="		D_E_L_E_T_ <> '*' AND "	
+	cQuery2+="	    E5_FILIAL+E5_TIPO+E5_NUMERO+E5_PREFIXO+CAST(E5_VALOR AS VARCHAR)+E5_DATA+E5_PARCELA NOT IN (
+	cQuery2+="      SELECT "
+	cQuery2+="      E5_FILIAL+   "
+	cQuery2+="      E5_TIPO+     "
+	cQuery2+="      E5_NUMERO+   "
+	cQuery2+="      E5_PREFIXO+  "
+	cQuery2+="      CAST(E5_VALOR AS VARCHAR)+      "
+	cQuery2+="      E5_DATA+              " 
+	cQuery2+="      E5_PARCELA    "
+	cQuery2+="FROM "
+	cQuery2+="	   " + RetSqlName("SE5") + " SE5 "
+	cQuery2+="WHERE "
+	cQuery2+="	    E5_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+	cQuery2+="	    E5_TIPO    ='"+aPosCC[nPosAtual][6]+"' AND "
+	cQuery2+="	    E5_NUMERO  ='"+aPosCC[nPosAtual][5]+"' AND "
+	cQuery2+="		E5_PREFIXO ='"+aPosCC[nPosAtual][14]+"' AND   " 
+	cQuery2+="	    E5_RECPAG =  'R' AND "
+	cQuery2+="		D_E_L_E_T_ <> '*') "	       
+	cQuery2+="ORDER BY   "
+	cQuery2+="         E5_DATA,  "
+	cQuery2+="         E5_NUMERO    "
+	cQuery2 := ChangeQuery(cQuery2)
+	dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery2),'qSE5', .F., .T.)
+    nSaldo:=0
+    nAcrescimos:=0
+	nVlrImpostos:=0
+    nValor:= 0
+    lRateio := .F.
+	While !Eof()    
+      If qSE5->E5_TIPODOC = 'VL' 
+            //Verificar se existe rateio para essa baixa
+            nValor:=U_NVerRateio()
+            If nValor = 0 
+               nValor :=qSE5->E5_VALOR 
+            Else
+               lRateio:=.T.   
+            Endif             
+			AADD(aPosCC,{qSQL->COD_CC,;
+			qSQL->DESC_CC,;
+			qSQL->COD_NAT,;
+			qSQL->DESC_NAT,;
+			qSQL->DOCUMENTO,;
+			qSQL->TIPO,;
+			qSQL->VENCIMENTO,;
+			qSQL->CLIFOR,;
+			qSQL->NOME,;
+			nValor+U_NRetImpostos(),;
+			cTipo,;
+			qSQL->COD_CC+qSQL->COD_NAT+qSQL->VENCIMENTO,;
+			qSE5->E5_DATA,;
+			qSQL->E2_PREFIXO})
+			nSaldo+=nValor
+	  Else
+         If qSE5->E5_TIPODOC = 'DC'
+           nSaldo+=qSE5->E5_VALOR
+         Elseif qSE5->E5_TIPODOC = 'JR' .OR. qSE5->E5_TIPODOC = 'MT'  
+                nAcrescimos+=qSE5->E5_VALOR
+         Endif
+	  Endif  
+	  DbSkip()
+	  
+    Enddo
+	qSe5->(dbCloseArea())
+	RestArea(aArea)
+    If nSaldo > 0 .And. MV_PAR16 = 2  
+       aDel(aPosCC,nPosAtual)
+       aSize(aPosCC,Len(aPosCC)-1)
+    Else
+	   aPosCC[nPosAtual][10] := (aPosCC[nPosAtual][10] - nSaldo)  + nAcrescimos 
+       If nSaldo > 0 
+          aPosCC[nPosAtual][10] := aPosCC[nPosAtual][10] - U_NRetImpostos()
+	      aPosCC[nPosAtual][13] := " " 
+	   Endif   
+	Endif   
+	qSql->(DbSkip())	  
+Enddo
+Return
+
+User Function NRetImpostos()
+Local aArea := GetArea()
+Local nValor := 0
+Local cQuery:= ""
+cQuery:=" SELECT   SUM(E2_ISS+E2_IRRF+E2_INSS+E2_COFINS+E2_PIS+E2_CSLL) AS VALOR FROM "
+cQuery+="	  " + RetSqlName("SE2") + " SE2 "	
+cQuery+="WHERE "
+cQuery+="	    E2_FILIAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' AND "
+cQuery+="	    E2_TIPO    ='"+aPosCC[nPosAtual][6]+"' AND "
+cQuery+="	    E2_NUM     ='"+aPosCC[nPosAtual][5]+"' AND "
+cQuery+="		E2_PREFIXO ='"+aPosCC[nPosAtual][14]+"' AND   " 
+cQuery+="		E2_FORNECE ='"+aPosCC[nPosAtual][08]+"' AND   " 
+cQuery+="		D_E_L_E_T_ <> '*' "	
+cQuery := ChangeQuery(cQuery)
+dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery),'qAux2', .F., .T.)
+If !Eof()
+   nValor := qAux2->VALOR
+Endif
+qAux2->(DbCloseArea())
+RestArea(aArea)
+Return(nValor) 
+                                
+
+User Function NVerRateios()
+Local aArea := GetArea()
+Local nValor := 0
+Local cQuery:= ""
+
+cQuery:=" SELECT EV_VALOR,EV_PERC,EV_RATEICC FROM " + RetSqlName("SEV") + " SEV WHERE "	
+cQuery+=" EV_NUM        = '"+aPosCC[nPosAtual][5]+"'  " 
+cQuery+=" AND EV_CLIFOR = '"+aPosCC[nPosAtual][08]+"'    " 
+cQuery+=" AND EV_PREFIXO ='"+aPosCC[nPosAtual][14]+"'    " 
+cQuery+=" AND EV_TIPO    ='"+aPosCC[nPosAtual][6]+"'      "
+cQuery+=" AND EV_RECPAG = 'P'
+cQuery+=" AND D_E_L_E_T_ <> '*' "	
+
+cQuery := ChangeQuery(cQuery)
+dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery),'qAux3', .F., .T.)
+If !Eof()
+   If qAux3->EV_RATEICC = '1'
+      nValor:=U_NVerRatCC()
+   Else
+      nValor:=(qAux3->EV_VALOR * (qAux3->EV_PERC * 100)) / 100   // o Campo ev_valor ja o valor percentual. no precisa aplicaar novamente.
+   Endif   
+Endif
+qAux3->(DbCloseArea())
+RestArea(aArea)
+Return(nValor) 
+
+
+User Function NVerRatCC()
+Local aArea := GetArea()
+Local nValor := 0
+Local cQuery:= ""
+
+cQuery:=" SELECT EZ_VALOR,EZ_PERC FROM " + RetSqlName("SEZ") + " SEZ WHERE "	
+cQuery+=" EZ_NUM        = '"+aPosCC[nPosAtual][5]+"'  " 
+cQuery+=" AND EZ_CLIFOR = '"+aPosCC[nPosAtual][08]+"'    " 
+cQuery+=" AND EZ_PREFIXO ='"+aPosCC[nPosAtual][14]+"'    " 
+cQuery+=" AND EZ_TIPO    ='"+aPosCC[nPosAtual][6]+"'      "
+cQuery+=" AND EZ_RECPAG = 'P'
+cQuery+=" AND D_E_L_E_T_ <> '*' "	
+
+cQuery := ChangeQuery(cQuery)
+dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery),'qAux4', .F., .T.)
+If !Eof()
+   nValor:=(qAux4->EZ_VALOR * (qAux4->EZ_PERC * 100)) / 100   
+Endif
+qAux4->(DbCloseArea())
+RestArea(aArea)
+Return(nValor) 
+
+
+
+
+
+

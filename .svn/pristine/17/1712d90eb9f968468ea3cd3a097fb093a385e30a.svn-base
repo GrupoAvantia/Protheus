@@ -1,0 +1,785 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATR225.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr225.prx"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "PROTHEUS.CH"
+#line 18 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr225.prx"
+Function MATR225()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And.  TRepInUse()
+
+
+
+	oReport:= ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR225R3()
+EndIf
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportDef()
+Local oReport
+Local oSection1
+Local oSection2
+Local oSection3
+
+
+
+
+
+
+
+
+
+
+
+oReport:= TReport():New("MATR225",OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Relação Simplificada Das Estruturas", "Relacao Simplificada das Estruturas" )),"MTR225", {|oReport| ReportPrint(oReport)},OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Este programa emite a relação de estrutura de um determinado artigo", "Este programa emite a relaçäo de estrutura de um determinado produto" ))+" "+OemToAnsi(If( cPaisLoc $ "ANG|PTG", "seleccionado pelo utilizador. Esta relação näo demonstra custos. Caso o", "selecionado pelo usuário. Esta relaçäo näo demonstra custos. Caso o" ))+" "+OemToAnsi(If( cPaisLoc $ "ANG|PTG", "produto use opcionais, será listada a estrutura com os opcionais padrão.", "produto use opcionais, será listada a estrutura com os opcionais padräo." )))
+oReport:SetLandscape()
+
+
+
+
+AjustaSX1()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pergunte(oReport:uParam, .F. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+oSection1 := TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Detalhes Do Artigo Pai", "Detalhes do Produto Pai" ),{"SG1","SB1"})
+oSection1:SetLineStyle()
+
+TRCell():New(oSection1,"G1_COD"	    ,"SG1",,,,,)
+TRCell():New(oSection1,"B1_DESC"   	,"SB1",,,,,)
+TRCell():New(oSection1,"B1_TIPO"   	,"SB1",,,,,)
+TRCell():New(oSection1,"B1_GRUPO"  	,"SB1",,,,,)
+TRCell():New(oSection1,"B1_UM"	    ,"SB1",,,,,)
+TRCell():New(oSection1,"B1_QB"		,"SB1",,,,, {|| IIf(RetFldProd(SB1->B1_COD,"B1_QB")==0,1,RetFldProd(SB1->B1_COD,"B1_QB"))})
+TRCell():New(oSection1,"B1_OPC"		,"SB1",,,,, {|| RetFldProd(SB1->B1_COD,"B1_OPC")})
+
+oSection1:SetNoFilter("SB1")
+
+
+
+oSection2 := TRSection():New(oSection1,"Estruturas",{"SG1","SB1"})
+
+TRCell():New(oSection2,"NIVEL"		,"   ",If( cPaisLoc $ "ANG|PTG", "Nível", "NIVEL" )	,					,10			,,)
+TRCell():New(oSection2,"G1_COMP"	,"SG1",If( cPaisLoc $ "ANG|PTG", "Código", "CODIGO" )	,					,,,)
+TRCell():New(oSection2,"G1_TRT"		,"SG1",If( cPaisLoc $ "ANG|PTG", "Trt", "TRT" )	,					,,,)
+TRCell():New(oSection2,"B1_TIPO"	,"SB1",If( cPaisLoc $ "ANG|PTG", "Tp.", "TP" )	,					,,,)
+TRCell():New(oSection2,"B1_GRUPO"	,"SB1",If( cPaisLoc $ "ANG|PTG", "Grup", "GRUP" )	,					,,,)
+TRCell():New(oSection2,"B1_DESC"	,"SB1",If( cPaisLoc $ "ANG|PTG", "Descrição", "DESCRIÇÃO" )	,					,,,)
+TRCell():New(oSection2,"G1_OBSERV"	,"SG1",If( cPaisLoc $ "ANG|PTG", "Observação", "OBSERVAÇÃO" )	,					,25			,,)
+TRCell():New(oSection2,"QUANTITEM"	,"   ",If( cPaisLoc $ "ANG|PTG", "Qtde.necessária", "QTDE.NECESSARIA" )	,PesqPict("SG1","G1_QUANT",14)	,14	   		,,)
+TRCell():New(oSection2,"B1_UM"		,"SB1",If( cPaisLoc $ "ANG|PTG", "Um", "UM" )	,					,,,)
+TRCell():New(oSection2,"G1_PERDA"	,"SG1",If( cPaisLoc $ "ANG|PTG", "Perda %", "PERDA %" )	,					,,,)
+TRCell():New(oSection2,"G1_QUANT"	,"SG1",If( cPaisLoc $ "ANG|PTG", "Quantidade", "QUANTIDADE" )	,					,,,)
+TRCell():New(oSection2,"B1_QB"		,"SB1",If( cPaisLoc $ "ANG|PTG", "Qtd. Base", "QTD. BASE" )	,					,,,{||If(RetFldProd(SB1->B1_COD,"B1_QB")==0,1,RetFldProd(SB1->B1_COD,"B1_QB"))})
+TRCell():New(oSection2,"G1_FIXVAR"	,"SG1",If( cPaisLoc $ "ANG|PTG", "Tipo De Quantidade", "TIPO QUANTIDADE" )	,					,,,)
+TRCell():New(oSection2,"G1_INI"		,"SG1",If( cPaisLoc $ "ANG|PTG", "Ini. da validade", "INI.VALID" )	,					,,,)
+TRCell():New(oSection2,"G1_FIM"		,"SG1",If( cPaisLoc $ "ANG|PTG", "Fim Da Validade", "FIM VALID" )	,					,,,)
+TRCell():New(oSection2,"G1_GROPC"	,"SG1",If( cPaisLoc $ "ANG|PTG", "Grp. Opc.", "GRP. OPC." )	,					,,,)
+TRCell():New(oSection2,"G1_OPC"		,"SG1",If( cPaisLoc $ "ANG|PTG", "Elemento Opc.", "ITEM OPC." )	,					,,,)
+
+oSection2:SetHeaderPage()
+oSection2:SetNoFilter("SB1")
+
+Return(oReport)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportPrint(oReport)
+
+Local oSection1 := oReport:Section(1)
+Local oSection2 := oReport:Section(1):Section(1)
+Local cProduto 	:= ""
+Local nNivel   	:= 0
+Local lContinua := .T. 
+Private lNegEstr:=GETMV("MV_NEGESTR")
+
+
+
+
+dbSelectArea("SG1")
+dbSetOrder(1)
+MsSeek(xFilial("SG1")+mv_par01, .T. )
+oReport:SetMeter(SG1->(LastRec()))
+
+While !oReport:Cancel() .And.  !Eof() .And.  SG1->G1_FILIAL+SG1->G1_COD <= xFilial("SG1")+mv_par02
+
+	oReport:IncMeter()
+
+	cProduto := SG1->G1_COD
+	nNivel   := 2
+    lContinua:= .T. 
+
+	dbSelectArea("SB1")
+	MsSeek(xFilial("SB1")+cProduto)
+
+	If Eof() .Or.  SB1->B1_TIPO < mv_par03 .Or.  SB1->B1_TIPO > mv_par04 .Or.  SB1->B1_GRUPO < mv_par05 .Or.  SB1->B1_GRUPO > mv_par06
+		dbSelectArea("SG1")
+		While !oReport:Cancel() .And.  !Eof() .And.  xFilial("SG1")+cProduto == SG1->G1_FILIAL+SG1->G1_COD
+			dbSkip()
+			oReport:IncMeter()
+		EndDo
+		lContinua := .F. 
+	EndIf
+
+	If lContinua
+
+		oSection1:Init( .F. )
+		oReport:SkipLine()
+
+
+		If !Empty(RetFldProd(SB1->B1_COD,"B1_OPC"))
+			oSection1:Cell("B1_OPC"):Show()
+		Else
+			oSection1:Cell("B1_OPC"):Hide()
+		EndIf
+
+		oSection1:PrintLine()
+		oReport:SkipLine()
+		oSection1:Finish()
+
+
+
+
+		oSection2:Init()
+
+
+		MR225ExplG(oReport,oSection2,cProduto,IIf(RetFldProd(SB1->B1_COD,"B1_QB")==0,1,RetFldProd(SB1->B1_COD,"B1_QB")),nNivel,RetFldProd(SB1->B1_COD,"B1_OPC"),IIf(RetFldProd(SB1->B1_COD,"B1_QB")==0,1,RetFldProd(SB1->B1_COD,"B1_QB"))	,IIf(Empty(mv_par08),SB1->B1_REVATU,mv_par08))
+
+		oSection2:Finish()
+
+
+		If mv_par07 == 1
+			oSection1:SetPageBreak( .T. )
+		Else
+			oReport:ThinLine()
+	 	EndIf
+
+	EndIf
+	dbSelectArea("SG1")
+EndDo
+
+
+dbSelectArea("SG1")
+dbClearFilter()
+dbSetOrder(1)
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function MR225ExplG(oReport,oSection2,cProduto,nQuantPai,nNivel,cOpcionais,nQtdBase,cRevisao)
+Local nReg 		  := 0
+Local nQuantItem  := 0
+Local nPrintNivel := 0
+Local cAteNiv     := If(mv_par09=Space(3),"999",mv_par09)
+
+dbSelectArea("SG1")
+While !oReport:Cancel() .And.  !Eof() .And.  G1_FILIAL+G1_COD == xFilial("SG1")+cProduto
+	oSection2:IncMeter()
+	nReg       := Recno()
+	nQuantItem := ExplEstr(nQuantPai,,cOpcionais,cRevisao)
+	dbSelectArea("SG1")
+	If nNivel <= Val(cAteNiv)
+		If (lNegEstr .Or.  (!lNegEstr .And.  QtdComp(nQuantItem, .T. ) > QtdComp(0) )) .And.  (QtdComp(nQuantItem, .T. ) # QtdComp(0, .T. ))
+
+			dbSelectArea("SB1")
+			dbSetOrder(1)
+			MsSeek(xFilial("SB1")+SG1->G1_COMP)
+
+
+
+
+			nPrintNivel:=IIf(nNivel>17,17,nNivel-2)
+			oSection2:Cell("NIVEL"		):SetValue(Space(nPrintNivel)+StrZero(nNivel,3))
+			oSection2:Cell("QUANTITEM"	):SetValue(nQuantItem)
+			oSection2:PrintLine()
+
+
+
+
+			dbSelectArea("SG1")
+			MsSeek(xFilial("SG1")+G1_COMP)
+			If Found()
+				MR225ExplG(oReport,oSection2,G1_COD,nQuantItem,nNivel+1,cOpcionais,IIf(RetFldProd(SB1->B1_COD,"B1_QB")==0,1,RetFldProd(SB1->B1_COD,"B1_QB")),If(!Empty(SB1->B1_REVATU),SB1->B1_REVATU,mv_par08),0)
+			EndIf
+
+			dbGoto(nReg)
+
+		EndIf
+	EndIf
+	dbSkip()
+EndDo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MATR225R3
+
+
+
+
+LOCAL Tamanho  := "G"
+LOCAL titulo   := If( cPaisLoc $ "ANG|PTG", "Relação Simplificada Das Estruturas", "Relacao Simplificada das Estruturas" )
+LOCAL cDesc1   := If( cPaisLoc $ "ANG|PTG", "Este programa emite a relação de estrutura de um determinado artigo", "Este programa emite a relaçäo de estrutura de um determinado produto" )
+LOCAL cDesc2   := If( cPaisLoc $ "ANG|PTG", "seleccionado pelo utilizador. Esta relação näo demonstra custos. Caso o", "selecionado pelo usuário. Esta relaçäo näo demonstra custos. Caso o" )
+LOCAL cDesc3   := If( cPaisLoc $ "ANG|PTG", "produto use opcionais, será listada a estrutura com os opcionais padrão.", "produto use opcionais, será listada a estrutura com os opcionais padräo." )
+LOCAL cString  := "SG1"
+LOCAL wnrel	   := "MATR225"
+
+
+
+
+PRIVATE lNegEstr:=GETMV("MV_NEGESTR")
+PRIVATE aReturn := {OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" )), 1,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" )), 2, 2, 1, "",1 }
+PRIVATE nLastKey:= 0 ,cPerg := "MTR225"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AjustaSX1()
+Pergunte(cPerg, .F. )
+
+
+
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3, .F. ,"",,Tamanho)
+
+If nLastKey = 27
+	dbClearFilter()
+	Return
+EndIf
+
+SetDefault(aReturn,cString)
+
+If nLastKey = 27
+	dbClearFilter()
+	Return
+EndIf
+
+RptStatus({|lEnd| C225Imp(@lEnd,wnRel,titulo,Tamanho)},titulo)
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function C225Imp(lEnd,WnRel,titulo,Tamanho)
+
+LOCAL cRodaTxt  := If( cPaisLoc $ "ANG|PTG", "Estrutura(s)", "ESTRUTURA(S)" )
+LOCAL nCntImpr  := 0
+LOCAL nTipo     := 0
+LOCAL cProduto  := ""
+LOCAL nNivel    := 0
+LOCAL cPictQuant:=""
+LOCAL cPictPerda:=""
+LOCAL nX        := 0
+LOCAL nPosCnt	:= 0
+LOCAL nPosOld	:= 0
+LOCAL i 		:= 0
+LOCAL nEstouro
+LOCAL nLen
+LOCAL nCol      :=0
+
+
+
+
+PRIVATE li := 80 ,m_pag := 1
+
+
+
+
+nTipo  := IIf(aReturn[4]==1,15,18)
+
+
+
+
+
+cabec1   := If( cPaisLoc $ "ANG|PTG", "Nível                Código          Trt Tp Grup Descrição                          Observação                                   Quantidade Um    Perda      Quantidade  Qtd. Base  Tipo De   Início   Fim      Grupo  Item", "NIVEL                CODIGO          TRT TP GRUP DESCRICAO                          OBSERVACAO                                   QUANTIDADE UM    PERDA      QUANTIDADE  QTD. BASE  TIPO DE   INICIO   FIM      GRUPO  ITEM" )
+cabec2   := If( cPaisLoc $ "ANG|PTG", "                                                                                                                                 Necessária         %                     Estrutura Quantidade Validade Validade Opcio Opcio", "                                                                                                                                 NECESSARIA         %                     ESTRUTURA QUANTIDADE VALIDADE VALIDADE OPCIO OPCIO" )
+
+
+
+
+
+
+
+dbSelectArea("SX3")
+dbSetOrder(2)
+dbSeek("G1_QUANT")
+If X3_TAMANHO >= 14
+	For nX := 1 To 14
+		If (nX == X3_TAMANHO - X3_DECIMAL) .And.  X3_DECIMAL > 0
+			cPictQuant := cPictQuant+"."
+		Else
+			cPictQuant := cPictQuant+"9"
+		EndIf
+	next
+Else
+	For nX := 1 To 14
+		If (nX == (X3_DECIMAL + 1)) .And.  X3_DECIMAL > 0
+			cPictQuant := "."+cPictQuant
+		Else
+			cPictQuant := "9"+cPictQuant
+		EndIf
+	next
+EndIf
+dbSeek("G1_PERDA")
+If X3_TAMANHO >= 6
+	For nX := 1 To 6
+		If (nX == X3_TAMANHO - X3_DECIMAL) .And.  X3_DECIMAL > 0
+			cPictPerda := cPictPerda+"."
+		Else
+			cPictPerda := cPictPerda+"9"
+		EndIf
+	next
+Else
+	For nX := 1 To 6
+		If (nX == (X3_DECIMAL + 1)) .And.  X3_DECIMAL > 0
+			cPictPerda := "."+cPictPerda
+		Else
+			cPictPerda := "9"+cPictPerda
+		EndIf
+	next
+EndIf
+dbSetOrder(1)
+dbSelectArea("SG1")
+SetRegua(LastRec())
+Set( 9,"ON" )
+dbSeek(xFilial("SG1")+mv_par01)
+Set( 9,"OFF" )
+While !Eof() .And.  G1_FILIAL+G1_COD <= xFilial("SG1")+mv_par02
+	If lEnd
+		PrintOut(_PROW()+1,001,If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR"),,)
+		Exit
+	EndIf
+	IncRegua()
+	cProduto := G1_COD
+	nNivel   := 2
+	dbSelectArea("SB1")
+	dbSeek(xFilial("SB1")+cProduto)
+
+	If EOF() .Or.  B1_TIPO < mv_par03 .Or.  B1_TIPO > mv_par04 .Or.  B1_GRUPO < mv_par05 .Or.  B1_GRUPO > mv_par06
+		dbSelectArea("SG1")
+		While !EOF() .And.  xFilial("SG1")+cProduto == G1_FILIAL+G1_COD
+			dbSkip()
+			IncRegua()
+		EndDo
+	Else
+		If li > 58
+			Cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+		EndIf
+
+
+
+		nCntImpr++
+		dbSelectArea("SB1")
+
+		nEstouro := .F. 
+
+		nLen := LEN(RTRIM(cProduto))
+
+		if nLen > 15
+			nEstouro := .T. 
+  		endif
+
+		PrintOut(li,004,cProduto,,)
+
+		nCol := 0
+		if nEstouro
+			PrintOut(li,036,"-",,)
+			PrintOut(li,038,SubStr(SB1->B1_DESC,1,34),,)
+			li++
+		else
+			nCol := 1
+		endif
+
+		PrintOut(li,024+nCol,SB1->B1_TIPO,,)
+		PrintOut(li,027+nCol,SB1->B1_GRUPO,,)
+
+		if !nEstouro
+			PrintOut(li,032,SubStr(SB1->B1_DESC,1,34),,)
+		endif
+
+		PrintOut(li,105+nCol,SB1->B1_UM,,)
+		PrintOut(li,129+nCol,If(RetFldProd(SB1->B1_COD,"B1_QB")==0,1,RetFldProd(SB1->B1_COD,"B1_QB")),PesqPict("SB1","B1_QB",11),)
+
+
+
+		If !Empty(RetFldProd(SB1->B1_COD,"B1_OPC"))
+			PrintOut(li,137+nCol,"Opc. ",,)
+			PrintOut(li,142+nCol,RetFldProd(SB1->B1_COD,"B1_OPC"),PesqPict("SB1","B1_OPC",80),)
+		EndIf
+		Li += 2
+		nPosOld:=nPosCnt
+		nPosCnt+=MR225Expl(cProduto,IF(RetFldProd(SB1->B1_COD,"B1_QB")==0,1,RetFldProd(SB1->B1_COD,"B1_QB")),nNivel,cPictQuant,cPictPerda,RetFldProd(SB1->B1_COD,"B1_OPC"),IF(RetFldProd(SB1->B1_COD,"B1_QB")==0,1,RetFldProd(SB1->B1_COD,"B1_QB")),titulo,cabec1,cabec2,wnrel,Tamanho,nTipo,If(Empty(mv_par08),SB1->B1_REVATU,mv_par08))
+		For i:=nPosOld to nPosCnt
+			IncRegua()
+		next
+
+
+		If mv_par07 == 1
+		    Li:= 90
+		Else
+	 		PrintOut(li,000,__PrtThinLine(),,)
+	 		Li +=2
+	 	EndIf
+	EndIf
+	dbSelectArea("SG1")
+EndDo
+If li <> 80
+	Roda(nCntImpr,cRodaTxt,Tamanho)
+EndIf
+
+
+
+
+dbSelectArea("SG1")
+dbClearFilter()
+dbSetOrder(1)
+
+If aReturn[5] = 1
+	Set( 24, "" )
+	dbCommitAll()
+	OurSpool(wnrel)
+EndIf
+MS_FLUSH()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function MR225Expl(cProduto,nQuantPai,nNivel,cPictQuant,cPictPerda,cOpcionais,nQtdBase,Titulo,cabec1,cabec2,wnrel,Tamanho,nTipo,cRevisao)
+LOCAL nReg,nQuantItem,nCntItens := 0
+LOCAL nPrintNivel
+LOCAL nX        := 0
+LOCAL aObserv   := {}
+LOCAL aAreaSB1:={}
+LOCAL cAteNiv   := If(mv_par09=Space(3),"999",mv_par09)
+LOCAL nEstouro
+LOCAL nLen
+LOCAL cComp
+LOCAL nCol := 0
+
+dbSelectArea("SG1")
+While !Eof() .And.  G1_FILIAL+G1_COD == xFilial("SG1")+cProduto
+	nReg       := Recno()
+	nQuantItem := ExplEstr(nQuantPai,,cOpcionais,cRevisao)
+	dbSelectArea("SG1")
+	If nNivel <= Val(cAteNiv)
+		If (lNegEstr .Or.  (!lNegEstr .And.  QtdComp(nQuantItem, .T. ) > QtdComp(0) )) .And.  (QtdComp(nQuantItem, .T. ) # QtdComp(0, .T. ))
+			If li > 58
+				Cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+				dbSelectArea("SB1")
+				aAreaSB1:=GetArea()
+				dbSeek(xFilial("SB1")+cProduto)
+
+				nEstouro := .F. 
+
+	   			nLen := LEN(RTRIM(cProduto))
+
+				if nLen > 15
+		 			nEstouro := .T. 
+  	  			endif
+
+				PrintOut(li,004,cProduto,,)
+
+				if nEstouro
+		   			PrintOut(li,036,"-",,)
+		   			PrintOut(li,038,SubStr(SB1->B1_DESC,1,34),,)
+					li++
+				else
+				   nCol := 1
+	   			endif
+
+				PrintOut(li,024+nCol,SB1->B1_TIPO,,)
+				PrintOut(li,027+nCol,SB1->B1_GRUPO,,)
+
+				if !nEstouro
+					PrintOut(li,032,SubStr(SB1->B1_DESC,1,34),,)
+				endif
+
+				PrintOut(li,105+nCol,SB1->B1_UM,,)
+				PrintOut(li,129+nCol,If(RetFldProd(SB1->B1_COD,"B1_QB")==0,1,RetFldProd(SB1->B1_COD,"B1_QB")),PesqPict("SB1","B1_QB",11),)
+
+
+
+				If !Empty(RetFldProd(SB1->B1_COD,"B1_OPC"))
+					PrintOut(li,137+nCol,"Opc. ",,)
+					PrintOut(li,142+nCol,RetFldProd(SB1->B1_COD,"B1_OPC"),PesqPict("SB1","B1_OPC",80),)
+				EndIf
+				RestArea(aAreaSB1)
+				Li += 2
+				dbSelectArea("SG1")
+			EndIf
+
+
+			aObserv := {}
+			For nX := 1 to MlCount(AllTrim(G1_OBSERV),45)
+				aAdd(aObserv, MemoLine(AllTrim(G1_OBSERV),45,nX))
+			next
+
+			nPrintNivel:=IIF(nNivel>17,17,nNivel-2)
+			PrintOut(li,nPrintNivel,StrZero(nNivel,3),,)
+			SB1->(dbSeek(xFilial("SB1")+SG1->G1_COMP))
+
+			nEstouro := .F. 
+
+		    cComp = G1_COMP
+	 		nLen := LEN(RTRIM(cComp))
+
+			if nLen > 15
+		 		nEstouro := .T. 
+  	  		endif
+
+			PrintOut(li,21,G1_COMP,,)
+
+			nCol := 0
+			if nEstouro
+		 		PrintOut(li,052,"-",,)
+		   	   	PrintOut(li,054,SubStr(SB1->B1_DESC,1,34),,)
+		  		li++
+		  	else
+			  	nCol := 1
+	   	  	endif
+
+			PrintOut(li,37+nCol,Substr(G1_TRT,1,3),,)
+			PrintOut(li,41+nCol,SB1->B1_TIPO,,)
+			PrintOut(li,44+nCol,SB1->B1_GRUPO,,)
+
+			if !nEstouro
+				PrintOut(li,49,SubStr(SB1->B1_DESC,1,34),,)
+			endif
+
+			PrintOut(li,84+nCol,If(Len(aObserv)>0,aObserv[1],Left(G1_OBSERV,45)),,)
+	  	    PrintOut(li,130+nCol,nQuantItem,cPictQuant,)
+ 			PrintOut(li,145+nCol,SB1->B1_UM,,)
+			PrintOut(li,147+nCol,G1_PERDA,cPictPerda,)
+			PrintOut(li,152+nCol,G1_QUANT,cPictQuant,)
+			PrintOut(li,168+nCol,If(RetFldProd(SB1->B1_COD,"B1_QB")==0,1,RetFldProd(SB1->B1_COD,"B1_QB")),PesqPict("SB1","B1_QB",11),)
+			PrintOut(li,180+nCol,If(G1_FIXVAR$" úV",If(cPaisLoc$"ANG|PTG","Variável","VARIAVEL"),If(cPaisLoc$"ANG|PTG","Fixa","FIXA")),,)
+			PrintOut(li,190+nCol,G1_INI,PesqPict("SG1","G1_INI",10),)
+			PrintOut(li,201+nCol,G1_FIM,PesqPict("SG1","G1_FIM",10),)
+			PrintOut(li,212+nCol,G1_GROPC,PesqPict("SG1","G1_GROPC",3),)
+			PrintOut(li,216+nCol,G1_OPC,PesqPict("SG1","G1_OPC",4),)
+
+			If Len(aObserv) > 1
+				For nX := 2 to Len(aObserv)
+					Li ++
+					PrintOut(li,84+nCol,aObserv[nX],,)
+				next
+			EndIf
+
+			Li++
+
+
+
+
+			dbSelectArea("SG1")
+			dbSeek(xFilial("SG1")+G1_COMP)
+			If Found()
+				MR225Expl(G1_COD,nQuantItem,nNivel+1,cPictQuant,cPictPerda,cOpcionais,IF(RetFldProd(SB1->B1_COD,"B1_QB")==0,1,RetFldProd(SB1->B1_COD,"B1_QB")),titulo,cabec1,cabec2,wnrel,Tamanho,nTipo,If(!Empty(SB1->B1_REVATU),SB1->B1_REVATU,mv_par08))
+			EndIf
+			dbGoto(nReg)
+		EndIf
+	EndIf
+	dbSkip()
+	nCntItens++
+EndDo
+nCntItens--
+Return nCntItens
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSX1()
+
+Local aHelpPor :={}
+Local aHelpEng :={}
+Local aHelpSpa :={}
+
+
+Aadd( aHelpPor, "Informe ate qual nivel da estrutura "     )
+Aadd( aHelpPor, "deseja visualizar. Se preenchido como "   )
+Aadd( aHelpPor, "(branco), ira exibir todos os niveis."    )
+
+Aadd( aHelpEng, "Enter up to which level of structure "    )
+Aadd( aHelpEng, "you want to view. If it left (in blank)"  )
+Aadd( aHelpEng, ", all levels will be displayed."          )
+
+Aadd( aHelpSpa, "Informe hasta que nivel de la estructura ")
+Aadd( aHelpSpa, "desea visualizar. Si se deja en blanco, " )
+Aadd( aHelpSpa, "se mostraran todos los niveles."          )
+
+
+
+PutSx1( "MTR225","09","Imprime Ate Nivel ?","¿Imprime hasta Nivel ?","Print To Level ?","mv_ch9", "C",3,0,0,"G","","","","S","mv_par09","","","","","","","","","","","","","","","","", aHelpPor,aHelpEng,aHelpSpa)
+
+Return Nil

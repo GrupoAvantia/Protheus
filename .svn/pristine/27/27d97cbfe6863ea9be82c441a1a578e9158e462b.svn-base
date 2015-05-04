@@ -1,0 +1,799 @@
+#INCLUDE "MATR015.CH"
+#INCLUDE "PROTHEUS.CH"
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR015  ³ Autor ³ Alexandre Inacio Lemes³ Data ³22/05/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Rela‡„o entre NFs Originais X NFs Frete/Importa‡„o.        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ MATR015(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function Matr015()
+
+Local oReport
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Ajusta perguntas no SX1 									 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AjustaSX1()
+
+If FindFunction("TRepInUse") .And. TRepInUse()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Interface de impressao                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport := ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR015R3()
+EndIf
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportDef ³Autor  ³Alexandre Inacio Lemes ³Data  ³22/05/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Rela‡„o entre NFs Originais X NFs Frete/Importa‡„o.        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpO1: Objeto do relatório                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+Local aOrdem   := {}
+Local oReport 
+Local oSection1 
+Local oSection2 
+Local oSection3 
+Local oSection4 
+Local oCell         
+
+#IFDEF TOP
+	Local cAliasSF8 := GetNextAlias()
+#ELSE
+	Local cAliasSF8 := "SF8"
+#ENDIF
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao do componente de impressao                                      ³
+//³                                                                        ³
+//³TReport():New                                                           ³
+//³ExpC1 : Nome do relatorio                                               ³
+//³ExpC2 : Titulo                                                          ³
+//³ExpC3 : Pergunte                                                        ³
+//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+//³ExpC5 : Descricao                                                       ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport := TReport():New("MATR015",STR0001,"MTR015", {|oReport| ReportPrint(oReport,cAliasSF8)},STR0002+" "+STR0003+" "+STR0004) //"Este relatorio ira imprimir a relacao entre as notas fiscais de Frete/Importacao e as notas fiscais que originaram as mesmas.
+Pergunte("MTR015",.F.)
+Aadd( aOrdem, STR0005 ) //"Por NF Frete/Importacao" # "F8_FILIAL+F8_NFDIFRE+F8_SEDIFRE+F8_FORNECE+F8_LOJA"
+Aadd( aOrdem, STR0006 ) //"Por NF Original"         # "F8_FILIAL+F8_NFORIG+F8_SERORIG+F8_FORNECE+F8_LOJA"
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da secao utilizada pelo relatorio                               ³
+//³                                                                        ³
+//³TRSection():New                                                         ³
+//³ExpO1 : Objeto TReport que a secao pertence                             ³
+//³ExpC2 : Descricao da seçao                                              ³
+//³ExpA3 : Array com as tabelas utilizadas pela secao. A primeira tabela   ³
+//³        sera considerada como principal para a seção.                   ³
+//³ExpA4 : Array com as Ordens do relatório                                ³
+//³ExpL5 : Carrega campos do SX3 como celulas                              ³
+//³        Default : False                                                 ³
+//³ExpL6 : Carrega ordens do Sindex                                        ³
+//³        Default : False                                                 ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da celulas da secao do relatorio                                ³
+//³                                                                        ³
+//³TRCell():New                                                            ³
+//³ExpO1 : Objeto TSection que a secao pertence                            ³
+//³ExpC2 : Nome da celula do relatório. O SX3 será consultado              ³
+//³ExpC3 : Nome da tabela de referencia da celula                          ³
+//³ExpC4 : Titulo da celula                                                ³
+//³        Default : X3Titulo()                                            ³
+//³ExpC5 : Picture                                                         ³
+//³        Default : X3_PICTURE                                            ³
+//³ExpC6 : Tamanho                                                         ³
+//³        Default : X3_TAMANHO                                            ³
+//³ExpL7 : Informe se o tamanho esta em pixel                              ³
+//³        Default : False                                                 ³
+//³ExpB8 : Bloco de código para impressao.                                 ³
+//³        Default : ExpC2                                                 ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSection1 := TRSection():New(oReport,STR0022,{"SF8","SF1"},aOrdem,/*Campos do SX3*/,/*Campos do SIX*/) //"Carga"
+TRCell():New(oSection1,"F8_NFDIFRE","SF8",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"F8_SEDIFRE","SF8",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"F8_FORNECE","SF8",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"F8_LOJA"   ,"SF8",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"F8_TIPO"   ,"SF8",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| IIF((cAliasSF8)->F8_TIPO == "F",OemToAnsi(STR0020),OemToAnsi(STR0021)) })
+
+oSection2 := TRSection():New(oSection1,STR0023,{"SF8","SF1"},aOrdem,/*Campos do SX3*/,/*Campos do SIX*/) //"Carga"
+TRCell():New(oSection2,"F8_NFORIG" ,"SF8",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"F8_SERORIG","SF8",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"F1_EMISSAO","SF1",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+
+oSection3:= TRSection():New(oReport,STR0024,{"SF8","SF1"},aOrdem,/*Campos do SX3*/,/*Campos do SIX*/) //"Carga"
+TRCell():New(oSection3,"F8_NFORIG" ,"SF8",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection3,"F8_SERORIG","SF8",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection3,"F8_FORNECE","SF8",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection3,"F8_LOJA"   ,"SF8",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+
+oSection4 := TRSection():New(oSection3,STR0025,{"SF8","SF1"},aOrdem,/*Campos do SX3*/,/*Campos do SIX*/) //"Carga"
+TRCell():New(oSection4,"F8_NFDIFRE","SF8",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection4,"F8_SEDIFRE","SF8",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection4,"F1_EMISSAO","SF1",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection4,"F8_TIPO"   ,"SF8",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| IIF((cAliasSF8)->F8_TIPO == "F",OemToAnsi(STR0020),OemToAnsi(STR0021)) })
+
+oSection1:SetHeaderPage()
+oSection2:SetHeaderPage()
+oSection3:SetHeaderPage()
+oSection4:SetHeaderPage()
+
+Return(oReport)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrin³Autor  ³Alexandre Inacio Lemes ³Data  ³19/05/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Imprime o Relatorio definido pela funcao ReportDef MATR190. ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatório                           ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport,cAliasSF8)
+
+Local oSection1 := oReport:Section(1) 
+Local oSection2 := oReport:Section(1):Section(1)  
+
+Local oSection3 := oReport:Section(2) 
+Local oSection4 := oReport:Section(2):Section(1)  
+
+Local nOrdem    := oReport:Section(1):GetOrder()
+
+Local cNFE      := ""
+Local cQuery    := ""
+Local cQuebra   := "" 
+LOCAL cSF8FilUsr:= ""
+LOCAL cSF1FilUsr:= ""
+   
+#IFNDEF TOP
+	Local cCondicao := ""
+#ENDIF
+
+
+If Len(oReport:Section(1):GetAdvplExp("SF1")) > 0     
+	cSF1FilUsr   := oReport:Section(1):GetAdvplExp("SF1")
+EndIf
+
+If Len(oReport:Section(1):GetAdvplExp("SF8")) > 0     
+	cSF8FilUsr   := oReport:Section(1):GetAdvplExp("SF8")
+EndIf     
+
+If Len(oReport:Section(2):GetAdvplExp("SF1")) > 0     
+	cSF1FilUsr   := oReport:Section(2):GetAdvplExp("SF1")
+EndIf
+
+If Len(oReport:Section(2):GetAdvplExp("SF8")) > 0  
+	cSF8FilUsr   := oReport:Section(2):GetAdvplExp("SF8")
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Filtragem do relatório                                                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SF8")
+dbSetOrder(nOrdem)
+
+If nOrdem == 1
+	cQuebra := "F8_NFDIFRE+F8_SEDIFRE+F8_FORNECE+F8_LOJA"
+	oSection3:Disable()
+	oSection4:Disable()
+Else
+	cQuebra := "F8_NFORIG+F8_SERORIG+F8_FORNECE+F8_LOJA"
+	oSection1:Disable()
+	oSection2:Disable()
+EndIf
+
+#IFDEF TOP
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Transforma parametros Range em expressao SQL                            ³	
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	MakeSqlExpr(oReport:uParam)
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Query do relatório da secao 1                                           ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If nOrdem == 1
+		oReport:Section(1):BeginQuery()	
+	Else
+		oReport:Section(2):BeginQuery()	
+	Endif	
+	
+	cQuery :="%"
+	If mv_par01 == 1 
+		cQuery += "AND F8_TIPO = 'F' "	
+	ElseIf mv_par01 == 2
+		cQuery += "AND F8_TIPO = 'D' "	
+	Endif
+	cQuery +="%"	
+
+	If nOrdem == 1
+		BeginSql Alias cAliasSF8
+		SELECT SF8.*
+		
+		FROM %table:SF8% SF8
+		
+		WHERE F8_FILIAL = %xFilial:SF8% AND 
+			F8_NFDIFRE >= %Exp:mv_par02% AND 
+			F8_NFDIFRE <= %Exp:mv_par03% AND 
+			F8_SEDIFRE >= %Exp:mv_par04% AND 
+			F8_SEDIFRE <= %Exp:mv_par05% AND
+			SF8.%notDel%
+			%Exp:cQuery%
+			
+		ORDER BY %Order:SF8% 
+				
+		EndSql 
+	Else
+		BeginSql Alias cAliasSF8
+		SELECT SF8.*
+		
+		FROM %table:SF8% SF8
+		
+		WHERE F8_FILIAL = %xFilial:SF8% AND 
+			F8_NFORIG  >= %Exp:mv_par02% AND 
+			F8_NFORIG  <= %Exp:mv_par03% AND 
+			F8_SERORIG >= %Exp:mv_par04% AND 
+			F8_SERORIG <= %Exp:mv_par05% AND
+			SF8.%notDel%
+			%Exp:cQuery%
+			
+		ORDER BY %Order:SF8% 
+				
+		EndSql 
+	EndIf		
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Metodo EndQuery ( Classe TRSection )                                    ³
+	//³                                                                        ³
+	//³Prepara o relatório para executar o Embedded SQL.                       ³
+	//³                                                                        ³
+	//³ExpA1 : Array com os parametros do tipo Range                           ³
+	//³                                                                        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If nOrdem == 1
+		oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
+	    oSection2:SetParentQuery()
+	Else
+		oReport:Section(2):EndQuery(/*Array com os parametros do tipo Range*/)
+	    oSection4:SetParentQuery()
+	Endif	
+    
+#ELSE
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Transforma parametros Range em expressao SQL                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	MakeAdvplExpr(oReport:uParam)
+
+	If nOrdem == 1
+		cCondicao := 'F8_FILIAL == "'+xFilial("SF8")+'".And.' 
+		cCondicao += 'F8_NFDIFRE >= "'+mv_par02+'".And.F8_NFDIFRE <="'+mv_par03+'".And.'
+		cCondicao += 'F8_SEDIFRE >= "'+mv_par04+'".And.F8_SEDIFRE <="'+mv_par05+'" '
+    Else 
+		cCondicao := 'F8_FILIAL == "'+xFilial("SF8")+'".And.' 
+		cCondicao += 'F8_NFORIG >= "'+mv_par02+'".And.F8_NFORIG <="'+mv_par03+'".And.'
+		cCondicao += 'F8_SERORIG >= "'+mv_par04+'".And.F8_SERORIG <="'+mv_par05+'" '    
+    EndIf
+    
+    If mv_par01 == 1
+ 		cCondicao += ' .And. F8_TIPO == "F" '	
+    Elseif mv_par01 == 2
+ 		cCondicao += ' .And. F8_TIPO == "D" '	    
+    EndIf
+    
+    If nOrdem == 1
+		oReport:Section(1):SetFilter(cCondicao,IndexKey())
+	Else		
+		oReport:Section(2):SetFilter(cCondicao,IndexKey())
+	EndIf
+#ENDIF		
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Metodo TrPosition()                                                     ³
+//³                                                                        ³
+//³Posiciona em um registro de uma outra tabela. O posicionamento será     ³
+//³realizado antes da impressao de cada linha do relatório.                ³
+//³                                                                        ³
+//³                                                                        ³
+//³ExpO1 : Objeto Report da Secao                                          ³
+//³ExpC2 : Alias da Tabela                                                 ³
+//³ExpX3 : Ordem ou NickName de pesquisa                                   ³
+//³ExpX4 : String ou Bloco de código para pesquisa. A string será macroexe-³
+//³        cutada.                                                         ³
+//³                                                                        ³				
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+TRPosition():New(oSection2,"SF1",1,{|| xFilial("SF1") + (cAliasSF8)->F8_NFORIG + (cAliasSF8)->F8_SERORIG + (cAliasSF8)->F8_FORNECE + (cAliasSF8)->F8_LOJA})
+TRPosition():New(oSection4,"SF1",1,{|| xFilial("SF1") + (cAliasSF8)->F8_NFORIG + (cAliasSF8)->F8_SERORIG + (cAliasSF8)->F8_FORNECE + (cAliasSF8)->F8_LOJA})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Inicio da impressao do fluxo do relatório                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:SetMeter(SF8->(LastRec()))
+
+If nOrdem == 1
+	oSection1:Init()
+	oSection2:Init()
+Else
+	oSection3:Init()
+	oSection4:Init()
+EndIf
+
+dbSelectArea(cAliasSF8)
+While !oReport:Cancel() .And. !(cAliasSF8)->(Eof())
+
+	If oReport:Cancel()
+		Exit
+	EndIf                                     
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Considera filtro de usuario para secao 1 ou 2                ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ     
+	If !Empty(cSF8FilUsr) 
+		If !(&(cSF8FilUsr))
+			(cAliasSF8)->(dbSkip())
+	  		Loop
+  		EndIf
+	EndIf    
+	
+	If !Empty(cSF1FilUsr)         
+		dbSelectArea("SF1")
+		dbSetOrder(1)
+		SF1->(dbSeek(xFilial("SF1")+(cAliasSF8)->F8_NFORIG+(cAliasSF8)->F8_SERORIG+(cAliasSF8)->F8_FORNECE+(cAliasSF8)->F8_LOJA))
+		If !(SF1->&(cSF1FilUsr))
+			(cAliasSF8)->(dbSkip())
+	  		Loop
+  		EndIf
+  		dbSelectArea(cAliasSF8)
+	EndIf    
+	
+    If &(cQuebra) <> cNFE 
+		If nOrdem == 1
+		 	oSection1:PrintLine()
+		 	oSection2:PrintLine()	
+			cNFE := (cAliasSF8)->F8_NFDIFRE+(cAliasSF8)->F8_SEDIFRE+(cAliasSF8)->F8_FORNECE+(cAliasSF8)->F8_LOJA
+		Else
+		 	oSection3:PrintLine()
+		 	oSection4:PrintLine()
+			cNFE := (cAliasSF8)->F8_NFORIG+(cAliasSF8)->F8_SERORIG+(cAliasSF8)->F8_FORNECE+(cAliasSF8)->F8_LOJA
+		EndIf				
+	Else	
+		If nOrdem == 1
+	 		oSection2:PrintLine()
+        Else 
+		 	oSection4:PrintLine()        
+        EndIf
+	EndIf
+	    
+   	DbSelectArea(cAliasSF8)
+   	DbSkip()
+
+    If &(cQuebra) <> cNFE 
+		oReport:SkipLine()
+		oReport:ThinLine() 
+    EndIf
+    
+	oReport:IncMeter()
+  
+EndDo
+
+oSection1:Finish()
+oSection2:Finish()
+oSection3:Finish()
+oSection4:Finish()
+
+(cAliasSF8)->(DbCloseArea())
+
+Return NIL
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR015R3³ Autor ³ Rodrigo de A. Sartorio³ Data ³ 24.05.96 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Rela‡„o entre NFs Originais X NFs Frete/Importa‡„o      	  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ MATR015R3		                                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ Nenhum			                                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ Nenhum                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Marcos Simi.³25/06/98³XXXXXX³Acertos do lay-out,Nro. NF com 12 bytes.  ³±±
+±±³Patricia Sal³20/12/99³XXXXXX³Acertos do Lay-Outo, Fornec. com 20 pos. e³±±
+±±³            ³        ³      ³loja com 4 pos.                           ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Descri‡…o ³ PLANO DE MELHORIA CONTINUA        ³Programa    MATR015.PRW ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ITEM PMC  ³ Responsavel              ³ Data       	| BOPS            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³      01  ³                          ³           	|                 ³±±
+±±³      02  ³                          ³           	|                 ³±±
+±±³      03  ³                          ³           	|                 ³±±
+±±³      04  ³Ricardo Berti             ³ 24/03/2006    | 00000094069     ³±±
+±±³      05  ³                          ³           	|                 ³±±
+±±³      06  ³                          ³           	|                 ³±±
+±±³      07  ³                          ³           	|                 ³±±
+±±³      08  ³                          ³           	|                 ³±±
+±±³      09  ³                          ³           	|                 ³±±
+±±³      10  ³Ricardo Berti             ³ 24/03/2006    | 00000094069     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function MATR015R3()
+
+LOCAL wnrel,cNomeArq
+LOCAL cString	:="SF8"
+Local cPerg		:= "MTR015"
+
+STATIC aTamSXG
+STATIC aTamSXG2
+PRIVATE limite :=80
+PRIVATE titulo := OemToAnsi(STR0001)	//"Relacao entre NFs Originais X NFs Frete/Importacao"
+PRIVATE cDesc1 := OemToAnsi(STR0002)	//"Este relatorio ira imprimir a relacao entre as notas"
+PRIVATE cDesc2 := OemToAnsi(STR0003)	//"fiscais de Frete/Importacao e as notas fiscais que"
+PRIVATE cDesc3 := OemToAnsi(STR0004)	//"originaram as mesmas."
+PRIVATE tamanho:="P"
+PRIVATE aOrd    := {OemToAnsi(STR0005),OemToAnsi(STR0006)}		//"Por NF Frete/Importacao"###"Por NF Original"
+PRIVATE aReturn := { OemToAnsi(STR0007), 1,OemToAnsi(STR0008), 1, 2, 1, "",1 }		//"Zebrado"###"Administracao"
+PRIVATE nomeprog:= "MATR015"
+PRIVATE nLastKey:= 0
+
+m_pag := 01
+wnrel := "MATR015"
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Pergunte(cPerg,.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                 			  ³
+//³ mv_par01      // Lista Nota: (1)Frete (2)Importa‡„o (3)Ambas	  ³
+//³ mv_par02      // De Nota                             	   	  	  ³
+//³ mv_par03      // Ate Nota                            		  	  ³
+//³ mv_par04      // De Serie                            	   	      ³
+//³ mv_par05      // Ate Serie                           		      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica conteudo da variavel STATIC p/ Grupo de Fornec. (001) /Loja (002)³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+aTamSXG  := If(aTamSXG == NIL, TamSXG("001"), aTamSXG)
+aTamSXG2 := If(aTamSXG2 == NIL,TamSXG("002"), aTamSXG2)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Envia controle para a funcao SETPRINT                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.F.,aOrd,,Tamanho)
+
+If ! nLastKey == 27
+
+	SetDefault(aReturn,cString)
+
+	If ! nLastKey == 27
+
+		RptStatus({|lEnd| C015Imp(@lEnd,wnRel,cString)},titulo)
+
+	EndIf
+Endif
+If nLastKey == 27
+	dbClearFilter()
+EndIf
+Return Nil
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ CA015Imp ³ Autor ³ Cristina Ogura        ³ Data ³ 09.11.95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Chamada do Relatorio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ C015Imp(ExpL1,ExpC1,ExpC2)                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpL1 = Variavel p/ controle de interrupcao pelo usuario   ³±±
+±±³          ³ ExpC1 = Codigo do relatorio                                ³±±
+±±³          ³ ExpC2 = Alias do arquivo                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ .T. / .F.                                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR015                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function C015Imp(lEnd,WnRel,cString)
+
+LOCAL cQuebra,cbCont:=0,lFirst:=.T.
+LOCAL cCompara				// Variavel usada para guardar Nota/Serie da quebra
+LOCAL cCampos				// Variavel usada para guardar dados a serem impressos
+LOCAL cDados
+LOCAL nDifTam:=(TamSX3("F1_DOC")[1]-6)			// Diferenca nro bytes da nf - Argentina
+LOCAL nDifNome := (aTamSXG[4]  - aTamSXG[3])  // Diferenca do nro. caract. Nome (min. 6 e max. 20)
+LOCAL nDifLoja := (aTamSXG2[4] - aTamSXG2[3]) //Diferenca do nro. caract. Loja (min. 2 e max. 4)
+
+PRIVATE cIndex,cKey,cCond
+PRIVATE li:=80
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para Impressao do Cabecalho e Rodape    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If aReturn[8] == 1
+	cabec1:= STR0009	//"NF ORIGINAL   SERIE NF   DATA EMISSAO"
+	cabec2:= STR0010	//"              ORIGINAL"
+	cCompara:="F8_NFDIFRE+F8_SEDIFRE+F8_FORNECE+F8_LOJA"
+	cCampos:="F8_NFORIG+F8_SERORIG"
+Else         
+	cabec1:= STR0011	//"NF FRETE/     SERIE NF   DATA EMISSAO   TIPO"
+	cabec2:= STR0012	//"IMPORTACAO"
+	cCompara:="F8_NFORIG+F8_SERORIG+F8_FORNECE+F8_LOJA"
+	cCampos:="F8_NFDIFRE+F8_SEDIFRE"
+EndIf
+
+If mv_par01 != 3
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Cria Indice Condicional para listar de acordo com parametros.³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	cIndex := CriaTrab(nil,.f.)
+	dbSelectArea("SF8")
+	dbSetOrder(aReturn[8])
+	cKey   := IndexKey()
+	If mv_par01 = 1
+		cCond:='F8_FILIAL == "'+xFilial("SF8")+'" .And. F8_TIPO == "F"'
+	Else
+		cCond:='F8_FILIAL == "'+xFilial("SF8")+'" .And. F8_TIPO == "D"'
+	EndIf
+	IndRegua("SF8",cIndex,cKey,,cCond,STR0013)		//"Selecionando Registros..."
+	nIndex := RetIndex("SF8")
+	dbSelectArea("SF8")
+	#IFNDEF TOP
+		dbSetIndex(cIndex+OrdBagExt())
+	#ENDIF
+	dbSetOrder(nIndex+1)
+EndIf
+
+SetRegua(LastRec())            // Total de Elementos da Regua
+dbSelectArea("SF1")
+dbSetOrder(1)
+dbSelectArea("SF8")
+dbSeek(xFilial("SF8"))
+Do While !Eof() .And. F8_FILIAL == xFilial()
+	IncRegua()
+	If lEnd
+		@PROW()+1,001 PSAY STR0014	//"CANCELADO PELO OPERADOR"
+		Exit
+	EndIf
+	If !R215Cond()
+		dbSkip()
+		Loop
+	EndIf
+	cQuebra:=&(cCompara)
+	If lEnd
+		@PROW()+1,001 PSAY STR0014	//"CANCELADO PELO OPERADOR"
+		Exit
+	Endif
+	If li > 60
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,15)
+	Endif
+	If !lFirst
+		@ li,000 PSAY __PrtThinLine()
+		li++
+	EndIf
+	lFirst:=.F.
+	@ li,000 		   	PSAY STR0015 + Substr(cQuebra,1,(6+nDifTam))	//"Nota : "
+	@ li,(013+nDifTam)	PSAY STR0016 + Substr(cQuebra,7+nDifTam,3)		//"Serie : "
+	@ li,(024+nDifTam)	PSAY STR0017 + SF8->F8_FORNECE           			//"Fornecedor : "
+	@ li,(045+nDifTam+If(aTamSXG[1] != aTamSXG[3],nDifNome,0))	PSAY STR0018 + SF8->F8_LOJA				//"Loja : "
+	If aReturn[8] == 1
+		@ li,If(aTamSXG[1] != aTamSXG[3],000,055+nDifTam) PSAY STR0019 + IIF(SF8->F8_TIPO == "F",STR0020,STR0021)		//"Tipo:"###"Frete"###"Desp. Import."
+	EndIf
+	
+	li++
+	While !Eof() .And. F8_FILIAL == xFilial() .And. cQuebra == &(cCompara)
+		IncRegua()
+		If !R215Cond()
+			dbSkip()
+			Loop
+		EndIf
+		cDados:=&(cCampos)
+		If lEnd
+			@PROW()+1,001 PSAY "CANCELADO PELO OPERADOR"
+			Exit
+		Endif
+		If li > 60
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,15)
+		Endif
+		@ li,005				   PSAY Substr(cDados,1,(6+nDifTam))
+		@ li,(019+nDifTam)	PSAY Substr(cDados,7+nDifTam,3)
+		SF1->(dbSeek(xFilial("SF1")+cDados+SF8->F8_FORNECE+SF8->F8_LOJA))
+		If SF1->(Found())
+			@ li,(032+nDifTam) PSAY SF1->F1_EMISSAO
+		EndIf
+		If aReturn[8] == 2
+			@ li,(045+nDifTam) PSAY STR0019+IIF(SF8->F8_TIPO == "F",STR0020,STR0021)		//"Frete"###"Desp. Import."
+		EndIf
+		Li++
+		dbSkip()
+	EndDo
+	Li++
+EndDo
+If !lFirst
+	Roda(CbCont,"","P")
+EndIf
+
+RetIndex("SF8")
+dbSelectArea("SF8")
+dbClearFilter()
+dbSetOrder(1)
+
+If mv_par01 != 3
+	If File(cIndex+OrdBagExt())
+		Ferase(cIndex+OrdBagExt())
+	Endif
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Se em disco, desvia para Spool                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If aReturn[5] == 1
+	Set Printer To
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return Nil
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ R215Cond ³ Autor ³ Rodrigo de A. Sartorio³ Data ³ 24.05.96 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Valida se Nota deve ser listada ou n„o                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ R215Cond(void)                                             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ Nenhum			                                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ .T. / .F.                                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR015                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function R215Cond()
+
+LOCAL lRet	:=.T.
+If aReturn[8] == 1
+	If SF8->F8_NFDIFRE < mv_par02 .Or. SF8->F8_NFDIFRE > mv_par03
+		lRet:=.F.
+	EndIf
+	If SF8->F8_SEDIFRE < mv_par04 .Or. SF8->F8_SEDIFRE > mv_par05
+		lRet:=.F.
+	EndIf
+Else
+	If SF8->F8_NFORIG < mv_par02 .Or. SF8->F8_NFORIG > mv_par03
+		lRet:=.F.
+	EndIf
+	If SF8->F8_SERORIG < mv_par04 .Or. SF8->F8_SERORIG > mv_par05
+		lRet:=.F.
+	EndIf
+EndIf
+Return(lRet)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ AjustaSX1³ Autor ³ Totvs S/A             ³ Data ³ 25/03/10 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Ajusta Dicionario de Dados                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR441			                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function AjustaSX1()
+
+Local aAreaAnt	:= GetArea()
+Local aAreaSX1	:= SX1->(GetArea())
+Local aAreaSX3	:= SX3->(GetArea())
+Local aSXB		:= {}
+Local nTamSX1   := Len(SX1->X1_GRUPO)
+Local nTamSXB   := Len(SXB->XB_ALIAS)
+Local aEstrut	:= {"XB_ALIAS","XB_TIPO","XB_SEQ","XB_COLUNA","XB_DESCRI","XB_DESCSPA","XB_DESCENG","XB_CONTEM"}
+Local i			:= 1
+Local j			:= 1
+
+Aadd(aSXB,{"SD1NF","1","01","DB"	,"Documento de Entrada"	,"Factura de Entrada"	,"Inflow Invoice"		,"SD1"       		})
+Aadd(aSXB,{"SD1NF","2","01","01"	,"Documento"			,"Factura"				,"Document"				,"SD1"       		})
+Aadd(aSXB,{"SD1NF","4","01","01"	,"Documento"			,"Factura"				,"Document"				,"SD1->D1_DOC"  	})
+Aadd(aSXB,{"SD1NF","4","01","02"	,"Serie"				,"Serie"				,"Series"				,"SD1->D1_SERIE"	})
+Aadd(aSXB,{"SD1NF","4","01","03"	,"Fornecedor"			,"Proveedor"			,"Supplier"				,"SD1->D1_FORNECE"	})
+Aadd(aSXB,{"SD1NF","4","01","04"	,"Loja"		   			,"Tienda"				,"Unit"					,"SD1->D1_LOJA"		})
+Aadd(aSXB,{"SD1NF","4","01","05"	,"Item"					,"Item"					,"Item"					,"SD1->D1_ITEMORI"	})
+Aadd(aSXB,{"SD1NF","5","01",""		,""						,""						,""						,"SD1->D1_DOC"		})
+
+dbSelectArea("SXB")
+dbSetOrder(1)
+For i := 1 To Len(aSXB)
+	If !Empty(aSXB[i][1])
+		If !dbSeek(PADR(aSXB[i,1],nTamSXB)+aSXB[i,2]+aSXB[i,3]+aSXB[i,4])
+			lSXB := .T.
+			RecLock("SXB",.T.)
+			For j:=1 To Len(aSXB[i])
+				If !Empty(FieldName(FieldPos(aEstrut[j])))
+					FieldPut(FieldPos(aEstrut[j]),aSXB[i,j])
+				EndIf
+			Next j
+			dbCommit()
+			MsUnLock()
+		EndIf
+	EndIf
+Next i
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Ajustando o dicionario SX1        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SX1")
+dbSetOrder(1)
+If dbSeek(PADR('MTR015',nTamSX1)+"02") .And. Empty(SX1->X1_F3)
+	RecLock("SX1",.F.)
+	Replace X1_F3 With 'SD1NF'
+	MsUnLock()
+EndIf
+If dbSeek(PADR('MTR015',nTamSX1)+"03") .And. Empty(SX1->X1_F3)
+	RecLock("SX1",.F.)
+	Replace X1_F3 With 'SD1NF'
+	MsUnLock()
+EndIf
+RestArea(aAreaSX1)
+RestArea(aAreaSX3)
+RestArea(aAreaAnt)
+Return

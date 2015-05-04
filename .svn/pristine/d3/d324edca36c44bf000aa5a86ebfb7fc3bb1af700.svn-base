@@ -1,0 +1,1026 @@
+#INCLUDE "MATR946.CH"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³Matr946   ³ Autor ³ Andressa Fagundes     ³ Data ³12/06/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Relacao de Retencao de IRRF      						  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ ATUALIZACOES SOFRIDAS DESDE A CONSTRUCAO INICIAL.                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ PROGRAMADOR  ³ DATA   ³ BOPS ³  MOTIVO DA ALTERACAO                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³              ³        ³      ³                                        ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Function Matr946()
+
+Local oReport
+Local	cPerg		:=	"MTR946"
+
+If FindFunction("TRepInUse") .And. TRepInUse()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Interface de impressao                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	AjustaSX1 (cPerg)	
+	oReport	:= ReportDef()
+	oReport:PrintDialog()
+Else
+	Matr946R3()
+EndIf
+
+Return
+                        
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportDef ³ Autor ³Andressa Fagundes      ³ Data ³12/06/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpO1: Objeto do relatório                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+Local oReport
+Local oRegCaix
+Local oRegNorm
+Local cAlias := GetNextAlias()
+Local oTotal1
+Local oTotal2
+Local oTotal3
+Local oTotal4
+Local oTotal5
+Local oTotal6
+Local oTotal7
+Local oTotal8
+Local oTotal9
+Local oTotal11
+Local oTotal12
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Componente de impressao³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport := TReport():New("MATR946",STR0001,"MTR946", {|oReport| ReportPrint(oReport,cAlias,oRegCaix,oTotal1,oTotal2,oTotal3,oTotal4,oTotal5,oTotal6,oTotal7,oTotal8,oTotal9,oTotal11,oTotal12)},STR0002)
+oReport:SetTotalInLine(.F.)
+oReport:SetLandscape()
+Pergunte("MTR946",.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Secao 1 - Regime de Caixa   	 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oRegCaix:= TRSection():New(oReport,OemToAnsi(STR0041),{"TRB"},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)
+oRegCaix:SetTotalInLine(.F.)                           
+oRegCaix:SetTotalText("Total Geral:")
+TRCell():New(oRegCaix,"TRB_PREFIX"		,"TRB"	,"Pref" ,/*Picture*/,3,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_NUMERO"		,"TRB"	,"Numero" ,/*Picture*/,TamSX3("F2_DOC")[1],/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_PARCEL"		,"TRB"	,"Par." ,/*Picture*/,2,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_TIPO"	   	,"TRB"	,"Tp" ,/*Picture*/,2,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_CLIENT"		,"TRB"	,"Cliente/Lj." ,/*Picture*/,9,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"A1_NOME"			,"TRB"	,"Razao Social",/*Picture*/,18,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_EMISSA"		,"TRB"	,"Emissao" ,/*Picture*/,10,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_VENCTO"		,"TRB"	,"Venc." ,/*Picture*/,10,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_DTPAG0"		,"TRB"	,"Dt.Pagto" ,/*Picture*/,10,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_VLBRUT"		,"TRB"	,"Valor Bruto" ,"@E 9,999,999.99",12,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_VLFAT"		,"TRB"	,"Valor Faturado" ,"@E 9,999,999.99",12,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_VLPAGO"		,"TRB"	,"Valor Recebido" ,"@E 9,999,999.99",12,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_RETEN"		,"TRB"	,"Retencoes" ,"@E 9,999,999.99",12,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_BSPIS"		,"TRB"	,"Bs Apuracao" ,"@E 9,999,999.99",12,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_PIS"			,"TRB"	,"Bs Pis/Cof" ,"@E 9,999,999.99",12,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_SALDO"		,"TRB"	,"Saldo" ,"@E 9,999,999.99",12,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_VLPIS"		,"TRB"	,"Vlr Pis" ,"@E 9,999,999.99",12,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"TRB_VLCOF"		,"TRB"	,"Vlr Cof" ,"@E 9,999,999.99",12,/*lPixel*/,/*{||  }*/)
+
+//Totalizadores
+oTotal1:= TRFunction():New(oRegCaix:Cell("TRB_VLBRUT"),Nil,"SUM",/*oBreak1*/,,"@E 999,999,999.99",/*uFormula*/,.T.,.F.)
+oTotal2:= TRFunction():New(oRegCaix:Cell("TRB_VLFAT"),Nil,"SUM",/*oBreak1*/,,"@E 999,999,999.99",/*uFormula*/,.T.,.F.)
+oTotal3:= TRFunction():New(oRegCaix:Cell("TRB_VLPAGO"),Nil,"SUM",/*oBreak1*/,,"@E 999,999,999.99",/*uFormula*/,.T.,.F.)
+oTotal4:= TRFunction():New(oRegCaix:Cell("TRB_RETEN"),Nil,"SUM",/*oBreak1*/,,"@E 999,999,999.99",/*uFormula*/,.T.,.F.)
+oTotal5:= TRFunction():New(oRegCaix:Cell("TRB_BSPIS"),Nil,"SUM",/*oBreak1*/,,"@E 999,999,999.99",/*uFormula*/,.T.,.F.)
+oTotal6:= TRFunction():New(oRegCaix:Cell("TRB_VLPIS"),Nil,"SUM",/*oBreak1*/,,"@E 999,999,999.99",/*uFormula*/,.T.,.F.)
+oTotal7:= TRFunction():New(oRegCaix:Cell("TRB_VLCOF"),Nil,"SUM",/*oBreak1*/,,"@E 999,999,999.99",/*uFormula*/,.T.,.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Secao 2 - Regime Normal   	 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oRegNorm:= TRSection():New(oReport,OemToAnsi(STR0042),{"TRB"},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)
+oRegNorm:SetTotalInLine(.F.)                           
+oRegNorm:SetTotalText("Total Geral:")
+TRCell():New(oRegNorm,"TRB_PREFIX"		,"TRB"	,"Pref" ,/*Picture*/,3,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"TRB_NUMERO"		,"TRB"	,"Numero" ,/*Picture*/,TamSX3("F2_DOC")[1],/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"TRB_PARCEL"		,"TRB"	,"Par." ,/*Picture*/,2,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"TRB_TIPO"	   	,"TRB"	,"Tp" ,/*Picture*/,2,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"TRB_CLIENT"		,"TRB"	,"Cliente/Lj." ,/*Picture*/,9,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"A1_NOME"			,"TRB"	,"Razao Social",/*Picture*/,18,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"TRB_EMISSA"		,"TRB"	,"Emissao" ,/*Picture*/,10,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"TRB_VENCTO"		,"TRB"	,"Venc." ,/*Picture*/,10,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"TRB_DTPAG0"		,"TRB"	,"Dt.Pagto" ,/*Picture*/,10,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"TRB_VALOR"		,"TRB"	,"Valor Bruto" ,"@E 99,999,999.99",13,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"nVlPagto"		,"TRB"	,"Vlr Orig Liq" ,"@E 99,999,999.99",13,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"TRB_VALTIT"		,"TRB"	,"Valor Recebido" ,"@E 99,999,999.99",13,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"TRB_SALDO"		,"TRB"	,"Saldo" ,"@E 99,999,999.99",13,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"TRB_VLPIS"		,"TRB"	,"Deducao PIS" ,"@E 99,999,999.99",13,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"TRB_VLCOF"		,"TRB"	,"Deducao COFINS" ,"@E 99,999,999.99",13,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"TRB_SCORGP"		,"TRB"	,"Mod" ,/*Picture*/,11,/*lPixel*/,/*{||  }*/)
+
+//Totalizadores
+oTotal8:= TRFunction():New(oRegNorm:Cell("TRB_VALOR"),Nil,"SUM",/*oBreak1*/,,"@E 999,999,999.99",/*uFormula*/,.T.,.F.)
+oTotal9:= TRFunction():New(oRegNorm:Cell("nVlPagto"),Nil,"SUM",/*oBreak1*/,,"@E 999,999,999.99",/*uFormula*/,.T.,.F.)
+oTotal11:= TRFunction():New(oRegNorm:Cell("TRB_VLPIS"),Nil,"SUM",/*oBreak1*/,,"@E 999,999,999.99",/*uFormula*/,.T.,.F.)
+oTotal12:= TRFunction():New(oRegNorm:Cell("TRB_VLCOF"),Nil,"SUM",/*oBreak1*/,,"@E 999,999,999.99",/*uFormula*/,.T.,.F.)
+
+Return(oReport)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrin³ Autor ³Andressa Fagundes      ³ Data ³12/06/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportPrint devera ser criada para todos  ³±±
+±±³          ³os relatorios que poderao ser agendados pelo usuario.       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport,cAlias,oRegCaix,oTotal1,oTotal2,oTotal3,oTotal4,oTotal5,oTotal6,oTotal7,oTotal8,oTotal9,oTotal11,oTotal12)
+
+Local	cChave		:=	""	
+Local	cFiltro		:=	""
+Local	cArqInd		:=	""
+Local	aTrb		:=	{}
+Local	dDtPagto	:=	CToD ("  /  /  ")
+Local	nVlPagto	:=	0
+Local	nValTit		:=	0
+Local	nI			:=	0
+Local	lLucPres    := If(mv_par05==1,.T.,.F.) // Apuracao atraves do Lucro Presumido (Regime de Caixa)
+Local	oRegNorm	:= oReport:Section(2)
+           
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Definidas as celulas de quebra fora do reportdef, para nao permitir a manipulacao ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+TRCell():New(oRegCaix,"DIA"		,"TRB"	,"Dia" ,/*Picture*/,,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegCaix,"MES"		,"TRB"	,"Mes" ,/*Picture*/,,/*lPixel*/,/*{||  }*/)
+
+TRCell():New(oRegNorm,"DIA"		,"TRB"	,"Dia" ,/*Picture*/,,/*lPixel*/,/*{||  }*/)
+TRCell():New(oRegNorm,"MES"		,"TRB"	,"Mes" ,/*Picture*/,,/*lPixel*/,/*{||  }*/)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Secao 1 - Regime de Caixa   	 					³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If lLucPres
+
+    Ma996Caixa(MV_PAR01, MV_PAR02, .T., @aTrb)
+                                      
+	If (MV_PAR04==1 .Or. MV_PAR04==2) // Se existir quebra
+		aAdd (aTrb, {aTrb[1][1], CriaTrab (,.F.)})
+		nI	:=	Len (aTrb)
+   		DbSelectArea (aTrb[nI][1])
+		(aTrb[nI][1])->(DbGoTop ())
+	 	IndRegua (aTrb[nI][1], aTrb[nI][2],  "DToS (TRB_DTPAG0)")
+	Else
+		nI	:=	1
+	EndIf    
+
+	oReport:Section(1):Cell("TRB_CLIENT"):SetBlock({|| (aTrb[nI][1])->TRB_CLIENT+"/"+(aTrb[nI][1])->TRB_LOJA})
+	oReport:Section(1):Cell("MES"):SetBlock({|| SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),5,2)+'/'+SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),1,4)})
+	oReport:Section(1):Cell("DIA"):SetBlock({|| SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),7,2)+'/'+SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),5,2)+'/'+SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),1,4)})
+	
+    //                                             
+	oReport:Section(1):Cell("MES"):Disable()
+	oReport:Section(1):Cell("DIA"):Disable()
+
+	If (MV_PAR04==1)  //Dia
+		oBreak := TRBreak():New(oRegCaix,oRegCaix:Cell("DIA"),"DIA :",.F.)
+    Elseif (MV_PAR04==2) //Mes
+        oBreak := TRBreak():New(oRegCaix,oRegCaix:Cell("MES"),"MES: ",.F.)
+    Endif
+
+	If (MV_PAR04==1 .Or. MV_PAR04==2) // Se existir quebra	
+		oTotal1:SetBreak(oBreak)
+		oTotal2:SetBreak(oBreak)
+		oTotal3:SetBreak(oBreak)
+		oTotal4:SetBreak(oBreak)
+		oTotal5:SetBreak(oBreak)
+		oTotal6:SetBreak(oBreak)
+		oTotal7:SetBreak(oBreak)
+	Endif	
+	//
+	DbSelectArea (aTrb[nI][1])
+	(aTrb[nI][1])->(DbGoTop ())             	
+	oReport:SetMeter((aTrb[nI][1])->(LastRec()))
+	oReport:Section(1):Init()
+	
+	While !(aTrb[nI][1])->(Eof ()) .And. !oReport:Cancel()
+	
+		If oReport:Cancel()
+			Exit
+		EndIf		
+		
+		DbSelectArea ("SA1")
+		SA1->(DbSetOrder (1))
+		SA1->(MsSeek (xFilial ("SA1")+(aTrb[nI][1])->TRB_CLIENT+(aTrb[nI][1])->TRB_LOJA))
+		
+		oReport:Section(1):Cell("A1_NOME"):SetBlock({|| Iif (SA1->(Eof ()), Replicate ("-", 17), SUBS(SA1->A1_NOME,1,17))})
+		oReport:Section(1):Init()
+		oReport:Section(1):PrintLine()
+		oReport:IncMeter()
+		
+       	If (MV_PAR04==1) //Dia
+	        oBreak:SetTitle("DIA: " +SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),7,2)+'/'+SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),5,2)+'/'+SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),1,4))
+		Elseif (MV_PAR04==2) //Mes
+			oBreak:SetTitle("MES: " +SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),5,2)+'/'+SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),1,4))
+		Endif
+		
+		DbSelectArea(aTrb[nI][1])
+		(aTrb[nI][1])->(DbSkip())
+	Enddo
+
+	oReport:Section(1):Finish()
+	oReport:IncMeter()
+
+	//Fecho o arquivo aberto anteriormente
+    Ma996Caixa(MV_PAR01, MV_PAR02, .T., @aTrb)
+Else
+	FsCalcRet (MV_PAR01, MV_PAR02, .T., @aTrb,,,,,,,Iif(MV_PAR06==1,.T.,.F.),,.T.)
+	//
+	If (MV_PAR04==1 .Or. MV_PAR04==2) // Se existir quebra
+		aAdd (aTrb, {aTrb[1][1], CriaTrab (,.F.)})
+		nI	:=	Len (aTrb)
+   		DbSelectArea (aTrb[nI][1])
+		(aTrb[nI][1])->(DbGoTop ())                                                                     
+	 	IndRegua (aTrb[nI][1], aTrb[nI][2],  "DToS(TRB_DTPAG0)")
+	Else
+		nI	:=	1
+	EndIf
+
+	oReport:Section(2):Cell("MES"):SetBlock({|| SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),5,2)+'/'+SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),1,4)})
+	oReport:Section(2):Cell("DIA"):SetBlock({|| SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),7,2)+'/'+SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),5,2)+'/'+SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),1,4)})
+    oReport:Section(2):Cell("MES"):Disable()
+    oReport:Section(2):Cell("DIA"):Disable()
+
+	If (MV_PAR04==1)  //Dia
+		oBreak := TRBreak():New(oRegNorm,oRegNorm:Cell("DIA"),"DIA :",.F.)
+    Elseif (MV_PAR04==2) //Mes
+        oBreak := TRBreak():New(oRegNorm,oRegNorm:Cell("MES"),"MES: ",.F.)
+    Endif
+    //
+	If (MV_PAR04==1 .Or. MV_PAR04==2) // Se existir quebra	
+		oTotal8:SetBreak(oBreak)
+		oTotal9:SetBreak(oBreak)
+		oTotal11:SetBreak(oBreak)
+		oTotal12:SetBreak(oBreak)
+	Endif	
+
+	DbSelectArea (aTrb[nI][1])
+	(aTrb[nI][1])->(DbGoTop ())             	
+	oReport:SetMeter((aTrb[nI][1])->(LastRec()))
+	oReport:Section(2):Init()
+	
+	cChvSE1 := ""
+	While !(aTrb[nI][1])->(Eof ()) .And. !oReport:Cancel()
+	
+		If oReport:Cancel()
+			Exit
+		EndIf		                   
+		
+		If cChvSE1 == (aTrb[nI][1])->TRB_PREFIX+(aTrb[nI][1])->TRB_NUMERO+(aTrb[nI][1])->TRB_PARCEL+(aTrb[nI][1])->TRB_TIPO+(aTrb[nI][1])->TRB_CLIENT+(aTrb[nI][1])->TRB_LOJA
+			(aTrb[nI][1])->(DbSkip ())
+			Loop        	
+		EndIf
+
+		//Filtro conforme parametros
+		If !((MV_PAR03==1) .And. ("1"$(aTrb[nI][1])->TRB_SCORGP) .Or.;
+			(MV_PAR03==2) .And. ("2"$(aTrb[nI][1])->TRB_SCORGP) .Or.;
+			(MV_PAR03==3))
+			//
+			(aTrb[nI][1])->(DbSkip ())
+			Loop
+		EndIf
+		//
+		cChvSE1 := (aTrb[nI][1])->TRB_PREFIX+(aTrb[nI][1])->TRB_NUMERO+(aTrb[nI][1])->TRB_PARCEL+(aTrb[nI][1])->TRB_TIPO+(aTrb[nI][1])->TRB_CLIENT+(aTrb[nI][1])->TRB_LOJA
+		dDtPagto	:=	CToD ("  /  /  ")
+		nVlPagto	:=	0
+		nValTit		:=	0
+		//
+		DbSelectArea ("SA1")
+		SA1->(DbSetOrder (1))
+		SA1->(MsSeek (xFilial ("SA1")+(aTrb[nI][1])->TRB_CLIENT+(aTrb[nI][1])->TRB_LOJA))
+		oReport:Section(2):Cell("A1_NOME"):SetBlock({|| Iif (SA1->(Eof ()), Replicate ("-", 17), SUBS(SA1->A1_NOME,1,17))})
+		oReport:Section(2):Cell("TRB_SCORGP"):SetBlock({|| Iif ("1"$(aTrb[nI][1])->TRB_SCORGP, STR0011, STR0012)})
+		//
+		//Vefico baixas para quando nao for recebimento de orgaos publicos (E1_SCORGP=="2")
+		If ("2"$(aTrb[nI][1])->TRB_SCORGP)
+			//
+			DbSelectArea ("SE5")
+			cArqInd	:= CriaTrab(,.F.)
+			cFiltro := "E5_FILIAL=='"+xFilial("SE5")+"'.And."
+			cFiltro += "E5_PREFIXO=='"+(aTrb[nI][1])->TRB_PREFIX+"'.And."
+			cFiltro += "E5_NUMERO=='"+(aTrb[nI][1])->TRB_NUMERO+"'.And."
+			cFiltro += "E5_PARCELA=='"+(aTrb[nI][1])->TRB_PARCEL+"'.And."
+			cFiltro += "E5_TIPO=='"+(aTrb[nI][1])->TRB_TIPO+"'.And."
+			cFiltro += "E5_CLIFOR=='"+(aTrb[nI][1])->TRB_CLIENT+"'.And."
+			cFiltro += "E5_LOJA=='"+(aTrb[nI][1])->TRB_LOJA+"'.And."			
+			cFiltro += "E5_MOTBX != '"+Space(TamSx3 ("E5_MOTBX")[1])+"'.And."
+			cFiltro += "(((E5_TIPODOC=='VL'.Or.E5_TIPODOC=='BA'.Or.E5_TIPODOC=='V2'.Or.E5_TIPODOC=='LJ').And.E5_RECPAG=='R').Or."
+			cFiltro += "(E5_TIPODOC=='ES' .And. E5_RECPAG=='P')) .And. E5_SITUACA==' '"
+			cChave   := "E5_FILIAL+DTOS(E5_DATA)+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA+E5_MOTBX+E5_SEQ"
+			IndRegua ("SE5", cArqInd, cChave,, cFiltro)
+			nIndex := RetIndex("SE5")
+			#IFNDEF TOP
+				dbSetIndex(cArqInd+OrdBagExt())
+			#ENDIF
+			DbSetOrder(nIndex+1)
+			//
+			SE5->(DbGoTop ())
+			Do While !SE5->(Eof ())
+				//Verifica se tem baixa cancelada para nao duplicar o valor no relatorio
+			   	If TemBxCanc(SE5->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA+E5_SEQ))
+					SE5->( dbskip())
+				  	Loop
+			   	EndIf        
+
+				dDtPagto	:=	SE5->E5_DATA
+				nVlPagto	+=	SE5->E5_VALOR
+				nValTit		:=	SE5->E5_VALOR
+				//
+				SE5->(DbSkip ())
+			EndDo
+		Else
+			dDtPagto	:=	(aTrb[nI][1])->TRB_DTPAG0
+			nVlPagto	:=	(aTrb[nI][1])->TRB_VLPAGO
+			nValTit		:=	(aTrb[nI][1])->TRB_VALTIT
+		EndIf
+
+		oReport:Section(2):Cell("TRB_CLIENT"):SetBlock({|| (aTrb[nI][1])->TRB_CLIENT+"/"+(aTrb[nI][1])->TRB_LOJA})
+		oReport:Section(2):Cell("TRB_DTPAG0"):SetBlock({|| dDtPagto})
+		oReport:Section(2):Cell("TRB_VALOR"):SetBlock({|| (aTrb[nI][1])->TRB_VALOR})
+		oReport:Section(2):Cell("nVlPagto"):SetBlock({|| nVlPagto})
+		
+		oReport:Section(2):Init()
+		oReport:Section(2):PrintLine()
+		oReport:IncMeter()
+		
+       	If (MV_PAR04==1) //Dia                                           
+	        oBreak:SetTitle("DIA: " +SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),7,2)+'/'+SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),5,2)+'/'+SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),1,4))
+		Elseif (MV_PAR04==2) //Mes
+			oBreak:SetTitle("MES: " +SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),5,2)+'/'+SubStr(DToS((aTrb[nI][1])->TRB_DTPAG0),1,4))
+		Endif
+		
+		DbSelectArea(aTrb[nI][1])
+		(aTrb[nI][1])->(DbSkip())
+	EndDo
+	oReport:Section(2):Finish()
+	oReport:IncMeter()
+
+	//Fecho o arquivo aberto anteriormente
+	FsCalcRet (MV_PAR01, MV_PAR02, .T., @aTrb)
+   
+Endif
+
+Return Nil
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³MATR946R3 ³ Autor ³Gustavo G. Rueda       ³ Data ³28/10/2005³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³Relacao de Retencao de IRRF                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³MATR946()       			                   	              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum   				     	               		          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³NIL            				     	               		  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³SIGAFIS                                                     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function MATR946R3 ()
+	Local	wnrel		:=	"MATR946"	
+	Local	cDesc1		:=	STR0001	//"Extrato das Deduções de PIS/COFINS."
+	Local	cDesc2		:=	STR0002	//"Emite um extrato dos títulos que compõe os valores de Deduções de PIS/COFINS na Apuração."
+	Local	cDesc3		:=	""
+	Local	Tamanho		:=	"G" 
+	Local	cAliasSe1	:=	""
+	Local	Titulo		:=	STR0003	//"Extrato das Deduções de PIS/COFINS."
+	Local	lRet		:=	.T.
+	Local	cPerg		:=	"MTR946"
+	Local	limite		:=	220
+	//
+	Private	lEnd		:=	.F.		//'Controle de cancelamento do relatorio'
+	Private	aReturn		:=	{STR0004, 1, STR0005, 1, 2, 1, '', 1}		//"Zebrado"###"Administracao"
+	Private	nLastKey	:=	0  	//' Controla o cancelamento da SetPrint e SetDefault'
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Carrega as perguntas selecionadas                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ mv_par01 - Periodo De    ?                                   ³
+	//³ mv_par02 - Periodo Ate   ?                                   ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	AjustaSX1 (cPerg)
+	Pergunte (cPerg, .T.)
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Envia controle para a funcao SETPRINT                        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	wnrel	:=	SetPrint (cAliasSe1, wnrel, cPerg, @titulo, cDesc1, cDesc2, cDesc3, .F., "",, Tamanho)
+	//
+	If (nLastKey==27)
+		Set Filter to
+		Return (lRet)
+	Endif
+	//
+	SetDefault (aReturn, cAliasSe1)
+	//
+	If (nLastKey==27)
+		Set Filter to
+		Return (lRet)
+	Endif
+	//
+	RptStatus ({|| R946Imp (wnRel, cAliasSe1, Titulo, Tamanho, limite)}, Titulo)
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Se impressao em disco, chama o gerenciador de impressao...          ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If (aReturn[5]==1)
+		DbCommitAll ()
+		OurSpool (wnrel)
+	Endif
+	MS_FLUSH()
+Return (lRet)
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³R946Imp   ³ Autor ³Gustavo G. Rueda       ³ Data ³28/10/2005³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³Imprime a Relacao de Retencao de IRRF                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpL1 - Variavel de controle para cancelamento do relatorio ³±±
+±±³          ³ExpC1 - Nome do Arquivo (TMSR430)                           ³±±
+±±³          ³ExpC2 - Alias utilizado na Filtragem (DTY)                  ³±±
+±±³          ³ExpC3 - Titulo do Relatorio                                 ³±±
+±±³          ³ExpN1 - Tamanho do Relatorio (G)                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³NIL                                                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³SIGAFIS                                                     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function R946Imp (wnRel, cAliasSe1, Titulo, Tamanho, limite)
+	Local		cChave		:=	""	
+	Local		Cabec1 		:= 	""
+	Local		Cabec2 		:= 	""
+	Local		aLay		:=	R946Lay (@Cabec1, @Cabec2)	
+	Local 		nTipo		:= 	Iif (aReturn[4]==1, 15, 18)	//Inicializa os codigos de caracter Comprimido/Normal da impressora	
+	Local		lRet		:=	.T.
+	Local		aTrb		:=	{}
+	Local		aBaseReg	:=	{}
+	Local		dDtPagto	:=	CToD ("  /  /  ")
+	Local		nVlPagto	:=	0
+	Local		nValTit		:=	0
+	Local		aTotaliza	:=	{"", 0, 0, 0, 0 }
+	Local		aTotalizaG	:=	{"", 0, 0, 0, 0 }
+	Local		aTotaliza1	:=	{"", 0, 0, 0, 0, 0, 0, 0 }
+	Local		aTotalizaG1	:=	{"", 0, 0, 0, 0, 0, 0, 0 }
+	Local		nMaxPag		:=	60
+	Local		cQuebra		:=	"''"
+	Local		cLblQuebra	:=	""
+	Local		cChaveQ		:=	""
+	Local		nI			:=	0
+	Local		lFirst		:=	.T.
+	Local		cFiltro		:=	""
+	Local		cArqInd		:=	""
+	Local		lMoviment	:=	.F.
+	Local 		lLucPres    := If(mv_par05==1,.T.,.F.) // Apuracao atraves do Lucro Presumido (Regime de Caixa)
+	//
+	Private 	m_pag  		:= 	1
+	Private 	li   		:= 	99
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Funcao que me retorna o TRB jah alimentado.³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+If !lLucPres
+	FsCalcRet (MV_PAR01, MV_PAR02, .T., @aTrb,,,,,,,iIF(MV_PAR06==1,.T.,.F.))
+	//
+	//Quebra quando houver
+	If (MV_PAR04==1 .Or. MV_PAR04==2)
+		If (MV_PAR04==1)
+			cQuebra		:=	"SubStr (DToS (TRB_DTPAG0), 7, 2)+'/'+SubStr (DToS (TRB_DTPAG0), 5, 2)+'/'+SubStr (DToS (TRB_DTPAG0), 1, 4)"
+			cLblQuebra	:=	"Dia :"
+		Else
+			cQuebra		:=	"SubStr (DToS (TRB_DTPAG0), 5, 2)+'/'+SubStr (DToS (TRB_DTPAG0), 1, 4)"
+			cLblQuebra	:=	"Mês :"
+		EndIf
+		//
+		aAdd (aTrb, {aTrb[1][1], CriaTrab (,.F.)})
+		nI	:=	Len (aTrb)
+	 	IndRegua (aTrb[nI][1], aTrb[nI][2],  "DToS (TRB_DTPAG0)")
+	Else
+		nI	:=	1
+	EndIf	
+	//
+	DbSelectArea (aTrb[nI][1])
+		(aTrb[nI][1])->(DbGoTop ())
+	cChaveQ	:=	&cQuebra
+	cChvSE1 := ""
+	Do While !(aTrb[nI][1])->(Eof ())
+		//
+		//Funcao que verifica o cancelamento do processamento da rotina
+		If Interrupcao(lEnd)
+			FsCalcRet (MV_PAR01, MV_PAR02, .T., @aTrb)
+			Return (lRet)
+		Endif
+		//
+		//Filtro conforme parametros
+		If !((MV_PAR03==1) .And. ("1"$(aTrb[nI][1])->TRB_SCORGP) .Or.;
+			(MV_PAR03==2) .And. ("2"$(aTrb[nI][1])->TRB_SCORGP) .Or.;
+			(MV_PAR03==3))
+			//
+			(aTrb[nI][1])->(DbSkip ())
+			If (lFirst)
+				cChaveQ	:=	&cQuebra
+			EndIf
+			Loop
+		EndIf
+		If cChvSE1 == (aTrb[nI][1])->TRB_PREFIX+(aTrb[nI][1])->TRB_NUMERO+(aTrb[nI][1])->TRB_PARCEL+(aTrb[nI][1])->TRB_TIPO+(aTrb[nI][1])->TRB_CLIENT+(aTrb[nI][1])->TRB_LOJA
+			(aTrb[nI][1])->(DbSkip ())
+			Loop        	
+		EndIf
+		
+		cChvSE1 := (aTrb[nI][1])->TRB_PREFIX+(aTrb[nI][1])->TRB_NUMERO+(aTrb[nI][1])->TRB_PARCEL+(aTrb[nI][1])->TRB_TIPO+(aTrb[nI][1])->TRB_CLIENT+(aTrb[nI][1])->TRB_LOJA
+		//
+		lMoviment	:=	.T.
+		lFirst 		:=	.F.
+		dDtPagto	:=	CToD ("  /  /  ")
+		nVlPagto	:=	0
+		nValTit		:=	0
+		//		
+		//Consistencia para a quebra
+		If ((aTrb[nI][1])->&(cQuebra)<>cChaveQ)
+			ImpTot (aTotaliza, aLay)
+			aTotaliza	:=	{"", 0, 0, 0, 0}
+			cChaveQ		:=	&cQuebra
+		EndIf
+		//
+		//Consistencia para a mudanca de pagina
+		If (li>nMaxPag)
+			@ 000,000 PSAY AvalImp (limite)
+			Cabec (Titulo, Cabec1, Cabec2, wnRel, Tamanho, nTipo)
+		EndIf
+		//
+		DbSelectArea ("SA1")
+			SA1->(DbSetOrder (1))
+		SA1->(MsSeek (xFilial ("SA1")+(aTrb[nI][1])->TRB_CLIENT+(aTrb[nI][1])->TRB_LOJA))
+		//
+		//Vefico baixas para quando nao for recebimento de orgaos publicos (E1_SCORGP=="2")
+		If ("2"$(aTrb[nI][1])->TRB_SCORGP)
+			//
+			DbSelectArea ("SE5")
+			cArqInd	:= CriaTrab(,.F.)
+			cFiltro := "E5_FILIAL=='"+xFilial("SE5")+"'.And."
+			cFiltro += "E5_PREFIXO=='"+(aTrb[nI][1])->TRB_PREFIX+"'.And."
+			cFiltro += "E5_NUMERO=='"+(aTrb[nI][1])->TRB_NUMERO+"'.And."
+			cFiltro += "E5_PARCELA=='"+(aTrb[nI][1])->TRB_PARCEL+"'.And."
+			cFiltro += "E5_TIPO=='"+(aTrb[nI][1])->TRB_TIPO+"'.And."
+			cFiltro += "E5_CLIFOR=='"+(aTrb[nI][1])->TRB_CLIENT+"'.And."
+			cFiltro += "E5_LOJA=='"+(aTrb[nI][1])->TRB_LOJA+"'.And."			
+			cFiltro += "E5_MOTBX != '"+Space(TamSx3 ("E5_MOTBX")[1])+"'.And."
+			cFiltro += "((E5_TIPODOC $ ('VL,BA,V2,LJ') .And. E5_RECPAG=='R') .Or. "
+			cFiltro += "(E5_TIPODOC=='ES' .And. E5_RECPAG=='P')) .And. E5_SITUACA==' '"
+			cChave   := "E5_FILIAL+DTOS(E5_DATA)+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA+E5_MOTBX+E5_SEQ"
+			IndRegua ("SE5", cArqInd, cChave,, cFiltro)
+			nIndex := RetIndex("SE5")
+			#IFNDEF TOP
+				dbSetIndex(cArqInd+OrdBagExt())
+			#ENDIF
+			DbSetOrder(nIndex+1)
+			//
+			SE5->(DbGoTop ())
+			Do While !SE5->(Eof ())
+				//Verifica se tem baixa cancelada para nao duplicar o valor no relatorio
+			   	If TemBxCanc(SE5->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA+E5_SEQ))
+					SE5->( dbskip())
+				  	Loop
+			   	EndIf        
+	
+				dDtPagto	:=	SE5->E5_DATA
+				nVlPagto	+=	SE5->E5_VALOR
+				nValTit		:=	SE5->E5_VALOR
+				//
+				SE5->(DbSkip ())
+			EndDo
+		Else
+			dDtPagto	:=	(aTrb[nI][1])->TRB_DTPAG0
+			nVlPagto	:=	(aTrb[nI][1])->TRB_VLPAGO
+			nValTit		:=	(aTrb[nI][1])->TRB_VALTIT
+		EndIf
+		//
+		aBaseReg	:=	{}
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_PREFIX)
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_NUMERO)
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_PARCEL)
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_TIPO)
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_CLIENT)
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_LOJA)  
+		aAdd (aBaseReg, Iif (SA1->(Eof ()), Replicate ("-", 20), SUBS(SA1->A1_NOME,1,20)))		
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_EMISSA)
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_VENCTO)
+		aAdd (aBaseReg, dDtPagto)
+		aAdd (aBaseReg, Transform((aTrb[nI][1])->TRB_VALOR,"@E 999,999,999.99"))
+		aAdd (aBaseReg, Transform(nVlPagto,"@E 999,999,999.99"))		
+		aAdd (aBaseReg, Transform((aTrb[nI][1])->TRB_VALTIT,"@E 999,999,999.99"))
+		aAdd (aBaseReg, Transform((aTrb[nI][1])->TRB_SALDO,"@E 999,999,999.99"))
+		aAdd (aBaseReg, Transform((aTrb[nI][1])->TRB_VLPIS,"@E 999,999,999.99"))
+		aAdd (aBaseReg, Transform((aTrb[nI][1])->TRB_VLCOF,"@E 999,999,999.99"))
+		aAdd (aBaseReg, Iif ("1"$(aTrb[nI][1])->TRB_SCORGP, STR0011, STR0012))
+		//
+		aTotaliza[1]	:=	cLblQuebra+cChaveQ
+		aTotaliza[2]	+=	(aTrb[nI][1])->TRB_VALOR
+		aTotaliza[3]	+=	nVlPagto
+		aTotaliza[4]	+=	(aTrb[nI][1])->TRB_VLPIS
+		aTotaliza[5]	+=	(aTrb[nI][1])->TRB_VLCOF
+		//		
+		aTotalizaG[2]	+=	(aTrb[nI][1])->TRB_VALOR
+		aTotalizaG[3]	+=	nVlPagto
+		aTotalizaG[4]	+=	(aTrb[nI][1])->TRB_VLPIS
+		aTotalizaG[5]	+=	(aTrb[nI][1])->TRB_VLCOF
+		//
+		FmtLin (aBaseReg, aLay[1],,, li++)
+		//
+		DbSelectArea (aTrb[nI][1])
+			(aTrb[nI][1])->(DbSkip ())
+	EndDo	
+    //
+	If (aTrb[nI][1])->(Eof ()) .And. lMoviment
+		If ((aTrb[nI][1])->&(cQuebra)<>cChaveQ)
+			ImpTot (aTotaliza, aLay)
+			aTotaliza	:=	{"", 0, 0, 0, 0}
+			cChaveQ		:=	&cQuebra
+		EndIf
+		Do While (li<=nMaxPag)
+			li++
+		EndDo
+		ImpTot (aTotalizaG, aLay)
+	EndIf
+	//
+	//Fecho o arquivo aberto anteriormente
+	FsCalcRet (MV_PAR01, MV_PAR02, .T., @aTrb)
+Else
+    Ma996Caixa(MV_PAR01, MV_PAR02, .T., @aTrb)
+	//
+	//Quebra quando houver
+	If (MV_PAR04==1 .Or. MV_PAR04==2)
+		If (MV_PAR04==1)
+			cQuebra		:=	"SubStr (DToS (TRB_DTPAG0),7,2)+'/'+SubStr(DToS(TRB_DTPAG0),5,2)+'/'+SubStr(DToS(TRB_DTPAG0),1,4)"
+			cLblQuebra	:=	"Dia :"
+		Else
+			cQuebra		:=	"SubStr (DToS (TRB_DTPAG0), 5, 2)+'/'+SubStr (DToS (TRB_DTPAG0), 1, 4)"
+			cLblQuebra	:=	"Mês :"
+		EndIf
+		//
+		aAdd (aTrb, {aTrb[1][1], CriaTrab (,.F.)})
+		nI	:=	Len (aTrb)
+   		DbSelectArea (aTrb[nI][1])
+		(aTrb[nI][1])->(DbGoTop ())
+	 	IndRegua (aTrb[nI][1], aTrb[nI][2],  "DToS (TRB_DTPAG0)")
+	Else
+		nI	:=	1
+	EndIf	
+	//
+	DbSelectArea (aTrb[nI][1])
+	(aTrb[nI][1])->(DbGoTop ())             	
+	cChaveQ	:=	&cQuebra
+	Do While !(aTrb[nI][1])->(Eof ())
+		//
+		//Funcao que verifica o cancelamento do processamento da rotina
+		If Interrupcao(lEnd)
+			Ma996Caixa(MV_PAR01, MV_PAR02, .T., @aTrb)
+			Exit
+		Endif
+		//    
+		//Filtro conforme parametros
+		If !((MV_PAR03==1) .Or.;
+			(MV_PAR03==2)  .Or.;
+			(MV_PAR03==3))
+			//
+			(aTrb[nI][1])->(DbSkip ())
+			If (lFirst)
+				cChaveQ	:=	&cQuebra
+			EndIf
+			Loop
+		EndIf
+		//
+		lMoviment	:=	.T.
+		lFirst 		:=	.F.
+		//		
+		//Consistencia para a quebra
+		If ((aTrb[nI][1])->&(cQuebra)<>cChaveQ)
+			ImpTot1 (aTotaliza1, aLay)
+			aTotaliza1	:=	{"", 0, 0, 0, 0, 0, 0, 0}
+			cChaveQ		:=	&cQuebra
+		EndIf
+		//
+		//Consistencia para a mudanca de pagina
+		If (li>nMaxPag)
+			@ 000,000 PSAY AvalImp (limite)
+			Cabec (Titulo, Cabec1, Cabec2, wnRel, Tamanho, nTipo)
+		EndIf
+		//
+		DbSelectArea ("SA1")
+		SA1->(DbSetOrder (1))
+		SA1->(MsSeek (xFilial ("SA1")+(aTrb[nI][1])->TRB_CLIENT+(aTrb[nI][1])->TRB_LOJA))
+		//
+		aBaseReg	:=	{}
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_PREFIX)
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_NUMERO)
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_PARCEL)
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_TIPO)
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_CLIENT)
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_LOJA)  
+		aAdd (aBaseReg, Iif (SA1->(Eof ()), Replicate ("-", 17), SUBS(SA1->A1_NOME,1,17)))
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_EMISSA)
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_VENCTO)
+		aAdd (aBaseReg, (aTrb[nI][1])->TRB_DTPAG0)                              
+		aAdd (aBaseReg, Transform((aTrb[nI][1])->TRB_VLBRUT,"@E 999,999,999.99"))
+		aAdd (aBaseReg, Transform((aTrb[nI][1])->TRB_VLFAT,"@E 999,999,999.99"))
+		aAdd (aBaseReg, Transform((aTrb[nI][1])->TRB_VLPAGO,"@E 999,999,999.99"))
+		aAdd (aBaseReg, Transform((aTrb[nI][1])->TRB_RETEN,"@E 999,999,999.99"))
+		aAdd (aBaseReg, Transform((aTrb[nI][1])->TRB_BSPIS,"@E 999,999,999.99"))
+		aAdd (aBaseReg, Transform((aTrb[nI][1])->TRB_PIS,"@E 999,999,999.99")) 		
+		aAdd (aBaseReg, Transform((aTrb[nI][1])->TRB_SALDO,"@E 999,999,999.99"))
+		aAdd (aBaseReg, Transform((aTrb[nI][1])->TRB_VLPIS,"@E 999,999,999.99"))
+		aAdd (aBaseReg, Transform((aTrb[nI][1])->TRB_VLCOF,"@E 999,999,999.99"))
+		//
+		aTotaliza1[1]	:=	cLblQuebra+cChaveQ      
+		aTotaliza1[2]	+=	(aTrb[nI][1])->TRB_VLBRUT
+		aTotaliza1[3]	+=	(aTrb[nI][1])->TRB_VLFAT
+		aTotaliza1[4]	+=	(aTrb[nI][1])->TRB_VLPAGO
+		aTotaliza1[5]	+=	(aTrb[nI][1])->TRB_RETEN
+		aTotaliza1[6]	+=	(aTrb[nI][1])->TRB_BSPIS
+		aTotaliza1[7]	+=	(aTrb[nI][1])->TRB_VLPIS
+		aTotaliza1[8]	+=	(aTrb[nI][1])->TRB_VLCOF
+		//		                                     
+		aTotalizaG1[2]	+=	(aTrb[nI][1])->TRB_VLBRUT
+		aTotalizaG1[3]	+=	(aTrb[nI][1])->TRB_VLFAT
+		aTotalizaG1[4]	+=	(aTrb[nI][1])->TRB_VLPAGO
+		aTotalizaG1[5]	+=	(aTrb[nI][1])->TRB_RETEN
+		aTotalizaG1[6]	+=	(aTrb[nI][1])->TRB_BSPIS		
+		aTotalizaG1[7]	+=	(aTrb[nI][1])->TRB_VLPIS
+		aTotalizaG1[8]	+=	(aTrb[nI][1])->TRB_VLCOF
+		//
+		FmtLin (aBaseReg, aLay[1],,, li++)
+		//
+		DbSelectArea (aTrb[nI][1])
+			(aTrb[nI][1])->(DbSkip ())
+	EndDo	
+    //
+	If (aTrb[nI][1])->(Eof ()) .And. lMoviment
+		If ((aTrb[nI][1])->&(cQuebra)<>cChaveQ)
+			ImpTot1 (aTotaliza1, aLay)
+			aTotaliza1	:=	{"", 0, 0, 0, 0, 0, 0, 0}
+			cChaveQ		:=	&cQuebra
+		EndIf
+		Do While (li<=nMaxPag)
+			li++
+		EndDo
+		ImpTot1 (aTotalizaG1, aLay)
+	EndIf
+	//
+	//Fecho o arquivo aberto anteriormente
+    Ma996Caixa(MV_PAR01, MV_PAR02, .T., @aTrb)
+Endif	
+Return (lRet)
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³ImpTot    ³ Autor ³Gustavo G. Rueda       ³ Data ³28/10/2005³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³imprime totalizador do relatorio, com ou sem quebra.        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpA1 - Array com os valores a serem totalizados.           ³±±
+±±³          ³ExpA2 - Array com o layout                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpL - .T.                                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³MATR946                                                     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function ImpTot (aTotaliza, aLay)
+
+If Empty (aTotaliza[1])
+	FmtLin (, aLay[3],,, li++)
+	FmtLin (aTotaliza, aLay[2],,, li++)
+	FmtLin ({}, aLay[3],,, li++)
+Else
+	FmtLin (, aLay[3],,, li++)
+	FmtLin (aTotaliza, aLay[2],,, li++)
+	li++
+EndIf
+
+Return (.T.)
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³ImpTot    ³ Autor ³Gustavo G. Rueda       ³ Data ³28/10/2005³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³imprime totalizador do relatorio, com ou sem quebra.        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpA1 - Array com os valores a serem totalizados.           ³±±
+±±³          ³ExpA2 - Array com o layout                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpL - .T.                                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³MATR946                                                     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function ImpTot1 (aTotaliza1, aLay)
+
+If Empty (aTotaliza1[1])
+	FmtLin (, aLay[3],,, li++)
+	FmtLin (aTotaliza1, aLay[2],,, li++)
+	FmtLin ({}, aLay[3],,, li++)
+Else
+	FmtLin (, aLay[3],,, li++)
+	FmtLin (aTotaliza1, aLay[2],,, li++)
+	li++
+EndIf
+
+Return (.T.)
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³R946Lay   ³ Autor ³Gustavo G. Rueda       ³ Data ³28/10/2005³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³Monta o Layout para o relatorio.                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpC1 - Cabecalho 1                                         ³±±
+±±³          ³ExpC2 - Cabecalho 2                                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpA - Array contendo a estrutura do layout.                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³MATR929                                                     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function R946Lay (Cabec1, Cabec2)
+	Local	aLay	:=	{}
+    Local lLucPres  := If(mv_par05==1,.T.,.F.) // Apuracao atraves do Lucro Presumido (Regime de Caixa)			
+
+If !lLucPres
+							//"         1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16        17        18        19        20        21        22"
+							//"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+							//"Prefixo  Numero  Parcela  Tipo  Cliente/Loja                                            Emissao  Vencimento  Data Pagto       Valor Pagto       Dedução PIS    Dedução COFINS  Contratados por PJ de Direito Publico"
+	aAdd (aLay, STR0006)	//"    ###  ######        #   ###   ######/## - ########################################  ########    ########    ########  ################  ################  ################                                    ###"
+	aAdd (aLay, STR0007)	//"                                                                                                                         ################  ################  ################                                       "
+	aAdd (aLay, STR0009)	//________________________________
+	Cabec1	:=	STR0008		//"Prefixo  Numero  Parcela  Tipo  Cliente/Loja                                            Emissao  Vencimento  Data Pagto       Valor Pagto       Dedução PIS    Dedução COFINS"
+	//                      
+Else
+	aAdd (aLay, STR0032)	//"    ###  ######        #   ###   ######/## - ########################################  ########    ########    ########  ################  ################  ################"
+	aAdd (aLay, STR0033)	//"                                                                                                                         ################  ################  ################"
+	aAdd (aLay, STR0009)	//________________________________
+	Cabec1	:=	STR0034		//"Prefixo  Numero  Parcela  Tipo  Cliente/Loja                                            Emissao  Vencimento  Data Pagto       Valor Pagto       Dedução PIS    Dedução COFINS"
+Endif
+	Cabec2	:=	""			
+Return (aLay)
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³AjustaSX1  ³ Autor ³Gustavo G. Rueda    ³ Data ³ 28/10/2005 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³Inclui Perguntas no SX1                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³.T.                                                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³MATR929                                                     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function AjustaSX1 (cPerg)                                                                                                 
+	Local	lRet		:=	.T.
+	Local	aHelpPor	:=	{}
+	Local	aHelpEng	:=	{}
+	Local	aHelpSpa	:=	{}
+	//
+	Aadd (aHelpPor, STR0013)	//"Informar o periodo inicial para esta    "
+	Aadd (aHelpPor, STR0014)	//"apuracao.                               "
+	Aadd (aHelpEng, STR0013)	//"Informar o periodo inicial para esta    "
+	Aadd (aHelpEng, STR0014)	//"apuracao.                               "
+	Aadd (aHelpSpa, STR0013)	//"Informar o periodo inicial para esta    "
+	Aadd (aHelpSpa, STR0014)	//"apuracao.                               "
+	PutSx1 (cPerg, "01",STR0015,"","","MV_CH1","D",8,0,0,"G","","","","","MV_PAR01","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)	//"Periodo De"
+	//
+	aHelpPor	:=	{}
+	aHelpEng	:=	{}
+	aHelpSpa	:=	{}
+	Aadd (aHelpPor, STR0016)	//"Informar o periodo final para esta      "
+	Aadd (aHelpPor, STR0017)	//"apuracao.                               "
+	Aadd (aHelpEng, STR0016)	//"Informar o periodo final para esta      "
+	Aadd (aHelpEng, STR0017)	//"apuracao.                               "
+	Aadd (aHelpSpa, STR0016)	//"Informar o periodo final para esta      "
+	Aadd (aHelpSpa, STR0017)	//"apuracao.                               "
+	PutSx1 (cPerg, "02",STR0018,"","","MV_CH2","D",8,0,0,"G","","","","","MV_PAR02","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)	//"Periodo Até"
+	//
+	aHelpPor	:=	{}
+	aHelpEng	:=	{}
+	aHelpSpa	:=	{}
+	Aadd (aHelpPor, STR0019)	//"Identifica se deve ser considerado so-"
+	Aadd (aHelpPor, STR0020)	//"mente a Modalidade da Deducao, ou a "
+	Aadd (aHelpPor, STR0031)	//"Modalidade de Vencimento ou Ambos casos."
+	Aadd (aHelpEng, STR0019)	//"Identifica se deve ser considerado so-"
+	Aadd (aHelpEng, STR0020)	//"mente a Modalidade da Deducao, ou a "
+	Aadd (aHelpEng, STR0031)	//"Modalidade de Vencimento ou Ambos casos."
+	Aadd (aHelpSpa, STR0019)	//"Identifica se deve ser considerado so-"
+	Aadd (aHelpSpa, STR0020)	//"mente a Modalidade da Deducao, ou a "
+	Aadd (aHelpSpa, STR0031)	//"Modalidade de Vencimento ou Ambos casos."
+	DbSelectArea ("SX1")
+		SX1->(DbSetOrder (1))
+	If (SX1->(DbSeek (cPerg+"03")) .And. !(STR0021$SX1->X1_PERGUNT))
+		RecLock ("SX1",.F.)
+			SX1->(DbDelete ())
+		MsUnLock ()
+	EndIf
+	PutSx1 (cPerg, "03",STR0021,"","","MV_CH3","N",1,0,1,"C","","","","","MV_PAR03",STR0022,STR0022,STR0022,"",STR0023,STR0023,STR0023,STR0024,STR0024,STR0024,"","","","","","",aHelpPor,aHelpEng,aHelpSpa)	//"Contr. por PJ Dir. Publ."###"Somente"###"Exceto"###"Ambos"
+	//
+	aHelpPor	:=	{}
+	aHelpEng	:=	{}
+	aHelpSpa	:=	{}
+	Aadd (aHelpPor, STR0025)	//"Informar se deve compor o demonstrativo "
+	Aadd (aHelpPor, STR0026)	//"uma das quebras dispon[iveis."
+	Aadd (aHelpEng, STR0025)	//"Informar se deve compor o demonstrativo "
+	Aadd (aHelpEng, STR0026)	//"uma das quebras dispon[iveis."
+	Aadd (aHelpSpa, STR0025)	//"Informar se deve compor o demonstrativo "
+	Aadd (aHelpSpa, STR0026)	//"uma das quebras dispon[iveis."
+	PutSx1 (cPerg, "04",STR0027,"","","MV_CH4","N",1,0,1,"C","","","","","MV_PAR04",STR0028,STR0028,STR0028,"",STR0029,STR0029,STR0029,STR0030,STR0030,STR0030,"","","","","","",aHelpPor,aHelpEng,aHelpSpa)	//"Quebra Totalizador"###"Por Dia"###"Por Mês"###"Sem Quebra"
+	//
+	aHelpPor	:=	{}
+	aHelpEng	:=	{}
+	aHelpSpa	:=	{}
+	Aadd( aHelpPor, STR0035)  //"Escolha Sim para utilizar a apuração    "
+	Aadd( aHelpPor, STR0036)  //"através do Lucro Presumido com base     "
+	Aadd( aHelpPor, STR0037)  //"no Regime de Caixa                      "
+	Aadd( aHelpEng, STR0035)
+	Aadd( aHelpEng, STR0036)
+	Aadd( aHelpEng, STR0037) 
+	Aadd( aHelpSpa, STR0035)
+	Aadd( aHelpSpa, STR0036)
+	Aadd( aHelpSpa, STR0037) 
+	PutSx1(cPerg,"05",STR0038,"","","MV_CH5","N",1,0,0,"C","","","","","MV_PAR05",STR0039,STR0039,STR0039,"",STR0040,STR0040,STR0040,"","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	//
+	aHelpPor	:=	{}
+	aHelpEng	:=	{}
+	aHelpSpa	:=	{}
+	Aadd( aHelpPor, STR0044)  //"Escolha Sim para imprimir a coluna 'Valor"
+	Aadd( aHelpPor, STR0045)  //" Bruto' para Apuração PIS/COFINS não     "
+	Aadd( aHelpPor, STR0046)  //"Órgão Público                            "
+	Aadd( aHelpEng, STR0044)
+	Aadd( aHelpEng, STR0045)
+	Aadd( aHelpEng, STR0046) 
+	Aadd( aHelpSpa, STR0044)
+	Aadd( aHelpSpa, STR0045)
+	Aadd( aHelpSpa, STR0046) 
+	PutSx1(cPerg,"06",STR0043,"","","MV_CH6","N",1,0,0,"C","","","","","MV_PAR06",STR0039,STR0039,STR0039,"",STR0040,STR0040,STR0040,"","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+Return (lRet)

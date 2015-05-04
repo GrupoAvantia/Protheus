@@ -1,0 +1,28 @@
+#include "rwmake.ch"     
+
+
+User Function SF2460I()  
+Local aArea     	:= GetArea()
+Local cCustoPed     := SC5->C5_CC	
+Local cDoc          := SF2->F2_DOC
+Local cSerie        := SF2->F2_SERIE
+
+RECLOCK("SF2",.F.)
+   SF2->F2_CC	:= cCustoPed
+MSUNLOCK()
+  
+
+DBSELECTAREA("SE1")
+DBSETORDER(1)
+IF SE1->(dbseek(xFilial("SE1")+SF2->F2_SERIE+SF2->F2_DOC))
+	WHILE SE1->E1_NUM==cDoc .And. SE1->E1_SERIE==cSerie .And. SE1->( !eof() )
+		RECLOCK("SE1",.F.)
+		SE1->E1_CCC	:= cCustoPed	
+		MSUNLOCK()
+  	SE1->(DBSKIP())
+	END
+ENDIF
+
+RestArea(aArea)
+
+Return(NIL)      

@@ -1,0 +1,1008 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATR875.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr875.prx"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "PROTHEUS.CH"
+#line 19 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr875.prx"
+Function MATR875()
+Local   oReport
+
+
+
+
+
+
+
+IF !(FindFunction("SIGACUS_V") .and.  SIGACUS_V() >= 20050512)
+    Final("Atualizar SIGACUS.PRW !!!")
+Endif
+IF !(FindFunction("SIGACUSA_V") .and.  SIGACUSA_V() >= 20050512)
+    Final("Atualizar SIGACUSA.PRX !!!")
+Endif
+IF !(FindFunction("SIGACUSB_V") .and.  SIGACUSB_V() >= 20050512)
+    Final("Atualizar SIGACUSB.PRX !!!")
+Endif
+
+If FindFunction("TRepInUse") .And.  TRepInUse()
+
+
+
+	oReport:= ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR875R3()
+EndIf
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportDef()
+Local oReport
+Local oSection1
+Local oSection2
+Local cTitle    := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Relação Para Analise Dos Stocks", "Relacao para Analise dos Estoques" ))
+Local cAliasSG1 := "SG1"
+Local lQuery    := .F. 
+
+	cAliasSG1   := GetNextAlias()
+	lQuery      := .T. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+oReport:= TReport():New("MATR875",cTitle,"MTR875", {|oReport| ReportPrint(oReport,cAliasSG1, lQuery)},OemToAnsi("Este relatório demonstra a situaçäo de cada item da estrutura")+" "+OemToAnsi("do produto Pai em relaçäo ao seu saldo , seu empenho , suas  ")+" "+OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Entradas Previstas E Sua Classe Abc.", "entradas previstas e sua classe ABC." )))
+oReport:SetLandscape()
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pergunte(oReport:GetParam(), .F. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+oSection1 := TRSection():New(oReport,"Estruturas",{"SG1","SB1","SB2"},)
+oSection1:SetHeaderBreak()
+
+TRCell():New(oSection1,"G1_COD" 	,"SG1", If( cPaisLoc $ "ANG|PTG", "Artigo Pai", "Produto Pai" )  ,,,,)
+TRCell():New(oSection1,"B1_DESC" 	,"SB1",,,,,)
+TRCell():New(oSection1,"B2_QATU"	,"SB2",,,,,)
+
+
+
+
+oSection2 := TRSection():New(oSection1,If( cPaisLoc $ "ANG|PTG", "Artigos", "Produtos" ),{"SG1","SB1","SC1","SD4","SC7","SC2","SC6","SB3","SB2"},)
+oSection2:SetHeaderPage()
+
+TRCell():New(oSection2,"B1_COD"  	,"SB1",,,,,)
+TRCell():New(oSection2,"B1_DESC" 	,"SB1",,,,,)
+TRCell():New(oSection2,"B1_TIPO" 	,"SB1",,,,,)
+TRCell():New(oSection2,"B1_GRUPO"  	,"SB1",,,,,)
+TRCell():New(oSection2,"B1_UM"  	,"SB1",,,,,)
+TRCell():New(oSection2,"B2_QATU" 	,"SB2",,,,,)
+TRCell():New(oSection2,"B2_QEMP" 	,"SB2",,,,,)
+TRCell():New(oSection2,"C1_QUANT" 	,"SC1", If( cPaisLoc $ "ANG|PTG", "Scs Colocadas", "SCs Colocadas" )  ,,,,)
+TRCell():New(oSection2,"C7_QUANT" 	,"SC7", If( cPaisLoc $ "ANG|PTG", "Pcs Colocados", "PCs Colocados" )  ,,,,)
+TRCell():New(oSection2,"C2_QUANT" 	,"SC2", If( cPaisLoc $ "ANG|PTG", "Ops Colocadas", "OPs Colocadas" )  ,,,,)
+TRCell():New(oSection2,"C6_QTDVEN" 	,"SC6", If( cPaisLoc $ "ANG|PTG", "Pvs Colocados", "PVs Colocados" )  ,,,,)
+TRCell():New(oSection2,"B1_EMIN" 	,"SB1",,,,,  {|| RetFldProd(SB1->B1_COD,"B1_EMIN") })
+TRCell():New(oSection2,"B1_LE" 	    ,"SB1",,,,,  {|| RetFldProd(SB1->B1_COD,"B1_LE")   })
+TRCell():New(oSection2,"B1_PE" 	    ,"SB1",,,,,  {|| RetFldProd(SB1->B1_COD,"B1_PE") })
+TRCell():New(oSection2,"B1_TIPE"	,"SB1",,,,,  {|| RetFldProd(SB1->B1_COD,"B1_TIPE") })
+TRCell():New(oSection2,"B3_MEDIA" 	,"SB3",,,,,)
+TRCell():New(oSection2,"B2_USAI" 	,"SB2",,,,,)
+TRCell():New(oSection2,"B3_CLASSE" 	,"SB3",,,,,)
+TRCell():New(oSection2,"B1_FANTASM"	,"SB1",,,,,  {|| RetFldProd(SB1->B1_COD,"B1_FANTASM") })
+TRCell():New(oSection2,"G1_COD"	    ,"SG1",,,,,)
+
+oSection1:SetNoFilter({"SB1","SB2"})
+oSection2:SetNoFilter({"SG1","SB1","SC1","SD4","SC7","SC2","SC6","SB3","SB2"})
+
+Return(oReport)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportPrint(oReport,cAliasSG1,lQuery)
+Local oSection1  := oReport:Section(1)
+Local oSection2  := oReport:Section(1):Section(1)
+Local oBreak, oBreak2
+Local oFunction
+Local cFilter
+Local nCntFor
+Local nSaldoPai  := 0
+Local aSalAlm    := {}
+Local aPai       := {}
+
+
+
+
+Private nSaldoEst:=nEmp:=nSCPro:=nPCPro:=nOPPro:=nPVPro:=0
+Private dUsai := CtoD("  /  /  ")
+
+dbSelectarea("SG1")
+dbSetOrder(1)
+
+
+
+If lQuery
+
+
+
+
+	MakeSqlExpr(oReport:GetParam())
+
+
+
+
+
+ 	oSection1:BeginQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasSG1," SELECT G1_FILIAL, G1_COD, G1_COMP, G1_TRT, R_E_C_N_O_ SG1RecNo FROM  "+RetSqlName('SG1')+" SG1 WHERE G1_FILIAL =  '" +xFilial('SG1')+"'  AND G1_COD >=  "+___SQLGetValue(MV_PAR01)+" AND G1_COD <=  "+___SQLGetValue(MV_PAR02)+" AND SG1.D_E_L_E_T_= ' ' ORDER BY  "+ SqlOrder(SG1->(IndexKey())),{},.F.)
+	oSection1:EndQuery(); If oSection1:bCompQuery <> NIL; oSection1:bRealQuery := {|__section| __runcb(__section:bCompQuery, .T. )}; EndIf
+
+Else
+
+
+
+
+	MakeAdvplExpr(oReport:GetParam())
+
+
+
+
+ 	cFilter := 'G1_FILIAL=="'+xFilial("SG1")+'".And.G1_COD>="'+mv_par01+'".And.'
+	cFilter += 'G1_COD<="'+mv_par02+'"'
+
+	oSection1:SetFilter(cFilter,Indexkey())
+
+EndIf
+TRPosition():New(oSection1,"SB1",1,{|| xFilial("SB1") + (cAliasSG1)->G1_COD})
+
+
+
+
+oBreak := TRBreak():New(oSection1,oSection1:Cell("G1_COD"),NIL, .F. )
+oBreak2:= TRBreak():New(oSection2,oSection2:Cell("G1_COD"),NIL, .F. )
+
+
+
+
+oFunction := TRFunction():New(oSection2:Cell("B2_QATU"  ),NIL,"SUM",oBreak2,NIL,,, .F. , .F. )
+oFunction := TRFunction():New(oSection2:Cell("B2_QEMP"  ),NIL,"SUM",oBreak2,NIL,,, .F. , .F. )
+oFunction := TRFunction():New(oSection2:Cell("C1_QUANT" ),NIL,"SUM",oBreak2,NIL,,, .F. , .F. )
+oFunction := TRFunction():New(oSection2:Cell("C7_QUANT" ),NIL,"SUM",oBreak2,NIL,,, .F. , .F. )
+oFunction := TRFunction():New(oSection2:Cell("C2_QUANT" ),NIL,"SUM",oBreak2,NIL,,, .F. , .F. )
+oFunction := TRFunction():New(oSection2:Cell("C6_QTDVEN"),NIL,"SUM",oBreak2,NIL,,, .F. , .F. )
+
+
+
+
+oSection1:Cell("B1_DESC"):HideHeader()
+
+
+
+
+oSection2:Cell("G1_COD"):Hide()
+oSection2:Cell("G1_COD"):HideHeader()
+
+
+
+
+oReport:SetMeter( SG1->(LastRec()) )
+oSection1:Init()
+While !oReport:Cancel() .And.  !(cAliasSG1)->(Eof())
+	oReport:IncMeter()
+	If !lQuery
+		dbSelectArea(cAliasSG1)
+		If G1_COD < mv_par01 .Or.  G1_COD > mv_par02
+			dbSkip()
+			Loop
+		EndIf
+	EndIf
+	If mv_par04 == 2
+
+
+
+		dbSelectArea("SB1")
+		dbSetOrder(1)
+		dbSeek( xFilial("SB1")+(cAliasSG1)->G1_COD )
+		If RetFldProd(SB1->B1_COD,"B1_FANTASM") == "S"
+			dbSelectArea(cAliasSG1)
+			dbSkip()
+			Loop
+		Endif
+	Endif
+
+	dbSelectArea(cAliasSG1)
+	nSaldoPai := 0
+
+	nScan:=aScan(aPai,(cAliasSG1)->G1_COD)
+	If nScan == 0
+		AADD(aPai,(cAliasSG1)->G1_COD)
+	Else
+		(cAliasSG1)->(dbSkip())
+		Loop
+	EndIf
+
+    aEstru:={}
+	nReg:=(cAliasSG1)->(Recno())
+	Explode((cAliasSG1)->G1_COD)
+	dbGoto(nReg)
+
+
+
+	dbSelectArea("SB2")
+	dbSetOrder(1)
+	dbSeek(xFilial("SB2")+(cAliasSG1)->G1_COD)
+	While B2_FILIAL+B2_COD == xFilial()+(cAliasSG1)->G1_COD
+		If B2_LOCAL >= mv_par06 .Or.  B2_LOCAL <= mv_par07
+
+
+
+			aSalAlm	:= CalcEst((cAliasSG1)->G1_COD,B2_LOCAL,dDataBase+1)
+			nSaldoPai+= aSalAlm[1]
+		EndIf
+		dbSkip()
+	EndDo
+	dbSelectArea(cAliasSG1)
+	oSection1:Cell("B2_QATU"):SetValue( nSaldoPai )
+	oReport:SkipLine()
+	oSection1:PrintLine()
+	oSection2:Init()
+	For nCntFor :=1 to Len(aEstru)
+		If mv_par03 == 2
+
+
+
+			dbSelectArea("SB1")
+			dbSetOrder(1)
+			dbSeek(xFilial()+aEstru[nCntFor])
+			If RetFldProd(SB1->B1_COD,"B1_FANTASM") == "S"
+				Loop
+			Endif
+		Endif
+		Imprime(Nil,Nil,nCntFor, .T. )
+		oSection2:Cell("B1_COD"    ):SetValue( SB1->B1_COD   )
+		oSection2:Cell("B1_DESC"   ):SetValue( SB1->B1_DESC  )
+		oSection2:Cell("B1_TIPO"   ):SetValue( SB1->B1_TIPO  )
+		oSection2:Cell("B1_GRUPO"  ):SetValue( SB1->B1_GRUPO )
+		oSection2:Cell("B1_UM"     ):SetValue( SB1->B1_UM    )
+		oSection2:Cell("B2_QATU"   ):SetValue( nSaldoEst     )
+		oSection2:Cell("B2_QEMP"   ):SetValue( nEmp          )
+		oSection2:Cell("C1_QUANT"  ):SetValue( nSCPro        )
+		oSection2:Cell("C7_QUANT"  ):SetValue( nPCPro        )
+		oSection2:Cell("C2_QUANT"  ):SetValue( nOPPro        )
+		oSection2:Cell("C6_QTDVEN" ):SetValue( nPVPro        )
+		oSection2:Cell("B1_EMIN"   ):SetValue( RetFldProd(SB1->B1_COD,"B1_EMIN") )
+		oSection2:Cell("B1_LE"     ):SetValue( RetFldProd(SB1->B1_COD,"B1_LE") )
+		oSection2:Cell("B1_PE"     ):SetValue( RetFldProd(SB1->B1_COD,"B1_PE") )
+		oSection2:Cell("B1_TIPE"   ):SetValue( RetFldProd(SB1->B1_COD,"B1_TIPE") )
+		oSection2:Cell("B3_MEDIA"  ):SetValue( SB3->B3_MEDIA   )
+		oSection2:Cell("B2_USAI"   ):SetValue( dUsai           )
+		oSection2:Cell("B3_CLASSE" ):SetValue( SB3->B3_CLASSE  )
+		oSection2:Cell("B1_FANTASM"):SetValue( If(RetFldProd(SB1->B1_COD,"B1_FANTASM")=="S","F","N") )
+
+		oSection2:PrintLine()
+	next
+	oSection2:Finish()
+	dbSelectArea(cAliasSG1)
+	dbGoto(nReg)
+	dbSkip()
+EndDo
+dbSelectArea("SC1")
+dbSetOrder(1)
+dbSelectArea("SC2")
+dbSetOrder(1)
+dbSelectArea("SC6")
+dbSetOrder(1)
+dbSelectArea("SC7")
+dbSetOrder(1)
+
+oSection1:Finish()
+(cAliasSG1)->(DbCloseArea())
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MATR875R3()
+LOCAL titulo 	:= If( cPaisLoc $ "ANG|PTG", "Relação Para Analise Dos Stocks", "Relacao para Analise dos Estoques" )
+LOCAL cString  	:= "SG1"
+LOCAL wnrel 	:= "MATR875"
+LOCAL cDesc1   	:= "Este relatório demonstra a situaçäo de cada item da estrutura"
+LOCAL cDesc2   	:= "do produto Pai em relaçäo ao seu saldo , seu empenho , suas  "
+LOCAL cDesc3   	:= If( cPaisLoc $ "ANG|PTG", "Entradas Previstas E Sua Classe Abc.", "entradas previstas e sua classe ABC." )
+LOCAL Tamanho  	:= "G"
+LOCAL i			:= 0
+
+PRIVATE aReturn	:= {If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ),1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 1, 2, 1, "",1 }
+PRIVATE nLastKey:= 0
+PRIVATE cPerg 	:= "MTR875"
+
+
+
+
+
+
+
+IF !(FindFunction("SIGACUS_V") .and.  SIGACUS_V() >= 20050512)
+    Final("Atualizar SIGACUS.PRW !!!")
+Endif
+IF !(FindFunction("SIGACUSA_V") .and.  SIGACUSA_V() >= 20050512)
+    Final("Atualizar SIGACUSA.PRX !!!")
+Endif
+IF !(FindFunction("SIGACUSB_V") .and.  SIGACUSB_V() >= 20050512)
+    Final("Atualizar SIGACUSB.PRX !!!")
+Endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+pergunte(cPerg, .F. )
+
+
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3, .F. ,"", .F. ,Tamanho)
+
+If nLastKey == 27
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	dbClearFilter()
+	Return
+Endif
+
+RptStatus({|lEnd| R875Imp(@lEnd,wnRel,titulo,tamanho,cString)},titulo)
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R875Imp(lEnd,wnRel,titulo,tamanho,cString)
+
+
+
+LOCAL cRodaTxt := If( cPaisLoc $ "ANG|PTG", "Artigo(s)", "PRODUTO(S)" )
+Local i			:= 0
+
+
+
+
+LOCAL nSaldoEst:= 0
+LOCAL aSalAlm  := {}
+
+
+
+PRIVATE nColAdd  := 0
+PRIVATE nomeprog := "MATR875"
+PRIVATE nTipo    := 0
+PRIVATE cabec1,cabec2
+PRIVATE nCntImpr := 0
+
+
+
+PRIVATE li := 80 ,m_pag := 1
+
+
+
+PRIVATE aEstru:={}
+PRIVATE aPai  :={}
+
+
+
+PRIVATE nSaldoEst:=nEmp:=nSCPro:=nPCPro:=nOPPro:=nPVPro:=0
+PRIVATE dUsai := CtoD("  /  /  ")
+
+
+
+PRIVATE nTotSaldo:=nTotEmp:=nTotSCPro:=nTotPCPro:=nTotOPPro:=nTotPVPro:=0
+
+
+
+
+nColadd := iif(TamSx3("B1_COD")[1] > 15,TamSx3("B1_COD")[1]-15,0)
+
+If !tamsx3("B1_COD")[1] > 15
+	cabec1 := "CODIGO          DESCRICAO                      TP GRUP UM    SALDO ATUAL   EMPENHO PARA           SC's           PC's           OP's           PV's     PONTO DE         LOTE   PRAZO EST.EM       CONSUMO   ULTIMA   CL  TP"
+Else
+	cabec1 := SUBSTR("CODIGO          DESCRICAO                      TP GRUP UM    SALDO ATUAL   EMPENHO PARA           SC's           PC's           OP's           PV's     PONTO DE         LOTE   PRAZO EST.EM       CONSUMO   ULTIMA   CL  TP",1,16)+SPACE(nColadd)+SUBSTR("CODIGO          DESCRICAO                      TP GRUP UM    SALDO ATUAL   EMPENHO PARA           SC's           PC's           OP's           PV's     PONTO DE         LOTE   PRAZO EST.EM       CONSUMO   ULTIMA   CL  TP",17,31-nColadd)+SUBSTR("CODIGO          DESCRICAO                      TP GRUP UM    SALDO ATUAL   EMPENHO PARA           SC's           PC's           OP's           PV's     PONTO DE         LOTE   PRAZO EST.EM       CONSUMO   ULTIMA   CL  TP",48,174)
+EndIf
+
+cabec2 := If( cPaisLoc $ "ANG|PTG", "                                                                         Req/pv/reserva      Colocadas      Colocados      Colocadas      Colocados       Pedido    Economico Entrega  Meses         Medio    Saida      N/f", "                                                                         REQ/PV/RESERVA      COLOCADAS      COLOCADOS      COLOCADAS      COLOCADOS       PEDIDO    ECONOMICO ENTREGA  MESES         MEDIO    SAIDA      N/F" )
+
+
+
+
+
+dbSelectArea("SG1")
+dbSetOrder(1)
+dbSeek(xFilial())
+
+SetRegua(LastRec())
+
+lFirst	 := .F. 
+lContinua := .T. 
+
+While !Eof() .And.  xFilial()==SG1->G1_FILIAL
+
+	If lEnd
+		PrintOut(_PROW()+1,001,If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR"),,)
+		lContinua := .F. 
+		Exit
+	EndIf
+
+	IncRegua()
+
+	If G1_COD < mv_par01 .Or.  G1_COD > mv_par02
+		dbSkip()
+		Loop
+	EndIf
+
+	If mv_par04 == 2
+
+
+
+		dbSelectArea("SB1")
+		dbSetOrder(1)
+		dbSeek(xFilial()+SG1->G1_COD)
+		If RetFldProd(SB1->B1_COD,"B1_FANTASM") == "S"
+			dbSelectArea("SG1")
+			dbSkip()
+			Loop
+		Endif
+	Endif
+	dbSelectArea("SG1")
+
+	nScan:=aScan(aPai,G1_COD)
+	If nScan == 0
+		AADD(aPai,G1_COD)
+	Else
+		dbSkip()
+		Loop
+	EndIf
+
+	aEstru:={}
+	nReg:=Recno()
+	Explode(G1_COD)
+	dbGoto(nReg)
+
+	If li > 58
+		Cabec(titulo,cabec1,cabec2,nomeprog,Tamanho,nTipo)
+	EndIf
+
+
+
+
+	nCntImpr++
+
+
+
+	nSaldoEst:=nTotSaldo:=nTotEmp:=nTotSCPro:=nTotPCPro:=nTotOPPro:=nTotPVPro:=0
+
+
+
+	dbSelectArea("SB1")
+	dbSetOrder(1)
+	dbSeek(xFilial()+SG1->G1_COD)
+
+
+
+	dbSelectArea("SB2")
+	dbSetOrder(1)
+	dbSeek(xFilial()+SG1->G1_COD)
+	While B2_FILIAL+B2_COD == xFilial()+SG1->G1_COD
+		If B2_LOCAL >= mv_par06 .Or.  B2_LOCAL <= mv_par07
+
+
+
+			aSalAlm	:= CalcEst(SG1->G1_COD,B2_LOCAL,dDataBase+1)
+			nSaldoEst+= aSalAlm[1]
+		EndIf
+		dbSkip()
+	EndDo
+	dbSelectArea("SG1")
+	If lFirst
+		PrintOut(li,000,__PrtThinLine(),,)
+		li++
+	EndIf
+
+	PrintOut(li,000,If(cPaisLoc$"ANG|PTG","Produto pai: ","PRODUTO PAI: ")+SG1->G1_COD+" - "+SB1->B1_DESC+If(cPaisLoc$"ANG|PTG","  saldo atual  ---> ","  SALDO ATUAL  ---> "),,)
+	PrintOut(li,_PCOL(),nSaldoEst,PesqPictQt("B2_QATU",14),)
+	li++
+	li++
+	lFirst:= .T. 
+
+	For i:=1 to Len(aEstru)
+		If mv_par03 == 2
+
+
+
+			dbSelectArea("SB1")
+			dbSetOrder(1)
+			dbSeek(xFilial()+aEstru[i])
+			If RetFldProd(SB1->B1_COD,"B1_FANTASM") == "S"
+				Loop
+			Endif
+		Endif
+		Imprime(titulo,tamanho,i, .F. )
+	next
+
+	ImpTot(titulo,cabec1,cabec2,nomeprog,Tamanho,nTipo)
+	dbSelectArea("SG1")
+	dbSetOrder(1)
+	dbGoto(nReg)
+	dbSkip()
+
+Enddo
+
+dbSelectArea("SC1")
+dbSetOrder(1)
+dbSelectArea("SC2")
+dbSetOrder(1)
+dbSelectArea("SC6")
+dbSetOrder(1)
+dbSelectArea("SC7")
+dbSetOrder(1)
+
+If li <> 80
+	Roda(nCntImpr,cRodaTxt,Tamanho)
+EndIf
+
+
+
+dbSelectArea(cString)
+dbClearFilter()
+dbSetOrder(1)
+
+If aReturn[5] == 1
+	Set( 24, "" )
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+STATIC Function Explode(cProduto)
+LOCAL nRegi
+
+dbSelectArea("SG1")
+dbSetOrder(1)
+dbSeek(xFilial()+cProduto)
+
+While !Eof() .And.  G1_FILIAL+G1_COD == xFilial()+cProduto
+
+	nRegi:=Recno()
+	nProcura:=aScan(aEstru,G1_COMP)
+	If nProcura  = 0
+		AADD(aEstru,G1_COMP)
+	EndIf
+
+
+
+
+	nRecno:=Recno()
+	If dbSeek(xFilial()+G1_COMP, .F. )
+		Explode(G1_COD)
+	Else
+		dbGoto(nRecno)
+		nProcura:=aScan(aEstru,G1_COMP)
+		If nProcura  = 0
+			AADD(aEstru,G1_COMP)
+		EndIf
+	Endif
+
+	dbGoto(nRegi)
+	dbSkip()
+
+Enddo
+
+Return(aEstru)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+STATIC Function Imprime(titulo,tamanho,i,lRelease4)
+LOCAL lSB3:= .F. 
+LOCAL aSalAlm  := {}
+
+
+
+
+nSaldoEst:=nEmp:=nSCPro:=nPCPro:=nOPPro:=nPVPro:=0
+dUsai := CtoD("  /  /  ")
+
+
+
+
+dbSelectArea("SC1")
+dbSetOrder(2)
+
+dbSelectArea("SC2")
+dbSetOrder(2)
+
+dbSelectArea("SC6")
+dbSetOrder(2)
+
+dbSelectArea("SC7")
+dbSetOrder(2)
+
+
+
+
+dbSelectArea("SB1")
+dbSetOrder(1)
+If dbSeek(xFilial()+aEstru[i])
+
+
+
+	dbSelectArea("SB2")
+	dbSetOrder(1)
+	dbSeek(xFilial()+aEstru[i])
+	While B2_FILIAL+B2_COD == xFilial()+aEstru[i]
+		If B2_LOCAL >= mv_par06 .And.  B2_LOCAL <= mv_par07
+			nEmp+=(If(mv_par05==1,SB2->B2_QEMP,If(mv_par05==2,SB2->B2_QEMPPRE,SB2->B2_QEMP+SB2->B2_QEMPPRE))+SB2->B2_RESERVA)
+			aSalAlm := CalcEst(B2_COD,SB2->B2_LOCAL,dDataBase+1)
+			nSaldoEst+= aSalAlm[1]
+			If dUsai < B2_USAI
+        		dUsai := B2_USAI
+			EndIf
+		EndIf
+		dbSkip()
+	EndDo
+
+
+
+	dbSelectArea("SB3")
+	lSB3:=dbSeek(xFilial()+aEstru[i])
+
+
+
+	dbSelectArea("SC1")
+	dbSeek(xFilial()+aEstru[i])
+	While !Eof() .And.  C1_FILIAL+C1_PRODUTO == xFilial()+aEstru[i]
+
+		If !MtrAValOP(mv_par05, "SC1")
+			dbSkip()
+			Loop
+		EndIf
+		If C1_LOCAL < mv_par06 .Or.  C1_LOCAL > mv_par07
+			dbSkip()
+			Loop
+		EndIf
+		If C1_QUJE < C1_QUANT .And.  Empty(C1_PEDIDO)
+			nSCPro += (C1_QUANT - C1_QUJE)
+		EndIf
+		dbSkip()
+	EndDo
+
+	dbSelectArea("SD4")
+	dbSetOrder(1)
+	dbSeek(cSeek := xFilial("SD4") + aEstru[i])
+	while !Eof() .And. SD4->(D4_FILIAL+D4_COD)==cSeek
+		If SD4->D4_QUANT < 0
+			nSCPro += ( SD4->D4_QUANT * -1 )
+		Endif
+		dbSkip()
+	Enddo
+
+
+
+
+	dbSelectArea("SC2")
+	dbSeek(xFilial()+aEstru[i])
+	While !Eof() .And.  C2_FILIAL+C2_PRODUTO == xFilial()+aEstru[i]
+
+		If !MtrAValOP(mv_par05, "SC2")
+			dbSkip()
+			Loop
+		EndIf
+		If C2_LOCAL < mv_par06 .Or.  C2_LOCAL > mv_par07
+			dbSkip()
+			Loop
+		EndIf
+		If Empty(C2_DATRF) .And.  aSC2Sld() > 0
+			nOPPro += aSC2Sld()
+		EndIf
+		dbSkip()
+	EndDo
+
+
+
+	dbSelectArea("SC6")
+	dbSeek(xFilial()+aEstru[i])
+	While !Eof() .And.  C6_FILIAL+C6_PRODUTO == xFilial()+aEstru[i]
+
+		If !MtrAValOP(mv_par05, "SC6")
+			dbSkip()
+			Loop
+		EndIf
+		If C6_LOCAL < mv_par06 .Or.  C6_LOCAL > mv_par07
+			dbSkip()
+			Loop
+		EndIf
+		If ( C6_QTDVEN - ( C6_QTDEMP + C6_QTDENT ) ) > 0
+			nPVPro += ( C6_QTDVEN - ( C6_QTDEMP + C6_QTDENT ) )
+		EndIf
+		dbSkip()
+	EndDo
+
+
+
+	dbSelectArea("SC7")
+	dbSeek(xFilial()+aEstru[i])
+	While !Eof() .And.  C7_FILIAL+C7_PRODUTO == xFilial()+aEstru[i]
+
+		If !MtrAValOP(mv_par05, "SC7")
+			dbSkip()
+			Loop
+		EndIf
+		If C7_LOCAL < mv_par06 .Or.  C7_LOCAL > mv_par07
+			dbSkip()
+			Loop
+		EndIf
+		If (C7_QUANT-C7_QUJE) > 0 .And.  Empty(C7_RESIDUO)
+			nPCPro += (C7_QUANT-C7_QUJE)
+		EndIf
+		dbSkip()
+	EndDo
+
+	If !lRelease4
+		If li > 58
+			Cabec(titulo,cabec1,cabec2,nomeprog,Tamanho,nTipo)
+		EndIf
+
+		PrintOut(li,000,SB1->B1_COD,,)
+		PrintOut(li,016+nColadd,Substr(SB1->B1_DESC,1,30),,)
+
+		If nColadd > 0
+			li++
+
+			If li > 58
+				Cabec(titulo,cabec1,cabec2,nomeprog,Tamanho,nTipo)
+			EndIf
+
+			PrintOut(li,000,"-",,)
+		EndIf
+
+		PrintOut(li,047,SB1->B1_TIPO,,)
+		PrintOut(li,050,SB1->B1_GRUPO,,)
+		PrintOut(li,055,SB1->B1_UM,,)
+		PrintOut(li,058,nSaldoEst,PesqPictQt("B2_QATU",14),)
+		PrintOut(li,073,nEmp,PesqPictQt("B2_QEMP",14),)
+		PrintOut(li,088,nSCPro,PesqPictQt("C1_QUANT",14),)
+		PrintOut(li,103,nPCPro,PesqPictQt("C7_QUANT",14),)
+		PrintOut(li,118,nOPPro,PesqPictQt("C2_QUANT",14),)
+		PrintOut(li,133,nPVPro,PesqPictQt("C6_QTDVEN",14),)
+		PrintOut(li,148,RetFldProd(SB1->B1_COD,"B1_EMIN"),PesqPictQt("B1_EMIN",12),)
+		PrintOut(li,161,RetFldProd(SB1->B1_COD,"B1_LE"),PesqPictQt("B1_LE",12),)
+		PrintOut(li,174,RetFldProd(SB1->B1_COD,"B1_PE"),PesqPictQt("B1_PE",12),)
+		PrintOut(li,180,RetFldProd(SB1->B1_COD,"B1_TIPE"),,)
+		If lSB3
+			If SB3->B3_MEDIA <> 0
+				PrintOut(li,183,nSaldoEst/SB3->B3_MEDIA,"99999",)
+			Else
+				PrintOut(li,183,"99999",,)
+			EndIf
+			PrintOut(li,189,SB3->B3_MEDIA,PesqPictQt("B3_MEDIA",13),)
+		EndIf
+		PrintOut(li,204,SB2->B2_USAI,,)
+		If lSB3
+			PrintOut(li,215,SB3->B3_CLASSE,,)
+		EndIf
+		If RetFldProd(SB1->B1_COD,"B1_FANTASM") == "S"
+			PrintOut(li,218,"F",,)
+		Else
+			PrintOut(li,218,"N",,)
+		Endif
+		li++
+
+
+
+		nTotSaldo+=nSaldoEst
+		nTotEmp+=nEmp
+		nTotSCPro+=nSCPro
+		nTotPCPro+=nPCPro
+		nTotOPPro+=nOPPro
+		nTotPVPro+=nPVPro
+	EndIf
+EndIf
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+STATIC Function ImpTot(titulo,cabec1,cabec2,nomeprog,Tamanho,nTipo)
+
+li++
+If li > 58
+	Cabec(titulo,cabec1,cabec2,nomeprog,Tamanho,nTipo)
+	li++
+EndIf
+PrintOut(li,000,If(cPaisLoc$"ANG|PTG","T o t a i s  :","T O T A I S  :"),,)
+PrintOut(li,058,nTotSaldo,PesqPictQt("B2_QATU",14),)
+PrintOut(li,073,nTotEmp,PesqPictQt("B2_QEMP",14),)
+PrintOut(li,088,nTotSCPro,PesqPictQt("C1_QUANT",14),)
+PrintOut(li,103,nTotPCPro,PesqPictQt("C7_QUANT",14),)
+PrintOut(li,118,nTotOPPro,PesqPictQt("C2_QUANT",14),)
+PrintOut(li,133,nTotPVPro,PesqPictQt("C6_QTDVEN",14),)
+li++
+
+Return

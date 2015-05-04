@@ -1,0 +1,340 @@
+#INCLUDE "MATR800.CH"
+#INCLUDE "PROTHEUS.CH"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Program   ³MATR800   ³ Autor ³Fernando Machima       ³ Data ³12/04/2004³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡ao ³Relatorio de Resolucao(Loc. Guatemala)                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ Nenhum                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ Nenhum                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao Efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³12/04/2004³Machima        ³Desenvolvimento inicial                     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function Matr800()
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis 											 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local cDesc1         := STR0001  //"Este programa tem como objetivo imprimir relatorio "
+Local cDesc2         := STR0002  //"de acordo com os parametros informados pelo usuario."
+Local cDesc3         := STR0003  //"Relatorio de Resolucao"
+Local cPict          := ""
+Local titulo         := STR0003  //"Relatorio de Resolucao"
+Local aOrd           := ""
+Local cPerg          := "MTR800"
+Local imprime        := .T.
+Local lUsaQuery      := .F.  //Verifica se o sistema esta trabalhando com Query
+
+Private lEnd         := .F.
+Private lAbortPrint  := .F.
+Private limite       := 132
+Private tamanho      := "M"
+Private nomeprog     := "MATR800" // Coloque aqui o nome do programa para impressao no cabecalho
+Private aReturn      := { STR0004, 1, STR0005, 1, 2, 1, "", 1}  //"Zebrado"//"Administracao"
+Private nLastKey     := 0
+Private cbtxt        := Space(10)
+Private cbcont       := 00
+Private m_pag        := 01
+Private wnrel        := "MATR800"  //Coloque aqui o nome do arquivo usado para impressao em disco
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros 					³
+//³ mv_par01		  // Entrada De           		        ³
+//³ mv_par02		  // Entrada Ate                        ³
+//³ mv_par03		  // Resolucao De                       ³
+//³ mv_par04		  // Resolucao Ate                      ³
+//³ mv_par05		  // Tipo Doc.                          ³
+//³ mv_par06		  // Serie De                           ³
+//³ mv_par07		  // Serie Ate                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AjustaSX1()
+
+Pergunte(cPerg,.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Seleciona o Cadastro de Resolucao            			   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SFQ")
+dbSetOrder(1)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Monta a interface padrao com o usuario...                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+wnrel := SetPrint("SFQ",NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.T.,aOrd,.T.,Tamanho,,.T.)
+
+If nLastKey == 27
+	Set Filter to
+	Return
+EndIf
+
+SetDefault(aReturn,"SFQ")
+
+If nLastKey == 27
+	Set Filter to
+	Return
+EndIf
+
+#IFDEF TOP
+	If TcSrvType() != "AS/400"
+		lUsaQuery := .T.
+	EndIf
+#ENDIF
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Impressao do relatorio.                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+RptStatus({|lEnd| Mtr800Impr(@lEnd,Titulo,lUsaQuery) },Titulo)
+
+Return(.T.)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³Mtr800Impr³ Autor ³ Fernando Machima      ³ Data ³12/04/2004³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Imprime os dados da Resolucao                               ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ Nenhum                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³                                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function Mtr800Impr(lEnd,Titulo,lUsaQuery)
+
+Local nIndex
+Local Cabec1         := STR0010  //"Num. Resolucao   Data Autor. Serie      De         Ate        Data Entr.  Tipo Documento  Total"      
+Local Cabec2         := ""
+Local cIndex   
+Local cChave
+Local cCondicao
+Local cTipoDoc       := ""
+LOCAL lContinua	     := .T.
+
+li   := 80
+dbSelectArea("SFQ")
+cIndex := CriaTrab("",.F.)
+cChave := 'FQ_FILIAL+DTOS(FQ_EMISSAO)+FQ_RESOLUC'
+
+cCondicao := 'FQ_FILIAL == "'+xFilial("SFQ")+'"'
+cCondicao += ' .And. DTOS(FQ_EMISSAO) >= "'+DTOS(mv_par01)+'" .And. DTOS(FQ_EMISSAO) <= "'+DTOS(mv_par02)+'"'
+cCondicao += ' .And. FQ_RESOLUC >= "'+mv_par03+'" .And. FQ_RESOLUC <= "'+mv_par04+'"'
+cCondicao += ' .And. FQ_SERIE >= "'+mv_par06+'" .And. FQ_SERIE <= "'+mv_par07+'"'
+cCondicao += ' .And. FQ_ATIVO == "1" '
+If mv_par05 != 4  //Se nao selecionar Todos
+   cCondicao += ' .And. FQ_TIPO == "'+Str(mv_par05,1)+'"'
+EndIf
+
+IndRegua("SFQ",cIndex,cChave,,cCondicao)
+nIndex := RetIndex("SFQ")
+
+dbSelectArea("SFQ")
+If !lUsaQuery
+	dbSetIndex(cIndex+OrdBagExt())
+EndIf
+dbSetOrder(nIndex+1)
+dbGoTop()
+
+SetRegua(RecCount())		
+
+While !Eof() .And. lContinua
+
+	IF lEnd
+		@Prow()+1,001 PSAY STR0006		//"CANCELADO PELO OPERADOR"
+		lContinua := .F.
+		Exit
+	Endif
+
+	IncRegua()
+    
+	If li > 52
+	   cabec(Titulo,cabec1,cabec2,nomeprog,tamanho,15)
+	EndIf
+//             1         2         3         4         5         6         7         8         9         100       110       120       130
+//   0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
+//  "Num. Resolucao   Data Autor. Serie      De         Ate        Data Entr.  Tipo Documento  Total"      
+
+    cTipoDoc  := Mtr800Tipo()    
+    @li,001 PSay SFQ->FQ_RESOLUC    
+    @li,024 PSay SFQ->FQ_AUTORIZ
+    @li,036 PSay SFQ->FQ_SERIE
+    @li,043 PSay SFQ->FQ_DOCINI PICTURE PesqPict("SFQ","FQ_DOCINI")
+    @li,054 PSay SFQ->FQ_DOCFIM PICTURE PesqPict("SFQ","FQ_DOCFIM")
+    @li,068 PSay SFQ->FQ_EMISSAO    
+    @li,080 PSay cTipoDoc    
+    @li,097 PSay SFQ->FQ_TOTAL    
+    
+    DbSkip()    
+    
+    li++
+End
+
+If li != 80
+   @ li,00 PSay __PrtFatLine()	
+   roda(cbcont,cbtxt,tamanho)
+EndIf   
+
+If !lUsaQuery
+   If File(cIndex + OrdBagExt())
+      FErase( cIndex + OrdBagExt() )
+   EndIf   
+EndIf
+
+RetIndex("SFQ")
+dbSelectArea("SFQ")
+Set Filter To
+dbSetOrder(1)
+	
+Set Device To Screen
+
+If aReturn[5] = 1
+	Set Printer TO
+	dbCommitAll()
+	ourspool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return .T.
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³AjustaSX1 ³ Autor ³ Fernando Machima      ³ Data ³12/04/2004³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡ao ³Cria as perguntas caso nao estejam cadastradas no SX1       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ Nenhum                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³                                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function AjustaSX1()
+
+Local aHelpPor	:= {}
+Local aHelpEng	:= {}
+Local aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe a data de entrada inicial"   )
+Aadd( aHelpEng, "Enter the initial inflow date    "   )
+Aadd( aHelpSpa, "Indique la fecha de entrada inicial" )
+
+PutSx1("MTR800", "01","Data de entrada De  ?","¿De fecha de entrada?","From inflow date?    ","mv_ch1","D",8,0,0,"G","","","","",;
+	"mv_par01","","","","01/01/2004","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe a data de entrada final"   )
+Aadd( aHelpEng, "Enter the final inflow date    "   )
+Aadd( aHelpSpa, "Indique la fecha de entrada final" )
+
+PutSx1("MTR800", "02","Data de entrada Ate ?","¿A fecha de entrada?","To inflow date?      ","mv_ch2","D",8,0,0,"G","","","","",;
+	"mv_par02","","","","31/12/2004","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe o Numero de Resolucao inicial"   ) 
+Aadd( aHelpEng, "Enter the initial authorization numb."   )
+Aadd( aHelpSpa, "Indique el Numero de Resolucion inicial" )
+
+PutSx1("MTR800", "03","Num. de Resolucao De?","¿De Num. de Resolucion?","From authorization no","mv_ch3","C",20,0,0,"G","","","","",;
+	"mv_par03","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe o Numero de Resolucao final"   )
+Aadd( aHelpEng, "Enter the final authorization number " )
+Aadd( aHelpSpa, "Indique el Numero de Resolucion final" )
+
+PutSx1("MTR800", "04","Num.de Resolucao Ate?","¿A Num. de Resolucion?","To authorization no.?","mv_ch4","C",20,0,0,"G","","","","",;
+	"mv_par04","","","","ZZZZZZZZZZZZZZZZZZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe o Tipo de Documento"  )
+Aadd( aHelpEng, "Enter the document type    "  )
+Aadd( aHelpSpa, "Indique el Tipo de Documento" )
+
+PutSx1("MTR800", "05","Tipo de Documento  ?","¿Tipo de Documento?","Document type?      ","mv_ch5","C",1,0,1,"C","","","","",;
+	"mv_par05","Nota Fiscal","Factura","Invoice","","Nota de Credito","Nota de Credito","Credit Note","Nota de Debito","Nota de Debito","Debit Note","Todos","Todos","All","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe a Serie inicial"  )
+Aadd( aHelpEng, "Enter the initial series" )
+Aadd( aHelpSpa, "Indique la Serie inicial" )
+
+PutSx1("MTR800", "06","Serie De           ?","¿De Serie          ?","From series?        ","mv_ch6","C",3,0,0,"G","","","","",;
+	"mv_par06","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe a Serie final"  )
+Aadd( aHelpEng, "Enter the final series" )
+Aadd( aHelpSpa, "Indique la Serie final" )
+
+PutSx1("MTR800", "07","Serie Ate          ?","¿A Serie           ?" ,"To series?          ","mv_ch7","C",3,0,0,"G","","","","",;
+	"mv_par07","","","","ZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+Return .T.
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³Mtr800Tipo³ Autor ³ Fernando Machima      ³ Data ³12/04/2004³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡ao ³Retorna a descricao do tipo do documento                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ Descricao do tipo do documento(Nota Fiscal,Nota de Credito,³±±
+±±³          ³ Nota de Debito)                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³                                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function Mtr800Tipo()
+
+Local cTipo  := ""
+
+If SFQ->FQ_TIPO == "2"
+   cTipo  := STR0007    //"Nota de Credito"
+ElseIf SFQ->FQ_TIPO == "3"
+   cTipo  := STR0008   //"Nota de Debito"
+Else
+   cTipo  := STR0009   //"Nota Fiscal"   
+EndIf   
+
+Return (cTipo)

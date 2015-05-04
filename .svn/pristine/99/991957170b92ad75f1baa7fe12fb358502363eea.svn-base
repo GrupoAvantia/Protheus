@@ -1,0 +1,70 @@
+#include "rwmake.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³PMA101IMP ºAutor  ³Grayson B.Tavares   º Data ³  06/24/09   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Ponto de entrada para alterar dados na importação de compo- º±±
+±±º          ³sição                                                       º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³Gestao de Projetos                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+User Function PMA101IMP
+
+cCompos := AE1->AE1_COMPOS
+cOrcam  := AF1->AF1_ORCAME
+
+dbSelectArea("AE2")
+dbSetOrder(1)
+AE2->(dbSeek(xFilial("AE2")+cCompos))
+
+While AE2->AE2_FILIAL == xFilial("AE2") .And. AE2->AE2_COMPOS == cCompos
+	dbSelectArea("AF3")
+	dbSetOrder(2)
+	If AF3->(dbSeek(xFilial("AF3")+cOrcam+AE2->AE2_PRODUT))
+		While AF3->AF3_FILIAL == xFilial("AF3") ;
+		     .And. AF3->AF3_ORCAME == cOrcam ;
+		     .And. AF3->AF3_PRODUTO == AE2->AE2_PRODUT 
+			If Alltrim(AF3->AF3_COMPOS) == Alltrim(cCompos)
+				RecLock("AF3",.f.)
+				Replace AF3->AF3_QTDORI With AF3->AF3_QUANT//AE2->AE2_QUANT
+				Replace AF3->AF3_INDICE With 1 //AF3->AF3_QUANT/AE2->AE2_QUANT
+				Replace AF3->AF3_COMP   With cCompos
+				If !Empty(AF3->AF3_RECURS)
+					Replace AF3->AF3_CUSTHR With AF3->AF3_CUSTD
+				EndIf
+				MsUnlock()
+			EndIf                                  
+			
+			AF3->(dbSkip())
+		EndDo	
+	EndIf
+	
+	dbSelectArea("AF3")
+	dbSetOrder(4)
+	If AF3->(dbSeek(xFilial("AF3")+AE2->AE2_PRODUT+cOrcam))
+		While AF3->AF3_FILIAL == xFilial("AF3") ;
+		     .And. AF3->AF3_ORCAME == cOrcam ;
+		     .And. AF3->AF3_RECURS == AE2->AE2_RECURS
+			If Alltrim(AF3->AF3_COMPOS) == Alltrim(cCompos)
+				RecLock("AF3",.f.)
+				Replace AF3->AF3_QTDORI With AF3->AF3_QUANT//AE2->AE2_QUANT
+				Replace AF3->AF3_INDICE With 1//AF3->AF3_QUANT/AE2->AE2_QUANT
+				Replace AF3->AF3_COMP   With cCompos
+				MsUnlock()
+			EndIf                                  
+			
+			AF3->(dbSkip())
+		EndDo	
+	EndIf
+		
+	AE2->(dbSkip())
+EndDo
+
+Return

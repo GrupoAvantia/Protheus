@@ -1,0 +1,557 @@
+#INCLUDE "MATR785.CH" 
+#INCLUDE "FIVEWIN.CH"
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ MATR785  ³ Autor ³ Marco Bianchi         ³ Data ³ 21/07/06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Lista de Precos Por Clientes - Release 4.                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³ SIGAFAT                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Function MATR785()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And. TRepInUse()
+	//-- Interface de impressao
+	oReport := ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR785R3()
+EndIf
+
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportDef ³ Autor ³ Marco Bianchi         ³ Data ³ 21/07/06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpO1: Objeto do relatório                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+Local oReport
+#IFDEF TOP
+	Local cAliasSA7 := cAliasSA1 := cAliasSB1 := GetNextAlias()
+#ELSE 
+	Local cAliasSA7 := "SA7"
+	Local cAliasSA1 := "SA1"
+	Local cAliasSB1 := "SB1"
+#ENDIF	
+Local dData 	:= CtoD("  /  /  ")
+Local nPreco	:= 0
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao do componente de impressao                                      ³
+//³                                                                        ³
+//³TReport():New                                                           ³
+//³ExpC1 : Nome do relatorio                                               ³
+//³ExpC2 : Titulo                                                          ³
+//³ExpC3 : Pergunte                                                        ³
+//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+//³ExpC5 : Descricao                                                       ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport := TReport():New("MATR785",STR0014,"MTR785", {|oReport| ReportPrint(oReport,cAliasSA7,cAliasSA1,cAliasSB1)},STR0015 + " " + STR0016)	// "Lista de Precos por Clientes"###"Este relatorio destina-se aos usuarios que utilizam preco de venda"###"na amarracao Produto X Cliente, sendo apresentado apenas o ultimo"
+oReport:SetLandscape() 
+oReport:SetTotalInLine(.F.)
+
+Pergunte(oReport:uParam,.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da secao utilizada pelo relatorio                               ³
+//³                                                                        ³
+//³TRSection():New                                                         ³
+//³ExpO1 : Objeto TReport que a secao pertence                             ³
+//³ExpC2 : Descricao da seçao                                              ³
+//³ExpA3 : Array com as tabelas utilizadas pela secao. A primeira tabela   ³
+//³        sera considerada como principal para a seção.                   ³
+//³ExpA4 : Array com as Ordens do relatório                                ³
+//³ExpL5 : Carrega campos do SX3 como celulas                              ³
+//³        Default : False                                                 ³
+//³ExpL6 : Carrega ordens do Sindex                                        ³
+//³        Default : False                                                 ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da celulas da secao do relatorio                                ³
+//³                                                                        ³
+//³TRCell():New                                                            ³
+//³ExpO1 : Objeto TSection que a secao pertence                            ³
+//³ExpC2 : Nome da celula do relatório. O SX3 será consultado              ³
+//³ExpC3 : Nome da tabela de referencia da celula                          ³
+//³ExpC4 : Titulo da celula                                                ³
+//³        Default : X3Titulo()                                            ³
+//³ExpC5 : Picture                                                         ³
+//³        Default : X3_PICTURE                                            ³
+//³ExpC6 : Tamanho                                                         ³
+//³        Default : X3_TAMANHO                                            ³
+//³ExpL7 : Informe se o tamanho esta em pixel                              ³
+//³        Default : False                                                 ³
+//³ExpB8 : Bloco de código para impressao.                                 ³
+//³        Default : ExpC2                                                 ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Secao 01 - Clientes                                                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oCliente := TRSection():New(oReport,STR0019,{"SA7","SA1"},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)	// "Lista de Precos por Clientes"
+oCliente:SetTotalInLine(.F.)
+TRCell():New(oCliente,"A7_CLIENTE"	,/*Tabela*/,RetTitle("A7_CLIENTE"	),PesqPict("SA7","A7_CLIENTE"	),TamSx3("A7_CLIENTE"	)[1],/*lPixel*/,{|| (cAliasSA7)->A7_CLIENTE	})
+TRCell():New(oCliente,"A1_NOME"		,/*Tabela*/,RetTitle("A1_NOME"		),PesqPict("SA1","A1_NOME"		),TamSx3("A1_NOME"		)[1],/*lPixel*/,{|| (cAliasSA1)->A1_NOME		})
+TRCell():New(oCliente,"A1_END"		,/*Tabela*/,RetTitle("A1_END"		),PesqPict("SA1","A1_END"		),TamSx3("A1_END"		)[1],/*lPixel*/,{|| (cAliasSA1)->A1_END 		})
+TRCell():New(oCliente,"A1_TEL"		,/*Tabela*/,RetTitle("A1_TEL"		),PesqPict("SA1","A1_TEL"		),TamSx3("A1_TEL"		)[1],/*lPixel*/,{|| (cAliasSA1)->A1_TEL		})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Sub-Secao do Cliente - Produto                                         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oProduto := TRSection():New(oCliente,STR0020,{"SA7","SB1"},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)	// "Lista de Precos por Clientes"
+oProduto:SetTotalInLine(.F.)
+TRCell():New(oProduto,"A7_PRODUTO"	,/*Tabela*/	,RetTitle("A7_PRODUTO"	),PesqPict("SA7","A7_PRODUTO"	),TamSx3("A7_PRODUTO"	)[1],/*lPixel*/,{|| (cAliasSA7)->A7_PRODUTO	})
+TRCell():New(oProduto,"B1_DESC"		,/*Tabela*/	,RetTitle("B1_DESC"		),PesqPict("SB1","B1_DESC"		),TamSx3("B1_DESC"		)[1],/*lPixel*/,{|| (cAliasSB1)->B1_DESC 		})
+TRCell():New(oProduto,"A7_CODCLI"	,/*Tabela*/	,RetTitle("A7_CODCLI"	),PesqPict("SA7","A7_CODCLI"	),TamSx3("A7_CODCLI"	)[1],/*lPixel*/,{|| (cAliasSA7)->A7_CODCLI 	})
+TRCell():New(oProduto,"B1_PESO"		,/*Tabela*/	,RetTitle("B1_PESO"		),PesqPict("SB1","B1_PESO"		),TamSx3("B1_PESO"		)[1],/*lPixel*/,{|| (cAliasSB1)->B1_PESO 		})
+TRCell():New(oProduto,"B1_UM"		,/*Tabela*/	,RetTitle("B1_UM"		),PesqPict("SB1","B1_UM"		),TamSx3("B1_UM"		)[1],/*lPixel*/,{|| (cAliasSB1)->B1_UM 		})
+If cPaisLoc =="BRA"
+	TRCell():New(oProduto,"B1_IPI"		,/*Tabela*/,RetTitle("B1_IPI"		),PesqPict("SB1","B1_IPI"		),TamSx3("B1_IPI"		)[1],/*lPixel*/,{|| (cAliasSB1)->B1_IPI 	})
+	TRCell():New(oProduto,"B1_POSIPI"	,/*Tabela*/,RetTitle("B1_POSIPI"	),PesqPict("SB1","B1_POSIPI"	),TamSx3("B1_POSIPI"	)[1],/*lPixel*/,{|| (cAliasSB1)->B1_POSIPI	})
+EndIf	
+TRCell():New(oProduto,"DDATA"	,/*Tabela*/,STR0017,PesqPict("SA7","A7_DTREF01"	),TamSx3("A7_DTREF01"	)[1],/*lPixel*/,{|| DDATA 	})	// "Ult.Reaj."
+TRCell():New(oProduto,"NPRECO"	,/*Tabela*/,STR0018,PesqPict("SA7","A7_PRECO01"	),TamSx3("A7_PRECO01"	)[1],/*lPixel*/,{|| NPRECO 	})	// "Preco de Venda"
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Imprimie Cabecalho no Topo da Pagina	                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:Section(1):Section(1):SetHeaderPage()                       
+
+
+Return(oReport)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrin³ Autor ³ Marco Bianchi         ³ Data ³ 21/07/06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatório                           ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport,cAliasSA7,cAliasSA1,cAliasSB1)
+
+#IFNDEF TOP
+	Local cCondicao	:= ""
+#ENDIF
+Local nP 		:= 0
+Local cCliente 	:= ""
+                
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define o bloco de codigo que retornara o conteudo de impres- ³
+//³ sao da celula.                                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:Section(1):Section(1):Cell("DDATA"	):SetBlock({|| dData	})
+oReport:Section(1):Section(1):Cell("NPRECO"):SetBlock({|| nPreco	})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Transforma parametros Range em expressao SQL                            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+MakeSqlExpr(oReport:uParam)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Filtragem do relatório                                                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+#IFDEF TOP
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Query do relatório da secao 1                                           ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:Section(1):BeginQuery()	
+	BeginSql Alias cAliasSA7
+	SELECT A7_FILIAL,A7_PRODUTO,A7_CODCLI,A7_CLIENTE,A7_LOJA,A7_DTREF01,A7_DTREF02,A7_DTREF03,A7_DTREF04,
+		A7_DTREF05,A7_DTREF06,A7_DTREF07,A7_DTREF08,A7_DTREF09,A7_DTREF10,A7_DTREF11,A7_DTREF12,
+		A7_PRECO01,A7_PRECO02,A7_PRECO03,A7_PRECO04,A7_PRECO05,A7_PRECO06,A7_PRECO07,A7_PRECO08,A7_PRECO09,
+		A7_PRECO10,A7_PRECO11,A7_PRECO12,B1_DESC,B1_PESO,B1_UM,B1_IPI,B1_POSIPI,B1_COD,B1_PRV1,B1_DESC,
+		A1_COD,A1_LOJA,A1_NOME,A1_END,A1_TEL
+	FROM %Table:SA7% SA7
+	LEFT JOIN %Table:SA1% SA1
+		ON A1_FILIAL = %xFilial:SA1% AND 
+		   A1_COD = A7_CLIENTE AND 
+		   A1_LOJA = A7_LOJA AND 
+		   SA1.%NotDel%
+	LEFT JOIN %Table:SB1% SB1
+		ON B1_FILIAL = %xFilial:SB1% AND
+		   B1_COD = A7_PRODUTO AND 
+		   SB1.%NotDel%
+	WHERE A7_FILIAL = %xFilial:SA7% AND 
+		A7_CLIENTE >= %Exp:mv_par01% AND A7_CLIENTE <= %Exp:mv_par02% AND 
+		A7_PRODUTO >= %Exp:mv_par03% AND A7_PRODUTO <= %Exp:mv_par04% AND
+		SA7.%NotDel%
+	ORDER BY A7_CLIENTE,A7_LOJA,A7_PRODUTO
+	EndSql 
+	oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
+		
+#ELSE
+	dbSelectArea(cAliasSA7)
+	dbSetOrder(1)
+	cCondicao := dbFilter()
+	cCondicao += If(!Empty(cCondicao),".And.","")
+	cCondicao += "A7_FILIAL=='"+xFilial("SA7")+"'"
+	cCondicao += " .And. A7_CLIENTE>='"+mv_par01+"' .And. A7_CLIENTE<='"+mv_par02+"'"
+	cCondicao += " .And. A7_PRODUTO>='"+mv_par03+"' .And. A7_PRODUTO<='"+mv_par04+"'"
+	oReport:Section(1):SetFilter(cCondicao,IndexKey())
+
+	// Posiciona Cadastro de Clientes e Produtos antes da impressao de cada linha
+	TRPosition():New(oReport:Section(1)				,"SA1",1,{|| xFilial("SA1")+(cAliasSA7)->A7_CLIENTE+(cAliasSA7)->A7_LOJA })
+	TRPosition():New(oReport:Section(1):Section(1)	,"SB1",1,{|| xFilial("SB1")+(cAliasSA7)->A7_PRODUTO })
+	
+#ENDIF		
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Inicio da impressao do fluxo do relatório                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea(cAliasSA7)
+oReport:SetMeter((cAliasSA7)->(LastRec()))
+While !oReport:Cancel() .And. !(cAliasSA7)->(Eof()) .And. (cAliasSA7)->A7_FILIAL = xFilial("SA7")
+
+    If (cAliasSA7)->A7_CLIENTE <> cCliente
+	    oReport:Section(1):Init()
+	    oReport:Section(1):PrintLine()  
+	    cCliente := (cAliasSA7)->A7_CLIENTE
+    EndIf
+	
+	oReport:Section(1):Section(1):Init()
+	While !oReport:Cancel() .And. !(cAliasSA7)->(Eof()) .And. (cAliasSA7)->A7_FILIAL = xFilial("SA7") .And.;
+		(cAliasSA7)->A7_CLIENTE == cCliente
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Valida o produto conforme a mascara         ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		lRet:=ValidMasc((cAliasSA7)->A7_PRODUTO,MV_PAR06)
+		If !lRet
+			dbSkip()
+			Loop
+		Endif
+	
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Busca ultimo preco                          ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		dbSelectArea(cAliasSA7)
+		For nP := 12 to 1 Step -1
+			nPreco := &("A7_PRECO"+StrZero(nP,2))
+			dData  := &("A7_DTREF"+StrZero(nP,2))
+			If !Empty(nPreco)
+				Exit
+			Endif
+		Next
+
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Imprime Produto                             ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		oReport:Section(1):Section(1):PrintLine()
+		
+		dbSelectArea(cAliasSA7)
+		dbSkip()
+		oReport:IncMeter()
+	
+	EndDo
+	
+	oReport:Section(1):Section(1):Finish()
+	oReport:Section(1):Finish()
+	If mv_par05 == 1		// Pula pagina na quebra da secao
+		oReport:section(1):SetPageBreak(.T.)
+	Else	
+		oReport:section(1):SetPageBreak(.F.)
+	EndIf
+	
+EndDo
+
+Return
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR785R3³ Autor ³ Marcos Bregantim      ³ Data ³ 11.04.94 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Lista de Precos Por Clientes                               ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ MATR785(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ ATUALIZACOES SOFRIDAS DESDE A CONSTRUCAO INICIAL.                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ PROGRAMADOR  ³ DATA   ³ BOPS ³  MOTIVO DA ALTERACAO                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function MatR785R3()
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL wnrel
+LOCAL aTitulo := {OemToAnsi(STR0001),OemToAnsi(STR0002),OemToAnsi(STR0003),OemToAnsi(STR0004)}		//"Detalhado"###"Analitico"###"Sintetico"###"Resumido "
+LOCAL tamanho:="M"
+LOCAL titulo:=OemToAnsi(STR0005)	//"Lista de Precos por Clientes"
+LOCAL cDesc1:=OemToAnsi(STR0006)	//"Este relatorio destina-se aos usuarios que utilizam preco de venda"
+LOCAL cDesc2:=OemToAnsi(STR0007)	//"na amarracao Produto X Cliente, sendo apresentado apenas o ultimo"
+LOCAL cDesc3:=OemToAnsi(STR0008)	//"preco"
+LOCAL CbCont,cbtxt,cabec1,cabec2
+LOCAL cString:="SA7"
+LOCAL lContinua := .T.,lCli:=.F.,cCliente
+cPerg :="MTR785"
+
+PRIVATE aReturn := { OemToAnsi(STR0009), 1,OemToAnsi(STR0010), 2, 2, 1, "",0 }			//"Zebrado"###"Administracao"
+PRIVATE nomeprog:="MATR785",nLastKey := 0,nBegin:=0,aLinha:={ }
+PRIVATE li:=80,limite:=80,lRodape:=.F.
+
+wnrel    := "MATR785"
+cString  := "SA7"
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para Impressao do Cabecalho e Rodape    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cbtxt    := SPACE(10)
+cbcont   := 0
+li       :=80
+m_pag    :=1
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+pergunte("MTR785",.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                        ³
+//³ mv_par01	     	  Do Cliente                               ³
+//³ mv_par02	     	  Ate o Cliente                            ³
+//³ mv_par03	     	  Do Produto                               ³
+//³ mv_par04	     	  Ate o Produto                            ³
+//³ mv_par05	     	  Quebra Clientes por pagina ? (S)im (N)ao ³
+//³ mv_par06	     	  Mascara do Produto                       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+If mv_par05 = 2
+	lCli:=.T.
+EndIf
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@Titulo,cDesc1,cDesc2,cDesc3,.F.,,,Tamanho)
+
+If nLastKey == 27
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	dbClearFilter()
+	Return
+Endif
+
+RptStatus({|lEnd| C785Imp(@lEnd,wnRel,cbcont,cbtxt,tamanho)},Titulo)
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ C785IMP  ³ Autor ³ Rosane Luciane Chene  ³ Data ³ 09.11.95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Chamada do Relatorio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR785 			                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function C785Imp(lEnd,WnRel,cbcont,cbtxt,tamanho)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL aTitulo := {OemToAnsi(STR0001),OemToAnsi(STR0002),OemToAnsi(STR0003),OemToAnsi(STR0004)}			//"Detalhado"###"Analitico"###"Sintetico"###"Resumido "
+LOCAL titulo:=OemToAnsi(STR0005)	//"LISTA DE PRECOS POR CLIENTES"
+LOCAL cDesc1:=OemToAnsi(STR0006)	//"Este relatorio destina-se aos usuarios que utilizam preco de venda"
+LOCAL cDesc2:=OemToAnsi(STR0007)	//"na amarracao Produto X Cliente, sendo apresentado apenas o ultimo"
+LOCAL cDesc3:=OemToAnsi(STR0008)	//"preco"
+LOCAL cabec1,cabec2
+LOCAL lContinua := .T.,lCli:=.T.,cCliente
+LOCAL cFiltro, bFiltro
+Local nPreco, dData, nP
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Filtro da funcao SetPrint                                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If ! Empty(aReturn[7])
+	cFiltro := "{ || " + aReturn[7] + " }"
+	bFiltro := &cFiltro
+Else
+	bFiltro := { || .t. }
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Definicao dos cabecalhos                                     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+titulo := OemToAnsi(STR0005)	//"LISTA DE PRECOS POR CLIENTES"
+dbSelectArea("SA7")
+dbSeek( cFilial+mv_par01,.T. )
+
+SetRegua(RecCount())		// Total de Elementos da regua
+
+While !Eof() .And. A7_FILIAL+A7_CLIENTE <= cFilial+mv_par02 .And. lContinua
+	
+	If lEnd
+		@Prow()+1,001 Psay STR0011	//"CANCELADO PELO OPERADOR"
+		lContinua := .F.
+		Exit
+	Endif
+	
+	IncRegua()
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Filtro da funcao SETPRINT                                    ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If ! Eval(bFiltro)
+		DbSkip()
+		Loop
+	EndIf
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Filtro das perguntas                                         ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If SA7->A7_PRODUTO < mv_par03 .Or. SA7->A7_PRODUTO > mv_par04
+		dbSkip()
+		Loop
+	Endif
+	//	ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//	³ Valida o produto conforme a mascara         ³
+	//	ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	lRet:=ValidMasc(SA7->A7_PRODUTO,MV_PAR06)
+	If !lRet
+		dbSkip()
+		Loop
+	Endif
+	
+	If SA7->A7_CLIENTE != cCliente
+		cCliente := SA7->A7_CLIENTE
+		If mv_par05 = 1
+			li := 60
+		ElseIf mv_par05 = 2 .And. lRodape
+			dbSelectArea("SA1")
+			dbSeek(cFilial+SA7->A7_CLIENTE+SA7->A7_LOJA)
+			Li++
+			@ Li,00 Psay __PrtThinLine()
+			Li++
+			@ Li,00 Psay STR0012 + SA1->A1_COD + " " + SA1->A1_NOME + " " + SA1->A1_END + " " + SA1->A1_TEL			//"Cliente : "
+			Li++
+			Li++
+		EndIf
+	Endif
+	
+	If li > 57
+		dbSelectArea("SA1")
+		dbSeek(cFilial+SA7->A7_CLIENTE+SA7->A7_LOJA)
+		If mv_par05 = 1
+			cabec1 := STR0012 + SA1->A1_COD + " " + SA1->A1_NOME + " " + SA1->A1_END + " " + SA1->A1_TEL			//"Cliente : "
+			cabec2 := STR0013	//"Produto         Descricao do Produto           Cod no Cliente  Peso Unitario  UM   IPI     Inciso IPI  Ult. Reaj      Preco de Venda"
+			//                   0         1         2         3         4         5         6         7         8         9        10        11        12        13
+			//                   012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901
+			lCli:=.F.
+		Else
+			cabec1 := STR0013	//"Produto         Descricao do Produto           Cod no Cliente  Peso Unitario  UM   IPI     Inciso IPI  Ult. Reaj      Preco de Venda"
+			//                   0         1         2         3         4         5         6         7         8         9        10        11        12        13
+			//                   012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901
+			cabec2 := ""
+		Endif
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,18)
+		lRodape := .T.
+	Endif
+	
+	If lCli
+		dbSelectArea("SA1")
+		dbSeek(cFilial+SA7->A7_CLIENTE+SA7->A7_LOJA)
+		@ Li,00 Psay STR0012 + SA1->A1_COD + " " + SA1->A1_NOME + " " + SA1->A1_END + " " + SA1->A1_TEL			//"Cliente : "
+		Li++
+		Li++
+		lCli:=.F.
+	EndIf
+	
+	dbSelectArea("SB1")
+	dbSeek(cFilial+SA7->A7_PRODUTO)
+	dbSelectArea("SA7")
+	
+	@li,000 Psay SA7->A7_PRODUTO
+	@li,031 Psay Substr(SB1->B1_DESC,1,30)
+	@li,062 Psay SA7->A7_CODCLI
+	@li,081 Psay SB1->B1_PESO Picture "@E 999,999.9999"
+	@li,096 Psay SB1->B1_UM
+	If cPaisLoc =="BRA"
+		@li,101 Psay SB1->B1_IPI Picture "@e 99.99"
+		@li,109 Psay SB1->B1_POSIPI
+	EndIf
+	For nP := 12 to 1 Step -1
+		nPreco := &("SA7->A7_PRECO"+StrZero(nP,2))
+		dData  := &("SA7->A7_DTREF"+StrZero(nP,2))
+		If !Empty(nPreco)
+			Exit
+		Endif
+	Next
+  	@li,IIf(cPaisLoc=="BRA",121,125) Psay dData
+	@li,IIf(cPaisLoc=="BRA",133,137) Psay nPreco Picture PesqPict("SA7","A7_PRECO01",20)
+
+	li++
+	dbSkip()
+End
+
+IF lRodape
+	roda(cbcont,cbtxt,tamanho)
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Restaura a Integridade dos dados                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SA7")
+dbClearFilter()
+dbSetOrder(1)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Se em disco, desvia para Spool                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If aReturn[5] = 1    // Se Saida para disco, ativa SPOOL
+	Set Printer TO
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()

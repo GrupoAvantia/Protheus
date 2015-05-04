@@ -1,0 +1,968 @@
+#INCLUDE "COMR100.ch"
+#INCLUDE "PROTHEUS.CH"
+#DEFINE CHRCOMP If(aReturn[4]==1,15,18)
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³COMR100   ³ Autor ³ Nereu Humberto Junior ³ Data ³23.06.2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Relacao dos documentos de cobertura                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function COMR100()
+Local oReport
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Ajusta perguntas no SX1 									 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AjustaSX1()
+
+If FindFunction("TRepInUse") .And. TRepInUse()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Interface de impressao                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport := ReportDef()
+	oReport:PrintDialog()
+Else
+	COMR100R3()
+EndIf
+
+Return
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportDef ³ Autor ³Nereu Humberto Junior  ³ Data ³23.06.2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpO1: Objeto do relatório                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+Local oReport 
+Local oSection1
+Local oSection2 
+Local oCell         
+Local aOrdem := {}
+#IFNDEF TOP
+	Local cAliasSDH := "SDH"	
+#ELSE
+	Local cAliasSDH := GetNextAlias()
+#ENDIF
+Local cTamQtd := TamSX3('DH_QUANT')[1]
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao do componente de impressao                                      ³
+//³                                                                        ³
+//³TReport():New                                                           ³
+//³ExpC1 : Nome do relatorio                                               ³
+//³ExpC2 : Titulo                                                          ³
+//³ExpC3 : Pergunte                                                        ³
+//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+//³ExpC5 : Descricao                                                       ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:= TReport():New("COMR100",STR0001,"COM100", {|oReport| ReportPrint(oReport,cAliasSDH)},STR0002+" "+STR0003) // "Relação dos documentos de cobertura "##"Este relatório demonstra os documentos de cobertura recebidos e pendentes"##"com o objetivo de auxiliar no follow-up destes documentos."
+oReport:SetLandscape() 
+oReport:SetTotalInLine(.F.)
+
+Pergunte("COM100",.F.)
+
+Aadd( aOrdem, STR0004 ) // "Documento"
+Aadd( aOrdem, STR0005 ) // "Cliente/Fornecedor+Documento"
+
+oSection1 := TRSection():New(oReport,STR0027,{"SDH","SA1","SA2"},aOrdem) //"Relação dos documentos de cobertura "
+oSection1 :SetTotalInLine(.F.)
+
+TRCell():New(oSection1,"cCodigo","   ",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| IIf(!Empty((cAliasSDH)->DH_CLIENTE),SA1->A1_COD,SA2->A2_COD) })
+oSection1:Cell("cCodigo"):GetFieldInfo("A1_COD")
+TRCell():New(oSection1,"cLoja","   ",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| IIf(!Empty((cAliasSDH)->DH_CLIENTE),SA1->A1_LOJA,SA2->A2_LOJA) })
+oSection1:Cell("cLoja"):GetFieldInfo("A1_LOJA")
+TRCell():New(oSection1,"cNome","   ",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| IIf(!Empty((cAliasSDH)->DH_CLIENTE),SA1->A1_NOME,SA2->A2_NOME) })
+oSection1:Cell("cNome"):GetFieldInfo("A1_NOME")
+
+oSection2 := TRSection():New(oSection1,STR0028,{"SDH","SD1","SB6","SB1"}) 
+oSection2 :SetHeaderPage()
+oSection2 :SetTotalInLine(.F.)
+
+TRCell():New(oSection2,"D1_SERIE"	,"SD1",STR0015				,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/) //"Serie"
+TRCell():New(oSection2,"D1_DOC"		,"SD1",STR0016				,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/) //"Numero"
+TRCell():New(oSection2,"D1_ITEM"	,"SD1",STR0017				,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/) //"Item"
+TRCell():New(oSection2,"D1_FORNECE"	,"SD1",STR0018+CRLF+STR0020	,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/) //"Cliente/Fornecedor"##"<--Doc.Entrada-->"
+TRCell():New(oSection2,"D1_LOJA"	,"SD1",STR0019				,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/) //"Loja"
+
+TRCell():New(oSection2,"DH_SERIE"	,"SDH",STR0015				,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"DH_DOC"		,"SDH",STR0016				,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"DH_CLIENTE"	,"SDH",STR0018+CRLF+STR0021	,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| IIf(!Empty((cAliasSDH)->DH_CLIENTE),(cAliasSDH)->DH_CLIENTE,(cAliasSDH)->DH_FORNECE)})
+TRCell():New(oSection2,"DH_LOJACLI"	,"SDH",STR0019				,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| IIf(!Empty((cAliasSDH)->DH_CLIENTE),(cAliasSDH)->DH_LOJACLI,(cAliasSDH)->DH_LOJAFOR) })
+
+TRCell():New(oSection2,"cSerCob"	,"   ",STR0015,PesqPict("SD1","D1_SERIE"),3,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"cDocCob"	,"   ",STR0016,PesqPict("SD1","D1_DOC"),TamSX3("F2_DOC")[1],/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"cFornCob"	,"   ",STR0018+CRLF+STR0022,PesqPict("SD1","D1_FORNECE"),6,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"cLojaCob"	,"   ",STR0019,PesqPict("SD1","D1_LOJA"),2,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"dPrazCob"	,"   ",STR0024,TM(0,5,0),5,/*lPixel*/,/*{|| code-block de impressao }*/)
+
+TRCell():New(oSection2,"B6_SERIE"	,"SB6",STR0015				,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"B6_DOC"		,"SB6",STR0016				,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"B6_CLIFOR"	,"SB6",STR0018+CRLF+STR0023	,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"B6_LOJA"	,"SB6",STR0019				,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"B6_QUANT"	,"SB6",/*Titulo*/			,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"B1_COD"		,"SB1",STR0025				,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"nQtdOri"	,"   ",/*Titulo*/			,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+
+oSection2:Cell("nQtdOri"):GetFieldInfo("DH_QUANT")
+TRCell():New(oSection2,"nSaldo","   ",STR0026,PesqPict("SDH","DH_QUANT"),cTamQtd,/*lPixel*/,/*{|| code-block de impressao }*/,,,"RIGHT")
+	
+Return(oReport)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrin³ Autor ³Nereu Humberto Junior  ³ Data ³21.06.2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatório                           ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport,cAliasSDH)
+
+Local oSection1:= oReport:Section(1) 
+Local oSection2:= oReport:Section(1):Section(1)  
+Local nOrdem   := oReport:Section(1):GetOrder() 
+Local cAliasSDH2:= GetNextAlias()
+Local cSerie    := ""
+Local cDoc      := ""
+Local cItem     := ""
+Local cCliente  := ""
+Local cLojaCli  := ""
+Local cFornece  := ""
+Local cLojaFor  := ""
+Local cArqInd   := ""
+Local dDataEnt  := Ctod("")
+Local dDataCob  := Ctod("")
+Local lTemCob   := .F.
+Local lTemSai   := .F.
+Local nQtdOri   := 0
+Local nSaldo    := 0
+Local cQuebra   := ""
+Local cOrder    := ""
+
+#IFNDEF TOP
+	Local cCondicao := ""
+#ELSE
+	Local cWhere := ""
+#ENDIF
+
+If nOrdem == 1
+	oReport:SetTitle( oReport:Title()+" - "+STR0004) // "Documento"
+	oSection1:Disable()
+ElseIf nOrdem == 2
+	oReport:SetTitle( oReport:Title()+" - "+STR0005) // "Cliente/Fornecedor+Documento"
+Endif
+TRFunction():New(oSection2:Cell("nQtdOri"),NIL,"SUM",/*oBreak*/,"",/*cPicture*/,/*uFormula*/,.F.,.T.) 
+TRFunction():New(oSection2:Cell("nSaldo"),NIL,"SUM",/*oBreak*/,"",/*cPicture*/,/*uFormula*/,.F.,.T.) 
+
+cArqInd := CriaTrab(,.F.)
+dbSelectArea("SDH")
+
+ChkFile("SDH",.F.,cAliasSDH2)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Filtragem do relatório                                                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+#IFDEF TOP
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Transforma parametros Range em expressao SQL                            ³	
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	MakeSqlExpr(oReport:uParam)
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Query do relatório da secao 1                                           ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:Section(1):BeginQuery()	
+	
+	cWhere :="%"
+	cWhere += "AND ((DH_CLIENTE >= '"+MV_PAR01+"'   AND "
+	cWhere += "DH_CLIENTE		<= '"+MV_PAR02+"'   AND "
+	cWhere += "DH_LOJACLI	    >= '"+MV_PAR03+"'   AND "
+	cWhere += "DH_LOJAFOR	    <= '"+MV_PAR04+"')  OR  "
+	cWhere += "(DH_FORNECE		>= '"+MV_PAR01+"'   AND "
+	cWhere += "DH_FORNECE		<= '"+MV_PAR02+"'   AND "
+	cWhere += "DH_LOJAFOR		>= '"+MV_PAR03+"'   AND "
+	cWhere += "DH_LOJAFOR	    <= '"+MV_PAR04+"')) "	
+	Do Case
+		Case mv_par11 == 2
+			cWhere += " AND DH_SALDO <> 0 "
+		Case mv_par11 == 3
+			cWhere += " AND DH_SALDO  = 0 "
+	EndCase
+	cWhere +="%"	
+	
+	cOrder := "%"
+	If nOrdem == 1
+		cOrder += "DH_FILIAL,DH_SERIE,DH_DOC,DH_CLIENTE,DH_LOJACLI,DH_FORNECE,DH_LOJAFOR,DH_TPMOV" 
+	Else
+		cOrder += "DH_FILIAL,DH_CLIENTE,DH_LOJACLI,DH_FORNECE,DH_LOJAFOR,DH_SERIE,DH_DOC,DH_TPMOV"
+	EndIf
+	cOrder += "%"
+
+	BeginSql Alias cAliasSDH
+
+	SELECT SDH.*
+	
+	FROM %table:SDH% SDH
+	
+	WHERE DH_FILIAL = %xFilial:SDH% AND 
+		  DH_OPER = '1' AND
+		  DH_TPMOV = '1' AND
+		  DH_SERIE >= %Exp:mv_par05% AND 
+		  DH_SERIE <= %Exp:mv_par06% AND 	 	  
+		  DH_DOC >= %Exp:mv_par07% AND 
+		  DH_DOC <= %Exp:mv_par08% AND 	 	  
+  		  DH_DTDIGIT >= %Exp:Dtos(mv_par09)% AND 
+		  DH_DTDIGIT <= %Exp:Dtos(mv_par10)% AND 		  
+		  SDH.%NotDel% 
+		  %Exp:cWhere%
+		  
+	ORDER BY %Exp:cOrder%
+			
+	EndSql 
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Metodo EndQuery ( Classe TRSection )                                    ³
+	//³                                                                        ³
+	//³Prepara o relatório para executar o Embedded SQL.                       ³
+	//³                                                                        ³
+	//³ExpA1 : Array com os parametros do tipo Range                           ³
+	//³                                                                        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
+
+#ELSE
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Transforma parametros Range em expressao Advpl                          ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	MakeAdvplExpr(oReport:uParam)
+
+	cCondicao := 'DH_FILIAL  	 == "'+xFilial("SDH")+'".And.' 
+	cCondicao += 'DH_OPER    	 == "1".And.' 
+	cCondicao += 'DH_TPMOV 		 == "1".And.' 
+	cCondicao += "((DH_CLIENTE   >= '"+mv_par01+"'  .And."
+	cCondicao += "DH_CLIENTE     <= '"+mv_par02+"'  .And."
+	cCondicao += "DH_LOJACLI	 >= '"+mv_par03+"'  .And."
+	cCondicao += "DH_LOJAFOR	 <= '"+mv_par04+"')  .Or."
+	cCondicao += "(DH_FORNECE	 >= '"+mv_par01+"'  .And."
+	cCondicao += "DH_FORNECE	 <= '"+mv_par02+"'  .And."
+	cCondicao += "DH_LOJAFOR	 >= '"+mv_par03+"'  .And."
+	cCondicao += "DH_LOJAFOR	 <='"+mv_par04+"')) .And."	
+	cCondicao += 'DH_SERIE 		 >= "'+mv_par05+'"  .And. DH_SERIE <="'+mv_par06+'".And.'
+	cCondicao += 'DH_DOC 		 >= "'+mv_par07+'"  .And. DH_DOC <="'+mv_par08+'".And.'
+	cCondicao += 'Dtos(DH_DTDIGIT) >= "'+Dtos(mv_par09)+'".And.Dtos(DH_DTDIGIT) <="'+Dtos(mv_par10)+'"'
+	Do Case
+		Case MV_PAR11 == 2
+			cCondicao += " .And. DH_SALDO <> 0 "
+		Case MV_PAR11 == 3
+			cCondicao += " .And. DH_SALDO == 0 "
+	EndCase
+	If nOrdem == 1
+		cOrder := "DH_FILIAL+DH_SERIE+DH_DOC+DH_CLIENTE+DH_LOJACLI+DH_FORNECE+DH_LOJAFOR+DH_TPMOV"
+	Else
+		cOrder := "DH_FILIAL+DH_CLIENTE+DH_LOJACLI+DH_FORNECE+DH_LOJAFOR+DH_SERIE+DH_DOC+DH_TPMOV"
+	EndIf
+	
+	oReport:Section(1):SetFilter(cCondicao,cOrder)
+#ENDIF		
+oSection2:SetParentQuery()
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Metodo TrPosition()                                                     ³
+//³                                                                        ³
+//³Posiciona em um registro de uma outra tabela. O posicionamento será     ³
+//³realizado antes da impressao de cada linha do relatório.                ³
+//³                                                                        ³
+//³                                                                        ³
+//³ExpO1 : Objeto Report da Secao                                          ³
+//³ExpC2 : Alias da Tabela                                                 ³
+//³ExpX3 : Ordem ou NickName de pesquisa                                   ³
+//³ExpX4 : String ou Bloco de código para pesquisa. A string será macroexe-³
+//³        cutada.                                                         ³
+//³                                                                        ³				
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Inicio da impressao do fluxo do relatório                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:SetMeter(SDH->(LastRec()))
+
+oSection2:Init()
+dbSelectArea(cAliasSDH)
+While !oReport:Cancel() .And. (cAliasSDH)->(!Eof()) .And. xFilial("SDH")==(cAliasSDH)->DH_FILIAL
+	If oReport:Cancel()
+		Exit
+	EndIf
+
+	oReport:IncMeter()
+	
+	If nOrdem == 2
+		If cQuebra <> (cAliasSDH)->(DH_CLIENTE+DH_LOJACLI+DH_FORNECE+DH_LOJAFOR)
+			If !Empty((cAliasSDH)->DH_CLIENTE)
+				dbSelectArea("SA1")
+				dbSetOrder(1)
+				MsSeek(xFilial("SA1")+(cAliasSDH)->DH_CLIENTE+(cAliasSDH)->DH_LOJACLI)
+				oSection1:Cell("cCodigo"):SetTitle(STR0011) //Cliente
+			Else
+				dbSelectArea("SA2")
+				dbSetOrder(1)
+				MsSeek(xFilial("SA2")+(cAliasSDH)->DH_FORNECE+(cAliasSDH)->DH_LOJAFOR)
+				oSection1:Cell("cCodigo"):SetTitle(STR0012) //Fornecedor
+			EndIf
+			oSection1:Init()
+			oSection1:PrintLine()
+			oSection1:Finish()
+		EndIf
+	EndIf
+	
+	cQuebra   := (cAliasSDH)->(DH_CLIENTE+DH_LOJACLI+DH_FORNECE+DH_LOJAFOR)
+	cSerie    := (cAliasSDH)->DH_SERIE
+	cDoc      := (cAliasSDH)->DH_DOC
+	cItem     := (cAliasSDH)->DH_ITEM
+	cCliente  := (cAliasSDH)->DH_CLIENTE
+	cLojaCli  := (cAliasSDH)->DH_LOJACLI
+	cFornece  := (cAliasSDH)->DH_FORNECE
+	cLojaFor  := (cAliasSDH)->DH_LOJAFOR
+	nQtdOri   := (cAliasSDH)->DH_QUANT
+	nSaldo    := (cAliasSDH)->DH_SALDO
+	
+	oSection2:Cell("nQtdOri"):SetValue(nQtdOri)
+	oSection2:Cell("nSaldo"):SetValue(nSaldo)
+	
+	dbSelectArea("SD1")
+	dbSetOrder(4)
+	MsSeek(xFilial("SD1")+(cAliasSDH)->DH_IDENTNF)
+	dDataEnt := SD1->D1_DTDIGIT
+	
+	dbSelectArea("SB1")
+	dbSetOrder(1)
+	MsSeek(xFilial("SB1")+SD1->D1_COD)
+	
+	oSection2:Cell("D1_SERIE"):SetValue(SD1->D1_SERIE)
+	oSection2:Cell("D1_DOC"):SetValue(SD1->D1_DOC)
+	oSection2:Cell("D1_ITEM"):SetValue(SD1->D1_ITEM)
+	oSection2:Cell("D1_FORNECE"):SetValue(SD1->D1_FORNECE)
+	oSection2:Cell("D1_LOJA"):SetValue(SD1->D1_LOJA)
+	
+	dbSelectArea(cAliasSDH2)
+	dbSetOrder(2)
+	MsSeek(xFilial("SDH")+"2"+cSerie+cDoc+cItem+cCliente+cLojaCli+cFornece+cLojaFor+"1")
+	
+	lTemCob := .F.
+	
+	oSection2:Cell("cSerCob"):Show()
+	oSection2:Cell("cDocCob"):Show()
+	oSection2:Cell("cFornCob"):Show()
+	oSection2:Cell("cLojaCob"):Show()
+	oSection2:Cell("dPrazCob"):Show()	
+    
+	oSection2:Cell("B6_SERIE"):Show()
+	oSection2:Cell("B6_DOC"):Show()
+	oSection2:Cell("B6_CLIFOR"):Show()
+	oSection2:Cell("B6_LOJA"):Show()
+	oSection2:Cell("B6_QUANT"):Show()
+	
+	
+	While ( !Eof() .And.;
+		xFilial("SDH")==(cAliasSDH2)->DH_FILIAL .And.;
+		cSerie == (cAliasSDH2)->DH_SERIE .And.;
+		cDoc == (cAliasSDH2)->DH_DOC .And.;
+		cItem == (cAliasSDH2)->DH_ITEM .And.;
+		cCliente == (cAliasSDH2)->DH_CLIENTE .And.;
+		cLojaCli == (cAliasSDH2)->DH_LOJACLI .And.;
+		cFornece  == (cAliasSDH2)->DH_FORNECE .And.;
+		cLojaFor == (cAliasSDH2)->DH_LOJAFOR )
+
+		lTemCob := .T.
+		
+		dbSelectArea("SD1")
+		dbSetOrder(4)
+		MsSeek(xFilial("SD1")+(cAliasSDH2)->DH_IDENTNF)
+		dDataCob := SD1->D1_DTDIGIT
+		
+		oSection2:Cell("cSerCob"):SetValue(SD1->D1_SERIE)
+		oSection2:Cell("cDocCob"):SetValue(SD1->D1_DOC)
+		oSection2:Cell("cFornCob"):SetValue(SD1->D1_FORNECE)
+		oSection2:Cell("cLojaCob"):SetValue(SD1->D1_LOJA)
+		oSection2:Cell("dPrazCob"):SetValue(dDataCob - dDataEnt)
+
+		dbSelectArea("SF4")
+		dbSetOrder(1)
+		MsSeek(xFilial("SF4")+SD1->D1_TES)
+		
+		If SF4->F4_PODER3 == "R"
+			lTemSai := .F.
+			
+			dbSelectArea("SB6")
+			dbSetOrder(3)
+			MsSeek(xFilial("SB6")+SD1->D1_NUMSEQ+SD1->D1_COD+"D")
+			
+			oSection2:Cell("B6_SERIE"):Show()
+			oSection2:Cell("B6_DOC"):Show()
+			oSection2:Cell("B6_CLIFOR"):Show()
+			oSection2:Cell("B6_LOJA"):Show()
+			oSection2:Cell("B6_QUANT"):Show()
+		
+			While (!Eof() .And. SB6->B6_FILIAL == xFilial("SB6") .And.;
+				SD1->D1_NUMSEQ == SB6->B6_IDENT .And.;
+				SD1->D1_COD == SB6->B6_PRODUTO .And.;
+				"D" == SB6->B6_PODER3)
+
+				oSection2:Cell("B6_SERIE"):SetValue(SB6->B6_SERIE)
+				oSection2:Cell("B6_DOC"):SetValue(SB6->B6_DOC)
+				oSection2:Cell("B6_CLIFOR"):SetValue(SB6->B6_CLIFOR)
+				oSection2:Cell("B6_LOJA"):SetValue(SB6->B6_LOJA)
+				oSection2:Cell("B6_QUANT"):SetValue(SB6->B6_QUANT)
+
+				lTemSai := .T.				
+
+				dbSelectArea("SB6")
+				dbSkip()
+			EndDo
+			
+			If !lTemSai  
+			 	oSection2:Cell("B6_SERIE"):SetValue("***")
+				oSection2:Cell("B6_DOC"):SetValue("******") 
+				oSection2:Cell("B6_CLIFOR"):SetValue("******") 
+				oSection2:Cell("B6_LOJA"):SetValue("**") 
+			 	oSection2:Cell("B6_QUANT"):Hide()
+			Else
+				oSection2:Cell("B6_SERIE"):Show()
+				oSection2:Cell("B6_DOC"):Show()
+				oSection2:Cell("B6_CLIFOR"):Show()
+				oSection2:Cell("B6_LOJA"):Show()
+				oSection2:Cell("B6_QUANT"):Show()
+			EndIf				
+		Else
+		 	oSection2:Cell("B6_SERIE"):SetValue("***")
+			oSection2:Cell("B6_DOC"):SetValue("******") 
+			oSection2:Cell("B6_CLIFOR"):SetValue("******") 
+			oSection2:Cell("B6_LOJA"):SetValue("**") 
+		 	oSection2:Cell("B6_QUANT"):Hide()
+		EndIf
+		
+		oSection2:PrintLine()
+		dbSelectArea(cAliasSDH2)
+		dbSkip()
+		
+	EndDo
+	
+	If !lTemCob 
+		oSection2:Cell("cSerCob"):SetValue("***")
+		oSection2:Cell("cDocCob"):SetValue("******")  
+		oSection2:Cell("cFornCob"):SetValue("******")
+		oSection2:Cell("cLojaCob"):SetValue("**")  
+		oSection2:Cell("dPrazCob"):Hide()
+		
+	 	oSection2:Cell("B6_SERIE"):SetValue("***")
+		oSection2:Cell("B6_DOC"):SetValue("******") 
+		oSection2:Cell("B6_CLIFOR"):SetValue("******") 
+		oSection2:Cell("B6_LOJA"):SetValue("**") 
+	 	oSection2:Cell("B6_QUANT"):Hide()
+	 	
+		oSection2:PrintLine()            
+	EndIf
+
+	dbSelectArea(cAliasSDH)
+	dbSkip()
+
+	oReport:IncMeter()
+		
+EndDo
+If nOrdem == 2
+	oSection1:Finish()
+Endif	
+        
+oReport:SkipLine()
+oReport:PrintText("* = "+STR0013)
+oSection2:Finish()
+
+Return NIL
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³COMR100R3 ³ Autor ³ Eduardo Riera         ³ Data ³13.07.2005³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Relacao dos documentos de cobertura (Antigo)                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Function COMR100R3()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Define Variaveis                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local Titulo  := STR0001 // Titulo do Relatorio //"Relação dos documentos de cobertura "
+Local cDesc1  := STR0002 // Descricao 1 //"Este relatório demonstra os documentos de cobertura recebidos e pendentes"
+Local cDesc2  := STR0003 // Descricao 2 //"com o objetivo de auxiliar no follow-up destes documentos."
+Local cDesc3  := ""  // Descricao 3
+Local cString := "SDH"  // Alias utilizado na Filtragem
+Local lDic    := .F. // Habilita/Desabilita Dicionario
+Local lComp   := .T. // Habilita/Desabilita o Formato Comprimido/Expandido
+Local lFiltro := .F. // Habilita/Desabilita o Filtro
+Local wnrel   := "COMR100"  // Nome do Arquivo utilizado no Spool
+Local nomeprog:= "COMR100"  // nome do programa
+
+Private Tamanho := "G" // P/M/G
+Private Limite  := 220 // 80/132/220
+Private aOrdem  := {STR0004,STR0005}  // Ordem do Relatorio //"Documento"###"Cliente/Fornecedor+Documento"
+Private cPerg   := "COM100"  // Pergunta do Relatorio
+Private aReturn := { STR0006, 1,STR0007, 1, 2, 1, "",1 } //"Zebrado"###"Administracao"
+						//[1] Reservado para Formulario
+						//[2] Reservado para N§ de Vias
+						//[3] Destinatario
+						//[4] Formato => 1-Comprimido 2-Normal
+						//[5] Midia   => 1-Disco 2-Impressora
+						//[6] Porta ou Arquivo 1-LPT1... 4-COM1...
+						//[7] Expressao do Filtro
+						//[8] Ordem a ser selecionada
+						//[9]..[10]..[n] Campos a Processar (se houver)
+Private lEnd    := .F.// Controle de cancelamento do relatorio
+Private m_pag   := 1  // Contador de Paginas
+Private nLastKey:= 0  // Controla o cancelamento da SetPrint e SetDefault
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Verifica as Perguntas Seleciondas                                       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Pergunte(cPerg,.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Envia para a SetPrinter                                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3,lDic,aOrdem,lComp,Tamanho,,lFiltro)
+If ( nLastKey==27 )
+	dbSelectArea(cString)
+	dbSetOrder(1)
+	Set Filter to
+	Return
+Endif
+SetDefault(aReturn,cString)
+If ( nLastKey==27 )
+	dbSelectArea(cString)
+	dbSetOrder(1)
+	Set Filter to
+	Return
+Endif
+RptStatus({|lEnd| ImpDet(@lEnd,wnRel,cString,nomeprog,Titulo)},Titulo)
+Return(.T.)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Program   ³ ImpDet   ³ Autor ³ Eduardo Riera         ³ Data ³13.07.2003³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Controle de Fluxo do Relatorio.                             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ImpDet(lEnd,wnrel,cString,nomeprog,Titulo)
+
+Local li        := 100 // Contador de Linhas
+Local lImp      := .F. // Indica se algo foi impresso
+Local cbCont    := 0   // Numero de Registros Processados
+Local cbText    := ""  // Mensagem do Rodape
+Local cQuery    := ""
+Local cAliasSDH := "SDH"
+Local cAliasSDH2:= "COMR1002"
+Local cSerie    := ""
+Local cDoc      := ""
+Local cItem     := ""
+Local cCliente  := ""
+Local cLojaCli  := ""
+Local cFornece  := ""
+Local cLojaFor  := ""
+Local cArqInd   := ""
+Local dDataEnt  := Ctod("")
+Local dDataCob  := Ctod("")
+Local lTemCob   := .F.
+Local lTemSai   := .F.
+Local lQuery    := .F.
+Local nQtdOri   := 0
+Local nSaldo    := 0
+Local aTotal    := {0,0}
+Local cQuebra   := ""
+#IFDEF TOP
+	Local nX        := 0
+	Local aStruSDH  := {}
+#ENDIF
+//
+//                          1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16        17        18        19        20        21        22
+//                01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+Local cCabec1 := STR0008 //"<--------- Documento de Entrada ----------> <------- Documento de Vinculo -------> <--------- Documento de Cobertura ---------> <------------- Documento de Saida --------------->                                          "
+Local cCabec2 := STR0009 //"Serie Numero Item Cliente/Fornecedor   Loja Serie Numero Cliente/Fornecedor   Loja Serie Numero Cliente/Fornecedor   Loja Prazo Serie Numero Cliente/Fornecedor   Loja  Quantidade Produto          Quantidade         Saldo"
+//
+//                XXX   XXXXXX XXXX XXXXXXXXXXXXXXXXXXXX XXXX XXX   XXXXXX XXXXXXXXXXXXXXXXXXXX XXXX XXX   XXXXXX XXXXXXXXXXXXXXXXXXXX XXXX 99999 XXX   XXXXXX XXXXXXXXXXXXXXXXXXXX XXXX 9999.999,99 XXXXXXXXXXXXXXX 9.999.999,99 9.999.999,99
+
+cArqInd := CriaTrab(,.F.)
+dbSelectArea("SDH")
+
+ChkFile("SDH",.F.,cAliasSDH2)
+#IFDEF TOP                                   
+	lQuery := .T.
+	cAliasSDH := "COMR100"
+	aStruSDH := SDH->(dbStruct())
+	cQuery += "SELECT * "
+	cQuery += "FROM "+RetSqlName("SDH")+" SDH "
+	cQuery += "WHERE "
+	cQuery += "DH_OPER        = '1'  AND "
+	cQuery += "DH_TPMOV		  = '1'  AND "
+	cQuery += "((DH_CLIENTE  >= '"+MV_PAR01+"'   AND "
+	cQuery += "DH_CLIENTE    <= '"+MV_PAR02+"'   AND "
+	cQuery += "DH_LOJACLI    >= '"+MV_PAR03+"'   AND "
+	cQuery += "DH_LOJAFOR    <= '"+MV_PAR04+"')  OR"
+	cQuery += "(DH_FORNECE	 >= '"+MV_PAR01+"'   AND "
+	cQuery += "DH_FORNECE    <= '"+MV_PAR02+"'   AND "
+	cQuery += "DH_LOJAFOR    >= '"+MV_PAR03+"'   AND "
+	cQuery += "DH_LOJAFOR    <= '"+MV_PAR04+"')) AND "
+	cQuery += "DH_SERIE      >= '"+MV_PAR05+"'   AND "
+	cQuery += "DH_SERIE      <= '"+MV_PAR06+"'   AND "
+	cQuery += "DH_DOC        >= '"+MV_PAR07+"'   AND "
+	cQuery += "DH_DOC        <= '"+MV_PAR08+"'   AND "
+	cQuery += "DH_DTDIGIT    >= '"+DTOS(MV_PAR09)+"' AND "
+	cQuery += "DH_DTDIGIT    <= '"+DTOS(MV_PAR10)+"' "
+	Do Case
+		Case MV_PAR11 == 2
+			cQuery += " AND DH_SALDO <> 0 "
+		Case MV_PAR11 == 3
+			cQuery += " AND DH_SALDO  = 0 "
+	EndCase
+	If aReturn[8]==1
+		cQuery += "ORDER BY DH_FILIAL,DH_SERIE,DH_DOC,DH_CLIENTE,DH_LOJACLI,DH_FORNECE,DH_LOJAFOR,DH_TPMOV" 
+	Else
+		cQuery += "ORDER BY DH_FILIAL,DH_CLIENTE,DH_LOJACLI,DH_FORNECE,DH_LOJAFOR,DH_SERIE,DH_DOC,DH_TPMOV"
+	EndIf	
+	cQuery := ChangeQuery(cQuery)
+	
+	dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQuery),cAliasSDH)
+	For nX := 1 To Len(aStruSDH)
+		If aStruSDH[nX][2]<>"C"
+			TcSetField(cAliasSDH,aStruSDH[nX][1],aStruSDH[nX][2],aStruSDH[nX][3],aStruSDH[nX][4])
+		EndIf	
+	Next nX	
+#ELSE
+	cQuery := "DH_FILIAL    == '"+xFilial("SDH")+"' .And. "
+	cQuery += "DH_OPER      == '1' .And. "
+	cQuery += "DH_TPMOV     == '1' .And. "
+	cQuery += "((DH_CLIENTE >= '"+MV_PAR01+"'   .And."
+	cQuery += "DH_CLIENTE   <= '"+MV_PAR02+"'   .And."
+	cQuery += "DH_LOJACLI   >= '"+MV_PAR03+"'   .And."
+	cQuery += "DH_LOJAFOR   <= '"+MV_PAR04+"')  .Or."
+	cQuery += "(DH_FORNECE  >= '"+MV_PAR01+"'   .And."
+	cQuery += "DH_FORNECE   <= '"+MV_PAR02+"'   .And."
+	cQuery += "DH_LOJAFOR   >= '"+MV_PAR03+"'   .And."
+	cQuery += "DH_LOJAFOR   <= '"+MV_PAR04+"')) .And."
+	cQuery += "DH_SERIE	    >= '"+MV_PAR05+"'   .And."
+	cQuery += "DH_SERIE	    <= '"+MV_PAR06+"'   .And."
+	cQuery += "DH_DOC	    >= '"+MV_PAR07+"'   .And."
+	cQuery += "DH_DOC	    <= '"+MV_PAR08+"'   .And."
+	cQuery += "DTOS(DH_DTDIGIT) >='"+DTOS(MV_PAR09)+"' .And."
+	cQuery += "DTOS(DH_DTDIGIT) <='"+DTOS(MV_PAR10)+"'"
+	Do Case
+		Case MV_PAR11 == 2
+			cQuery += " .And. DH_SALDO <> 0 "
+		Case MV_PAR11 == 3
+			cQuery += " .And. DH_SALDO == 0 "
+	EndCase
+	If aReturn[8]==1
+		IndRegua("SDH",cArqInd,"DH_FILIAL+DH_SERIE+DH_DOC+DH_CLIENTE+DH_LOJACLI+DH_FORNECE+DH_LOJAFOR+DH_TPMOV",,cQuery)
+	Else
+		IndRegua("SDH",cArqInd,"DH_FILIAL+DH_CLIENTE+DH_LOJACLI+DH_FORNECE+DH_LOJAFOR+DH_SERIE+DH_DOC+DH_TPMOV",,cQuery)
+	EndIf	
+	dbGotop()
+#ENDIF
+SetRegua(SDH->(LastRec()))
+While ( !Eof() .And. xFilial("SDH")==(cAliasSDH)->DH_FILIAL )
+
+	lImp := .T.
+	If lEnd
+		@ Prow()+1,001 PSAY STR0010 //"CANCELADO PELO OPERADOR"
+		Exit
+	EndIf
+	If ( li > 58 )
+		li := cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,CHRCOMP)
+		li++
+	EndIf
+	
+	If aReturn[8] == 2
+		If cQuebra <> (cAliasSDH)->(DH_CLIENTE+DH_LOJACLI+DH_FORNECE+DH_LOJAFOR)
+			li++
+			If !Empty((cAliasSDH)->DH_CLIENTE)
+				dbSelectArea("SA1")
+				dbSetOrder(1)
+				MsSeek(xFilial("SA1")+(cAliasSDH)->DH_CLIENTE+(cAliasSDH)->DH_LOJACLI)
+				
+				@ li,001 PSAY STR0011+" -> "+SA1->A1_COD+"/"+SA1->A1_LOJA+" "+SA1->A1_NOME //"Cliente"
+			Else
+				dbSelectArea("SA2")
+				dbSetOrder(1)
+				MsSeek(xFilial("SA2")+(cAliasSDH)->DH_FORNECE+(cAliasSDH)->DH_LOJAFOR)
+				
+				@ li,001 PSAY STR0012+" -> "+SA2->A2_COD+"/"+SA2->A2_LOJA+" "+SA2->A2_NOME	 //"Fornecedor"
+			EndIf
+			li+=2
+		EndIf
+	EndIf
+	
+	cQuebra   := (cAliasSDH)->(DH_CLIENTE+DH_LOJACLI+DH_FORNECE+DH_LOJAFOR)
+	cSerie    := (cAliasSDH)->DH_SERIE
+	cDoc      := (cAliasSDH)->DH_DOC
+	cItem     := (cAliasSDH)->DH_ITEM
+	cCliente  := (cAliasSDH)->DH_CLIENTE
+	cLojaCli  := (cAliasSDH)->DH_LOJACLI
+	cFornece  := (cAliasSDH)->DH_FORNECE
+	cLojaFor  := (cAliasSDH)->DH_LOJAFOR
+	nQtdOri   := (cAliasSDH)->DH_QUANT
+	nSaldo    := (cAliasSDH)->DH_SALDO
+	
+	dbSelectArea("SD1")
+	dbSetOrder(4)
+	MsSeek(xFilial("SD1")+(cAliasSDH)->DH_IDENTNF)
+	dDataEnt := SD1->D1_DTDIGIT
+	
+	dbSelectArea("SB1")
+	dbSetOrder(1)
+	MsSeek(xFilial("SB1")+SD1->D1_COD)
+	
+	@ Li,001 PSAY SD1->D1_SERIE
+	@ Li,006 PSAY SD1->D1_DOC
+	@ Li,018 PSAY SD1->D1_ITEM
+	@ Li,023 PSAY SD1->D1_FORNECE
+	@ Li,039 PSAY SD1->D1_LOJA
+	@ Li,044 PSAY (cAliasSDH)->DH_SERIE
+	@ Li,050 PSAY (cAliasSDH)->DH_DOC
+	If !Empty((cAliasSDH)->DH_CLIENTE)
+		@ Li,062 PSAY (cAliasSDH)->DH_CLIENTE
+		@ Li,078 PSAY (cAliasSDH)->DH_LOJACLI
+	Else
+		@ Li,062 PSAY (cAliasSDH)->DH_FORNECE
+		@ Li,078 PSAY (cAliasSDH)->DH_LOJAFOR	
+	EndIf
+
+	dbSelectArea(cAliasSDH2)
+	dbSetOrder(2)
+	MsSeek(xFilial("SDH")+"2"+cSerie+cDoc+cItem+cCliente+cLojaCli+cFornece+cLojaFor+"1")
+	
+	lTemCob := .F.
+	
+	While ( !Eof() .And.;
+		xFilial("SDH")==(cAliasSDH2)->DH_FILIAL .And.;
+		cSerie == (cAliasSDH2)->DH_SERIE .And.;
+		cDoc == (cAliasSDH2)->DH_DOC .And.;
+		cItem == (cAliasSDH2)->DH_ITEM .And.;
+		cCliente == (cAliasSDH2)->DH_CLIENTE .And.;
+		cLojaCli == (cAliasSDH2)->DH_LOJACLI .And.;
+		cFornece  == (cAliasSDH2)->DH_FORNECE .And.;
+		cLojaFor == (cAliasSDH2)->DH_LOJAFOR )
+
+		If lTemCob
+			Li++
+		EndIf
+		lTemCob := .T.
+		
+		dbSelectArea("SD1")
+		dbSetOrder(4)
+		MsSeek(xFilial("SD1")+(cAliasSDH2)->DH_IDENTNF)
+		dDataCob := SD1->D1_DTDIGIT
+		
+		@ Li,083 PSAY SD1->D1_SERIE
+		@ Li,089 PSAY SD1->D1_DOC
+		@ Li,101 PSAY SD1->D1_FORNECE
+		@ Li,117 PSAY SD1->D1_LOJA
+		@ Li,122 PSAY dDataCob - dDataEnt PICTURE TM(0,5,0)      
+		
+		dbSelectArea("SF4")
+		dbSetOrder(1)
+		MsSeek(xFilial("SF4")+SD1->D1_TES)
+		
+		If SF4->F4_PODER3 == "R"
+			lTemSai := .F.
+			
+			dbSelectArea("SB6")
+			dbSetOrder(3)
+			MsSeek(xFilial("SB6")+SD1->D1_NUMSEQ+SD1->D1_COD+"D")
+		
+			While (!Eof() .And. SB6->B6_FILIAL == xFilial("SB6") .And.;
+				SD1->D1_NUMSEQ == SB6->B6_IDENT .And.;
+				SD1->D1_COD == SB6->B6_PRODUTO .And.;
+				"D" == SB6->B6_PODER3)
+				If lTemSai
+					Li++
+				EndIf				      
+				
+				@ Li,128 PSAY SB6->B6_SERIE
+				@ Li,134 PSAY SB6->B6_DOC
+				@ Li,146 PSAY SB6->B6_CLIFOR
+				@ Li,162 PSAY SB6->B6_LOJA
+				@ Li,167 PSAY SB6->B6_QUANT PICTURE Tm(SB6->B6_QUANT,11,2)
+				
+				lTemSai := .T.				
+				If ( li > 58 )
+					li := cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,CHRCOMP)
+					li++
+				EndIf				
+				
+				dbSelectArea("SB6")
+				dbSkip()
+			EndDo
+			If !lTemSai
+			  	@ Li,128 PSAY STR0013 //"Não há documentos relacionados"   
+			EndIf				
+		Else
+			@ Li,128 PSAY STR0013 //"Não há documentos relacionados"  
+		EndIf
+
+		dbSelectArea(cAliasSDH2)
+		dbSkip()
+		
+	EndDo
+	If !lTemCob 
+		@ Li,083 PSAY STR0013 //"Não há documentos relacionados"	
+	EndIf
+	
+	@ Li,179 PSAY SB1->B1_COD
+	@ Li,194 PSAY nQtdOri PICTURE TM(nQtdOri,12,2)
+	@ Li,208 PSAY nSaldo  PICTURE TM(nSaldo,12,2)
+	
+	aTotal[1] += nQtdOri
+	aTotal[2] += nSaldo
+	
+	Li++
+	dbSelectArea(cAliasSDH)
+	dbSkip()
+	cbCont++
+	IncRegua()
+		
+EndDo
+
+If ( lImp )
+	Li++
+	@ Li,000 PSAY STR0014 //"Total Geral "
+	@ Li,194 PSAY aTotal[1] PICTURE TM(aTotal[1],12,2)
+	@ Li,208 PSAY aTotal[2] PICTURE TM(aTotal[2],12,2)	
+	Roda(cbCont,cbText,Tamanho)
+EndIf
+If lQuery
+	dbSelectArea(cAliasSDH)
+	dbCloseArea()
+	dbSelectArea(cAliasSDH2)
+	dbCloseArea()	
+	dbSelectArea("SDH")
+Else
+	dbSelectArea(cAliasSDH2)
+	dbCloseArea()
+	dbSelectArea("SDH")	
+	RetIndex("SDH")
+	FErase(cArqInd+OrdBagExt())
+EndIf
+
+Set Device To Screen
+Set Printer To
+If ( aReturn[5] = 1 )
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+MS_FLUSH()
+Return(.T.)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ AjustaSX1³ Autor ³ Marcos V. Ferreira    ³ Data ³19/03/2008³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Realiza ajustes no grupo de perguntas                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ COMR100   		                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function AjustaSX1()
+
+Local aAreaAnt := GetArea()
+Local cPerg    := "COM100"
+Local nTamDoc  := TamSX3("D1_DOC")[1]
+Local nTamSX1  := Len(SX1->X1_GRUPO)
+
+
+dbSelectArea("SX1")
+dbSetOrder(1)
+
+If dbSeek(PADR(cPerg,nTamSX1)+"07")
+	RecLock("SX1",.F.)
+	Replace X1_TAMANHO with nTamDoc
+	MsUnLock()
+EndIf
+
+If dbSeek(PADR(cPerg,nTamSX1)+"08")
+	RecLock("SX1",.F.)
+	Replace X1_TAMANHO with nTamDoc
+	MsUnLock()
+EndIf
+
+RestArea(aAreaAnt)
+Return

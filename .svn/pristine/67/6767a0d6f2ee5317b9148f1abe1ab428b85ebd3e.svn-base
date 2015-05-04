@@ -1,0 +1,40 @@
+#include "protheus.ch"
+
+
+/*                                                                                  
+  +-----------------------------------------------------------------------------------------------------------------+  
+  | CLASSE    | GPE001.prw        | AUTOR | JOSE TEIXEIRA              | DATA | 18/04/13                            |
+  +-----------------------------------------------------------------------------------------------------------------+    
+  | DESCRICAO | RESPONSÁVEL POR CONFIGURAÇÃO DO TICKET                                                              |  
+  |           |                                                                                                     |  
+  |           |                                                                                                     |
+  |           |                                                                                                     |
+  +-----------------------------------------------------------------------------------------------------------------+    
+  | MANUTENCAO DESDE SUA CRIACAO                                                				                    |   
+  +-----------------------------------------------------------------------------------------------------------------+    
+  | DATA     | AUTOR                | DESCRICAO                                 				                    |  
+  +-----------------------------------------------------------------------------------------------------------------+    
+ */  
+
+User Function GPEI001
+
+Private cCadastro := "Configuracao Ticket"
+Private aRotina := { {"Pesquisar","AxPesqui",0,1} ,;
+             {"Visualizar","AxVisual",0,2} ,;
+             {"Incluir","AxInclui",0,3} ,;
+             {"Alterar","AxAltera",0,4} ,;
+             {"Excluir","AxDeleta",0,6} }
+
+Private cDelFunc := ".T." 
+
+Private cString := "SZE"
+
+dbSelectArea("SZE")
+dbSetOrder(1)
+
+dbSelectArea(cString)
+mBrowse( 6,1,22,75,cString)
+
+Return
+
+

@@ -1,0 +1,41 @@
+#include "rwmake.ch"
+#INCLUDE "PROTHEUS.CH"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³PMA100Prj ºAutor  ³Grayson B.Tavares   º Data ³  12/31/08   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Ponto de entrada para atualizar o parametro MV_SEQPRJ na    º±±
+±±º          ³confirmao do oramento                                       º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³Gestão de Projetos                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+User Function PMA100Prj
+
+dbSelectArea("SX6")
+dbSetOrder(1)
+
+If !SX6->(dbSeek("  "+Padr("MV_SEQPRJ",10)))
+	RecLock("SX6",.T.)
+	SX6->X6_FIL      := "  "
+	SX6->X6_VAR   	 := "MV_SEQPRJ"
+	SX6->X6_TIPO  	 := "C"
+	SX6->X6_DESCRIC  := SX6->X6_DSCSPA  := 	SX6->X6_DSCENG  := "Sequencial Orcamento/Projeto"
+	SX6->X6_CONTEUD  := SX6->X6_CONTSPA :=  SX6->X6_CONTENG := "0001"
+	SX6->X6_PROPRI   := 'U'
+	SX6->(MsUnlock())
+Else
+	RecLock("SX6",.F.)
+	SX6->X6_CONTEUD  := SX6->X6_CONTSPA :=  SX6->X6_CONTENG := StrZero(Val(SX6->X6_CONTEUD)+1,4)
+	MsUnlock()
+EndIf
+
+//fClose("codorc.lck")
+
+Return

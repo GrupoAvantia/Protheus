@@ -1,0 +1,975 @@
+#INCLUDE "MATR450.CH"
+#INCLUDE "PROTHEUS.CH"
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR450A ³ Autor ³ Cesar Eduardo Valadao ³ Data ³ 02.06.99 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Relacao Consumo Real x Standard.                           ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ MATR450A(void)                                             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Rodrigo Sart³27/05/98³10411A³ Tratamento correto qdo qtd fixa na       ³±±
+±±³            ³        ³      ³ estrutura.                               ³±±
+±±³Rodrigo Sart³10/09/98³17538A³ Tratamento correto nos indices do SD3    ³±±
+±±³Fernando J. ³02/12/98³18752A³ Pictures Fixas e fun‡”es PesqPictQT foram³±±
+±±³            ³        ³      ³ substituidas pela fun‡„o PesqPict. (Todas³±±
+±±³            ³        ³      ³ as Pictures fixas foram referenciadas ao ³±±
+±±³            ³        ³      ³ campo D3_CUSTO1).                        ³±±
+±±³Rodrigo Sart³11/05/99³20943A³ Retirada primeira chamada da funcao Roda ³±±
+±±³            ³        ³      ³ para imprimir resumo respeitando driver  ³±±
+±±³CesarValadao³02/06/99³XXXXXX³ Implementacao da func.recursiva R450Fant ³±±
+±±³            ³        ³      ³ para imp.estr.fantasma, e corrigir QUANT ³±±
+±±³            ³        ³      ³ e CUSTO STD, baseado no D3_QUANT         ³±±
+±±³CesarValadao³07/07/99³22419A³ Calcular Qtd RealxStandard com nTamDecQtd³±±
+±±³Iuspa       ³28/07/00³5320  ³ Corte em 30 caracteres na impressão da   ³±±
+±±³            ³        ³      ³ descrição do produto                     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+*/
+Function Matr450A()
+LOCAL wnrel
+LOCAL tamanho:="G"
+LOCAL titulo :=STR0001		//"Consumo Real x Standard"
+LOCAL cDesc1 :=STR0002		//"Este programa ira imprimir a relacao de "
+LOCAL cDesc2 :=STR0003		//"Consumo Real x Standard.                "
+LOCAL cDesc3 :=""
+LOCAL cString:="SB1"
+
+
+PRIVATE aReturn  := {OemToAnsi(STR0004), 1,OemToAnsi(STR0005), 1, 2, 1, "",1 }		//"Zebrado"###"Administracao"
+PRIVATE cPerg    := "MTR450"
+PRIVATE nLastKey := 0, nTamDecQtd := TamSX3("D3_QUANT")[2], nTamDecCus := 0
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Funcao utilizada para verificar a ultima versao dos fontes      ³
+//³ SIGACUS.PRW, SIGACUSA.PRX e SIGACUSB.PRX, aplicados no rpo do   |
+//| cliente, assim verificando a necessidade de uma atualizacao     |
+//| nestes fontes. NAO REMOVER !!!							        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If !(FindFunction("SIGACUS_V") .And. SIGACUS_V() >= 20050512)
+	Aviso("Atencao","Atualizar patch do programa SIGACUS.PRW !!!",{"Ok"})
+	Return
+EndIf
+If !(FindFunction("SIGACUSA_V") .And. SIGACUSA_V() >= 20050512)
+	Aviso("Atencao","Atualizar patch do programa SIGACUSA.PRX !!!",{"Ok"})
+	Return
+EndIf
+If !(FindFunction("SIGACUSB_V") .And. SIGACUSB_V() >= 20060915)
+	Aviso("Atencao","Atualizar patch do programa SIGACUSB.PRX !!!",{"Ok"})
+	Return
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para Impressao do Cabecalho e Rodape    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+li       := 80
+m_pag    := 1
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Pergunte("MTR450",.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                         ³
+//³ mv_par01    // Listagem por Ordem de Producao ou Produto.    ³
+//³ mv_par02    // Aglutina por Produto.                         ³
+//³ mv_par03    // Listagem Sintetica ou Analitica.              ³
+//³ mv_par04    // De 		                                 	 ³
+//³ mv_par05    // Ate          	                         	 ³
+//³ mv_par06    // Custo do Consumo Real 1...6 ( Moeda )         ³
+//³ mv_par07    // Custo do Consumo Std  1...6                   ³
+//³ mv_par08    // Custo Atual, Fechamento e movimento.          ³
+//³ mv_par09    // Movimentacao De                               ³
+//³ mv_par10    // Movimentacao Ate                              ³
+//³ mv_par11    // Calcular Pela Esturura / Empenho              ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Envia controle para a funcao SETPRINT                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+wnrel:="MATR450A"            //Nome Default do relatorio em Disco
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.F.,"",.F.,Tamanho)
+
+If nLastKey = 27
+	dbClearFilter()
+	Return .T.
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey = 27
+	dbClearFilter()
+	Return .T.
+Endif
+
+RptStatus({|lEnd| C450Imp(@lEnd,tamanho,titulo,wnRel,cString)},titulo)
+
+Return NIL
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ C450IMP  ³ Autor ³ Rodrigo de A. Sartorio³ Data ³ 11.12.95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Chamada do Relatorio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR450A  		                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function C450Imp(lEnd,tamanho,titulo,wnRel,cString)
+Local cCondFiltr,cabec1,cabec2, lOk
+Local limite     := 230
+Local cbCont     := 0
+Local cArqTrab
+Local aCampos    := {}
+Local aTam		 := {}
+Local nQuantG1   := 0
+Local cCond,CbTxt:= SPACE(10)
+Local nomeprog   := "MATR450A"
+Local cPicD3C114 := PesqPict("SD3","D3_CUSTO1",14)
+Local cPicD3C116 := PesqPict("SD3","D3_CUSTO1",16)
+Local cPicD3C118 := PesqPict("SD3","D3_CUSTO1",18)
+Local aAreaD3    := {}
+Local aRetSD3    := {} // Variavel que recebe conteudo de controle das validacoes das RE's Fantasma
+Local cOpAnt     := ""
+Local lOpConf    := .T.
+Local lEstrut    := .F.
+Local aRecnoD4   := {}
+
+Private lQuery      := .F.
+
+Private cAliasT450  := "SD3"
+
+aTam:=TamSX3("D3_CUSTO1")
+nTamIntCus := aTam[1]
+nTamDecCus := aTam[2]
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Este procedimento foi necessario para transformar o filtro sele- ³
+//³ cionado pelo usuario em uma condicao de IF ,isto porque o filtro ³
+//³ age em todo o arquivo e eu preciso dele apenas no While principal³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cCondFiltr := aReturn[7]
+If Empty(cCondFiltr)
+	cCondFiltr := ".T."
+EndIf
+dbSelectArea("SB1")
+dbClearFilter()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Montar arquivo de Trabalho para Consumo RealxStandard.       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AADD(aCampos,{ "PRODUTO"  , "C", 15, 0 })
+aTam:=TamSX3("D3_OP")
+AADD(aCampos,{ "OP"       , "C", aTam[1],0 })
+AADD(aCampos,{ "NUMSEQ"   , "C",  6, 0 })
+AADD(aCampos,{ "TRT"      , "C", 30, 0 })
+aTam:=TamSX3("D3_CHAVE")	
+AADD(aCampos,{ "CHAVE"    , "C", aTam[1], 0 })
+AADD(aCampos,{ "EMISSAO"  , "D", 8, 0 })
+aTam:=TamSX3("B1_DESC")
+AADD(aCampos,{ "DESCRI"   , "C", aTam[1],0 })
+aTam:=TamSX3("B1_UM")
+AADD(aCampos,{ "UM"       , "C", aTam[1],0 })
+aTam:=TamSX3("C2_PRODUTO")
+AADD(aCampos,{ "PAI"     ,  "C", aTam[1],0 })
+aTam:=TamSX3("G1_FIXVAR")
+AADD(aCampos,{ "FIXVAR"  ,  "C", aTam[1],0 })
+aTam:=TamSX3("D3_QUANT")
+AADD(aCampos,{ "QTDREAL"  , "N", aTam[1],aTam[2] })
+AADD(aCampos,{ "QTDSTD"   , "N", aTam[1],aTam[2] })
+AADD(aCampos,{ "QTDVAR"   , "N", aTam[1],aTam[2] })
+
+aTam:=TamSX3("D3_CUSTO1")
+AADD(aCampos,{ "CUSTOSTD" , "N", aTam[1],aTam[2] })
+AADD(aCampos,{ "CUSTOREAL", "N", aTam[1],aTam[2] })
+AADD(aCampos,{ "CUSTOVAR" , "N", aTam[1],aTam[2] })
+
+cArqTrab := CriaTrab(aCampos)
+
+Use &cArqTrab NEW Exclusive Alias TRB 
+cIdxTrb1 := Substr(cArqtrab,1,7)+"A"
+cIdxTrb2 := Substr(cArqtrab,1,7)+"B"
+IndRegua("TRB",cIdxTrb2,"PAI+PRODUTO",,,STR0006)	//"Selecionando Registros..."
+IndRegua("TRB",cIdxTrb1,"OP+PRODUTO",,,STR0006)		//"Selecionando Registros..."
+dbSetIndex(cIdxTrb2+OrdBagExt())
+dbSetOrder(mv_par01)
+dbGoTop()
+
+aCampos:={}
+aTam:=TamSX3("D3_COD")
+AADD(aCampos,{ "C2PRODUTO"  , "C", aTam[1], aTam[2] })
+aTam:=TamSX3("D3_OP")
+AADD(aCampos,{ "C2OP"       , "C", aTam[1], aTam[2] })
+aTam:=TamSX3("D3_UM")
+AADD(aCampos,{ "C2UM"       , "C", aTam[1], aTam[2] })
+aTam:=TamSX3("D3_QUANT")
+AADD(aCampos,{ "C2QTD"      , "N", 18, aTam[2] })
+cArqTrab1 := CriaTrab(aCampos)
+
+Use &cArqTrab1 NEW Exclusive Alias TRB1
+cIdxTrb3 := Substr(cArqtrab,1,7)+"C"
+cIdxTrb4 := Substr(cArqtrab,1,7)+"D"
+IndRegua("TRB1",cIdxTrb4,"C2PRODUTO",,,STR0006)		//"Selecionando Registros..."
+IndRegua("TRB1",cIdxTrb3,"C2OP",,,STR0006)			//"Selecionando Registros..."
+dbSetIndex(cIdxTrb4+OrdBagExt())
+dbSetOrder(mv_par01)
+dbGoTop()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Corre SD3 para gerar registro de trabalho.	                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SD3")
+aAreaD3:=GetArea()
+dbSetOrder(6)
+#IFDEF TOP
+	If TcSrvType()<>"AS/400"
+		lQuery := .T.
+		cAliasT450 := CriaTrab(NIL,.f.)
+		cQuery := "SELECT SD3.* ,R_E_C_N_O_ D3REC "
+		cQuery += "FROM "+RetSqlName("SD3")+" SD3 "
+		cQuery += "WHERE SD3.D3_FILIAL='"+xFilial("SD3")+"' AND "
+		cQuery += "SD3.D3_OP <> '"+Space(Len(SD3->D3_OP))+"' AND "
+		cQuery += "(SUBSTRING(SD3.D3_CF,2,1) = 'E' OR "
+		cQuery += "SUBSTRING(SD3.D3_CF,1,2) = 'PR') AND "
+		cQuery += "SD3.D3_EMISSAO >= '" + DTOS(mv_par09) + "' AND "
+		cQuery += "SD3.D3_EMISSAO <= '" + DTOS(mv_par10) + "' AND "
+		cQuery += "SD3.D3_ESTORNO <> 'S' AND "
+		cQuery += "SD3.D_E_L_E_T_=' ' "
+		cQuery += "ORDER BY "+SqlOrder(SD3->(IndexKey())) 
+		cQuery := ChangeQuery(cQuery)
+		dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQuery),cAliasT450,.T.,.T.)
+		aEval(SD3->(dbStruct()), {|x| If(x[2] <> "C", TcSetField(cAliasT450,x[1],x[2],x[3],x[4]),Nil)})
+	Endif
+#ENDIF
+
+SetRegua(RecCount())		// Total de Elementos da regua
+
+If !lQuery
+	dbSeek(xFilial()+DTOS(mv_par09), .T.)
+EndIf
+
+While !Eof() .And. If(lQuery,.T.,D3_FILIAL == xFilial() .And. D3_EMISSAO <= mv_par10)
+	IncRegua()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Le requisicoes e devolucoes do SD3 e gravar TRB. para gravacao do REAL ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If D3_ESTORNO != "S" .And. !Empty(D3_OP) .And. SubStr(D3_CF,2,1)$"E"
+		dbSelectArea("SB1")
+		dbSeek(xFilial()+(cAliasT450)->D3_COD)
+		dbSelectArea("SC2")
+		dbSeek(xFilial()+(cAliasT450)->D3_OP)
+		dbSelectArea("TRB")
+		If mv_par01 == 1
+			lOk := dbSeek((cAliasT450)->D3_OP+(cAliasT450)->D3_COD)
+		Else
+			lOk := dbSeek(SC2->C2_PRODUTO+(cAliasT450)->D3_COD)
+		EndIf
+
+			RecLock("TRB", ! lOk)
+         Replace QTDREAL   With QTDREAL   + If( SUBS((cAliasT450)->D3_CF,1,1)=="R",(cAliasT450)->D3_QUANT,(cAliasT450)->D3_QUANT*-1 ),;
+                 CUSTOREAL With CUSTOREAL + If( SUBS((cAliasT450)->D3_CF,1,1)=="R",R450Cus("R",mv_par06,(cAliasT450)->D3_QUANT ),R450Cus("R",mv_par06,(cAliasT450)->D3_QUANT  )*-1), ;
+                 NUMSEQ    With (cAliasT450)->D3_NUMSEQ   ,;
+                 CHAVE     With (cAliasT450)->D3_CHAVE    ,;
+                 EMISSAO   With (cAliasT450)->D3_EMISSAO  ,;
+                 TRT       With R450TRT("RE")
+
+      If ! lOk
+			Replace PRODUTO With (cAliasT450)->D3_COD ,;
+                 OP      With (cAliasT450)->D3_OP  ,;
+                 DESCRI  With SB1->B1_DESC         ,;
+                 UM      With SB1->B1_UM           ,;
+                 PAI     With SC2->C2_PRODUTO
+		Endif
+		MsUnLock()
+		dbSelectArea(cAliasT450)
+	EndIf
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Le producoes e gravar TRB. para gravacao do STANDART         ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If D3_ESTORNO != "S" .And. SubStr(D3_CF,1,2)$"PR"
+		dbSelectArea("SB1")
+		dbSeek(xFilial()+(cAliasT450)->D3_COD)
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Considera filtro escolhido                                   ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If ! &(cCondFiltr)
+			dbSelectArea(cAliasT450)
+			dbSkip()
+			Loop
+		Endif
+		dbSelectArea("TRB1")
+		If mv_par01 == 1
+			lOk := dbSeek((cAliasT450)->D3_OP)
+		Else
+			lOk := dbSeek((cAliasT450)->D3_COD)
+		EndIf
+		RecLock("TRB1",! lOk)
+		Replace C2PRODUTO With (cAliasT450)->D3_COD,;
+              C2OP      With (cAliasT450)->D3_OP ,;
+              C2UM      With (cAliasT450)->D3_UM ,;
+              C2QTD     With C2QTD + (cAliasT450)->D3_QUANT
+		MsUnLock()
+		cProduto := (cAliasT450)->D3_COD
+		
+		If mv_par11 == 1
+			dbSelectArea("SG1")
+			dbSetOrder(1)
+			dbSeek(xFilial()+cProduto)
+			While !Eof() .and. xFilial()+cProduto == G1_FILIAL + G1_COD
+				If G1_INI > dDataBase .Or. G1_FIM < dDataBase
+					dbSelectArea("SG1")
+					dbSkip()
+					Loop
+				EndIf
+				dbSelectArea("SB1")
+				dbSeek(xFilial()+(cAliasT450)->D3_COD)
+				If SG1->G1_FIXVAR == "F"
+					nQuantG1 := SG1->G1_QUANT
+					If (cAliasT450)->D3_PARCTOT == 'P'
+						nQuantG1 := (((cAliasT450)->D3_QUANT+(cAliasT450)->D3_PERDA)/SC2->C2_QUANT) * SG1->G1_QUANT
+					EndIf
+				Else
+					nQuantG1 := ExplEstr((cAliasT450)->D3_QUANT,,RetFldProd(SB1->B1_COD,"B1_OPC"))
+				EndIf
+				If RetFldProd(SB1->B1_COD,"B1_FANTASM") == "S"  // Projeto Implementeacao de campos MRP e FANTASM no SBZ
+					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+					//³ Se Produto for FANTASMA gravar so os componentes.            ³
+					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+					R450Fant(nQuantG1 )
+				Else
+					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+					//³ Gravar Valores da Producao em TRB.                           ³
+					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+					dbSelectArea("SB1")
+					dbSeek(xFilial()+SG1->G1_COMP)
+					If Found()
+						dbSelectArea("TRB")
+						If mv_par01 == 1
+							lOk := dbSeek((cAliasT450)->D3_OP+SG1->G1_COMP)
+							If OP != (cAliasT450)->D3_OP								// Abre Reg P/ Outra OP
+								lOk := .F.
+							EndIf
+						Else
+							lOk := dbSeek(TRB1->C2PRODUTO+SG1->G1_COMP)	// esta pegando C2_PRODUTO
+						EndIf
+
+						// Valida Requesicoes de mesmo componente para a mesma estrutura
+						If !Empty(TRB->TRT)
+							aRetSD3 := R450TRT("PR")
+						Else
+							aRetSD3 := {"",0,.F.}
+						EndIF
+
+						RecLock("TRB", ! lOk)
+					
+						Replace PRODUTO  With SG1->G1_COMP      ,;
+						OP       With (cAliasT450)->D3_OP      ,;
+						TRT      With aRetSD3[1]		 ,;
+						DESCRI   With SB1->B1_DESC      ,;
+						UM       With SB1->B1_UM        ,;
+						QTDSTD	 With QTDSTD + Round(nQuantG1,nTamDecQtd),;
+						CUSTOSTD With CUSTOSTD + R450Cus("S",mv_par07,Round(nQuantG1,nTamDecCus) ),;
+						PAI		 With cProduto          ,;
+						FIXVAR	 With SG1->G1_FIXVAR
+						MsUnLock()
+						If aRetSD3[3] .And. ! lQuery
+							(cAliasT450)->( dbGoTo(aRetSD3[2]) )
+						EndIf
+					EndIf
+				EndIf
+				dbSelectArea("SG1")
+				dbSkip()
+			Enddo
+		Else
+			dbSelectArea("SD4")
+			dbSetOrder(2)
+			dbSeek(xFilial()+(cAliasT450)->D3_OP)
+			If (cAliasT450)->D3_OP # cOpAnt
+               lOpConf:=.T.
+			Else 
+			   lOpConf:=.F.
+			Endif
+			While !Eof() .And. xFilial()+(cAliasT450)->D3_OP == D4_FILIAL + D4_OP .And. cOpant # (cAliasT450)->D3_OP .And. lOpConf
+
+				If aScan(aRecnoD4, SD4->(RecNo())) > 0
+					dbSkip()
+					Loop
+				Endif	
+				
+				Aadd(aRecnoD4, SD4->(RecNo()))
+
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Gravar Valores da Producao em TRB.                           ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				dbSelectArea("SB1")
+				dbSeek(xFilial()+SD4->D4_COD)
+				dbSelectArea("TRB")
+				If mv_par01 == 1
+					lOk := dbSeek((cAliasT450)->D3_OP+SD4->D4_COD)
+					If OP != (cAliasT450)->D3_OP								// Abre Reg P/ Outra OP
+						lOk := .F.
+					EndIf
+				Else
+					lOk := dbSeek(SC2->C2_PRODUTO+SD4->D4_COD)
+				EndIf
+				RecLock("TRB", ! lOk)
+				Replace PRODUTO  With SD4->D4_COD ,;
+                    OP       With SD4->D4_OP  ,;
+                    DESCRI   With SB1->B1_DESC,;
+                    UM       With SB1->B1_UM  ,;
+                    QTDSTD   With QTDSTD + Round((SD4->D4_QTDEORI-SD4->D4_QUANT),nTamDecQtd),;
+                    CUSTOSTD With CUSTOSTD + R450Cus("S",mv_par07,Round((SD4->D4_QTDEORI-SD4->D4_QUANT),nTamDecCus) ),;
+                    PAI      With cProduto    ,;
+                    FIXVAR   With ""
+				MsUnLock()
+				dbSelectArea("SD4")
+				dbSkip()
+			Enddo
+		    cOpAnt := (cAliasT450)->D3_OP
+		EndIf
+		dbSelectArea(cAliasT450)
+	EndIf
+	dbSkip()
+EndDo
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Montar arquivo de trabalho para resumo.	                     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cProduto := ""
+aCampos  := {}
+aTam:=TamSX3("D3_COD")
+AADD(aCampos,{ "PRODUTO"  , "C", aTam[1], aTam[2] })
+aTam:=TamSX3("B1_DESC")
+AADD(aCampos,{ "DESCRI"   , "C", aTam[1], aTam[2] })
+aTam:=TamSX3("D3_QUANT")
+AADD(aCampos,{ "QTDREAL"  , "N", 18, aTam[2] })
+AADD(aCampos,{ "QTDSTD"   , "N", 18, aTam[2] })
+AADD(aCampos,{ "QTDVAR"   , "N", 18, aTam[2] })
+aTam:=TamSX3("D3_CUSTO1")
+AADD(aCampos,{ "CUSTOREAL", "N", 18, aTam[2] })
+AADD(aCampos,{ "CUSTOSTD" , "N", 18, aTam[2] })
+AADD(aCampos,{ "CUSTOVAR" , "N", 18, aTam[2] })
+
+cArqTrab2 := CriaTrab(aCampos)
+Use &cArqTrab2 NEW Exclusive Alias TRB2  
+cIdxTrb5 := Substr(cArqtrab,1,7)+"E"
+IndRegua("TRB2",cIdxTrb5,"PRODUTO",,,STR0006)		//"Selecionando Registros..."
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Monta os Cabecalhos                                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cabec1 :=STR0007	//"CODIGO           M A T E R I A L                  |              C O N S U M O  R E A L              |           C O N S U M O  S T A N D A R D         |                          V A R I A C A O 	                      "
+cabec2 :=STR0008	//"                 DESCRICAO                     UM |      QUANTIDADE      CUSTO UN.       VALOR TOTAL |      QUANTIDADE      CUSTO UN.       VALOR TOTAL |     QUANTIDADE     VALOR TOTAL          $QTD.    $VALOR         %  "
+//                     123456789012345  12345678901234567890123456789 12    1234567890123  12345678901234    12345678901234    1234567890123  12345678901234    12345678901234   123456789012    12345678901234 12345678901234  123456789012 1234567
+//                                                                         123456789012345                 1234567890123456   123456789012345                 1234567890123456  123456789012345                                1234567890123
+//                               1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16        17         18       19        20        21        22
+//                     01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+cabec3 := ""
+If mv_par01 == 1
+	cCond  := "OP  <= AllTrim(mv_par05)"
+Else
+	cCond  := "PAI <= AllTrim(mv_par05)"
+EndIf
+titulo += IIF( mv_par01 == 1, STR0009,STR0010 )		//" ( Por Ordem de Producao )"###" ( Por Produto )"
+
+dbSelectArea("TRB")
+dbSetOrder(mv_par01)
+dbSeek(AllTrim(mv_par04), .T.)
+
+SetRegua(RecCount())		// Total de Elementos da regua
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicio da Impressao do arquivo Temporario.                   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+nQuantOp := 0.00
+While !Eof() .And. &(cCond)
+	
+	If lEnd
+		@Prow()+1,001 PSAY STR0011		//"CANCELADO PELO OPERADOR"
+		Exit
+	Endif
+	
+	If li > 55 .And. mv_par03 == 1
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,15)
+		li-= 2
+	EndIf
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Impressao por OP e PRODUTO                               ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	dbSelectArea("TRB1")
+	dbSetOrder(mv_par01)
+	If mv_par01 = 1
+		lOk := dbSeek(TRB->OP)
+	Else
+		lOk := dbSeek(TRB->PAI)
+	EndIf
+	If ! lOk
+		dbSelectArea("TRB")
+		dbSkip()
+		Loop
+	Endif
+	dbSelectArea("TRB")
+	If mv_par03 == 1
+		R450Linha(@li,.F.)
+		li++
+		@ li,000 PSAY If(mv_par01=1,"OP: "+TRB->OP,"PRODUTO:")
+		@ li,017 PSAY Left(TRB1->C2PRODUTO,29)
+		@ li,047 PSAY TRB1->C2UM
+		@ li,050 PSAY "|"
+		@ li,052 PSAY TRB1->C2QTD PICTURE PesqPict("SC2","C2_QUANT",15)
+		@ li,101 PSAY "|"
+		@ li,152 PSAY "|"
+		li++
+		@ li,050 PSAY "|"
+		@ li,101 PSAY "|"
+		@ li,152 PSAY "|"
+		nQuantOp := TRB1->C2QTD
+	EndIf
+	
+	cAnt := IIF( mv_par01 == 1,OP,PAI)
+	nCusStdOP := nTotStdOP := nCusRealOP := nTotRealOP := nTotVarOP := 0
+	nCusUnitR := nCusUnitS := 0
+	
+	While !Eof() .And. IF( mv_par01 == 1,OP,PAI) == cAnt
+		
+		IncRegua()
+		
+		If li > 58 .And. mv_par03 == 1
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,15)
+			//li -= 2
+		EndIf
+		
+		nTotalVar  := CUSTOREAL-CUSTOSTD
+		nQtdVar    := QTDREAL-QTDSTD
+		nPercent   := ((QTDREAL-QTDSTD)/QTDSTD)*100
+		nCusUnit   := Round(CUSTOREAL/IIF(QTDREAL=0,1,QTDREAL),nTamDecCus)
+		nCusUStd   := Round(CUSTOSTD/IIF(QTDSTD=0,1,QTDSTD),nTamDecCus)
+		nSValor    := Round(nCusUnit*nQtdVar,nTamDecCus)
+		nSQuant    := Round(nTotalVar-nSValor,nTamDecCus)
+		
+		If mv_par03 == 1 .And. (mv_par11 == 1 .Or. (QtdComp(QTDREAL,.T.) # QtdComp(0,.T.)))
+			li++
+			@ li,000 PSAY PRODUTO
+			@ li,016 PSAY Pad(DESCRI,29)
+			@ li,047 PSAY UM
+			@ li,050 PSAY "|"
+			@ li,052 PSAY QTDREAL 		PICTURE PesqPict("SD3","D3_QUANT",15)
+			@ li,068 PSAY nCusUnit 		PICTURE cPicD3C114
+			@ li,084 PSAY CUSTOREAL		PICTURE cPicD3C116
+			@ li,101 PSAY "|"
+			@ li,103 PSAY QTDSTD		PICTURE PesqPict("SD3","D3_QUANT",15)
+			@ li,119 PSAY nCusUStd		PICTURE cPicD3C114
+			@ li,135 PSAY CUSTOSTD  	PICTURE cPicD3C116
+			@ li,152 PSAY "|"
+			@ li,153 PSAY nQtdVar		PICTURE PesqPict("SD3","D3_QUANT",15)
+			@ li,167 PSAY nTotalVar 	PICTURE cPicD3C114
+			@ li,181 PSAY nSValor		PICTURE cPicD3C114
+			@ li,197 PSAY nSQuant		PICTURE PesqPict("SD3","D3_QUANT",13)
+			@ li,211 PSAY nPercent		PICTURE "9999.99"
+		EndIf
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Aglutinar Produto para Posterior Resumo.                 ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		dbSelectArea("TRB2")
+		lOk := dbSeek(TRB->PRODUTO)
+		RecLock("TRB2", ! lOk)
+		Replace PRODUTO   With TRB->PRODUTO,;
+		DESCRI    With TRB->DESCRI,;
+		QTDSTD    With QTDSTD    + TRB->QTDSTD   ,;
+		CUSTOSTD  With CUSTOSTD  + TRB->CUSTOSTD ,;
+		QTDREAL   With QTDREAL   + TRB->QTDREAL  ,;
+		CUSTOREAL With CUSTOREAL + TRB->CUSTOREAL,;
+		QTDVAR    With QTDVAR    + nQtdVar       ,;
+		CUSTOVAR  With CUSTOVAR  + nTotalVar
+		MsUnLock()
+		
+		nCusUnitR  += nCusUnit
+		nCusUnitS  += nCusUStd
+		nTotRealOP += TRB->CUSTOREAL
+		nTotStdOP  += TRB->CUSTOSTD
+		nTotVarOP  += nTotalVar
+		dbSelectArea("TRB")
+		dbSkip()
+	End
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Impressao dos Totais por OP/Produto.                     ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If mv_par03 == 1
+		R450Linha(@li,.T.)
+		li++
+		@ li,000 PSAY STR0012 +IIF(mv_par01==1,STR0013,STR0014)		//"Total "###"da OP:"###"do Produto:"
+		@ li,050 PSAY "|"
+		@ li,066 PSAY (nTotRealOP/nQuantOp)	PICTURE cPicD3C116
+		@ li,082 PSAY nTotRealOP	        PICTURE cPicD3C118
+		@ li,101 PSAY "|"
+		@ li,117 PSAY (nTotStdOP/nQuantOp)	PICTURE cPicD3C116
+		@ li,133 PSAY nTotStdOP            	PICTURE cPicD3C118
+		@ li,152 PSAY "|"
+		@ li,164 PSAY nTotVarOP 	       	PICTURE cPicD3C118
+		R450Linha(@li,.T.)
+	EndIf
+End
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Impressao do Resumo Aglutinado por Produto.              ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+li := 80
+
+titulo := STR0015		//"V A R I A C A O   DE   U S O   E   C O N S U M O"
+cabec1 := ""
+cabec2 := ""
+cabec3 := ""
+//cLinha := "|-------------------------------------------------------|"
+//cLinha += "------------------|--------------------|------------------|"
+//cLinha += "--------------------|------------------|--------------------|"
+cLinha := __PrtThinLine()
+
+dbSelectArea("TRB2")
+dbGoTop()
+
+SetRegua(RecCount())		// Total de Elementos da regua
+
+While !Eof()
+	
+	IncRegua()
+	
+	IF lEnd
+		@Prow()+1,001 PSAY STR0011		//"CANCELADO PELO OPERADOR"
+		Exit
+	Endif
+	
+	If li > 58
+		R450CabRes(titulo,cabec1,cabec2,nomeprog,tamanho)
+	EndIf
+	
+	@ li,000 PSAY "|"
+	@ li,003 PSAY PRODUTO
+	@ li,021 PSAY Pad(DESCRI,29)
+	@ li,056 PSAY "|"
+	@ li,058 PSAY QTDREAL	 PICTURE PesqPict("SD3","D3_QUANT",16)
+	@ li,075 PSAY "|"
+	@ li,077 PSAY CUSTOREAL	 PICTURE cPicD3C118
+	@ li,096 PSAY "|"
+	@ li,098 PSAY QTDSTD	 PICTURE PesqPict("SD3","D3_QUANT",16)
+	@ li,115 PSAY "|"
+	@ li,117 PSAY CUSTOSTD	 PICTURE cPicD3C118
+	@ li,136 PSAY "|"
+	@ li,138 PSAY QTDVAR	 PICTURE PesqPict("SD3","D3_QUANT",16)
+	@ li,155 PSAY "|"
+	@ li,157 PSAY CUSTOVAR	 PICTURE cPicD3C118
+	@ li,176 PSAY "|"
+	li++
+	@ li,000 PSAY cLinha
+	li++
+	dbSelectArea("TRB2")
+	dbSkip()
+End
+If li != 80
+	roda(cbcont,cbtxt,"G")
+EndIf
+
+If aReturn[5] = 1
+	Set Printer TO
+	dbCommitall()
+	ourspool(wnrel)
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Apaga Arquivos de trabalho                                   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("TRB")
+dbCloseArea()
+cArqTrab += GetDBExtension()
+cIdxTrb1 += OrdBagExt()
+cIdxTrb2 += OrdBagExt()
+FErase( cArqTrab )
+FErase( cIdxTrb1 )
+FErase( cIdxTrb2 )
+
+dbSelectArea("TRB1")
+dbCloseArea()
+cArqTrab1 += GetDBExtension()
+cIdxTrb3  += OrdBagExt()
+cIdxTrb4  += OrdBagExt()
+FErase( cArqTrab1 )
+FErase( cIdxTrb3 )
+FErase( cIdxTrb4 )
+
+dbSelectArea("TRB2")
+dbCloseArea()
+cArqTrab2 += GetDBExtension()
+cIdxTrb5  += OrdBagExt()
+FErase( cArqTrab2 )
+FErase( cIdxTrb5 )
+
+dbSelectArea("SB1")
+RetIndex("SB1")
+dbClearFilter()
+dbSetOrder(1)
+
+If lQuery
+	dbSelectArea(cAliasT450)
+	dbCloseArea()
+	dbSelectArea("SD3")
+EndIf
+RestArea(aAreaD3)
+MS_FLUSH()
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ R450Linha³ Autor ³ Jose Lucas            ³ Data ³ 21.09.93 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Imprimir caracteres barra e ifens como separadores.        ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ R450Linha                                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+*/
+Static Function R450Linha(li,nImpTraco)
+Local cLinha
+li++
+If nImpTraco
+	//cLinha := "--------------------------------------------------|"
+	//cLinha += "--------------------------------------------------|"
+	//cLinha += "--------------------------------------------------|"
+	//cLinha += "-------------------------------------------------------------------"
+	cLinha := __PrtThinLine()
+Else
+	cLinha := "                                                  |"
+	cLinha += "                                                  |"
+	cLinha += "                                                  |"
+EndIf
+@ li,000 PSAY cLinha
+Return Nil
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ R450CabRes³ Autor ³ Jose Lucas           ³ Data ³ 21.09.93 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Impressao do Cabecalho do Resumo.                          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ R450CabRes(void)                                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR450A                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+*/
+Static Function R450CabRes(titulo,cabec1,cabec2,nomeprog,tamanho)
+cabec(titulo,cabec1,cabec2,nomeprog,tamanho,15)
+@ li,000 PSAY __PrtThinLine()
+li++
+@ li,000 PSAY STR0017		//"|                                                       |        C O N S U M O  R E A L         |    C O N S U M O  S T A N D A R D     |            V A R I A C A O            |"
+li++
+@ li,000 PSAY STR0018		//"|  CODIGO            DESCRICAO                          |---------------------------------------|---------------------------------------|---------------------------------------|"
+li++
+@ li,000 PSAY STR0019		//"|                                                       |      QUANTIDADE  |             VALOR  |      QUANTIDADE  |             VALOR  |      QUANTIDADE  |             VALOR  |"
+li++
+@ li,000 PSAY __PrtFatLine()
+li++
+Return Nil
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ R450Cus   ³ Autor ³ Jose Lucas           ³ Data ³ 21.09.93 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Retorna o Custo.                                           ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ ExpN1 := R450Cus(ExpC1,ExpN2,ExpN3)                        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpN1 := Valor do Custo                                    ³±±
+±±³          ³ ExpC1 := Tipo "S" para Std e "R" para Real                 ³±±
+±±³          ³ ExpN2 := Indica a Moeda para obtencao do Custo             ³±±
+±±³          ³ ExpN3 := Qunatidade utilizada.                             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR450A                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+*/
+Static Function R450Cus(cTipo,nMoeda,nQtd)
+Local nRet := 0
+nMoeda--
+If Empty(nMoeda) //Reposicao
+	nRet := Round( nQtd * SB1->B1_CUSTD,nTamDecCus )
+Else
+	If cTipo = "R"
+		nRet := &("(cAliasT450)->D3_CUSTO"+ Str(nMoeda,1) )
+	Else
+		nRet := (nQtd*xMoeda(RetFldProd(SB1->B1_COD,"B1_CUSTD"),Val(RetFldProd(SB1->B1_COD,"B1_MCUSTD")), nMoeda, RetFldProd(SB1->B1_COD,"B1_DATREF") ))
+	EndIf
+EndIf
+Return nRet
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ R450Fant  ³ Autor ³ Cesar Eduardo Valadao³ Data ³ 01.06.99 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Retorna a Estrutura de Produto Fantasma                    ³±±
+±±³          ³ Funcao Recursiva.                                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ R450Fant(ExpN1)                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpN1 := Quantidade do Pai.                                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR450A                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+*/
+Static Function R450Fant(nQuantPai)
+Local aAreaAnt  := GetArea()
+Local aAreaSB1  := SB1->(GetArea())
+Local aAreaSG1  := SG1->(GetArea())
+LOCAL cComponen := SG1->G1_COMP
+LOCAL lOk
+dbSelectArea("SG1")
+If dbSeek(xFilial()+cComponen, .F.)
+	While !Eof() .And. G1_FILIAL+G1_COD == xFilial()+cComponen
+		If G1_INI > dDataBase .Or. G1_FIM < dDataBase
+			dbSkip()
+			Loop
+		EndIf
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Gravar Valores da Producao em TRB do componente.             ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		dbSelectArea("SB1")
+		If dbSeek(xFilial()+SG1->G1_COMP)
+			If SG1->G1_FIXVAR == "F"
+				nQuantG1 := SG1->G1_QUANT
+			Else
+				nQuantG1 := ExplEstr(nQuantPai,,RetFldProd(SB1->B1_COD,"B1_OPC"))
+			EndIf
+			dbSelectArea("TRB")
+			If mv_par01 == 1
+				lOk := dbSeek((cAliasT450)->D3_OP+SG1->G1_COMP)
+			Else
+				lOk := dbSeek(SC2->C2_PRODUTO+SG1->G1_COMP)
+			EndIf
+			If RetFldProd(SB1->B1_COD,"B1_FANTASM") == "S" // Projeto Implementeacao de campos MRP e FANTASM no SBZ
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Se Produto for FANTASMA gravar so os componentes.            ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				R450Fant(nQuantG1 )
+			Else
+				If !lOk .Or. QTDSTD = 0 .Or. (OP != (cAliasT450)->D3_OP .Or. ;
+					TRB->NUMSEQ == (cAliasT450)->D3_NUMSEQ .Or. ;
+					(TRB->NUMSEQ == (cAliasT450)->D3_NUMSEQ .and. !Empty(TRB->TRT)))
+
+					If !Empty(TRB->TRT)
+						aRetSD3 := R450TRT("PR")
+					Else
+						aRetSD3 := {"",0,.F.}
+					EndIF
+
+					RecLock("TRB",!lOk)
+					Replace PRODUTO     With SG1->G1_COMP,;
+					OP          With (cAliasT450)->D3_OP,;
+					TRT		 	With aRetSD3[1]		,;
+					DESCRI      With SB1->B1_DESC,;
+					UM          With SB1->B1_UM,;
+					QTDSTD	    With QTDSTD + Round(nQuantG1,nTamDecQtd),;
+					CUSTOSTD    With CUSTOSTD + R450Cus("S",mv_par07,Round(nQuantG1,nTamDecCus) ),;
+					PAI         With cProduto,;
+					FIXVAR		With SG1->G1_FIXVAR
+					MsUnLock()
+					// Volta ao Registro Original do SD3
+					If aRetSD3[3] .And. ! lQuery
+						(cAliasT450)->( dbGoTo(aRetSD3[2]) )
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+		dbSelectArea("SG1")
+		dbSkip()
+	End
+EndIf
+RestArea(aAreaSB1)
+RestArea(aAreaSG1)
+RestArea(aAreaAnt)
+Return(Nil)
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³R450TRT   ºAutor  ³ Marcelo Iuspa      º Data ³  24/11/03   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Funcao para tratar duas ou mais requisicoes de um mesmo    º±±
+±±º          ³ Componente utilizadas dentro da mesma estrutura            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ MATR450A                                                   º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function R450TRT(cTipoMov)
+Local cConteudo := RTrim(TRB->TRT)
+Local nRegSD3,cRetorno,nPosCorte,lReposSD3
+
+If cTipoMov == "RE"
+	// Chamado apartir da leitura das REQUISICOES para compor o REAL
+	If !Empty((cAliasT450)->D3_TRT)
+		If Empty(TRB->TRT)
+			cRetorno := "   /" + (cAliasT450)->D3_TRT
+		Else
+			cRetorno := RTrim(TRB->TRT)+"/" + (cAliasT450)->D3_TRT
+		EndIf
+	EndIf
+	Return(cRetorno)
+Else
+	// Chamado apartir da leitura das PRODUCOES para compor o STANDARD
+	lReposSD3	:= .F.
+	nPosCorte	:= At("/",cConteudo)
+	If nposCorte <> 0
+		cTRTCorte	:= SubStr(cConteudo,1,nPosCorte-1)
+		cConteudo	:= Substr(cConteudo,nPosCorte+1,Len(cConteudo))
+	Else
+		cTRTCorte	:= AllTrim(cConteudo)
+		cConteudo	:= ""
+	EndIf
+	nRegSD3		:= SD3->( Recno() )
+	If SD3->( dbSeek(xFilial("SD3")+DTOS(TRB->EMISSAO)+TRB->NUMSEQ+TRB->CHAVE+TRB->PRODUTO) )
+		Do While ! SD3->(Eof())
+			If SD3->D3_TRT == cTRTCorte
+				lReposSD3 := .T.
+				Exit
+			EndIf
+			SD3->( dbSkip() )
+		EndDo
+		Return({cConteudo,nRegSD3,lReposSD3})
+	EndIf
+EndIf

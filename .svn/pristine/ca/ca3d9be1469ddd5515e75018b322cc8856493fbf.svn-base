@@ -1,0 +1,523 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "Protheus.Ch"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matrbol1.prw"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MatrBol1.Ch"
+#line 29 "d:\totvs 11\microsiga\protheus\my projects\materiais\matrbol1.prw"
+Function U_MatrBol1()
+
+
+
+
+Local cTitulo	:= OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Livro De Iva De Compras/vendas", "Livro IVA de Compras/Vendas" ))
+Local cDescr1	:= OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Este Programa Tem Como Objectivo Imprimir O Relatório Do Livro De Iva De Compras/vendas", "Este programa tem como objetivo imprimir o relatorio Livro IVA de Compras/Vendas" ))
+Local cPerg	 	:= "MTRBO1"
+Local cNomeProg	:= "MATRBOL1"
+Local cString	:= "SF3"
+
+Private cTam	:= "G"
+Private lEnd	:= .F. 
+Private aReturn	:= {If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ), 1, If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 2, 2, 1, "", 1}
+Private nLastKey:= 0
+Private m_pag	:= 1
+Private wnRel	:= ""
+Private aL		:= Array(8)
+
+If cPaisLoc == "BOL" .And.  LocBol()
+
+
+
+	LayOut(@aL)
+
+
+
+
+	AjustaSx1(cPerg)
+	Pergunte(cPerg, .F. )
+
+
+
+
+	wnRel := SetPrint(cString,cNomeProg,cPerg,cTitulo,cDescr1,,, .F. ,, .T. ,cTam,, .T. )
+	If nLastKey == 27
+		Return Nil
+	Endif
+	SetDefault(aReturn,cString)
+	If nLastKey == 27
+		Return Nil
+	Endif
+
+
+
+
+	RptStatus({|| Imprime()},cTitulo)
+Endif
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function Imprime()
+
+Local cFiltro	:= ""
+Local cAlias	:= "SF3"
+Local nLivro	:= mv_par01
+Local dDtIni	:= mv_par02
+Local dDtFim	:= mv_par03
+Local cRG		:= mv_par04
+Local cResp		:= Upper(mv_par05)
+Local cCondicao	:= ""
+Local cIndex	:= ""
+Local nIndex	:= 0
+Local cDebug	:= ""
+Local lQuery	:= .F. 
+Local aDados	:= Array(11)
+Local cRazSoc	:= ""
+Local cNIT		:= ""
+Local nTotGer	:= 0
+Local nLin		:= 0
+Local nFolha	:= 0
+Local aImpostos	:= {}
+Local aTotPar	:= {OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Parciais", "PARCIAIS" )),0,0,0,0,0}
+Local aTotGer	:= {OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Totais", "TOTAIS" )),0,0,0,0,0}
+Local cOrdem	:= ""
+
+
+
+
+
+
+
+
+Local lPassag 	:= 	cPaisLoc == "BOL" .And.  GetNewPar("MV_PASSBOL", .F. ) .And.  SF3->(FieldPos("F3_COMPANH")) > 0 .And.  SF3->(FieldPos("F3_LOJCOMP")) > 0 .And.  SF3->(FieldPos("F3_PASSAGE")) > 0 .And.  SF3->(FieldPos("F3_DTPASSA")) > 0 .And.  SF1->(FieldPos("F1_COMPANH")) > 0 .And.  SF1->(FieldPos("F1_LOJCOMP")) > 0 .And.  SF1->(FieldPos("F1_PASSAGE")) > 0 .And.  SF1->(FieldPos("F1_DTPASSA")) > 0
+
+
+    If TcSrvType() <> "AS/400"
+    	lQuery := .T. 
+    Endif
+
+
+
+
+
+dbSelectArea("SFB")
+dbSetOrder(1)
+dbGoTop()
+
+AADD(aImpostos,{"IVA",""})
+While !SFB->(Eof())
+	If aScan(aImpostos,{|x| SFB->FB_CODIGO $ x[1]}) > 0
+		aImpostos[aScan(aImpostos,{|x| SFB->FB_CODIGO $ x[1]})][2] := SFB->FB_CPOLVRO
+	Endif
+	dbSkip()
+Enddo
+aSort(aImpostos,,,{|x,y| x[2] < y[2]})
+
+AAdd(aImpostos[1],SF3->(FieldPos("F3_BASIMP"+aImpostos[1][2])))
+AAdd(aImpostos[1],SF3->(FieldPos("F3_VALIMP"+aImpostos[1][2])))
+
+dbSelectArea("SF3")
+dbSetOrder(1)
+
+If lQuery
+	cCondicao := "%"
+	cCondicao += IIf(nLivro == 1,"F3_TIPOMOV = 'C' AND","F3_TIPOMOV = 'V' AND")
+	cCondicao += "%"
+
+	cAlias := GetNextAlias()
+
+		If (nLivro == 1 .And.  mv_par06 == 2) .Or.  nLivro == 2
+		cFiltro	+= "Dtos(F3_EMISSAO) >= '"+Dtos(dDtIni)+"' .And. "
+		cFiltro	+= "Dtos(F3_EMISSAO) <= '"+Dtos(dDtFim)+"'"
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAlias," SELECT * FROM  "+RetSqlName('SF3')+" SF3 WHERE F3_FILIAL =  "+___SQLGetValue(XFILIAL("SF3"))+" AND F3_EMISSAO >=  "+___SQLGetValue(DDTINI)+" AND F3_EMISSAO <=  "+___SQLGetValue(DDTFIM)+" AND  "+___SQLGetValue(CCONDICAO)+" SF3.D_E_L_E_T_= ' ' ORDER BY F3_FILIAL,F3_EMISSAO,F3_NFISCAL,F3_SERIE,F3_CLIEFOR,F3_LOJA,F3_CFO,F3_ALIQICM",{{"F3_EMISSAO","D",8,0},{"F3_ENTRADA","D",8,0}},.F.)
+
+	Else
+		cFiltro	+= "Dtos(F3_ENTRADA) >= '"+Dtos(dDtIni)+"' .And. "
+		cFiltro	+= "Dtos(F3_ENTRADA) <= '"+Dtos(dDtFim)+"'"
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAlias," SELECT * FROM  "+RetSqlName('SF3')+" SF3 WHERE F3_FILIAL =  "+___SQLGetValue(XFILIAL("SF3"))+" AND F3_ENTRADA >=  "+___SQLGetValue(DDTINI)+" AND F3_ENTRADA <=  "+___SQLGetValue(DDTFIM)+" AND  "+___SQLGetValue(CCONDICAO)+" SF3.D_E_L_E_T_= ' ' ORDER BY F3_FILIAL,F3_ENTRADA,F3_NFISCAL,F3_SERIE,F3_CLIEFOR,F3_LOJA,F3_CFO,F3_ALIQICM",{{"F3_ENTRADA","D",8,0},{"F3_EMISSAO","D",8,0}},.F.)
+
+	EndIf
+
+	cDebug := GetLastQuery()[2]
+
+Else
+	cIndex	:= CriaTrab(Nil, .F. )
+	cFiltro	:= "F3_FILIAL == '"+ xFilial("SF3") + "' .And. "
+	cFiltro += IIf(nLivro == 1,"F3_TIPOMOV == 'C'","F3_TIPOMOV == 'V'")+" .And. "
+	If (nLivro == 1 .And.  mv_par06 == 2) .Or.  nLivro == 2
+	 	cFiltro	+= "Dtos(F3_EMISSAO) >= '"+Dtos(dDtIni)+"' .And. "
+		cFiltro	+= "Dtos(F3_EMISSAO) <= '"+Dtos(dDtFim)+"'"
+		cOrdem := "F3_FILIAL+Dtos(F3_EMISSAO)+F3_NFISCAL+F3_SERIE+F3_CLIEFOR+F3_LOJA+F3_CFO+STR(F3_ALIQICM)"
+
+   	Else
+		cFiltro	+= "Dtos(F3_ENTRADA) >= '"+Dtos(dDtIni)+"' .And. "
+		cFiltro	+= "Dtos(F3_ENTRADA) <= '"+Dtos(dDtFim)+"'"
+		cOrdem := "F3_FILIAL+Dtos(F3_ENTRADA)+F3_NFISCAL+F3_SERIE+F3_CLIEFOR+F3_LOJA+F3_CFO+STR(F3_ALIQICM)"
+   		Endif
+
+	IndRegua(cAlias,cIndex,cOrdem,,cFiltro,"Data Final")
+	nIndex := RetIndex("SF3")
+	dbSetIndex(cIndex+OrdBagExt())
+	dbSetOrder(nIndex+1)
+	dbGoTop()
+Endif
+
+
+
+
+dbSelectArea(cAlias)
+SetRegua(RecCount())
+
+aItens := {}
+While !(cAlias)->(Eof())
+
+
+
+
+	If lEnd
+		Exit
+	Endif
+
+
+
+
+	If ( nLin > 60 .Or.  nLin == 0 )
+		If (aTotPar[2]+aTotPar[3]+aTotPar[4]+aTotPar[5]+aTotPar[6]) > 0
+			FmtLin(,aL[01],,,@nLin)
+			FmtLin(aTotPar,aL[04],,,@nLin)
+			aTotPar	:= {OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Parciais", "PARCIAIS" )),0,0,0,0,0}
+			FmtLin(,aL[05],,,@nLin)
+		Endif
+		nLin := CabecRel(nLivro,@nFolha)
+	Endif
+
+
+	If !Empty((cAlias)->F3_RAZSOC)
+		cRazSoc := (cAlias)->F3_RAZSOC
+		cNIT	:= (cAlias)->F3_NIT
+	Else
+
+		If nLivro == 1
+			If (cAlias)->F3_TIPO <> "B"
+
+
+
+
+				If lPassag .And.  !Empty((cAlias)->F3_COMPANH) .And.  !Empty((cAlias)->F3_LOJCOMP)
+					cRazSoc := Posicione("SA2",1,xFilial("SA2")+(cAlias)->F3_COMPANH+(cAlias)->F3_LOJCOMP,"A2_NOME")
+					cNIT	:= Posicione("SA2",1,xFilial("SA2")+(cAlias)->F3_COMPANH+(cAlias)->F3_LOJCOMP,"A2_CGC")
+				Else
+					cRazSoc := Posicione("SA2",1,xFilial("SA2")+(cAlias)->F3_CLIEFOR+(cAlias)->F3_LOJA,"A2_NOME")
+					cNIT	:= Posicione("SA2",1,xFilial("SA2")+(cAlias)->F3_CLIEFOR+(cAlias)->F3_LOJA,"A2_CGC")
+				Endif
+			Else
+				cRazSoc := Posicione("SA1",1,xFilial("SA1")+(cAlias)->F3_CLIEFOR+(cAlias)->F3_LOJA,"A1_NOME")
+				cNIT	:= Posicione("SA1",1,xFilial("SA1")+(cAlias)->F3_CLIEFOR+(cAlias)->F3_LOJA,"A1_CGC")
+			EndIf
+		Else
+			If (cAlias)->F3_TIPO <> "B"
+				cRazSoc := Posicione("SA1",1,xFilial("SA1")+(cAlias)->F3_CLIEFOR+(cAlias)->F3_LOJA,"A1_NOME")
+				cNIT	:= Posicione("SA1",1,xFilial("SA1")+(cAlias)->F3_CLIEFOR+(cAlias)->F3_LOJA,"A1_CGC")
+			Else
+				cRazSoc := Posicione("SA2",1,xFilial("SA2")+(cAlias)->F3_CLIEFOR+(cAlias)->F3_LOJA,"A2_NOME")
+				cNIT	:= Posicione("SA2",1,xFilial("SA2")+(cAlias)->F3_CLIEFOR+(cAlias)->F3_LOJA,"A2_CGC")
+			EndIf
+		Endif
+
+	EndIf
+
+
+
+
+	aDados[01] := Iif((MV_PAR06==2 .And.  nLivro == 1) .Or.  nLivro == 2,(cAlias)->F3_EMISSAO,(cAlias)->F3_ENTRADA)
+	aDados[02] := cNIT
+	aDados[03] := cRazSoc
+	aDados[04] := (cAlias)->F3_NFISCAL
+	aDados[05] := (cAlias)->F3_NUMAUT
+	If Empty((cAlias)->F3_CODCTR)
+		aDados[06] := ""
+	Else
+		aDados[06] := (cAlias)->F3_CODCTR
+	Endif
+	aDados[07] := (cAlias)->F3_VALCONT
+	aDados[08] := (cAlias)->F3_VALIMP5
+	aDados[09] := (cAlias)->F3_EXENTAS
+
+	If aImpostos[1][3] > 0 .AND.  (cAlias)->F3_VALIMP5 == 0
+		aDados[10] := (cAlias)->(FieldGet(aImpostos[1][3]))
+	Elseif (cAlias)->F3_VALIMP5 > 0
+		aDados[10] := (cAlias)->F3_VALCONT-(cAlias)->F3_VALIMP5
+	Else
+		aDados[10] := 0
+	Endif
+
+	If aImpostos[1][4] > 0
+		aDados[11] := (cAlias)->(FieldGet(aImpostos[1][4]))
+	Else
+		aDados[11] := 0
+	Endif
+
+
+
+
+
+	aTotPar[2] += aDados[07]
+	aTotGer[2] += aDados[07]
+
+	aTotPar[3] += aDados[08]
+	aTotGer[3] += aDados[08]
+
+	aTotPar[4] += aDados[09]
+	aTotGer[4] += aDados[09]
+
+	aTotPar[5] += aDados[10]
+	aTotGer[5] += aDados[10]
+
+	aTotPar[6] += aDados[11]
+	aTotGer[6] += aDados[11]
+
+
+
+
+	FmtLin(aDados,aL[03],,,@nLin)
+
+	dbSelectArea(cAlias)
+	(cAlias)->(dbSkip())
+EndDo
+
+If (aTotPar[2]+aTotPar[3]+aTotPar[4]+aTotPar[5]+aTotPar[6]) > 0
+	FmtLin(,aL[01],,,@nLin)
+	FmtLin(aTotPar,aL[04],,,@nLin)
+	FmtLin({cRG,cResp},aL[06],,,@nLin)
+	FmtLin(aTotGer,aL[07],,,@nLin)
+	FmtLin({OemToAnsi(If( cPaisLoc $ "ANG|PTG", "R.g.", "R.G." )),Upper(OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Nome Completo Do Responsável", "Nome Completo do Responsavel" )))},aL[08],,,@nLin)
+EndIf
+
+If lQuery
+	dbSelectArea(cAlias)
+	dbCloseArea()
+Else
+  	dbSelectArea("SF3")
+	RetIndex("SF3")
+	dbClearFilter()
+	Ferase(cIndex+OrdBagExt())
+Endif
+
+If aReturn[5]==1
+   dbCommitAll()
+   Set( 24, "" )
+   OurSpool(wnRel)
+Endif
+
+MS_FLUSH()
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function CabecRel(nLivro,nFolha)
+
+Local nLin		:= 0
+Local cMes		:= StrZero(Month(mv_par02),2)
+Local cAno		:= StrZero(Year(mv_par02),4)
+
+nLin := 1
+If nLivro == 1
+	PrintOut(nLin,001,Upper(OemToAnsi(If(cPaisLoc$"ANG|PTG","Livro De Compras Do Iva Do Período","Livro de Compras IVA do Periodo")))+"  "+cMes+"/"+cAno,,)
+Else
+	PrintOut(nLin,001,Upper(OemToAnsi(If(cPaisLoc$"ANG|PTG","Livro De Vendas Do Iva Do Período","Livro de Vendas IVA do Periodo")))+"  "+cMes+"/"+cAno,,)
+Endif
+PrintOut(nLin,197,Upper(OemToAnsi("Folha: "))+StrZero(++nFolha,4),,)
+nLin := (nLin+3)
+PrintOut(nLin,001,Upper(OemToAnsi(If(cPaisLoc$"ANG|PTG","Nome ou razão social: ","Nome ou Razao Social: ")))+SM0->M0_NOMECOM,,)
+PrintOut(nLin,150,Upper(OemToAnsi(If(cPaisLoc$"ANG|PTG","Nif: ","CNPJ: ")))+SM0->M0_CGC,,)
+nLin := (nLin+1)
+PrintOut(nLin,001,Upper(OemToAnsi(If(cPaisLoc$"ANG|PTG","Núm. filial: ","No. Filial: ")))+cFilAnt,,)
+PrintOut(nLin,025,Upper(OemToAnsi(If(cPaisLoc$"ANG|PTG","Endereço: ","Endereco: ")))+SM0->M0_ENDENT,,)
+nLin := (nLin+2)
+FmtLin(,aL[02],,,@nLin)
+PrintOut(nLin,000,Upper(OemToAnsi(If(cPaisLoc$"ANG|PTG","                                                                                                                          |                                valores em bolivianos                               |","                                                                                                                          |                                VALORES EM BOLIVIANOS                               |"))),,)
+nLin := (nLin+1)
+FmtLin(,aL[01],,,@nLin)
+PrintOut(nLin,000,Upper(OemToAnsi(If(cPaisLoc$"ANG|PTG","|          |                 |                                          |  número da   |    número de    |     código     |     total      |      total     |    valores     |     valor      |     crédito    |","|          |                 |                                          |  NUMERO DA   |    NUMERO DE    |     CODIGO     |     TOTAL      |      TOTAL     |    VALORES     |     VALOR      |     CREDITO    |"))),,)
+nLin := (nLin+1)
+PrintOut(nLin,000,Upper(OemToAnsi(If(cPaisLoc$"ANG|PTG","|   data   |  número de nit  | nome ou razão social                     |  factura |   autorização   |  de controlo   | factura (a)|    i.c.e. (b)  |   isentos (c)  | líquido (a-b-c)|  fiscal i.v.a. |","|   DATA   |  NUMERO DE NIT  | NOME OU RAZAO SOCIAL                     |  NOTA FISCAL |   AUTORIZACAO   |  DE CONTROLE   | NOTA FISCAL (A)|    I.C.E. (B)  |   ISENTOS (C)  | LIQUIDO (A-B-C)|  FISCAL I.V.A. |"))),,)
+nLin := (nLin+1)
+FmtLin(,aL[01],,,@nLin)
+
+Return( nLin )
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function LayOut(aL)
+
+aL[01] := 	"+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+"
+aL[02] := 	"                                                                                                                          +------------------------------------------------------------------------------------+"
+
+
+aL[03] := 	"| ######## | ############### | ######################################## | ############ | ############### | ############## |############### |############### |############### |############### |############### |"
+aL[04] := 	"                                                                                                         | ############## |############### |############### |############### |############### |############### |"
+aL[05] := 	"                                                                                                         +-----------------------------------------------------------------------------------------------------+"
+aL[06] := 	" ####################   ######################################################                           +-----------------------------------------------------------------------------------------------------+"
+aL[07] := 	" --------------------   ------------------------------------------------------                           | ############## |############### |############### |############### |############### |############### |"
+aL[08] := 	"         ####                      ###############################                                       +-----------------------------------------------------------------------------------------------------+"
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSx1(cPerg)
+
+Local aHelpP  := {}
+Local aHelpE  := {}
+Local aHelpS  := {}
+
+
+Aadd(aHelpP, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique o livro que deseja imprimir:", "Informe o Livro que deseja imprimir:" )))
+Aadd(aHelpP, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Compras Ou Vendas", "Compras ou Vendas" )))
+Aadd(aHelpE, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique o livro que deseja imprimir:", "Informe o Livro que deseja imprimir:" )))
+Aadd(aHelpE, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Compras Ou Vendas", "Compras ou Vendas" )))
+Aadd(aHelpS, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique o livro que deseja imprimir:", "Informe o Livro que deseja imprimir:" )))
+Aadd(aHelpS, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Compras Ou Vendas", "Compras ou Vendas" )))
+PutSx1(cPerg,"01",OemToAnsi("Livro"),OemToAnsi("Livro"),OemToAnsi("Livro"),"mv_ch1","N",1,0,0,"C",,,,,"mv_par01",OemToAnsi("Compras"),OemToAnsi("Compras"),OemToAnsi("Compras"),,OemToAnsi("Vendas"),OemToAnsi("Vendas"),OemToAnsi("Vendas"),,,,,,,,,,aHelpP,aHelpE,aHelpS)
+
+
+aHelpP  := {}
+aHelpE  := {}
+aHelpS  := {}
+Aadd(aHelpP, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique a data inicial para criação do", "Informe a Data Inicial para geracao do" )))
+Aadd(aHelpP, OemToAnsi("Livro"))
+Aadd(aHelpE, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique a data inicial para criação do", "Informe a Data Inicial para geracao do" )))
+Aadd(aHelpE, OemToAnsi("Livro"))
+Aadd(aHelpS, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique a data inicial para criação do", "Informe a Data Inicial para geracao do" )))
+Aadd(aHelpS, OemToAnsi("Livro"))
+PutSx1(cPerg,"02",OemToAnsi("Data Inicial"),OemToAnsi("Data Inicial"),OemToAnsi("Data Inicial"),"mv_ch2","D",8,0,0,"G",,,,,"mv_par02",,,,,,,,,,,,,,,,,aHelpP,aHelpE,aHelpS)
+
+
+aHelpP  := {}
+aHelpE  := {}
+aHelpS  := {}
+Aadd(aHelpP, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique a data final para criação do", "Informe a Data Final para geracao do" )))
+Aadd(aHelpP, OemToAnsi("Livro"))
+Aadd(aHelpE, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique a data final para criação do", "Informe a Data Final para geracao do" )))
+Aadd(aHelpE, OemToAnsi("Livro"))
+Aadd(aHelpS, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique a data final para criação do", "Informe a Data Final para geracao do" )))
+Aadd(aHelpS, OemToAnsi("Livro"))
+PutSx1(cPerg,"03",OemToAnsi("Data Final"),OemToAnsi("Data Final"),OemToAnsi("Data Final"),"mv_ch3","D",8,0,0,"G",,,,,"mv_par03",,,,,,,,,,,,,,,,,aHelpP,aHelpE,aHelpS)
+
+
+aHelpP  := {}
+aHelpE  := {}
+aHelpS  := {}
+Aadd(aHelpP, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique O Número Do R.g. Do Responsável", "Informe o Numero do R.G. do Responsavel" )))
+Aadd(aHelpE, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique O Número Do R.g. Do Responsável", "Informe o Numero do R.G. do Responsavel" )))
+Aadd(aHelpS, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique O Número Do R.g. Do Responsável", "Informe o Numero do R.G. do Responsavel" )))
+PutSx1(cPerg,"04",OemToAnsi(If( cPaisLoc $ "ANG|PTG", "R.g.", "R.G." )),OemToAnsi(If( cPaisLoc $ "ANG|PTG", "R.g.", "R.G." )),OemToAnsi(If( cPaisLoc $ "ANG|PTG", "R.g.", "R.G." )),"mv_ch4","C",20,0,0,"G",,,,,"mv_par04",,,,,,,,,,,,,,,,,aHelpP,aHelpE,aHelpS)
+
+
+aHelpP  := {}
+aHelpE  := {}
+aHelpS  := {}
+Aadd(aHelpP, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique O Nome Completo Do Responsável", "Informe o Nome Completo do Responsavel" )))
+Aadd(aHelpE, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique O Nome Completo Do Responsável", "Informe o Nome Completo do Responsavel" )))
+Aadd(aHelpS, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Indique O Nome Completo Do Responsável", "Informe o Nome Completo do Responsavel" )))
+PutSx1(cPerg,"05",OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Responsável", "Responsavel" )),OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Responsável", "Responsavel" )),OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Responsável", "Responsavel" )),"mv_ch5","C",55,0,0,"G",,,,,"mv_par05",,,,,,,,,,,,,,,,,aHelpP,aHelpE,aHelpS)
+
+
+aHelpP  := {}
+aHelpE  := {}
+aHelpS  := {}
+Aadd(aHelpP, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Informe se o relatório será ordenado por:", "Informe se o relatorio será ordenado por:" )))
+Aadd(aHelpP, OemToAnsi("Data de digitação ou Data de emissão"))
+Aadd(aHelpE, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Informe se o relatório será ordenado por:", "Informe se o relatorio será ordenado por:" )))
+Aadd(aHelpE, OemToAnsi("Data de digitação ou Data de emissão"))
+Aadd(aHelpS, OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Informe se o relatório será ordenado por:", "Informe se o relatorio será ordenado por:" )))
+Aadd(aHelpS, OemToAnsi("Data de digitação ou Data de emissão"))
+PutSx1(cPerg,"06",OemToAnsi("Ordenação:"),OemToAnsi("Ordenação:"),OemToAnsi("Ordenação:"),"mv_ch6","N",1,0,0,"C",,,,,"mv_par06",OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Digitação", "Digitacao" )),OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Digitação", "Digitacao" )),OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Digitação", "Digitacao" )),,OemToAnsi("Emissão"),OemToAnsi("Emissão"),OemToAnsi("Emissão"),,,,,,,,,,aHelpP,aHelpE,aHelpS)
+
+
+
+Return Nil

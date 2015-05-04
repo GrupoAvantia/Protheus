@@ -1,0 +1,787 @@
+#include "protheus.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³AVPMSR05  ³ Autor ³ Grayson B.Tavares     ³ Data ³ 28.07.09 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³Planilha de material e Maõ de Obra                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³Gestao de Projetos                                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+User Function AVPMSR05()
+Local cMens := ""
+Local nOpca := 0
+
+Private cTitRel := OemToAnsi("Planilha de Material e Mão de Obra")
+Private lEnd	:= .F.
+
+//ÚÄÄÄÄÄÄÄÄÄhÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Ajustar perguntas do SX1									           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AjustaSX1("APMSR05")
+
+Pergunte("APMSR05",.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Tela de configuracao do Relatorio							 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+DEFINE MSDIALOG oDlg FROM  96,9 TO 310,592 TITLE OemToAnsi("Planilha de Material e Mão de Obra") PIXEL    //"Contratos"
+@ 18, 6 TO 66, 287 LABEL "" OF oDlg  PIXEL
+@ 29, 15 SAY OemToAnsi("Este programa ira emitir a Planilha de Material e Mão de Obra") SIZE 268, 8 OF oDlg PIXEL
+@ 38, 15 SAY OemToAnsi("exibindo os dados de acordo com os parametros informados") SIZE 268, 8 OF oDlg PIXEL
+@ 48, 15 SAY OemToAnsi("") SIZE 268, 8 OF oDlg PIXEL
+DEFINE SBUTTON FROM 80, 190 TYPE 5 ACTION Pergunte("APMSR05",.t.) ENABLE OF oDlg
+DEFINE SBUTTON FROM 80, 223 TYPE 1 ACTION (oDlg:End(),nOpca:=1) ENABLE OF oDlg
+DEFINE SBUTTON FROM 80, 255 TYPE 2 ACTION oDlg:End() ENABLE OF oDlg
+ACTIVATE MSDIALOG oDlg CENTER
+
+If nOpca == 1
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Processamento do Relatorio									        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	RptStatus({|lEnd| APMS04Imp(@lEnd)})
+EndIf	
+
+Return Nil
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³APMS04Imp ³ Autor ³ Grayson B.Tavares     ³ Data ³ 28.07.09 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Chamada do Relatorio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ AVPMSR01 		                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Static Function APMS04Imp(lEnd)
+
+Local cQuery	:= ""
+Local cSeek		:= ""
+Local nX		:= 0
+Local cDirSpool := GetMv("MV_RELT")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Fontes											 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Private oFont06	:= TFont():New("Arial",06,06,,.T.,,,,.T.,.F.)
+Private oFont07	:= TFont():New("Courier",07,07,,.T.,,,,.T.,.F.)
+Private oFont08	:= TFont():New("Arial",08,08,,.F.,,,,.T.,.F.)
+Private oFont08n	:= TFont():New("Arial",08,08,,.T.,,,,.T.,.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas pelo Objeto TMSPrinter					 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Private nMaxLin := 3000
+Private nlin	:= nMaxLin
+Private nPagina := 0
+Private oPrint
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis Gerais                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Objeto TMSPrinter								           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oPrint:=TMSPrinter():New(OemToAnsi("Planilha de Material e Mão de Obra"))
+oPrint:SetPortrait()	//-- Retrato //SetLandscape()//paisagem
+lPaisagem := .f.
+oPrint:Setup() 		//-- Configurar Impressao
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Query do Contrato											           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cAliasTop := "XAF1"
+
+cQuery := "SELECT * "
+cQuery += "FROM " + RetSqlName("AF1") + " AF1 "  
+cQuery += "WHERE AF1.D_E_L_E_T_ = '' AND "
+cQuery += "AF1_FILIAL =  '"		+	xFilial("AF1")	+ "' AND "
+cQuery += "AF1_ORCAME >= '"		+	mv_par01		+ "' AND "
+cQuery += "AF1_ORCAME <= '"		+	mv_par02		+ "' AND "
+cQuery += "AF1_DATA >= '"		+	dtos(mv_par03)	+ "' AND "
+cQuery += "AF1_DATA <= '"		+	dtos(mv_par04)	+ "' "
+cQuery += "ORDER BY AF1_ORCAME "
+
+cQuery := ChangeQuery(cQuery)
+
+MsAguarde({|| dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQuery),cAliasTop,.F.,.T.)},OemToAnsi("Processando"))
+
+dbSelectArea(cAliasTop)
+SetRegua(LastRec())
+
+nLin := nMaxLin //-- Forca a Quebra da pagina por orçamento
+nAjus := 10
+
+(cAliasTop)->(dbGoTop())
+
+Do While (cAliasTop)->(!Eof())
+	
+	IncProc()
+	
+	If lEnd
+		CNRBox(0050,2350,OemToAnsi("CANCELADO PELO OPERADOR"),,.T.,1)
+		Exit
+	EndIf
+
+	If nLin >= nMaxLin
+		CNRCabec(Nil,Nil,OemToAnsi(cTitRel),.t.,lPaisagem) //-- Impressao do Cabecalho da pagina
+	EndIf
+			
+	nTTotMA:=0
+	nTTotMO:=0
+	nTTotDP:=0
+	nUniMO:=0
+	nUniMA:=0
+	
+	//EDT
+	cQryMA:="SELECT * "
+	cQryMA+="FROM "+RetSqlName("AF5")+" AF5 "
+	cQryMA+="WHERE AF5.D_E_L_E_T_ <> '*' "
+	cQryMA+="AND AF5_ORCAME = '"+(cAliasTop)->AF1_ORCAME+"' "
+	cQryMA+="AND AF5_FILIAL =  '"		+	xFilial("AF5")	+ "' "
+	cQryMA+="AND AF5_NIVEL <> '001' "
+	cQryMA+="ORDER BY AF5_ORCAME,AF5_EDT,AF5_NIVEL "
+	
+	dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"XMA",.F.,.T.)		
+	XMA->(dbGoTop())
+	
+	While XMA->(!EOF())
+		
+		If nLin >= nMaxLin
+			CNRCabec(Nil,Nil,OemToAnsi(cTitRel),.t.,lPaisagem) //-- Impressao do Cabecalho da pagina
+		EndIf
+		
+		cCod   := XMA->AF5_EDT
+		cDescri:= XMA->AF5_DESCRI
+		cUM    := XMA->AF5_UM
+		
+		If mv_par05 == 1
+			//Materiais sem BDI
+			cQryMA:="SELECT SUM((AF3_QUANT*AF2_QUANT)*AF3_CUSTD) AS TOTAL "
+			cQryMA+="FROM "+RetSqlname("AF3")+" AF3 "
+			cQryMA+="INNER JOIN "+RetSqlName("AF2")+" AF2 "
+			cQryMA+="ON AF3.AF3_FILIAL = AF2.AF2_FILIAL "
+			cQryMA+="AND AF3.AF3_ORCAME = AF2.AF2_ORCAME "
+			cQryMA+="AND AF3_TAREFA = AF2_TAREFA "
+			cQryMA+="WHERE AF3.D_E_L_E_T_ <> '*' "
+			cQryMA+="AND AF2.D_E_L_E_T_ <> '*' "
+			cQryMA+="AND AF3_ORCAME = '"+(cAliasTop)->AF1_ORCAME+"' "
+			cQryMA+="AND LEFT(AF3_TAREFA,"+CVALTOCHAR(len(alltrim(cCod)))+")='"+alltrim(cCod)+"' "
+			cQryMA+="AND AF3_FILIAL =  '"		+	xFilial("AF3")	+ "' "
+			cQryMA+="AND AF3_RECURS = '' "
+			
+			dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"YMA",.F.,.T.)
+			
+			nTotMA := YMA->TOTAL
+			
+			dbSelectArea("YMA")
+			dbCloseArea() 
+		Else	
+			//Materiais com BDI
+			cQryMA:="SELECT ROUND(ROUND((SUM(ROUND(CAST(AF3_CUSTD AS DECIMAL (18,2)) * CAST(AF3_QUANT AS DECIMAL (18,2)),2,1)) * AVG(ROUND(CASE WHEN AF2_CUSTO = 0 THEN 0 ELSE AF2_VALBDI/AF2_CUSTO END+1,4))),2,1) * AVG(AF2_QUANT),2,1) AS TOTAL "
+			cQryMA+="FROM "+RetSqlname("AF3")+" AF3, "+RetSqlname("AF2")+" AF2 "
+			cQryMA+="WHERE AF3.D_E_L_E_T_ <> '*' "
+			cQryMA+="AND AF2.D_E_L_E_T_ <> '*' "
+			cQryMA+="AND AF3_ORCAME = '"+(cAliasTop)->AF1_ORCAME+"' "
+			cQryMA+="AND LEFT(AF3_TAREFA,"+CVALTOCHAR(len(alltrim(cCod)))+")='"+alltrim(cCod)+"' "
+			cQryMA+="AND AF3_FILIAL =  '"		+	xFilial("AF3")	+ "' "
+			cQryMA+="AND AF3_RECURS = '' "
+			cQryMA+="AND AF2_ORCAME = AF3_ORCAME "
+			cQryMA+="AND AF2_TAREFA = AF3_TAREFA "
+			cQryMA+="GROUP BY AF3_TAREFA "
+			
+			dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"YMA",.F.,.T.)
+			
+			nTotMA := 0
+			While YMA->(!EOF())
+				nTotMA += YMA->TOTAL
+				YMA->(dbSkip())
+			EndDo
+			
+			dbSelectArea("YMA")
+			dbCloseArea() 
+		EndIf
+		
+		If mv_par05 == 1
+			//Mao de Obra sem BDI
+			cQryMA:="SELECT ROUND(SUM(ROUND((CAST(AF3_CUSTD AS DECIMAL (18,2)) * CAST(AF3_QUANT AS DECIMAL (18,4))),2,1))* CAST(AVG(AF2_QUANT) AS DECIMAL (18,4)),2,1) AS TOTAL "
+			cQryMA+="FROM "+RetSqlname("AF3")+" AF3 "
+			cQryMA+="INNER JOIN "+RetSqlName("AF2")+" AF2 "
+			cQryMA+="ON AF3.AF3_FILIAL = AF2.AF2_FILIAL "
+			cQryMA+="AND AF3.AF3_ORCAME = AF2.AF2_ORCAME "
+			cQryMA+="AND AF3_TAREFA = AF2_TAREFA "
+			cQryMA+="WHERE AF3.D_E_L_E_T_ <> '*' "
+			cQryMA+="AND AF2.D_E_L_E_T_ <> '*' "
+			cQryMA+="AND AF3_ORCAME = '"+(cAliasTop)->AF1_ORCAME+"' " 
+			cQryMA+="AND LEFT(AF3_TAREFA,"+CVALTOCHAR(len(alltrim(cCod)))+")='"+alltrim(cCod)+"' "
+			cQryMA+="AND AF3_FILIAL =  '"		+	xFilial("AF3")	+ "' "
+			cQryMA+="AND AF3_RECURS <> '' "
+			cQryMA+="GROUP BY AF3_TAREFA "
+			
+			dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"YMA",.F.,.T.)
+			
+			nTotMO := 0
+			While YMA->(!EOF())
+				nTotMO += YMA->TOTAL
+				YMA->(dbSkip())
+			EndDo
+			
+			dbSelectArea("YMA")
+			dbCloseArea()
+		Else	
+			//Mao de Obra com BDI
+			cQryMA:="SELECT SUM(AF2_TOTVEN) AS TOTAL "
+			cQryMA+="FROM "+RetSqlname("AF2")+" AF2 "
+			cQryMA+="WHERE AF2.D_E_L_E_T_ <> '*' "
+			cQryMA+="AND AF2_ORCAME = '"+(cAliasTop)->AF1_ORCAME+"' "
+			cQryMA+="AND LEFT(AF2_TAREFA,"+CVALTOCHAR(len(alltrim(cCod)))+")='"+alltrim(cCod)+"' "
+			cQryMA+="AND AF2_FILIAL =  '"		+	xFilial("AF2")	+ "' "
+			
+			dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"YMA",.F.,.T.)
+			
+			nTotMO := YMA->TOTAL-nTotMA
+			
+			dbSelectArea("YMA")
+			dbCloseArea() 
+		EndIf
+		
+		If mv_par05 == 1
+			//Despesas sem BDI
+			cQryMA:="SELECT SUM(AF4_VALOR) AS TOTAL "
+			cQryMA+="FROM "+RetSqlname("AF4")+" AF4 "
+			cQryMA+="WHERE AF4.D_E_L_E_T_ <> '*' "
+			cQryMA+="AND AF4_ORCAME = '"+(cAliasTop)->AF1_ORCAME+"' "
+			cQryMA+="AND LEFT(AF4_TAREFA,2)='"+alltrim(cCod)+"' "
+			cQryMA+="AND AF4_FILIAL =  '"		+	xFilial("AF4")	+ "' "
+			
+			dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"YMA",.F.,.T.)
+			
+			nTotDP := YMA->TOTAL
+			
+			dbSelectArea("YMA")
+			dbCloseArea() 
+		Else	
+			//Despesas com BDI
+			cQryMA:="SELECT SUM(AF4_VALOR*AF2_BDI) AS TOTAL "
+			cQryMA+="FROM "+RetSqlname("AF4")+" AF4, "+RetSqlname("AF2")+" AF2 "
+			cQryMA+="WHERE AF4.D_E_L_E_T_ <> '*' "
+			cQryMA+="AND AF2.D_E_L_E_T_ <> '*' "
+			cQryMA+="AND AF4_ORCAME = '"+(cAliasTop)->AF1_ORCAME+"' "
+			cQryMA+="AND LEFT(AF4_TAREFA,2)='"+alltrim(cCod)+"' "
+			cQryMA+="AND AF2_ORCAME = AF4_ORCAME "
+			cQryMA+="AND AF2_TAREFA = AF4_TAREFA "
+			cQryMA+="AND AF2_FILIAL =  '"		+	xFilial("AF2")	+ "' "
+			cQryMA+="AND AF2_FILIAL =  '"		+	xFilial("AF2")	+ "' "
+			
+			dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"YMA",.F.,.T.)
+			
+			nTotDP := YMA->TOTAL
+			
+			dbSelectArea("YMA")
+			dbCloseArea() 
+		EndIf
+				
+		If len(alltrim(cDescri)) > 45
+			CNRBox(0050,0300,cCod                                         ,""                   ,.F.,3,oFont08n,.F.)
+			CNRBox(0300,1150,Substr(cDescri,1,45)                         ,Substr(cDescri,46,45),.F.,3,oFont08n,.F.)
+			CNRBox(1150,1240,""                                           ,""                   ,.F.,3,oFont08n,.F.)
+			CNRBox(1240,1425,""                                           ,""                   ,.F.,3,oFont08n,.T.)
+			CNRBox(1425,1610,""                                           ,""                   ,.F.,3,oFont08n,.T.)
+			CNRBox(1610,1795,"",Transform(nTotMA+nTotDP  ,"@E 999,999,999.99")                  ,.F.,3,oFont08n,.T.)
+			CNRBox(1795,1980,""                                           ,                     ,.F.,3,oFont08n,.T.)			
+			CNRBox(1980,2160,"",Transform(nTotMO         ,"@E 999,999,999.99")                  ,.F.,3,oFont08n,.T.)
+			CNRBox(2160,2351,"",Transform(nTotMA+nTotDP+nTotMO,"@E 999,999,999.99")             ,.T.,3,oFont08n,.T.)
+		Else	
+			CNRBox(0050,0300,cCod                                         ,""                   ,.F.,2,oFont08n,.F.)
+			CNRBox(0300,1150,cDescri                                      ,""                   ,.F.,2,oFont08n,.F.)
+			CNRBox(1150,1240,""                                           ,""                   ,.F.,2,oFont08n,.F.)
+			CNRBox(1240,1425,""                                           ,""                   ,.F.,2,oFont08n,.T.)
+			CNRBox(1425,1610,""                                           ,""                   ,.F.,2,oFont08n,.T.)
+			CNRBox(1610,1795,Transform(nTotMA+nTotDP,"@E 999,999,999.99") ,""                   ,.F.,2,oFont08n,.T.)
+			CNRBox(1795,1980,""                                           ,                     ,.F.,2,oFont08n,.T.)
+			CNRBox(1980,2160,Transform(nTotMO,"@E 999,999,999.99")        ,                     ,.F.,2,oFont08n,.T.)
+			CNRBox(2160,2351,Transform(nTotMA+nTotDP+nTotMO,"@E 999,999,999.99"),               ,.T.,2,oFont08n,.T.)			
+		EndIf
+		
+		IF(Len(Alltrim(cCod)) == 2)
+			nTTotMA+=nTotMA	
+			nTTotMO+=nTotMO
+			nTTotDP+=nTotDP
+		EndIf
+		
+		//TAREFAS
+		cQryMA:="SELECT * "
+		cQryMA+="FROM "+RetSqlName("AF2")+" AF2 "
+		cQryMA+="WHERE AF2.D_E_L_E_T_ <> '*' "
+		cQryMA+="AND AF2_ORCAME = '"+(cAliasTop)->AF1_ORCAME+"' " 
+		cQryMA+="AND AF2_EDTPAI = '"+cCod+"' "
+		cQryMA+="AND AF2_FILIAL =  '"		+	xFilial("AF2")	+ "' "
+		cQryMA+="ORDER BY AF2_ORCAME,AF2_TAREFA,AF2_NIVEL "
+		
+		dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"XMB",.F.,.T.)
+		
+		While XMB->(!EOF())
+			cCod   := XMB->AF2_TAREFA
+			cDescri:= XMB->AF2_DESCRI
+			cUM    := XMB->AF2_UM
+			nQuant := XMB->AF2_QUANT
+					
+			If mv_par05 == 1
+				//Materiais sem BDI
+				cQryMA:="SELECT SUM((AF3_QUANT*AF2_QUANT)*AF3_CUSTD) AS TOTAL "
+				cQryMA+="FROM "+RetSqlname("AF3")+" AF3 "
+				cQryMA+="INNER JOIN "+RetSqlname("AF2")+" AF2 "
+				cQryMA+="ON AF3_FILIAL = AF2_FILIAL "
+				cQryMA+="AND AF3_ORCAME = AF2_ORCAME "
+				cQryMA+="AND AF3_TAREFA = AF2_TAREFA "				
+				cQryMA+="WHERE AF3.D_E_L_E_T_ <> '*' "
+				cQryMA+="AND AF2.D_E_L_E_T_ <> '*' "
+				cQryMA+="AND AF3_ORCAME = '"+(cAliasTop)->AF1_ORCAME+"' "
+				cQryMA+="AND AF3_FILIAL =  '"		+	xFilial("AF3")	+ "' "
+				cQryMA+="AND AF3_TAREFA = '"+cCod+"' "
+				cQryMA+="AND AF3_RECURS = '' "
+				
+				dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"YMA",.F.,.T.)
+				
+				nTotMA := YMA->TOTAL
+				
+				dbSelectArea("YMA")
+				dbCloseArea() 
+			Else	
+				//Materiais com BDI
+				cQryMA:="SELECT ROUND((SUM(ROUND(CAST(AF3_CUSTD AS DECIMAL (18,2)) * CAST(AF3_QUANT AS DECIMAL (18,2)),2,1)) * AVG(ROUND(CASE WHEN AF2_CUSTO = 0 THEN 0 ELSE AF2_VALBDI/AF2_CUSTO END+1,4))),2,1) AS TOTAL "
+				cQryMA+="FROM "+RetSqlname("AF3")+" AF3, "+RetSqlname("AF2")+" AF2 "
+				cQryMA+="WHERE AF3.D_E_L_E_T_ <> '*' "
+				cQryMA+="AND AF2.D_E_L_E_T_ <> '*' "
+				cQryMA+="AND AF3_ORCAME = '"+(cAliasTop)->AF1_ORCAME+"' " 
+				cQryMA+="AND AF3_FILIAL =  '"		+	xFilial("AF3")	+ "' "
+				cQryMA+="AND AF2_FILIAL =  '"		+	xFilial("AF2")	+ "' "
+				cQryMA+="AND AF3_TAREFA = '"+cCod+"' "
+				cQryMA+="AND AF3_RECURS = '' "
+				cQryMA+="AND AF2_ORCAME = AF3_ORCAME "
+				cQryMA+="AND AF2_TAREFA = AF3_TAREFA "
+				
+				dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"YMA",.F.,.T.)
+				
+				nUniMA := YMA->TOTAL
+				nTotMa := nUniMA*nQuant
+				
+				dbSelectArea("YMA")
+				dbCloseArea() 
+			EndIf
+			
+			If mv_par05 == 1
+				//Mao de Obra sem BDI
+				cQryMA:="SELECT ROUND(SUM(ROUND((CAST(AF3_CUSTD AS DECIMAL (18,2)) * CAST(AF3_QUANT AS DECIMAL (18,4))),2,1))* CAST(AVG(AF2_QUANT) AS DECIMAL (18,4)),2,1) AS TOTAL "
+				cQryMA+="FROM "+RetSqlname("AF3")+" AF3 "
+				cQryMA+="INNER JOIN "+RetSqlname("AF2")+" AF2 "
+				cQryMA+="ON AF3_FILIAL = AF2_FILIAL "			
+				cQryMA+="AND AF3.AF3_ORCAME = AF2.AF2_ORCAME "
+				cQryMA+="AND AF3_TAREFA = AF2_TAREFA "				
+				cQryMA+="WHERE AF2.D_E_L_E_T_ <> '*' "
+				cQryMA+="AND AF3.D_E_L_E_T_ <> '*' "
+				cQryMA+="AND AF3_ORCAME = '"+(cAliasTop)->AF1_ORCAME+"' " 
+				cQryMA+="AND AF3_FILIAL = '"+xFilial("AF3")+"' "
+				cQryMA+="AND AF3_TAREFA = '"+cCod+"' "
+				cQryMA+="AND AF3_RECURS <> '' "
+				
+				dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"YMA",.F.,.T.)
+				
+				nTotMO := YMA->TOTAL
+				
+				dbSelectArea("YMA")
+				dbCloseArea() 
+			Else	
+				//Mao de Obra com BDI
+				cQryMA:="SELECT AF2_X_TOTB AS TOTAL "
+				cQryMA+="FROM "+RetSqlname("AF2")+" AF2 "
+				cQryMA+="WHERE AF2.D_E_L_E_T_ <> '*' "
+				cQryMA+="AND AF2_ORCAME = '"+(cAliasTop)->AF1_ORCAME+"' "
+				cQryMA+="AND LEFT(AF2_TAREFA,"+CVALTOCHAR(len(alltrim(cCod)))+")='"+alltrim(cCod)+"' "
+				cQryMA+="AND AF2_FILIAL =  '"		+	xFilial("AF2")	+ "' "
+			
+				dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"YMA",.F.,.T.)
+			
+				nUniMO := YMA->TOTAL-nUniMA
+				nTotMO := nUniMO*nQuant
+				
+				dbSelectArea("YMA")
+				dbCloseArea() 
+			EndIf
+			
+			If mv_par05 == 1
+				//Despesas sem BDI
+				cQryMA:="SELECT SUM(AF4_VALOR) AS TOTAL "
+				cQryMA+="FROM "+RetSqlname("AF4")+" AF4 "
+				cQryMA+="WHERE AF4.D_E_L_E_T_ <> '*' "
+				cQryMA+="AND AF4_ORCAME = '"+(cAliasTop)->AF1_ORCAME+"' "
+				cQryMA+="AND AF4_FILIAL =  '"		+	xFilial("AF4")	+ "' "
+				cQryMA+="AND AF4_TAREFA = '"+cCod+"' "
+				
+				dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"YMA",.F.,.T.)
+				
+				nTotDP := YMA->TOTAL
+				
+				dbSelectArea("YMA")
+				dbCloseArea() 
+			Else	
+				//Despesas com BDI
+				cQryMA:="SELECT SUM(AF4_VALOR*AF2_BDI) AS TOTAL "
+				cQryMA+="FROM "+RetSqlname("AF4")+" AF4, "+RetSqlname("AF2")+" AF2 "
+				cQryMA+="WHERE AF4.D_E_L_E_T_ <> '*' "
+				cQryMA+="AND AF2.D_E_L_E_T_ <> '*' "
+				cQryMA+="AND AF4_ORCAME = '"+(cAliasTop)->AF1_ORCAME+"' "
+				cQryMA+="AND AF2_FILIAL =  '"		+	xFilial("AF2")	+ "' "
+				cQryMA+="AND AF4_FILIAL =  '"		+	xFilial("AF4")	+ "' "
+				cQryMA+="AND AF4_TAREFA = '"+cCod+"' "
+				cQryMA+="AND AF2_ORCAME = AF4_ORCAME "
+				cQryMA+="AND AF2_TAREFA = AF4_TAREFA "
+				
+				dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQryMA),"YMA",.F.,.T.)
+				
+				nTotDP := YMA->TOTAL
+				
+				dbSelectArea("YMA")
+				dbCloseArea() 
+			EndIf
+			
+			If len(alltrim(cDescri)) > 45
+				CNRBox(0050,0300,cCod                ,""                                                   ,.F.,3,oFont08,.F.)
+				CNRBox(0300,1150,Substr(cDescri,1,45),Substr(cDescri,46,45)                                ,.F.,3,oFont08,.F.)
+				CNRBox(1150,1240,""                  ,cUM                                                  ,.F.,3,oFont08,.F.)
+				CNRBox(1240,1425,""                  ,Transform(nQuant,"@E 999,999,999.99")                ,.F.,3,oFont08,.T.)
+				CNRBox(1425,1610,""                  ,Transform((nUniMA+nTotDP),"@E 999,999,999.99")       ,.F.,3,oFont08,.T.)
+				CNRBox(1610,1795,""                  ,Transform((nUniMA+nTotDP)*nQuant,"@E 999,999,999.99"),.F.,3,oFont08,.T.)
+				CNRBox(1795,1980,""                  ,Transform(nUniMO,"@E 999,999,999.99")                ,.F.,3,oFont08,.T.)
+				CNRBox(1980,2160,""                  ,Transform(nUniMO*nQuant,"@E 999,999,999.99")         ,.F.,3,oFont08,.T.)
+				CNRBox(2160,2351,""                  ,Transform(nTotMA+nTotDP+nTotMO,"@E 999,999,999.99")  ,.T.,3,oFont08,.T.)				
+			Else
+				CNRBox(0050,0300,cCod                                                                   ,"",.F.,2,oFont08,.F.)
+				CNRBox(0300,1150,cDescri                                                                ,"",.F.,2,oFont08,.F.)
+				CNRBox(1150,1240,cUM                                                                    ,"",.F.,2,oFont08,.F.)
+				CNRBox(1240,1425,Transform(nQuant,"@E 999,999,999.99")                                  ,"",.F.,2,oFont08,.T.)
+				CNRBox(1425,1610,Transform((nUniMA+nTotDP),"@E 999,999,999.99")                         ,"",.F.,2,oFont08,.T.)
+				CNRBox(1610,1795,Transform((nUniMA+nTotDP)*nQuant,"@E 999,999,999.99")                  ,"",.F.,2,oFont08,.T.)
+              CNRBox(1795,1980,Transform(nUniMO,"@E 999,999,999.99")                                  ,"",.F.,2,oFont08,.T.)
+              CNRBox(1980,2160,Transform(nUniMO*nQuant,"@E 999,999,999.99")                           ,"",.F.,2,oFont08,.T.)
+				CNRBox(2160,2351,Transform(nTotMA+nTotDP+nTotMO,"@E 999,999,999.99")                    ,"",.T.,2,oFont08,.T.)				
+			EndIf	
+			
+			XMB->(dbSkip())
+		EndDo
+		
+		dbSelectArea("XMB")
+		dbCloseArea()
+		
+		XMA->(dbSkip())
+	EndDo
+	
+	dbSelectArea("XMA")
+	dbCloseArea()
+		
+	CNRBox(0300,0150,"TOTAL"                                               ,"",.F.,4,oFont08n,.F.)	
+	CNRBox(1610,1795,Transform(nTTotMA+nTTotDP,"@E 999,999,999.99")        ,"",.F.,4,oFont08n,.T.)
+	CNRBox(1980,2160,Transform(nTTotMO,"@E 999,999,999.99")                ,"",.F.,4,oFont08n,.T.)
+	CNRBox(2160,2351,Transform(nTTotMA+nTTotDP+nTTotMO,"@E 999,999,999.99"),"",.T.,4,oFont08n,.T.)
+	
+    CNRBox(0050,2350,"O presente orçamento importa o valor de "+extenso(nTTotMA+nTTotDP+nTTotMO),"",.T.,3,oFont08n,.F.)	
+					
+	nLin := 3000
+		
+	(cAliasTop)->(dbSkip())
+EndDo
+
+//-- Encerra arquivo de Trabalho
+dbSelectArea(cAliasTop)
+dbCloseArea()
+
+//-- Grava Imagem em Disco
+If !Empty(cDirSpool)
+	oPrint:SaveAllAsJPEG(cDirSpool+"AVPMSR05",875,1170,140)
+EndIF	
+
+//-- Visualiza antes de Imprimir
+oPrint:Preview()  
+
+Return Nil
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNRCabec ³ Autor ³ Marcos V. Ferreira    ³ Data ³03/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Cabecalho padrao para relatorios graficos                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpN1 = Posicao da coluna para impressao do cTexto         ³±±
+±±³          ³ ExpC2 = Texto a ser impresso	                             ³±±
+±±³          ³ ExpC3 = Titulo do Relatorio                                ³±±
+±±³          ³ ExpO4 = Fonte para impressao do cTexto                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010 / CNR020	                                         ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Static Function CNRCabec(nCol,cTexto,cTitulo,oFontT,lPaisagem)
+
+Local cFileLogo	:= ""
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Fontes											           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local oFont10	:= TFont():New("Arial",10,10,,.F.,,,,.T.,.F.)
+Local oFont10n	:= TFont():New("Arial",10,10,,.T.,,,,.T.,.F.)
+
+Default nCol	:= 0
+Default cTexto	:= ""
+Default cTitulo := ""
+Default oFontT  := oFont10
+Default lPaisagem := .F.
+
+If (If(lPaisagem,(nLin >= 2350),(nLin >= 3000)))
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Cabecalho da Pagina					      ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	nPagina++ //-- Variavel Private
+	nLin := 200 //-- Variavel private
+	oPrint:EndPage() 	//-- Encerra a pagina anterior
+	oPrint:StartPage()	//-- Inicia uma nova pagina
+	oPrint:Line(50,50,50,If(lPaisagem,3181,2350))
+	oPrint:Line(51,51,51,If(lPaisagem,3181,2351))
+	oPrint:Line(200,50,200,If(lPaisagem,3181,2351))
+	oPrint:Line(201,51,201,If(lPaisagem,3181,2351))
+	oPrint:Say(065,0200,Upper(OemToAnsi("AVANTIA TECNOLOGIA E ENGENHARIA S/A")),oFont10n) //EMPRESA
+	oPrint:Say(110,0200,Upper(OemToAnsi(cTitulo)),oFont10n) 				              //Texto do Cabecalho
+	oPrint:Say(155,0200,Upper((cAliasTop)->AF1_ORCAME+"   "+Posicione("AF1",1,xFilial("AF1")+(cAliasTop)->AF1_ORCAME,"AF1_DESCRI")),oFont10n) 				              //ORÇAMENTO
+	oPrint:Say(065,If(lPaisagem,2830,2000),OemToAnsi("Folha....: ")	+ StrZero(nPagina,3),oFont10)
+	oPrint:Say(110,If(lPaisagem,2830,2000),OemToAnsi("DT.Ref..: ")	+ Dtoc(dDataBase),oFont10)
+	oPrint:Say(155,If(lPaisagem,2830,2000),OemToAnsi("Emissao.: ")	+ Dtoc(Date()),oFont10)
+	cFileLogo += "LGRL"+SM0->M0_CODIGO+".BMP"
+	oPrint:SayBitmap(70,60,cFileLogo,120,120) //-- Logotipo
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Salta para a proxima linha			   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+nLin += 50
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Impressao do texto					      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If !Empty(cTexto)
+	oPrint:Say(nLin,nCol,cTexto,oFontT)
+EndIf
+
+	
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cabecalho dos Itens             					        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+CNRBox(0050,0300,"Codigo"         ,,.F.,2,oFont06)
+CNRBox(0300,1150,"Descição"       ,,.F.,2,oFont06)
+CNRBox(1150,1240,"Unid."          ,,.F.,2,oFont06)
+CNRBox(1240,1425,"Quantidade"     ,,.F.,2,oFont06)
+CNRBox(1425,1610,"Prc.Unit.Mat"   ,,.F.,2,oFont06)
+CNRBox(1610,1795,"Total Mat"      ,,.F.,2,oFont06)
+CNRBox(1795,1980,"Prc.Unit.MO"    ,,.F.,2,oFont06)
+CNRBox(1980,2160,"Total MO"       ,,.F.,2,oFont06)
+CNRBox(2160,2351,"Total"          ,,.T.,2,oFont06)
+	
+Return Nil
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ CNRBox() ³ Autor ³ Marcos V. Ferreira    ³ Data ³03/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Cria Box para Textos			                                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpN1 = Posicao inicial da coluna para criacao do Box      ³±±
+±±³          ³ ExpN2 = Posicao final da coluna para criacao do Box        ³±±
+±±³          ³ ExpC3 = Texto da 1a. linha do Box                          ³±±
+±±³          ³ ExpC4 = Texto da 2a. linha do Box                          ³±±
+±±³          ³ ExpL5 = Quebra para proxima linha apos a impressao do Box  ³±±
+±±³          ³         (.T. Com  Quebra / .F. Sem Quebra)                 ³±±
+±±³          ³ ExpN6 = Tipo do Box : 									           ³±±
+±±³          ³                      1 - Linha de Cabecalho                ³±±
+±±³          ³                      2 - Linha Unica Simples               ³±±
+±±³          ³                      3 - Linha de Detalhe                  ³±±
+±±³          ³                      4 - Somente Texto                     ³±±
+±±³          ³ ExpO7 = Fonte para impressao do Texto                      ³±±
+±±³          ³ ExpL8 = Se .T. realiza o alinhamento do cTexto1 a Direita. ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010  / CNTR020                                         ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Static Function CNRBox(nCol1,nCol2,cTexto1,cTexto2,lQuebra,nTipo,oFontB,lAlinDir)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicializa Fontes											           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local oFont10	:= TFont():New("Arial",10,10,,.F.,,,,.T.,.F.)
+Local oFont10n	:= TFont():New("Arial",10,10,,.T.,,,,.T.,.F.)
+
+Default nCol1	:= 0
+Default nCol2	:= 0
+Default cTexto1 := ""
+Default cTexto2 := ""
+Default lQuebra := .T.
+Default nTipo   := 3
+Default oFontB  := oFont10
+Default lAlinDir:= .F.
+
+If nLin >= 3000
+	CNRCabec(Nil,Nil,OemToAnsi(cTitRel),.t.,lPaisagem) //-- Impressao do Cabecalho da pagina
+EndIf
+
+If nTipo == 1  //-- Linha de Cabecalho
+	oPrint:Box(nLin,nCol1,nLin+55,nCol2)
+	oPrint:Box(nLin+5,nCol1+5,nLin+50,nCol2-5)
+	oPrint:Say(nLin+10,((nCol2-nCol1)/2)-((Len(alltrim(cTexto1))/2)*20),cTexto1,oFont10n)
+ElseIf nTipo == 2 //-- Linha Unica Simples
+	oPrint:Box(nLin,nCol1,nLin+45,nCol2)
+	If lAlinDir //-- Alinhamento a Direita
+		oPrint:Say(nLin+7,nCol2-5-TamTexto(Alltrim(cTexto1)),AllTrim(cTexto1),oFontB)
+	Else 
+		oPrint:Say(nLin+7,nCol1+10,cTexto1,oFontB)
+	EndIf
+ElseIf nTipo == 3 //-- Linha de Detalhe
+	oPrint:Box(nLin,nCol1,nLin+100,nCol2)
+	oPrint:Say(nLin+10,nCol1+10,cTexto1,oFontB)
+	If lAlinDir //-- Alinhamento a Direita
+		oPrint:Say(nLin+50,nCol2-5-TamTexto(Alltrim(cTexto2)),AllTrim(cTexto2),oFontB)
+	Else
+		oPrint:Say(nLin+50,nCol1+10,cTexto2,oFontB)
+	EndIf
+ElseIf nTipo == 4 //-- Somente Texto
+	//oPrint:Say(nLin+7,nCol1,cTexto1,oFontB)
+	If lAlinDir //-- Alinhamento a Direita
+		oPrint:Say(nLin+7,nCol2-5-TamTexto(Alltrim(cTexto1)),AllTrim(cTexto1),oFontB)
+	Else 
+		oPrint:Say(nLin+7,nCol1+10,cTexto1,oFontB)
+	EndIf
+EndIf
+If lQuebra //-- Quebra Linha
+	If nTipo == 1
+		nLin += 50	//-- Cabecalho
+	ElseIf nTipo == 2
+		nLin += 50	//-- Unica Simples
+	ElseIf nTipo == 3
+		nLin += 105	//-- Detalhe
+	ElseIf nTipo == 4 
+		nLin += 50 //-- Somente Texto
+	EndIf
+EndIf	
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ TamTexto | Autor ³ Marcos V. Ferreira    ³ Data ³08/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Recupera o tamanho de uma string em pixels                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010 / CNTR020                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Static Function TamTexto(cTexto)
+Local nSize := 0
+Local nx
+Local aSize := {{17.241,2.692,15.241,13.692}} 
+For nx := 1 to Len(cTexto)
+	If Substr(cTexto,nx,1)=="." .Or. Substr(cTexto,nx,1)=="," .or.  Substr(UPPER(cTexto),nx,1)=="I" 
+		nSize += aSize[1,2]
+	ElseIf Substr(cTexto,nx,1)$"abcdefghijklmnopqrstuvxyzw"
+		nSize += aSize[1,4]
+	ElseIf Substr(UPPER(cTexto),nx,1)$"ABCDEFGHIJKLMNOPQRSTUVXWYZ""
+		nSize += aSize[1,3]
+	Else                     
+		nSize += aSize[1,1]
+	EndIf
+Next
+Return nSize
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ AjustaSX1³ Autor ³ Marcos V. Ferreira    ³ Data ³03/03/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Ajusta as perguntas do SX1                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ CNTR010                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Static Function AjustaSX1(cPerg)
+
+Local aAreaAnt := GetArea()
+Local aHelpPor := {}
+Local aHelpEng := {}
+Local aHelpSpa := {}
+
+dbSelectArea("SX1")
+dbSetOrder(1)
+If !SX1->(dbSeek(cPerg)) 
+	//---------------------------------------MV_PAR01--------------------------------------------------
+	aHelpPor := {"Numero inicial do Orçamento"}
+	aHelpEng := {""}
+	aHelpSpa := {""}
+	
+	PutSX1(cPerg,"01","Orçamento de:","","","mv_ch1","C",12,0,0,"G","","AF1","","S","MV_PAR01","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	
+	//---------------------------------------MV_PAR02--------------------------------------------------
+	aHelpPor := {"Numero final do Orçamento"}
+	aHelpEng := {""}
+	aHelpSpa := {""}
+	
+	PutSX1(cPerg,"02","Orçamento ate:","","","mv_ch2","C",12,0,0,"G","","AF1","","S","mv_par02","","","","ZZZZZZZZZZZZZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	
+	//---------------------------------------MV_PAR03--------------------------------------------------
+	aHelpPor := {"Da data do orçamento"}
+	aHelpEng := {""}
+	aHelpSpa := {""}
+	
+	PutSX1(cPerg,"03","Da data    :","","","mv_ch3","D",08,0,0,"G","","","","S","mv_par03","","","","01/01/06","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	
+	//---------------------------------------MV_PAR04--------------------------------------------------
+	aHelpPor := {"Ate a data do orçamento"}
+	aHelpEng := {""}
+	aHelpSpa := {""}
+	
+	PutSX1(cPerg,"04","Ate a data  :","","","mv_ch4","D",08,0,0,"G","","","","S","mv_par04","","","","31/12/49","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)	
+	
+	//---------------------------------------MV_PAR05--------------------------------------------------
+	aHelpPor := {"Quanto ao Valor"}
+	aHelpEng := {""}
+	aHelpSpa := {""}
+	PutSx1(cPerg,"05","Quanto ao Valor   ?"  ,"Quanto ao Valor   ?","Quanto ao Valor  ?","mv_ch5","N",1,0,2,"C","","","","","mv_par05","Custo           "      ,"Custo           "          ,"Custo           "       ,"","Venda          "               ,"Venda          "                     ,"Venda          "                            ," "," "," ","","","","","","",aHelpPor,aHelpEng,aHelpSpa)	
+	
+EndIf	
+
+RestArea(aAreaAnt)
+Return

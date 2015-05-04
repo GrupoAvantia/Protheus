@@ -1,0 +1,79 @@
+#include "rwmake.ch"
+#include "topconn.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³CODORC    ºAutor  ³Grayson B.Tavares   º Data ³  29/12/08   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Execblock para geração do codigo do orcamento no formato    º±±
+±±º          ³999999MMAA                                                  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³Gestão de Projetos                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+User Function CodOrc()
+
+cCod := space(10)
+
+/*
+cArq   := "codorc.lck"
+
+IF file(cArq)
+	MsgAlert("A Funcao de inclusao de orcamento esta sendo utilizada por"+chr(13)+chr(10)+;	// 
+				"outro usuario. "+chr(13)+chr(10)+;	// 	
+				"Tente novamente mais tarde.","Inclusao de Orcamentos")				// "simultaneamente. Tente novamente mais tarde."###Border“ de Pagamentos
+	Return cCod
+Else
+	nHdlLock := fCreate( cArq, 0 )
+Endif
+*/
+dbSelectArea("SX6")
+dbSetOrder(1)
+
+If !SX6->(dbSeek("  "+Padr("MV_SEQPRJ",10)))
+	RecLock("SX6",.T.)
+	SX6->X6_FIL      := "  "
+	SX6->X6_VAR   	 := "MV_SEQPRJ"
+	SX6->X6_TIPO  	 := "C"
+	SX6->X6_DESCRIC  := SX6->X6_DSCSPA  := 	SX6->X6_DSCENG  := "Sequencial Orcamento/Projeto"
+	SX6->X6_CONTEUD  := SX6->X6_CONTSPA :=  SX6->X6_CONTENG := "001"
+	SX6->X6_PROPRI   := 'U'
+	SX6->(MsUnlock())
+	
+	cCod := Alltrim(SX6->X6_CONTEUD)+Substr(dtos(dDatabase),5,2)+Substr(dtos(dDatabase),3,2)+".01"
+Else
+	//RecLock("SX6",.F.)
+	//Replace SX6->X6_CONTEUD With StrZero(Val(SX6->X6_CONTEUD)+1,6)
+	//MsUnlock()
+   
+   cQuery:="SELECT COUNT(R_E_C_N_O_) AS TOTREG "
+   cQuery+="FROM "+RetSqlName("AF1")+" "
+   cQuery+="WHERE D_E_L_E_T_ <> '*' "
+   cQuery+="AND LEFT(RTRIM(LTRIM(AF1_DATA)),4) = '"+substr(dtos(dDatabase),1,4)+"' "
+   
+   TCQUERY cQuery NEW ALIAS "XAF8"
+   
+   dbSelectArea("XAF8")
+            
+   nPrjAno := XAF8->TOTREG
+   
+   dbSelectArea("XAF8")
+   dbCloseArea()
+	
+	If nPrjAno > 0
+		cCod := Alltrim(SX6->X6_CONTEUD)+Substr(dtos(dDatabase),5,2)+Substr(dtos(dDatabase),3,2)+".00"
+	Else
+		RecLock("SX6",.F.)
+		SX6->X6_CONTEUD  := SX6->X6_CONTSPA :=  SX6->X6_CONTENG := "001"
+		SX6->(MsUnlock())
+		
+		cCod := Alltrim(SX6->X6_CONTEUD)+Substr(dtos(dDatabase),5,2)+Substr(dtos(dDatabase),3,2)+".00"
+	EndIf	
+EndIf
+
+Return cCod

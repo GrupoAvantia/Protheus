@@ -1,0 +1,765 @@
+#INCLUDE "MATR870.CH"
+#INCLUDE "PROTHEUS.CH"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR870  ³ Autor ³ Ricardo Berti 	    ³ Data ³ 07/06/06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡ao ³ Relatorio de Custos de Reposicao dos Materiais             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ MATR870(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function MATR870()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And. TRepInUse()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Interface de impressao                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport := ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR870R3()
+EndIf
+
+Return
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportDef ³ Autor ³ Ricardo Berti 		³ Data ³07.06.2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡ao ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpO1: Objeto do relatorio                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+Local aSB1Cod	:= TamSX3("B1_COD")
+Local aSB1Ite	:= TamSX3("B1_CODITE")
+Local cPerg		:= "MTR870"
+Local cTitGrupo := Posicione("SX3",2,"B1_GRUPO","X3TITULO()")
+Local lVEIC		:= Upper(GetMV("MV_VEICULO"))=="S"
+Local oCell         
+Local oReport 
+Local oSection1
+Local oSection2
+Local cAliasQRY := GetNextAlias()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao do componente de impressao                                      ³
+//³                                                                        ³
+//³TReport():New                                                           ³
+//³ExpC1 : Nome do relatorio                                               ³
+//³ExpC2 : Titulo                                                          ³
+//³ExpC3 : Pergunte                                                        ³
+//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+//³ExpC5 : Descricao                                                       ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport := TReport():New("MATR870",STR0001,cPerg, {|oReport| ReportPrint(oReport, cAliasQRY)},STR0002+" "+STR0003+" "+STR0004+If(lVeic," "+STR0009,"")) //"Custos de Reposicao dos materiais"##"Este programa ira imprimir uma rela‡„o dos materiais"##"e seus respectivos Custos de Reposi‡ao"##"Na Gestão de Concessionarias a ordem do relatorio e : Grupo + Cod. Item."
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Ajustar o SX1 para SIGAVEI, SIGAPEC e SIGAOFI                ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AjustaSX1(cPerg,lVeic,aSB1Cod,aSB1Ite)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                         ³
+//³ mv_par01        	// Do Produto                            ³
+//³ mv_par02        	// Ate o Produto                         ³
+//³ mv_par03        	// Seleciona Filial?Ate o Produto        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Pergunte(cPerg,.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da secao utilizada pelo relatorio                               ³
+//³                                                                        ³
+//³TRSection():New                                                         ³
+//³ExpO1 : Objeto TReport que a secao pertence                             ³
+//³ExpC2 : Descricao da seçao                                              ³
+//³ExpA3 : Array com as tabelas utilizadas pela secao. A primeira tabela   ³
+//³        sera considerada como principal para a seção.                   ³
+//³ExpA4 : Array com as Ordens do relatório                                ³
+//³ExpL5 : Carrega campos do SX3 como celulas                              ³
+//³        Default : False                                                 ³
+//³ExpL6 : Carrega ordens do Sindex                                        ³
+//³        Default : False                                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da celulas da secao do relatorio                                ³
+//³                                                                        ³
+//³TRCell():New                                                            ³
+//³ExpO1 : Objeto TSection que a secao pertence                            ³
+//³ExpC2 : Nome da celula do relatório. O SX3 será consultado              ³
+//³ExpC3 : Nome da tabela de referencia da celula                          ³
+//³ExpC4 : Titulo da celula                                                ³
+//³        Default : X3Titulo()                                            ³
+//³ExpC5 : Picture                                                         ³
+//³        Default : X3_PICTURE                                            ³
+//³ExpC6 : Tamanho                                                         ³
+//³        Default : X3_TAMANHO                                            ³
+//³ExpL7 : Informe se o tamanho esta em pixel                              ³
+//³        Default : False                                                 ³
+//³ExpB8 : Bloco de codigo para impressao.                                 ³
+//³        Default : ExpC2                                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+oSection1 := TRSection():New(oReport,STR0013+STR0014,{"SB1"}) //"Produtos"##" (Grupo)"
+
+TRCell():New(oSection1,"TIT","",,,Len(Trim(cTitGrupo)),,{|| cTitGrupo })
+TRCell():New(oSection1,"B1_GRUPO","SB1")
+
+oSection1:SetHeaderSection(.F.)
+
+oSection2 := TRSection():New(oSection1,STR0013,{"SB1"}) //"Produtos"
+oSection2:SetHeaderPage()
+
+If lVeic
+	TRCell():New(oSection2,"B1_CODITE","SB1")      
+Else
+	TRCell():New(oSection2,"B1_COD","SB1")		
+EndIf
+
+TRCell():New(oSection2,"B1_DESC"	,"SB1",,,,,,,,,,,.T.)
+TRCell():New(oSection2,"B1_UM"		,"SB1",,,,,,,,,,,.T.)
+TRCell():New(oSection2,"B1_TIPO"	,"SB1",,,,,,,,,,,.T.)
+TRCell():New(oSection2,"B1_GRUPO"	,"SB1",,,,,,,,,,,.T.)
+TRCell():New(oSection2,"B1_CUSTD"	,"SB1",,,,,{|| RetFldProd((cAliasQRY)->B1_COD	,"B1_CUSTD"	,cAliasQRY) })
+TRCell():New(oSection2,"B1_DATREF"	,"SB1")
+TRCell():New(oSection2,"B1_UPRC"	,"SB1",,,,,{||RetFldProd((cAliasQRY)->B1_COD	,"B1_UPRC"	,cAliasQRY) })
+TRCell():New(oSection2,"B1_UCOM"	,"SB1",,,,,{||RetFldProd((cAliasQRY)->B1_COD	,"B1_UCOM"	,cAliasQRY) })
+
+Return(oReport)
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrin³ Autor ³ Ricardo Berti   		³ Data ³07.06.2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatorio                           ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport, cAliasQRY)
+
+Local lVEIC		:= Upper(GetMV("MV_VEICULO"))=="S"
+Local lFirst    := .F.
+Local oSection1	:= oReport:Section(1)
+Local oSection2 := oReport:Section(1):Section(1)
+Local cGrupo	:= ""
+#IFNDEF TOP
+	Local cCondicao := ""
+#ENDIF
+
+// Variaveis utilizadas no processamento por Filiais
+Local aFilsCalc  := MatFilCalc(mv_par03 == 1)
+Local cFilBack   := cFilAnt
+Local nForFilial := 0
+
+If !Empty(aFilsCalc)
+
+	For nForFilial := 1 To Len(aFilsCalc)
+	
+		If aFilsCalc[ nForFilial, 1 ]
+		
+			cFilAnt := aFilsCalc[ nForFilial, 2 ]
+
+			oReport:EndPage() //Reinicia Paginas
+			
+			oReport:SetTitle( STR0001 + " - " + aFilsCalc[ nForFilial, 3 ] ) //Titulo do Relatorio
+			
+			dbSelectArea("SB1")
+			If lVEIC
+				dbSetOrder(7)
+			Else
+				dbSetOrder(1)
+			EndIf
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³Filtragem do relatorio                                                  ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			#IFDEF TOP
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Transforma parametros Range em expressao SQL                            ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				MakeSqlExpr(oReport:uParam)
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Query do relatorio da secao 1                                           ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				oReport:Section(1):BeginQuery()	
+				
+				If lVEIC
+		
+					BeginSql Alias cAliasQRY
+		
+						SELECT B1_FILIAL,B1_COD,B1_CODITE,B1_DESC,B1_UM,B1_TIPO,B1_GRUPO,B1_DATREF,B1_CUSTD,B1_UPRC,B1_UCOM
+		
+						FROM %table:SB1% SB1
+		    	
+		  			    WHERE	B1_FILIAL = %xFilial:SB1% AND
+								B1_CODITE >= %Exp:mv_par01% AND 
+								B1_CODITE <= %Exp:mv_par02% AND 
+								SB1.%NotDel%
+							
+						ORDER BY B1_GRUPO,B1_CODITE
+					
+					EndSql 
+		
+				Else 
+		
+					BeginSql Alias cAliasQRY
+		
+						SELECT B1_FILIAL,B1_COD,B1_DESC,B1_UM,B1_TIPO,B1_GRUPO,B1_DATREF,B1_CUSTD,B1_UPRC,B1_UCOM
+		
+						FROM %table:SB1% SB1
+		 			
+			 			WHERE	B1_FILIAL = %xFilial:SB1% AND
+								B1_COD    >= %Exp:mv_par01% AND 
+								B1_COD    <= %Exp:mv_par02% AND 
+								SB1.%NotDel%
+							
+						ORDER BY %Order:SB1%
+					
+					EndSql 
+		
+				EndIf
+		
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Metodo EndQuery ( Classe TRSection )                                    ³
+				//³                                                                        ³
+				//³Prepara o relatorio para executar o Embedded SQL.                       ³
+				//³                                                                        ³
+				//³ExpA1 : Array com os parametros do tipo Range                           ³
+				//³                                                                        ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
+		
+			    oSection2:SetParentQuery()
+		
+			#ELSE
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Transforma parametros Range em expressao SQL                            ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				MakeAdvplExpr(oReport:uParam)
+		
+				cCondicao := 'B1_FILIAL == "'+xFilial("SB1")+'".And.' 
+				If lVEIC
+					cCondicao += 'B1_CODITE >= "'+mv_par01+'".And.B1_CODITE <="'+mv_par02+'"'
+				Else
+					cCondicao += 'B1_COD    >= "'+mv_par01+'".And.B1_COD    <="'+mv_par02+'"'
+				EndIf
+			
+				oReport:Section(1):SetFilter(cCondicao,IndexKey())
+		
+			#ENDIF		
+		
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³Metodo TrPosition()                                                     ³
+			//³                                                                        ³
+			//³Posiciona em um registro de uma outra tabela. O posicionamento será     ³
+			//³realizado antes da impressao de cada linha do relatorio.                ³
+			//³                                                                        ³
+			//³                                                                        ³
+			//³ExpO1 : Objeto Report da Secao                                          ³
+			//³ExpC2 : Alias da Tabela                                                 ³
+			//³ExpX3 : Ordem ou NickName de pesquisa                                   ³
+			//³ExpX4 : String ou Bloco de codigo para pesquisa. A string sera macroexe-³
+			//³        cutada.                                                         ³
+			//³                                                                        ³				
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³Inicio da impressao do fluxo do relatório                               ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		
+			oReport:SetMeter(SB1->(LastRec()))
+		
+			dbSelectArea(cAliasQRY)
+		
+			While !oReport:Cancel() .And. !(cAliasQRY)->(Eof())
+		
+				oReport:IncMeter()
+		
+				If lVEIC .And. cGrupo != (cAliasQRY)->B1_GRUPO
+		
+					If lFirst
+						oReport:SkipLine()
+					EndIf
+		
+					oSection2:Init()    
+					oSection2:Cell("B1_DATREF"):SetValue(RetFldProd(SB1->B1_COD,"B1_DATREF",cAliasQRY))
+					oSection2:Finish()
+		
+					cGrupo := (cAliasQRY)->B1_GRUPO
+		
+					If lFirst  
+						oSection2:Finish()
+					EndIf	
+		
+					lFirst := .T. 
+				EndIf	
+		
+				oSection2:Init()
+				oSection2:PrintLine()
+				dbSkip()
+			EndDo
+			oSection1:Finish()
+			oSection2:Finish()
+			(cAliasQRY)->(DbCloseArea())
+		EndIf
+	
+	Next nForFilial	
+	
+EndIf
+
+// Restaura a filial corrente
+cFilAnt := cFilBack
+	
+Return NIL
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR870R3³ Autor ³ Paulo Boschetti       ³ Data ³ 25.08.92 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Relatorio de Custo de Reposicao de Materiais               ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ MATR870(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Rodrigo Sart³04/11/98³XXXXXX³ Acerto p/ Bug Ano 2000                   ³±±
+±±³Cesar       ³31/03/99³XXXXXX³Manutencao na SetPrint()                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Marcos Hirak³06/07/04³XXXXXX³Imprimir B1_CODITE quando for gestao de   ³±±
+±±³            ³        ³      ³Concessionarias ( MV_VEICULO = "S").      ³±±
+±±³            ³        ³      ³Inclusao da string STR0009                ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+*/
+Function MATR870R3()
+Local titulo 		:= STR0001	//"Custos de Reposicao dos materiais"
+Local cString		:= "SB1"
+Local wnrel			:= "MATR870"
+Local cDesc1 		:= STR0002	//"Este programa ira imprimir uma rela‡„o dos materiais"
+Local cDesc2 		:= STR0003	//"e seus respectivos Custos de Reposi‡„o"
+Local tamanho		:= "M"
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis tipo Local para SIGAVEI, SIGAPEC e SIGAOFI         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local cDesc3	:= ""
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis tipo Private para SIGAVEI, SIGAPEC e SIGAOFI       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Private lVEIC	:= Upper(GetMV("MV_VEICULO"))=="S"
+Private aSB1Cod	:= {}
+Private aSB1Ite	:= {}
+Private nCOL1	:= 0
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis tipo Private padrao de todos os relatorios         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Private aReturn	 := {STR0004,1,STR0005, 1, 2, 1, "",1 }	//"Zebrado"###"Administracao"
+Private cPerg	 := "MTR870"
+Private nLastKey := 0
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Funcao utilizada para verificar a ultima versao dos fontes      ³
+//³ SIGACUS.PRW, SIGACUSA.PRX e SIGACUSB.PRX, aplicados no rpo do   |
+//| cliente, assim verificando a necessidade de uma atualizacao     |
+//| nestes fontes. NAO REMOVER !!!							        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If !(FindFunction("SIGACUS_V") .And. SIGACUS_V() >= 20060810)
+	Aviso(STR0010,STR0011 + " SIGACUS.PRW !!!",{"Ok"})
+	Return
+EndIf
+If !(FindFunction("SIGACUSA_V") .And. SIGACUSA_V() >= 20050512)
+	Aviso(STR0010,STR0011 + " SIGACUSA.PRX !!!",{"Ok"})
+	Return
+EndIf
+If !(FindFunction("SIGACUSB_V") .And. SIGACUSB_V() >= 20050512)
+	Aviso(STR0010,STR0011 + " SIGACUSB.PRX !!!",{"Ok"})
+	Return
+EndIf
+
+aSB1Cod	:= TamSX3("B1_COD")
+aSB1Ite	:= TamSX3("B1_CODITE")
+
+If lVEIC
+	nCOL1	:= ABS(aSB1Cod[1] - aSB1Ite[1])
+	cDesc3	:= STR0009 // "Na Gestao de Concessionarias a ordem do relatorio e : Grupo + Cod. Item."
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Ajustar o SX1 para SIGAVEI, SIGAPEC e SIGAOFI                ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AjustaSX1(cPerg,lVeic,aSB1Cod,aSB1Ite)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                         ³
+//³ mv_par01        	// Do Produto                            ³
+//³ mv_par02        	// Ate o Produto                         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Pergunte("MTR870",.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Envia controle para a funcao SETPRINT                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+wnrel:=SetPrint(cString, wnrel, cPerg, @titulo, cDesc1, cDesc2, cDesc3, .F.,  "",,Tamanho)
+
+If nLastKey = 27
+	Set Filter to
+	Return
+EndIf
+
+SetDefault(aReturn,cString)
+
+If nLastKey = 27
+	Set Filter To
+	Return
+EndIf
+
+Processa( { |lEnd| R870Imp( @lEnd, wnRel, titulo, tamanho, MatFilCalc(mv_par03 == 1) ) }, titulo )
+
+Return NIL
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³ R870Imp  ³ Autor ³ Waldemiro L. Lustosa  ³ Data ³ 13.11.95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Chamada do Relat¢rio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR870			                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function R870Imp(lEnd,wnRel,titulo,tamanho, aFilsCalc)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local CbTxt
+Local CbCont,cabec1,cabec2
+Local nTipo
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis tipo Local para SIGAVEI, SIGAPEC e SIGAOFI         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local cGRUP		:= "" 
+
+// Variaveis utilizadas no processamento por Filiais
+Local cFilBack := cFilAnt
+Local nForFilial
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica se deve comprimir ou nao                            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+nTipo := IIf(aReturn[4]==1,15,18)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para Impressao do Cabecalho e Rodape    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+cbtxt    := Space(10)
+cbcont   := 0
+li       := 80
+m_pag    := 1
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Monta os Cabecalhos                                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cabec1 := STR0006	//"CODIGO          D E S C R I C A O               UM TP GRUPO         CUSTO DE     DATA DE             ULTIMO    DATA"
+cabec2 := STR0007	//"                                                                    REPOSICAO    REFERENCIA          PRECO   ULT COMPRA"
+//                   123456789012345 123456789012345678901234567890  XX XX XXXX     12345678901234    1234567890  12345678901234  1234567890
+//                             1         2         3         4         5         6         7         8         9        10        11        12
+//                   0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+
+If !Empty(aFilsCalc)
+
+	For nForFilial := 1 To Len(aFilsCalc)
+	
+		If aFilsCalc[ nForFilial, 1 ]
+		
+			cFilAnt := aFilsCalc[ nForFilial, 2 ]
+	
+			li := 80
+	
+			dbSelectArea("SB1")
+			dbSetOrder(1)
+			Set SoftSeek On
+			
+			If ! lVEIC
+				dbSeek(xFilial("SB1") + mv_par01)
+			Else
+				cabec1  := substr(cabec1 ,1,aSB1Cod[1]) + SPACE(nCOL1) + substr(cabec1 ,aSB1Cod[1]+1)
+				cabec2  := substr(cabec2 ,1,aSB1Cod[1]) + SPACE(nCOL1) + substr(cabec2 ,aSB1Cod[1]+1)
+				dbSetOrder( 7 ) // B1_FILIAL+B1_GRUPO+B1_CODITE
+				dbSeek(xFilial("SB1"))
+				cGRUP	:= B1_GRUPO
+				Do While !Eof() .And. B1_FILIAL == xFilial("SB1")
+				   If B1_CODITE >= mv_par01 .And. B1_CODITE <= mv_par02
+						cGRUP	:= B1_GRUPO
+				      Exit
+				   EndIf
+					DbSkip()
+				EndDo
+			EndIf	
+			Set SoftSeek Off
+			
+			ProcRegua( LastRec() )
+			
+			While !Eof() .And. B1_FILIAL = xFilial("SB1")
+				If lVEIC
+					If B1_CODITE < mv_par01 .Or. B1_CODITE > mv_par02
+						dbSkip()
+						Loop
+					EndIf
+				Else
+					If B1_COD < mv_par01 .Or. B1_COD > mv_par02
+						dbSkip()
+						Loop
+					EndIf
+				EndIf
+								
+				If lEnd
+					@ Prow()+1,001 PSay STR0008	//"CANCELADO PELO OPERADOR"
+					Exit
+				EndIf
+	
+				IncProc( STR0001 + " - " + aFilsCalc[ nForFilial, 3 ] )
+	
+				If li > 58
+					Li	:= cabec(titulo + " - " + aFilsCalc[ nForFilial, 3 ], cabec1, cabec2 , wnrel, tamanho, nTipo )
+					If lVEIC
+						Li++
+						@Li,000 PSay STR0012 + cGRUP //"* GRUPO : "
+						Li++
+					Else
+						Li++
+					EndIf
+				EndIf
+				If ! lVEIC
+					@Li,000 PSay B1_COD
+				Else
+					@Li,000 PSay B1_CODITE
+				EndIf		
+				@Li,031 + nCOL1 PSay Substr(B1_DESC,1,30)
+				@Li,065 + nCOL1 PSay B1_UM
+				@Li,070 + nCOL1 PSay B1_TIPO
+				@Li,075 + nCOL1 PSay B1_GRUPO
+				@Li,077 + nCOL1 PSay RetFldProd(SB1->B1_COD,"B1_CUSTD") PICTURE PesqPict("SB1","B1_CUSTD",14)
+				@Li,096 + nCOL1 PSay RetFldProd(SB1->B1_COD,"B1_DATREF")
+				@Li,104 + nCOL1 PSay RetFldProd(SB1->B1_COD,"B1_UPRC")  PICTURE PesqPict("SB1","B1_UPRC",14)
+				@Li,120 + nCOL1 PSay RetFldProd(SB1->B1_COD,"B1_UCOM")
+				Li++
+				dbSkip()
+				If lVEIC 
+				   If B1_CODITE < mv_par01 .Or. B1_CODITE > mv_par02 
+						Do While !Eof() .And. B1_FILIAL == xFilial("SB1")
+				   			If B1_CODITE >= mv_par01 .And. B1_CODITE <= mv_par02
+						    	Exit
+			   				EndIf                                      
+							IncProc( STR0015 )
+							DbSkip()
+						EndDo
+					EndIf
+					If !EOF()
+					   If cGRUP <> B1_GRUPO
+							cGRUP	:= B1_GRUPO
+							If li <= 58
+								li++
+								@Li,000 PSay STR0012 + cGRUP //"* GRUPO : "
+								li++
+							EndIf	
+						EndIf	
+					EndIf
+			   EndIf
+			EndDo
+			
+			If Li != 80
+				roda(cbcont,cbtxt)
+			EndIf
+	
+			dbSelectArea("SB1")
+			Set Filter To
+			dbSetOrder(1)
+		
+		EndIf
+	
+	Next nForFilial
+	
+	If aReturn[5] = 1
+		Set Printer To
+		dbCommitAll()
+		OurSpool(wnrel)
+		MS_FLUSH()
+	EndIf
+
+EndIf	
+
+// Restaura a filial corrente
+cFilAnt := cFilBack
+
+Return NIL
+
+/*           
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³ AjustaSX1 ³ Autor ³ Ricardo Berti      ³ Data ³ 07/06/2006 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³ Ajustar o SX1 para SIGAVEI, SIGAPEC e SIGAOFI  	          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ AjustaSX1(ExpC1,ExpL1,ExpA1,ExpA2)  	                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpC1 = Grupo do pergunte 		                          ³±±
+±±³          ³ ExpL1 = Se .T. = gestao de Concessionarias(MV_VEICULO ="S")³±±
+±±³          ³ ExpA1 = Array com TAMSX3 do B1_COD		                  ³±±
+±±³          ³ ExpA2 = Array com TAMSX3 do B1_CODITE		              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ Nenhum                                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³ MATR870                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+*/
+Static Function AjustaSX1(cPerg,lVeic,aSB1Cod,aSB1Ite)
+Local aHelpPor := aHelpEng := aHelpSpa := {}
+Local aArea1   := Getarea()                          
+Local nTamSX1  := Len(SX1->X1_GRUPO)
+DbSelectArea("SX1")
+DbSetOrder(1)
+DbSeek(PADR(cPerg,nTamSX1))
+
+If lVEIC
+   Do While SX1->X1_GRUPO == PADR(cPerg,nTamSX1) .And. !SX1->(EOF())
+      If "PRODU" $ Upper(SX1->X1_PERGUNT) .And. Upper(SX1->X1_TIPO) == "C" .And. ;
+         (SX1->X1_TAMANHO <> aSB1Ite[1] .Or. Upper(SX1->X1_F3) <> "VR4")
+         RecLock("SX1",.F.)
+         SX1->X1_TAMANHO := aSB1Ite[1]
+         SX1->X1_F3 := "VR4"
+         DbCommit()
+         MsUnlock()
+      EndIf
+      DbSkip()
+   EndDo
+Else
+   Do While SX1->X1_GRUPO == PADR(cPerg,nTamSX1) .And. !SX1->(EOF())
+      If "PRODU" $ Upper(SX1->X1_PERGUNT) .And. Upper(SX1->X1_TIPO) == "C" .And. ;
+         (SX1->X1_TAMANHO <> aSB1Cod[1] .Or. Upper(SX1->X1_F3) <> "SB1")
+         RecLock("SX1",.F.)
+         SX1->X1_TAMANHO := aSB1Cod[1]
+         SX1->X1_F3 := "SB1"
+         DbCommit()
+         MsUnlock()
+      EndIf
+      DbSkip()
+   EndDo
+EndIf
+RestArea(aArea1)
+
+Aadd( aHelpPor, { 'Seleciona as filiais desejadas. Se NAO',;
+                  'apenas a filial corrente sera afetada.',;
+                  '' } )
+Aadd( aHelpSpa, { 'Selecciona las sucursales deseadas. Si',;
+                  'NO solamente la sucursal actual es',;
+                  'afectado.' } ) 
+Aadd( aHelpEng, { 'Select desired branch offices. If NO',;
+                  'only current branch office will be',;
+                  'affected.' } )
+PutSx1(	'MTR870',              	   ; //-- 01 - X1_GRUPO
+	    '03',                      ; //-- 02 - X1_ORDEM
+    	'Seleciona Filiais?',      ; //-- 03 - X1_PERGUNT
+	    '¿Selecciona Sucursales?', ; //-- 04 - X1_PERSPA
+    	'Select Branch Offices?',  ; //-- 05 - X1_PERENG
+	    'mv_chc',                  ; //-- 06 - X1_VARIAVL
+    	'N',                       ; //-- 07 - X1_TIPO
+	    1,                         ; //-- 08 - X1_TAMANHO
+    	0,                         ; //-- 09 - X1_DECIMAL
+	    2,                         ; //-- 10 - X1_PRESEL
+    	'C',                       ; //-- 11 - X1_GSC
+	    '',                        ; //-- 12 - X1_VALID
+    	'',                        ; //-- 13 - X1_F3
+	    '',                        ; //-- 14 - X1_GRPSXG
+    	'',                        ; //-- 15 - X1_PYME
+	    'mv_par03',                ; //-- 16 - X1_VAR01
+    	'Sim',                     ; //-- 17 - X1_DEF01
+	    'Si',                      ; //-- 18 - X1_DEFSPA1
+    	'Yes',                     ; //-- 19 - X1_DEFENG1
+	    '',                        ; //-- 20 - X1_CNT01
+    	'Nao',                     ; //-- 21 - X1_DEF02
+	    'No',                      ; //-- 22 - X1_DEFSPA2
+    	'No',                      ; //-- 23 - X1_DEFENG2
+	    '',                        ; //-- 24 - X1_DEF03
+    	'',                        ; //-- 25 - X1_DEFSPA3
+		'',                        ; //-- 26 - X1_DEFENG3
+	    '',                        ; //-- 27 - X1_DEF04
+    	'',                        ; //-- 28 - X1_DEFSPA4
+	    '',                        ; //-- 29 - X1_DEFENG4
+    	'',                        ; //-- 30 - X1_DEF05
+	    '',                        ; //-- 31 - X1_DEFSPA5
+    	'',                        ; //-- 32 - X1_DEFENG5
+	    aHelpPor,                  ; //-- 33 - HelpPor
+    	aHelpSpa,                  ; //-- 34 - HelpSpa
+	    aHelpEng,                  ; //-- 35 - HelpEng
+    	'')                          //-- 36 - X1_HELP 
+
+Return Nil

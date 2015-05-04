@@ -1,0 +1,1030 @@
+#include "rwmake.ch"
+#include "topconn.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ARGA002   ºAutor  ³Grayson B.Tavares   º Data ³  28/12/08   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Copia de Orcamentos                                         º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Gestao de Projetos                                        º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+User Function ARGA002
+
+cPerg:="ARG002"
+ValidPerg(cPerg)
+
+Pergunte(cPerg,.T.)
+
+@ 96,012 To 250,400 Dialog oDlg Title OemToAnsi("Copia de Orcamento")
+@ 18,020 Say OemToAnsi("Esta  rotina  ira fazer a copia de um orcamento,  conforme")
+@ 31,020 Say OemToAnsi("os  parametros  digitados.")
+@ 08,005 To 048,190
+@ 56,100 BmpButton Type 5 Action pergunte(cPerg,.T.)
+@ 56,130 BmpButton Type 1 Action Processa({||CopyOrc()},"Aguarde...Gerando Orcamento")
+@ 56,160 BmpButton Type 2 Action Close(oDlg)
+Activate Dialog oDlg Centered
+
+Return
+      
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³CopyOrc   ³ Autor ³                       ³ Data ³   /  /   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³Especifico para Clientes Microsiga                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Static Function CopyOrc()
+
+cOrcMod:=mv_par01
+If mv_par04 == 1
+   cTamOrc:=str(len(Alltrim(cOrcMod)))
+   cQuery:="SELECT COUNT(R_E_C_N_O_) AS TOTREG "
+   cQuery+="FROM "+RetSqlName("AF1")+" "
+   cQuery+="WHERE D_E_L_E_T_ <> '*' "
+   cQuery+="AND LEFT(RTRIM(LTRIM(AF1_ORCAME)),7) = '"+Substr(cOrcMod,1,7)+"' "
+   
+   TCQUERY cQuery NEW ALIAS "XAF1"
+   
+   dbSelectArea("XAF1")
+            
+   nRevOrc := XAF1->TOTREG+1-1
+   
+   dbSelectArea("XAF1")
+   dbCloseArea()
+   
+   cOrcNew := Substr(cOrcMod,1,7)+"."+strzero(nRevOrc,2)
+Else
+   cOrcNew:=CodOrc()   
+EndIf	
+
+If Empty(cOrcMod)
+	Alert("Informe o Orçamento de origem","Atenção")
+	
+	Return
+EndIf
+
+If Empty(cOrcNew)
+	Alert("Informe o Orçamento destino","Atenção")
+	
+	Return
+EndIf
+
+dbSelectArea("AF1")
+dbSetOrder(1)
+If !AF1->(dbSeek(xFilial("AF1")+mv_par01))
+	Alert("Orcamento de origem nao existe","Atenção")
+	
+	Return
+EndIf
+
+
+********************************************************************************************************************
+
+ProcRegua(AF1->(RecCount()))
+
+// Criação e Abertura de Arquivo Temporario
+aCpoAF1 := {}
+
+dbSelectArea("SX3")
+dbSetOrder(1)
+dbSeek("AF1")
+While ( !Eof() .And. SX3->X3_ARQUIVO == "AF1")
+    
+    Aadd(aCpoAF1,{SX3->X3_CAMPO,SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
+        
+	SX3->(dbSkip())
+EndDo
+
+cArq := CriaTrab(aCpoAF1,.t.)
+dbUseArea( .T.,__LocalDriver,cArq,"XAF1", If(.F. .OR. .T., !.T., NIL), .F. )
+
+//Copia dos dados para arquivo temporario
+dbSelectArea("AF1")
+dbSetOrder(1)
+AF1->(dbSeek(xFilial("AF1")+cOrcMod))
+
+While AF1->(!EOF()) .And. AF1->AF1_ORCAME == cOrcMod
+	
+	RecLock("XAF1",.T.)
+	dbSelectArea("SX3")
+	dbSetOrder(1)
+	dbSeek("AF1")
+	While ( !Eof() .And. SX3->X3_ARQUIVO == "AF1")	    
+	    cCampo := SX3->X3_CAMPO
+	    
+	    If SX3->X3_TIPO <> "M" .And. SX3->X3_CONTEXT <> "V"
+	    	Replace XAF1->&(cCampo) With AF1->&(cCampo)
+	    EndIf
+			
+		SX3->(dbSkip())
+	EndDo		
+	MsUnlock()
+		 
+	AF1->(dbSkip())
+
+EndDo
+
+//Copia para novo orcamento
+dbSelectArea("XAF1")
+dbGoTop()
+
+While XAF1->(!EOF())
+    
+    IncProc("Gerando dados da AF1")
+    
+	RecLock("AF1",.T.)
+	dbSelectArea("SX3")
+	dbSetOrder(1)
+	dbSeek("AF1")
+	While ( !Eof() .And. SX3->X3_ARQUIVO == "AF1")	    
+	    cCampo := SX3->X3_CAMPO
+	    
+	    If Alltrim(cCampo) == "AF1_ORCAME" 
+	    	Replace AF1->&(cCampo) With cOrcNew
+	    ElseIf Alltrim(cCampo) == "AF1_DESCRI" 
+	    	Replace AF1->&(cCampo) With mv_par02
+	    ElseIf Alltrim(cCampo) == "AF1_FASE" 
+	    	Replace AF1->&(cCampo) With "01"
+	    ElseIf Alltrim(cCampo) == "AF1_DATA" 
+	    	Replace AF1->&(cCampo) With mv_par03
+	    Else
+	    	Replace AF1->&(cCampo) With XAF1->&(cCampo)
+	    EndIf	
+			
+		SX3->(dbSkip())
+	EndDo		
+	MsUnlock()
+
+	XAF1->(dbSkip())
+EndDo
+
+dbSelectArea("XAF1")
+dbCloseArea()
+
+********************************************************************************************************************
+
+ProcRegua(AF2->(RecCount()))
+
+// Criação e Abertura de Arquivo Temporario
+aCpoAF2 := {}
+
+dbSelectArea("SX3")
+dbSetOrder(1)
+dbSeek("AF2")
+While ( !Eof() .And. SX3->X3_ARQUIVO == "AF2")
+    
+    Aadd(aCpoAF2,{SX3->X3_CAMPO,SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
+        
+	SX3->(dbSkip())
+EndDo
+
+cArq := CriaTrab(aCpoAF2,.t.)
+dbUseArea( .T.,__LocalDriver,cArq,"XAF2", If(.F. .OR. .T., !.T., NIL), .F. )
+
+//Copia dos dados para arquivo temporario
+dbSelectArea("AF2")
+dbSetOrder(1)
+AF2->(dbSeek(xFilial("AF2")+cOrcMod))
+
+While AF2->(!EOF()) .And. AF2->AF2_ORCAME == cOrcMod
+	
+	RecLock("XAF2",.T.)
+	dbSelectArea("SX3")
+	dbSetOrder(1)
+	dbSeek("AF2")
+	While ( !Eof() .And. SX3->X3_ARQUIVO == "AF2")	    
+	    cCampo := SX3->X3_CAMPO
+	    
+	    If SX3->X3_TIPO <> "M" .And. SX3->X3_CONTEXT <> "V"
+	    	Replace XAF2->&(cCampo) With AF2->&(cCampo)
+	    EndIf	
+			
+		SX3->(dbSkip())
+	EndDo		
+	MsUnlock()
+		 
+	AF2->(dbSkip())
+
+EndDo
+
+//Copia para novo orcamento
+dbSelectArea("XAF2")
+dbGoTop()
+
+While XAF2->(!EOF())
+    
+	IncProc("Gerando dados da AF2")
+	
+	dbSelectArea("AF2")
+	dbSetOrder(1)
+	
+	If !AF2->(dbSeek(xFilial("AF2")+cOrcNew+XAF2->AF2_TAREFA+XAF2->AF2_ORDEM))	
+		RecLock("AF2",.T.)
+		dbSelectArea("SX3")
+		dbSetOrder(1)
+		dbSeek("AF2")
+		While ( !Eof() .And. SX3->X3_ARQUIVO == "AF2")	    
+		    cCampo := SX3->X3_CAMPO
+		    
+		    If Alltrim(cCampo) == "AF2_ORCAME" 
+		    	Replace AF2->&(cCampo) With cOrcNew
+		    ElseIf Alltrim(cCampo) == "AF2_EDTPAI" .And. AF2->AF2_NIVEL == "002"  
+	    		Replace AF2->&(cCampo) With cOrcNew	    	
+       		Else
+		    	Replace AF2->&(cCampo) With XAF2->&(cCampo)
+		    EndIf	
+				
+			SX3->(dbSkip())
+		EndDo		
+		MsUnlock()
+    EndIf
+	
+	XAF2->(dbSkip())
+EndDo
+
+dbSelectArea("XAF2")
+dbCloseArea()
+
+********************************************************************************************************************
+
+ProcRegua(AF3->(RecCount()))
+
+// Criação e Abertura de Arquivo Temporario
+aCpoAF3 := {}
+
+dbSelectArea("SX3")
+dbSetOrder(1)
+dbSeek("AF3")
+While ( !Eof() .And. SX3->X3_ARQUIVO == "AF3")
+    
+    Aadd(aCpoAF3,{SX3->X3_CAMPO,SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
+        
+	SX3->(dbSkip())
+EndDo
+
+cArq := CriaTrab(aCpoAF3,.t.)
+dbUseArea( .T.,__LocalDriver,cArq,"XAF3", If(.F. .OR. .T., !.T., NIL), .F. )
+
+//Copia dos dados para arquivo temporario
+dbSelectArea("AF3")
+dbSetOrder(1)
+AF3->(dbSeek(xFilial("AF3")+cOrcMod))
+
+While AF3->(!EOF()) .And. AF3->AF3_ORCAME == cOrcMod
+	
+	RecLock("XAF3",.T.)
+	dbSelectArea("SX3")
+	dbSetOrder(1)
+	dbSeek("AF3")
+	While ( !Eof() .And. SX3->X3_ARQUIVO == "AF3")	    
+	    cCampo := SX3->X3_CAMPO
+	    
+	    If SX3->X3_TIPO <> "M" .And. SX3->X3_CONTEXT <> "V"
+	    	Replace XAF3->&(cCampo) With AF3->&(cCampo)
+	    EndIf	
+			
+		SX3->(dbSkip())
+	EndDo		
+	MsUnlock()
+		 
+	AF3->(dbSkip())
+
+EndDo
+
+//Copia para novo orcamento
+dbSelectArea("XAF3")
+dbGoTop()
+
+While XAF3->(!EOF())
+
+	IncProc("Gerando dados da AF3")
+    
+        dbSelectArea("AF3")
+	dbSetOrder(1)
+	
+	//If !AF3->(dbSeek(xFilial("AF3")+cOrcNew+XAF3->AF3_TAREFA+XAF3->AF3_ITEM))	
+		RecLock("AF3",.T.)
+		dbSelectArea("SX3")
+		dbSetOrder(1)
+		dbSeek("AF3")
+		While ( !Eof() .And. SX3->X3_ARQUIVO == "AF3")	    
+		    cCampo := SX3->X3_CAMPO
+		    
+		    If Alltrim(cCampo) == "AF3_ORCAME" 
+		    	Replace AF3->&(cCampo) With cOrcNew
+		    Else
+		    	Replace AF3->&(cCampo) With XAF3->&(cCampo)
+		    EndIf	
+				
+			SX3->(dbSkip())
+		EndDo		
+		MsUnlock()
+	//EndIf	
+
+	XAF3->(dbSkip())
+EndDo
+
+dbSelectArea("XAF3")
+dbCloseArea()
+
+********************************************************************************************************************
+
+ProcRegua(AF4->(RecCount()))
+
+// Criação e Abertura de Arquivo Temporario
+aCpoAF4 := {}
+
+dbSelectArea("SX3")
+dbSetOrder(1)
+dbSeek("AF4")
+While ( !Eof() .And. SX3->X3_ARQUIVO == "AF4")
+    
+    Aadd(aCpoAF4,{SX3->X3_CAMPO,SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
+        
+	SX3->(dbSkip())
+EndDo
+
+cArq := CriaTrab(aCpoAF4,.t.)
+dbUseArea( .T.,__LocalDriver,cArq,"XAF4", If(.F. .OR. .T., !.T., NIL), .F. )
+
+//Copia dos dados para arquivo temporario
+dbSelectArea("AF4")
+dbSetOrder(1)
+AF4->(dbSeek(xFilial("AF4")+cOrcMod))
+
+While AF4->(!EOF()) .And. AF4->AF4_ORCAME == cOrcMod
+	
+	RecLock("XAF4",.T.)
+	dbSelectArea("SX3")
+	dbSetOrder(1)
+	dbSeek("AF4")
+	While ( !Eof() .And. SX3->X3_ARQUIVO == "AF4")	    
+	    cCampo := SX3->X3_CAMPO
+	    
+	    If SX3->X3_TIPO <> "M" .And. SX3->X3_CONTEXT <> "V"
+	    	If Alltrim(cCampo) == "AF4_ORCAME"        
+		    	RecLock("AF4",.f.)
+		    	Replace AF4->AF4_ORCAME With cOrcNew
+		    	MsUnlock()
+		    Else
+		    	RecLock("AF4",.f.)
+	    		Replace XAF4->&(cCampo) With AF4->&(cCampo)
+	    		MsUnlock()
+	    	EndIf	
+	    EndIf	
+			
+		SX3->(dbSkip())
+	EndDo		
+	MsUnlock()
+		 
+	AF4->(dbSkip())
+
+EndDo
+                                           
+//Copia para novo orcamento
+dbSelectArea("XAF4")
+dbGoTop()
+
+While XAF4->(!EOF())
+
+	IncProc("Gerando dados da AF4")
+    
+	dbSelectArea("AF4")
+	dbSetOrder(1)
+	
+	If !AF4->(dbSeek(xFilial("AF4")+cOrcNew+XAF4->AF4_TAREFA+XAF4->AF4_ITEM))	
+		RecLock("AF4",.T.)
+		dbSelectArea("SX4")
+		dbSetOrder(1)
+		dbSeek("AF4")
+		While ( !Eof() .And. SX3->X3_ARQUIVO == "AF4")	    
+		    cCampo := SX3->X3_CAMPO
+		    
+		    If Alltrim(cCampo) == "AF4_ORCAME" 
+		    	Replace AF4->&(cCampo) With cOrcNew
+		    Else
+		    	Replace AF4->&(cCampo) With XAF4->&(cCampo)
+		    EndIf	
+				
+			SX3->(dbSkip())
+		EndDo		
+		MsUnlock()
+	EndIf	
+
+	XAF4->(dbSkip())
+EndDo
+
+dbSelectArea("XAF4")
+dbCloseArea()
+
+********************************************************************************************************************
+
+ProcRegua(AF5->(RecCount()))
+
+// Criação e Abertura de Arquivo Temporario
+aCpoAF5 := {}
+
+dbSelectArea("SX3")
+dbSetOrder(1)
+dbSeek("AF5")
+While ( !Eof() .And. SX3->X3_ARQUIVO == "AF5")
+    
+    Aadd(aCpoAF5,{SX3->X3_CAMPO,SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
+        
+	SX3->(dbSkip())
+EndDo
+
+cArq := CriaTrab(aCpoAF5,.t.)
+dbUseArea( .T.,__LocalDriver,cArq,"XAF5", If(.F. .OR. .T., !.T., NIL), .F. )
+
+//Copia dos dados para arquivo temporario
+dbSelectArea("AF5")
+dbSetOrder(1)
+AF5->(dbSeek(xFilial("AF5")+cOrcMod))
+
+While AF5->(!EOF()) .And. AF5->AF5_ORCAME == cOrcMod
+	
+	RecLock("XAF5",.T.)
+	dbSelectArea("SX3")
+	dbSetOrder(1)
+	dbSeek("AF5")
+	While ( !Eof() .And. SX3->X3_ARQUIVO == "AF5")	    
+	    cCampo := SX3->X3_CAMPO
+	    
+	    If SX3->X3_TIPO <> "M" .And. SX3->X3_CONTEXT <> "V"
+	    	Replace XAF5->&(cCampo) With AF5->&(cCampo)
+	    EndIf
+			
+		SX3->(dbSkip())
+	EndDo		
+	MsUnlock()
+		 
+	AF5->(dbSkip())
+
+EndDo
+
+//Copia para novo orcamento
+dbSelectArea("XAF5")
+dbGoTop()
+
+While XAF5->(!EOF())
+    
+    IncProc("Gerando dados da AF5")
+    
+    dbSelectArea("AF5")
+	dbSetOrder(1)
+	
+	If !AF5->(dbSeek(xFilial("AF5")+cOrcNew+XAF5->AF5_EDT))	
+		RecLock("AF5",.T.)
+		dbSelectArea("SX3")
+		dbSetOrder(1)
+		dbSeek("AF5")
+		While ( !Eof() .And. SX3->X3_ARQUIVO == "AF5")	    
+		    cCampo := SX3->X3_CAMPO
+		    
+		    If Alltrim(cCampo) == "AF5_ORCAME" 
+		    	Replace AF5->&(cCampo) With cOrcNew
+		    ElseIf Alltrim(cCampo) == "AF5_EDT" .And. XAF5->AF5_NIVEL == "001"
+		    	Replace AF5->&(cCampo) With cOrcNew
+		    ElseIf Alltrim(cCampo) == "AF5_EDTPAI" .And. XAF5->AF5_NIVEL == "002"
+		    	Replace AF5->&(cCampo) With cOrcNew
+		    ElseIf Alltrim(cCampo) == "AF5_DESCRI" .And. XAF5->AF5_NIVEL == "001"
+		    	Replace AF5->&(cCampo) With mv_par02			
+		    Else
+		    	Replace AF5->&(cCampo) With XAF5->&(cCampo)
+		    EndIf	
+				
+			SX3->(dbSkip())
+		EndDo		
+		MsUnlock()
+    EndIf
+	
+	XAF5->(dbSkip())
+EndDo
+
+dbSelectArea("XAF5")
+dbCloseArea()
+
+********************************************************************************************************************
+
+ProcRegua(AF7->(RecCount()))
+
+// Criação e Abertura de Arquivo Temporario
+aCpoAF7 := {}
+
+dbSelectArea("SX3")
+dbSetOrder(1)
+dbSeek("AF7")
+While ( !Eof() .And. SX3->X3_ARQUIVO == "AF7")
+    
+    Aadd(aCpoAF7,{SX3->X3_CAMPO,SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
+        
+	SX3->(dbSkip())
+EndDo
+
+cArq := CriaTrab(aCpoAF7,.t.)
+dbUseArea( .T.,__LocalDriver,cArq,"XAF7", If(.F. .OR. .T., !.T., NIL), .F. )
+
+//Copia dos dados para arquivo temporario
+dbSelectArea("AF7")
+dbSetOrder(1)
+AF7->(dbSeek(xFilial("AF7")+cOrcMod))
+
+While AF7->(!EOF()) .And. AF7->AF7_ORCAME == cOrcMod
+	
+	RecLock("XAF7",.T.)
+	dbSelectArea("SX3")
+	dbSetOrder(1)
+	dbSeek("AF7")
+	While ( !Eof() .And. SX3->X3_ARQUIVO == "AF7")	    
+	    cCampo := SX3->X3_CAMPO
+	    
+	    If SX3->X3_TIPO <> "M" .And. SX3->X3_CONTEXT <> "V"
+	    	Replace XAF7->&(cCampo) With AF7->&(cCampo)
+	    EndIf	
+			
+		SX3->(dbSkip())
+	EndDo		
+	MsUnlock()
+		 
+	AF7->(dbSkip())
+
+EndDo
+
+//Copia para novo orcamento
+dbSelectArea("XAF7")
+dbGoTop()
+
+While XAF7->(!EOF())
+
+	IncProc("Gerando dados da AF7")
+    
+	dbSelectArea("AF3")
+	dbSetOrder(1)
+	
+	If !AF7->(dbSeek(xFilial("AF7")+cOrcNew+XAF7->AF7_TAREFA+XAF7->AF7_ITEM))	
+		RecLock("AF7",.T.)
+		dbSelectArea("SX3")
+		dbSetOrder(1)
+		dbSeek("AF7")
+		While ( !Eof() .And. SX3->X3_ARQUIVO == "AF7")	    
+		    cCampo := SX3->X3_CAMPO
+		    
+		    If Alltrim(cCampo) == "AF7_ORCAME" 
+		    	Replace AF7->&(cCampo) With cOrcNew
+		    Else
+		    	Replace AF7->&(cCampo) With XAF7->&(cCampo)
+		    EndIf	
+				
+			SX3->(dbSkip())
+		EndDo		
+		MsUnlock()
+	EndIf	
+
+	XAF7->(dbSkip())
+EndDo
+
+dbSelectArea("XAF7")
+dbCloseArea()
+********************************************************************************************************************
+
+ProcRegua(AJ2->(RecCount()))
+
+// Criação e Abertura de Arquivo Temporario
+aCpoAJ2 := {}
+
+dbSelectArea("SX3")
+dbSetOrder(1)
+dbSeek("AJ2")
+While ( !Eof() .And. SX3->X3_ARQUIVO == "AJ2")
+    
+    Aadd(aCpoAJ2,{SX3->X3_CAMPO,SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
+        
+	SX3->(dbSkip())
+EndDo
+
+cArq := CriaTrab(aCpoAJ2,.t.)
+dbUseArea( .T.,__LocalDriver,cArq,"XAJ2", If(.F. .OR. .T., !.T., NIL), .F. )
+
+//Copia dos dados para arquivo temporario
+dbSelectArea("AJ2")
+dbSetOrder(1)
+AJ2->(dbSeek(xFilial("AJ2")+cOrcMod))
+
+While AJ2->(!EOF()) .And. AJ2->AJ2_ORCAME == cOrcMod
+	
+	RecLock("XAJ2",.T.)
+	dbSelectArea("SX3")
+	dbSetOrder(1)
+	dbSeek("AJ2")
+	While ( !Eof() .And. SX3->X3_ARQUIVO == "AJ2")	    
+	    cCampo := SX3->X3_CAMPO
+	    
+	    If SX3->X3_TIPO <> "M" .And. SX3->X3_CONTEXT <> "V"
+	    	Replace XAJ2->&(cCampo) With AJ2->&(cCampo)
+	    EndIf
+			
+		SX3->(dbSkip())
+	EndDo		
+	MsUnlock()
+		 
+	AJ2->(dbSkip())
+
+EndDo
+
+//Copia para novo orcamento
+dbSelectArea("XAJ2")
+dbGoTop()
+
+While XAJ2->(!EOF())
+    
+    IncProc("Gerando dados da AJ2")
+    
+    dbSelectArea("AJ2")
+	dbSetOrder(1)
+	
+	If !AJ2->(dbSeek(xFilial("AJ2")+cOrcNew+XAJ2->AJ2_EDT))	
+		RecLock("AJ2",.T.)
+		dbSelectArea("SX3")
+		dbSetOrder(1)
+		dbSeek("AJ2")
+		While ( !Eof() .And. SX3->X3_ARQUIVO == "AJ2")	    
+		    cCampo := SX3->X3_CAMPO
+		    
+		    If Alltrim(cCampo) == "AJ2_ORCAME" 
+		    	Replace AJ2->&(cCampo) With cOrcNew		    
+		    Else
+		    	Replace AJ2->&(cCampo) With XAJ2->&(cCampo)
+		    EndIf	
+				
+			SX3->(dbSkip())
+		EndDo		
+		MsUnlock()
+    EndIf
+	
+	XAJ2->(dbSkip())
+EndDo
+
+dbSelectArea("XAJ2")
+dbCloseArea()
+
+********************************************************************************************************************
+
+ProcRegua(AJ3->(RecCount()))
+
+// Criação e Abertura de Arquivo Temporario
+aCpoAJ3 := {}
+
+dbSelectArea("SX3")
+dbSetOrder(1)
+dbSeek("AJ3")
+While ( !Eof() .And. SX3->X3_ARQUIVO == "AJ3")
+    
+    Aadd(aCpoAJ3,{SX3->X3_CAMPO,SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
+        
+	SX3->(dbSkip())
+EndDo
+
+cArq := CriaTrab(aCpoAJ3,.t.)
+dbUseArea( .T.,__LocalDriver,cArq,"XAJ3", If(.F. .OR. .T., !.T., NIL), .F. )
+
+//Copia dos dados para arquivo temporario
+dbSelectArea("AJ3")
+dbSetOrder(1)
+AJ3->(dbSeek(xFilial("AJ3")+cOrcMod))
+
+While AJ3->(!EOF()) .And. AJ3->AJ3_ORCAME == cOrcMod
+	
+	RecLock("XAJ3",.T.)
+	dbSelectArea("SX3")
+	dbSetOrder(1)
+	dbSeek("AJ3")
+	While ( !Eof() .And. SX3->X3_ARQUIVO == "AJ3")	    
+	    cCampo := SX3->X3_CAMPO
+	    
+	    If SX3->X3_TIPO <> "M" .And. SX3->X3_CONTEXT <> "V"
+	    	Replace XAJ3->&(cCampo) With AJ3->&(cCampo)
+	    EndIf
+			
+		SX3->(dbSkip())
+	EndDo		
+	MsUnlock()
+		 
+	AJ3->(dbSkip())
+
+EndDo
+
+//Copia para novo orcamento
+dbSelectArea("XAJ3")
+dbGoTop()
+
+While XAJ3->(!EOF())
+    
+    IncProc("Gerando dados da AJ3")
+    
+    dbSelectArea("AJ3")
+	dbSetOrder(1)
+	
+	If !AJ3->(dbSeek(xFilial("AJ3")+cOrcNew+XAJ3->AJ3_EDT))	
+		RecLock("AJ3",.T.)
+		dbSelectArea("SX3")
+		dbSetOrder(1)
+		dbSeek("AJ3")
+		While ( !Eof() .And. SX3->X3_ARQUIVO == "AJ3")	    
+		    cCampo := SX3->X3_CAMPO
+		    
+		    If Alltrim(cCampo) == "AJ3_ORCAME" 
+		    	Replace AJ3->&(cCampo) With cOrcNew		    
+		    Else
+		    	Replace AJ3->&(cCampo) With XAJ3->&(cCampo)
+		    EndIf	
+				
+			SX3->(dbSkip())
+		EndDo		
+		MsUnlock()
+    EndIf
+	
+	XAJ3->(dbSkip())
+EndDo
+
+dbSelectArea("XAJ3")
+dbCloseArea()
+
+********************************************************************************************************************
+
+ProcRegua(AJF->(RecCount()))
+
+// Criação e Abertura de Arquivo Temporario
+aCpoAJF := {}
+
+dbSelectArea("SX3")
+dbSetOrder(1)
+dbSeek("AJF")
+While ( !Eof() .And. SX3->X3_ARQUIVO == "AJF")
+    
+    Aadd(aCpoAJF,{SX3->X3_CAMPO,SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
+        
+	SX3->(dbSkip())
+EndDo
+
+cArq := CriaTrab(aCpoAJF,.t.)
+dbUseArea( .T.,__LocalDriver,cArq,"XAJF", If(.F. .OR. .T., !.T., NIL), .F. )
+
+//Copia dos dados para arquivo temporario
+dbSelectArea("AJF")
+dbSetOrder(1)
+AJF->(dbSeek(xFilial("AJF")+cOrcMod))
+
+While AJF->(!EOF()) .And. AJF->AJF_ORCAME == cOrcMod
+	
+	RecLock("XAJF",.T.)
+	dbSelectArea("SX3")
+	dbSetOrder(1)
+	dbSeek("AJF")
+	While ( !Eof() .And. SX3->X3_ARQUIVO == "AJF")	    
+	    cCampo := SX3->X3_CAMPO
+	    
+	    If SX3->X3_TIPO <> "M" .And. SX3->X3_CONTEXT <> "V"
+	    	Replace XAJF->&(cCampo) With AJF->&(cCampo)
+	    EndIf	
+			
+		SX3->(dbSkip())
+	EndDo		
+	MsUnlock()
+		 
+	AJF->(dbSkip())
+
+EndDo
+
+//Copia para novo orcamento
+dbSelectArea("XAJF")
+dbGoTop()
+
+While XAJF->(!EOF())
+
+	IncProc("Gerando dados da AJF")
+    
+	dbSelectArea("AJF")
+	dbSetOrder(1)
+	
+	If !AJF->(dbSeek(xFilial("AJF")+cOrcNew+XAJF->AJF_EDT+XAJF->AJF_USER+XAJF->AJF_FASE))	
+		RecLock("AJF",.T.)
+		dbSelectArea("SX3")
+		dbSetOrder(1)
+		dbSeek("AJF")
+		While ( !Eof() .And. SX3->X3_ARQUIVO == "AJF")	    
+		    cCampo := SX3->X3_CAMPO
+		    
+		    If Alltrim(cCampo) == "AJF_ORCAME" .Or. Alltrim(cCampo) == "AJF_EDT"
+		    	Replace AJF->&(cCampo) With cOrcNew
+		    Else
+		    	Replace AJF->&(cCampo) With XAJF->&(cCampo)
+		    EndIf	
+				
+			SX3->(dbSkip())
+		EndDo		
+		MsUnlock()
+	EndIf	
+
+	XAJF->(dbSkip())
+EndDo
+
+dbSelectArea("XAJF")
+dbCloseArea()
+
+********************************************************************************************************************
+
+ProcRegua(AJG->(RecCount()))
+
+// Criação e Abertura de Arquivo Temporario
+aCpoAJG := {}
+
+dbSelectArea("SX3")
+dbSetOrder(1)
+dbSeek("AJG")
+While ( !Eof() .And. SX3->X3_ARQUIVO == "AJG")
+    
+    Aadd(aCpoAJG,{SX3->X3_CAMPO,SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
+        
+	SX3->(dbSkip())
+EndDo
+
+cArq := CriaTrab(aCpoAJG,.t.)
+dbUseArea( .T.,__LocalDriver,cArq,"XAJG", If(.F. .OR. .T., !.T., NIL), .F. )
+
+//Copia dos dados para arquivo temporario
+dbSelectArea("AJG")
+dbSetOrder(1)
+AJG->(dbSeek(xFilial("AJG")+cOrcMod))
+
+While AJG->(!EOF()) .And. AJG->AJG_ORCAME == cOrcMod
+	
+	RecLock("XAJG",.T.)
+	dbSelectArea("SX3")
+	dbSetOrder(1)
+	dbSeek("AJG")
+	While ( !Eof() .And. SX3->X3_ARQUIVO == "AJG")	    
+	    cCampo := SX3->X3_CAMPO
+	    
+	    If SX3->X3_TIPO <> "M" .And. SX3->X3_CONTEXT <> "V"
+	    	Replace XAJG->&(cCampo) With AJG->&(cCampo)
+	    EndIf	
+			
+		SX3->(dbSkip())
+	EndDo		
+	MsUnlock()
+		 
+	AJG->(dbSkip())
+
+EndDo
+
+//Copia para novo orcamento
+dbSelectArea("XAJG")
+dbGoTop()
+
+While XAJG->(!EOF())
+
+	IncProc("Gerando dados da AJG")
+    
+	dbSelectArea("AJG")
+	dbSetOrder(1)
+	
+	If !AJG->(dbSeek(xFilial("AJG")+cOrcNew+XAJG->AJG_EDT+XAJG->AJG_USER+XAJG->AJG_FASE))	
+		RecLock("AJG",.T.)
+		dbSelectArea("SX3")
+		dbSetOrder(1)
+		dbSeek("AJG")
+		While ( !Eof() .And. SX3->X3_ARQUIVO == "AJG")	    
+		    cCampo := SX3->X3_CAMPO
+		    
+		    If Alltrim(cCampo) == "AJG_ORCAME"
+		    	Replace AJG->&(cCampo) With cOrcNew
+		    Else
+		    	Replace AJG->&(cCampo) With XAJG->&(cCampo)
+		    EndIf	
+				
+			SX3->(dbSkip())
+		EndDo		
+		MsUnlock()
+	EndIf	
+
+	XAJG->(dbSkip())
+EndDo
+
+dbSelectArea("XAJG")
+dbCloseArea()
+
+MsgInfo("Orçamento "+cOrcNew+" gerado com sucesso","Atenção")
+
+CodNewOrc()
+
+Close(oDlg)
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³VALIDPERG ³ Autor ³ RAIMUNDO PEREIRA      ³ Data ³ 01/08/02 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³ Especifico para Clientes Microsiga                         ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Static Function ValidPerg()
+_sAlias := Alias()
+DBSelectArea("SX1")
+DBSetOrder(1)
+cPerg := PADR(cPerg,10)
+aRegs:={}
+
+// Grupo/Ordem/Pergunta/Variavel/Tipo/Tamanho/Decimal/Presel/GSC/Valid/Var01/Def01/Cnt01/Var02/Def02/Cnt02/Var03/Def03/Cnt03/Var04/Def04/Cnt04/Var05/Def05/Cnt05
+aAdd(aRegs,{cPerg,'01' ,'Orcamento Origem   ?',''				 ,''			 ,'mv_ch1','C'  ,10     ,0      ,0     ,'G','                                ','mv_par01','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''    ,'AF1',''	,'' ,'','',''	})
+aAdd(aRegs,{cPerg,'02' ,'Descricao          ?',''				 ,''			 ,'mv_ch2','C'  ,90     ,0      ,0     ,'G','naovazio                        ','mv_par02','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''    ,'   ',''	,'' ,'','',''	})
+aAdd(aRegs,{cPerg,'03' ,'Data Orcamento     ?',''				 ,''			 ,'mv_ch3','D'  ,08     ,0      ,0     ,'G','naovazio                        ','mv_par03','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''    ,'   ',''	,'' ,'','',''	})
+AADD(aRegs,{cPerg,"04","Revisao              ?","","","mv_chG","N", 1,0,0,"C","","mv_par04","Sim","","","","","Nao","","","","","","","","","","","","","","","","","","","",""})
+
+For i:=1 to Len(aRegs)
+	If ! DBSeek(cPerg+aRegs[i,2])
+		RecLock("SX1",.T.)
+		For j:=1 to Max(39, Len(aRegs[i])) //fCount()
+			FieldPut(j,aRegs[i,j])
+		Next
+		MsUnlock()
+	Endif
+Next
+
+DBSkip()
+
+do while x1_grupo == cPerg
+	RecLock("SX1", .F.)
+	DBDelete()
+	DBSkip()
+Enddo
+
+DBSelectArea(_sAlias)
+
+Return
+
+//Função para gração do codigo do projeto
+Static Function CodOrc()
+
+cCod := space(10)
+
+dbSelectArea("SX6")
+dbSetOrder(1)
+
+If !SX6->(dbSeek("  "+Padr("MV_SEQPRJ",10)))
+	RecLock("SX6",.T.)
+	SX6->X6_FIL      := "  "
+	SX6->X6_VAR   	 := "MV_SEQPRJ"
+	SX6->X6_TIPO  	 := "C"
+	SX6->X6_DESCRIC  := SX6->X6_DSCSPA  := 	SX6->X6_DSCENG  := "Sequencia do Projeto/Orcamento"
+	SX6->X6_CONTEUD  := SX6->X6_CONTSPA :=  SX6->X6_CONTENG := "001"
+	SX6->X6_PROPRI   := 'U'
+	SX6->(MsUnlock())
+
+    cCod := Alltrim(SX6->X6_CONTEUD)+Substr(dtos(dDatabase),5,2)+Substr(dtos(dDatabase),3,2)+".00"
+Else
+	cSeq := GetMv("MV_SEQPRJ")
+	
+	cCod := Alltrim(cSeq)+Substr(dtos(dDatabase),5,2)+Substr(dtos(dDatabase),3,2)+".00"
+EndIf
+
+Return cCod
+
+
+
+//Função para gração do codigo do projeto
+Static Function CodNewOrc()
+
+dbSelectArea("SX6")
+dbSetOrder(1)
+
+cSeq := GetMv("MV_SEQPRJ")
+
+If SX6->(dbSeek("  "+Padr("MV_SEQPRJ",10)))
+	Reclock("SX6",.f.)
+	Replace SX6->X6_CONTEUD With StrZero(val(cSeq)+1,3)
+	Replace SX6->X6_CONTSPA With StrZero(val(cSeq)+1,3)
+	Replace SX6->X6_CONTENG With StrZero(val(cSeq)+1,3)
+	MsUnlock()		
+EndIf
+
+Return

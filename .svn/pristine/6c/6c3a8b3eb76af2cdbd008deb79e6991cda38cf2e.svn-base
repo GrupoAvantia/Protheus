@@ -1,0 +1,47 @@
+****************Criar campos ****************
+
+Descrição campo       Tipo    Tam  Dec  Mascara               Pasta
+
+Custo Hora AE8_CUSTHR  N       14   2    "@E 999,999,999.99"   Custo previsto
+%Encargo   AE8_ENCARG  N        6   2    "@E 999.99"           Custo previsto
+
+Custo Hora AF3_CUSTHR  N       14   2    "@E 999,999,999.99"
+%Encargo   AF3_ENCARG  N        6   2    "@E 999.99"
+
+Custo Hora AFA_CUSTHR  N       14   2    "@E 999,999,999.99"
+%Encargo   AFA_ENCARG  N        6   2    "@E 999.99"
+
+
+
+****************Criar gatilhos****************
+
+
+Dominio     Ct.Dom.    Regra
+
+AE8_ENCARG  AE8_VALOR  M->AE8_CUSTHR+(M->AE8_CUSTHR*M->AE8_ENCARG/100)
+AE8_CUSTHR  AE8_VALOR  M->AE8_CUSTHR+(M->AE8_CUSTHR*M->AE8_ENCARG/100)
+
+AF3_ENCARG  AF3_CUSTD  M->AF3_CUSTHR+(M->AF3_CUSTHR*M->AF3_ENCARG/100)
+AF3_CUSTHR  AF3_CUSTD  M->AF3_CUSTHR+(M->AF3_CUSTHR*M->AF3_ENCARG/100)
+AF3_RECURS  AF3_CUSTHR AE8->AE8_CUSTHR
+AF3_RECURS  AF3_ENCARG AE8->AE8_ENCARG
+
+AFA_ENCARG  AFA_CUSTD  M->AFA_CUSTHR+(M->AFA_CUSTHR*M->AFA_ENCARG/100)
+AFA_CUSTHR  AFA_CUSTD  M->AFA_CUSTHR+(M->AFA_CUSTHR*M->AFA_ENCARG/100)
+
+
+****************Alterar Campos****************
+
+AF1_ORCAME
+X3_RELACAO U_CODORC()
+X3_VISUAL  V
+
+**************Alterar Perguntas***************
+
+X1_GRUPO   PS110A
+X1_VALID   ExistChav("AF8",UPPER(&(ReadVar()))).And.U_CodPrj()
+
+
+Parametro do Sequencial do Orcamento/Projeto
+
+MV_SEQPRJ (Criado automaticamente pela rotina)

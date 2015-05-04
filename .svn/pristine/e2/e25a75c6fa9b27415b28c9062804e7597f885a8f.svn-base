@@ -1,0 +1,699 @@
+#INCLUDE "MATR055.CH"
+#INCLUDE "PROTHEUS.CH"
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR055  ³ Autor ³Alexandre Inacio Lemes ³ Data ³30/06/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Programa para imprimir relacao das solicitacoes de NCP     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ MATR055(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function Matr055()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And. TRepInUse()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Interface de impressao                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:= ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR055R3()
+EndIf
+                                               
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ ReportDef³Autor  ³Alexandre Inacio Lemes ³Data  ³30/06/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Programa para imprimir relacao das solicitacoes de NCP     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ oExpO1: Objeto do relatorio                                ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+Local cTitle   := FunDesc() // Informe Sol. de NCP
+Local oReport 
+Local oSection1
+
+#IFDEF TOP
+	Local cAliasSCU := GetNextAlias()
+#ELSE
+	Local cAliasSCU := "SCU"
+#ENDIF
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³  Verifica as perguntas selecionadas                             ³
+//³ mv_par01 -> Da solicitacao.      				           		³
+//³ mv_par02 -> Ate solicitacao.          							³
+//³ mv_par03 -> Do fornecedor.				                 		³
+//³ mv_par04 -> Ate o fornecedor.				       				³
+//³ mv_par05 -> Da emissao.				        		       		³
+//³ mv_par06 -> Ate a emissao.				       					³
+//³ mv_par07 -> Listar. (1)Pendetes.(2) Encerradas.(3)Todas.   		³
+//³ mv_par08 -> Moeda. 							       				³
+//³ mv_par09 -> Outras moedas.(1)Converter.(2)Ignorar.  			³
+//³                                                     			³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Pergunte("MTR055",.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao do componente de impressao                                      ³
+//³                                                                        ³
+//³TReport():New                                                           ³
+//³ExpC1 : Nome do relatorio                                               ³
+//³ExpC2 : Titulo                                                          ³
+//³ExpC3 : Pergunte                                                        ³
+//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+//³ExpC5 : Descricao                                                       ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:= TReport():New("MTR055",cTitle,"MTR055", {|oReport| ReportPrint(oReport,cAliasSCU)},STR0009) // "Emite uma relacao das solicitacoes de NCP" 
+oReport:SetLandscape() 
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da secao utilizada pelo relatorio                               ³
+//³                                                                        ³
+//³TRSection():New                                                         ³
+//³ExpO1 : Objeto TReport que a secao pertence                             ³
+//³ExpC2 : Descricao da seçao                                              ³
+//³ExpA3 : Array com as tabelas utilizadas pela secao. A primeira tabela   ³
+//³        sera considerada como principal para a seção.                   ³
+//³ExpA4 : Array com as Ordens do relatório                                ³
+//³ExpL5 : Carrega campos do SX3 como celulas                              ³
+//³        Default : False                                                 ³
+//³ExpL6 : Carrega ordens do Sindex                                        ³
+//³        Default : False                                                 ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da celulas da secao do relatorio                                ³
+//³                                                                        ³
+//³TRCell():New                                                            ³
+//³ExpO1 : Objeto TSection que a secao pertence                            ³
+//³ExpC2 : Nome da celula do relatório. O SX3 será consultado              ³
+//³ExpC3 : Nome da tabela de referencia da celula                          ³
+//³ExpC4 : Titulo da celula                                                ³
+//³        Default : X3Titulo()                                            ³
+//³ExpC5 : Picture                                                         ³
+//³        Default : X3_PICTURE                                            ³
+//³ExpC6 : Tamanho                                                         ³
+//³        Default : X3_TAMANHO                                            ³
+//³ExpL7 : Informe se o tamanho esta em pixel                              ³
+//³        Default : False                                                 ³
+//³ExpB8 : Bloco de código para impressao.                                 ³
+//³        Default : ExpC2                                                 ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSection1:= TRSection():New(oReport,STR0012,{"SCU","SA2"},/*aOrdem*/)
+oSection1:SetHeaderPage()
+
+TRCell():New(oSection1,"CU_NUMERO" ,"SCU",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"CU_FORNECE","SCU",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"A2_NOME"   ,"SA2",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"CU_EMISSAO","SCU",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"VALMINIMO" ,"   ",STR0010,PesqPict("SCU","CU_VALMIN", 20),20,/*lPixel*/,{|| xMoeda((cAliasSCU)->CU_VALMIN,(cAliasSCU)->CU_MOEDA,mv_par08,(cAliasSCU)->CU_EMISSAO,MsDecimais(mv_par08)) })
+TRCell():New(oSection1,"CU_MOEDA"  ,"SCU",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"CU_NFISCAL","SCU",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"CU_SERNF"  ,"SCU",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"MOTIVO"    ,"   ",STR0011,/*Picture*/,40,/*lPixel*/,{|| cMotivo })
+TRCell():New(oSection1,"CU_NCRED"  ,"SCU",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"CU_SERNCP" ,"SCU",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+
+Return(oReport)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrin³ Autor ³Alexandre Inacio Lemes ³Data  ³30/06/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Programa para imprimir relacao das solicitacoes de NCP     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatório                           ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport,cAliasSCU)
+
+Local oSection1  := oReport:Section(1) 
+Local lPendente  := .T.
+Local lEncerrada := .T.
+
+#IFDEF TOP
+	Local cWhere := ""
+#ELSE
+    Local cCondicao := ""
+#ENDIF
+
+Private cMotivo  := ""
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Filtragem do relatorio                                                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SCU")
+
+#IFDEF TOP
+	
+ 	MakeSqlExpr(oReport:uParam)
+    
+ 	oReport:Section(1):BeginQuery()	
+
+	cWhere := "%" 
+
+	If mv_par07 == 1
+		cWhere +="AND CU_NCRED = '" + Space(TamSx3("CU_NCRED")[1]) + "'" 
+	ElseIf mv_par07 == 2
+		cWhere +="AND CU_NCRED <> '" + Space(TamSx3("CU_NCRED")[1]) + "'" 
+	EndIf
+
+	If mv_par09 == 2
+		cWhere += "AND CU_MOEDA = "+AllTrim(Str(mv_par08))
+    EndIf
+
+	cWhere += "%" 
+
+	BeginSql Alias cAliasSCU
+	 
+	SELECT SCU.*
+	 
+	FROM %table:SCU% SCU
+	 
+	WHERE CU_FILIAL  = %xFilial:SCU% AND 
+		CU_NUMERO   >= %Exp:mv_par01% AND 
+	    CU_NUMERO   <= %Exp:mv_par02% AND      
+	    CU_FORNECE  >= %Exp:mv_par03% AND 
+	    CU_FORNECE  <= %Exp:mv_par04% AND          
+	    CU_EMISSAO  >= %Exp:Dtos(mv_par05)% AND 
+	    CU_EMISSAO  <= %Exp:Dtos(mv_par06)% AND 
+	    SCU.%NotDel% 
+	    %Exp:cWhere%	    
+
+	ORDER BY CU_FILIAL,CU_NCRED,CU_NUMERO
+	   
+	EndSql
+	
+	oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
+
+#ELSE
+
+	MakeAdvplExpr(oReport:uParam)
+
+	cCondicao := 'CU_FILIAL=="' + xFilial()+ '".And.'
+	cCondicao += 'CU_NUMERO>="' + mv_par01 + '".And.CU_NUMERO<="' + mv_par02 + '".And.'
+	cCondicao += 'CU_FORNECE>="'+ mv_par03 + '".And.CU_FORNECE<="'+ mv_par04 + '".And.'
+	cCondicao += 'DTOS(CU_EMISSAO)>="'+DTOS(mv_par05)+'".And.DTOS(CU_EMISSAO)<="'+DTOS(mv_par06)+'"'
+	
+	If mv_par07 == 1
+		cCondicao +='.And. CU_NCRED == "' + Space(TamSx3("CU_NCRED")[1]) + '" '
+	ElseIf mv_par07 == 2
+		cCondicao +='.And. CU_NCRED <> "' + Space(TamSx3("CU_NCRED")[1]) + '" '
+	EndIf
+
+	If mv_par09 == 2
+		cCondicao += '.And. CU_MOEDA ==  mv_par08 ' 
+    EndIf
+				
+	oReport:Section(1):SetFilter(cCondicao,"CU_FILIAL+CU_NCRED+CU_NUMERO")
+
+#ENDIF		
+
+TRPosition():New(oSection1,"SA2",1,{|| xFilial("SA2")+(cAliasSCU)->CU_FORNECE+(cAliasSCU)->CU_LOJA})	
+
+oReport:SetMeter(SCU->(LastRec()))
+dbSelectArea(cAliasSCU)               
+
+oSection1:Init()
+
+While !oReport:Cancel() .And. !(cAliasSCU)->(Eof())
+	
+	oReport:IncMeter()
+
+	If oReport:Cancel()
+		Exit
+	EndIf
+
+    If lPendente .And. Empty((cAliasSCU)->CU_NCRED) 
+		oReport:SkipLine()
+		oReport:PrintText(STR0002,,oSection1:Cell("CU_NUMERO"):ColPos()) //"|  P E N D E N T E S   |"
+		oReport:FatLine()
+        lPendente := .F.
+    EndIf
+        
+    If lEncerrada .And. !Empty((cAliasSCU)->CU_NCRED)
+		oReport:SkipLine()
+		oReport:PrintText(STR0003,,oSection1:Cell("CU_NUMERO"):ColPos()) //"|  E N C E R R A D A S  |"
+		oReport:FatLine()
+	    lEncerrada := .F.
+	EndIf
+
+	cMotivo := Posicione("SX5",1,xFilial('SX5')+ 'O1'+ (cAliasSCU)->CU_MOTIVO,RetX5Titulo())
+
+	oSection1:PrintLine()
+	
+	dbSelectArea(cAliasSCU)
+	dbSkip()
+
+EndDo
+
+oSection1:Finish()
+
+Return Nil
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ Matr055R3³ Autor ³ Alexandre Silva       ³ Data ³25/10/2002³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Programa para imprimir relacao das solicitacoes de NCP     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ Void Mtr055R3(void)                                        ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function Matr055R3()
+
+Local cDesc1    := ""
+Local cDesc2    := ""
+Local cDesc3    := ''
+Local cString	:= "SCU"
+Local Titulo 	:= FunDesc()
+Local lRet		:= .T.
+
+If cPaisLoc = "MEX"
+	Private Tamanho := 'G'
+Else
+	Private Tamanho := 'M'
+EndIf
+Private cCabec1	:= ""
+Private cCabec2	:= ""
+Private nLastKey:= 0
+Private cPerg	:= "MTR055"
+Private NomeProg:= "MATR055"
+Private wnRel 	:= "MATR055"   	//Nome Default do relatorio em Disco
+Private aReturn := {STR0007,1,STR0008,1,2,1,"",1}  //"Zebrado"###"Administracao"
+Private Li      := 80
+Private m_pag   := 1
+
+Pergunte(cPerg,.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas pelos parametros.					  		³
+//³ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ³
+//³                                  				           		³
+//³ mv_par01 -> Da solicitacao.      				           		³
+//³ mv_par02 -> Ate solicitacao.          							³
+//³ mv_par03 -> Do fornecedor.				                 		³
+//³ mv_par04 -> Ate o fornecedor.				       				³
+//³ mv_par05 -> Da emissao.				        		       		³
+//³ mv_par06 -> Ate a emissao.				       					³
+//³ mv_par07 -> Listar. (1)Pendetes.(2) Encerradas.(3)Todas.   		³
+//³ mv_par08 -> Moeda. 							       				³
+//³ mv_par09 -> Outras moedas.(1)Converter.(2)Ignorar.  			³
+//³                                                     			³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+WnRel := SetPrint(cString,WnRel,cPerg,@Titulo,cDesc1,cDesc2,cDesc3,.F.,,,Tamanho)
+
+If nLastKey == 27
+	DbClearFilter()
+	lRet := .F.
+Else
+	SetDefault( aReturn , cString ,,,,2) 
+    RptStatus({|lEnd| Mtr055Cfg(@lEnd,WnRel,Titulo,Tamanho)})
+Endif
+
+Return lRet
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Program   ³Mtr055Cfg ³ Autor ³ Alexandre Silva       ³ Data ³ 27.06.01 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Faz a selecao dos registro para exibicao.                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³                                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function Mtr055Cfg(lEnd,WnRel,Titulo,Tamanho)
+
+Local cAliasSCU	:= "SCU"
+Local cArqInd	:= ""
+Local cSolDe	:= xFilial("SCU")+Space(TamSX3("CU_NCRED")[1])+mv_par01
+Local cSolAte	:= xFilial("SCU")+Replicate("z",TamSX3("CU_NCRED")[1])+mv_par02
+Local nUltInd	:= 0
+Local lImpSep	:= iiF(mv_par07==2 ,.F.,.T.)//Imprime Separador?
+
+#IFDEF TOP
+	Local cQuery:=""
+#ENDIF
+
+Private nDecimal:= MsDecimais(mv_par08)
+Private Li 		:= 56
+Private	cPictVal:= PesqPict("SCU","CU_VALMIN", 20)
+Private lQuery	:= .F.
+Private aColPos := AjCabec({{"SCU->CU_NUMERO",,10},{"SCU->CU_FORNECE",,20},{"SCU->CU_EMISSAO",,11},;
+				{"SCU->CU_VALMIN",,20},{"SCU->CU_MOEDA",,05},{"SCU->CU_NFISCAL"},{"SCU->CU_SERNF",,05},;
+				{"SCU->CU_MOTIVO",,22},{"SCU->CU_NCRED"},{"SCU->CU_SERNCP",,05}};
+				,{Tamanho})
+#IFDEF TOP
+	lQuery := .T.
+	cAliasSCU:="TabSCU"
+	If Select(cAliasSCU)<>0
+		DbSelectArea(cAliasSCU)
+		DbCloseArea()
+	Endif
+	cQuery:="SELECT TabSCU.*,TabSA2.A2_NOME,TabSX5."+RetX5Titulo()+" "
+	cQuery+="FROM   " + RetSqlName("SCU")+" TabSCU, "+ RetSqlName("SA2")+" TabSA2, "+ RetSqlName("SX5")+" TabSX5 "
+	cQuery+="WHERE TabSCU.CU_FILIAL	  = '"+xFilial("SCU")+"'"
+	cQuery+=" AND  TabSCU.CU_NUMERO  >= '"+mv_par01+"' AND TabSCU.CU_NUMERO  <= '"+mv_par02+"'"
+	cQuery+=" AND  TabSCU.CU_FORNECE >= '"+mv_par03+"' AND TabSCU.CU_FORNECE <= '"+mv_par04+"'"
+	cQuery+=" AND  TabSCU.CU_EMISSAO >= '"+DtoS(mv_par05)+"' AND TabSCU.CU_EMISSAO <= '"+DtoS(mv_par06)+"'"
+	If mv_par07 == 1
+		cQuery +=" AND TabSCU.CU_NCRED = '"+Space(TamSx3("CU_NCRED")[1])+"'"
+	ElseIf mv_par07 == 2
+		cQuery +=" AND TabSCU.CU_NCRED <>'"+Space(TamSx3("CU_NCRED")[1])+"'"
+	EndIf
+	If mv_par09 ==2  //Nao imprimir notas com moeda diferente da escolhida.
+		cQuery +=" AND TabSCU.CU_MOEDA ='"+Str(mv_par08)+"'"
+	EndIf
+	cQuery += " AND TabSA2.A2_FILIAL = '"+xFilial("SA2")+"'"
+	cQuery += " AND TabSA2.A2_COD    = TabSCU.CU_FORNECE AND TabSA2.A2_LOJA = TabScu.CU_LOJA"
+	cQuery += " AND TabSX5.X5_FILIAL = '"+xFilial("SX5")+"' AND TabSX5.X5_TABELA = 'O1'"
+	cQuery += " AND TabSX5.X5_CHAVE  = TabSCU.CU_MOTIVO"
+	cQuery += " AND TabSCU.D_E_L_E_T_<>'*' ORDER BY TabScu.CU_NCRED,TabSCU.CU_EMISSAO,TabSCU.CU_FORNECE"
+	
+	cQuery:=ChangeQuery(cQuery)
+	dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQuery),cAliasSCU,.F.,.T.)
+	TCSetField(cAliasSCU,"CU_EMISSAO","D",8,0)
+	dbSelectArea(cAliasSCU)
+#ELSE
+	dbSelectArea(cAliasSCU)
+	cArqInd	:= CriaTrab(Nil,.F.)
+	IndRegua("SCU",cArqInd,"CU_FILIAL+CU_NCRED+CU_NUMERO",,,OemToAnsi(STR0001))
+	nUltInd := RetIndex("SCU")
+	dbSetIndex(cArqInd + OrdBagExt() )
+	dbSetOrder(nUltInd+1)
+	dbSeek(cSolDe,.T.)
+#ENDIF
+
+Do While  CU_FILIAL+CU_NCRED+CU_NUMERO <= cSolAte .And. !Eof()
+	//Verifica o fornecedor
+	If 	(CU_NUMERO  >= mv_par01 .And. CU_NUMERO  <= mv_par02) .And.;
+		(CU_FORNECE >= mv_par03 .And. CU_FORNECE <= mv_par04) .And.;
+		(CU_EMISSAO >= mv_par05 .And. CU_EMISSAO <= mv_par06) .And.;
+		((mv_par09 ==  2 		.And. CU_MOEDA 	 ==  mv_par08) .Or. (mv_par09 == 1))
+		
+		If Li > 55
+		    cCabec1 := aColPos[01]
+			Cabec(Titulo,cCabec1,cCabec2,WnRel,Tamanho)
+		End If
+	
+		If (mv_par07 == 1 .And. Empty(CU_NCRED)) .Or. (mv_par07 == 3 .And. Empty(CU_NCRED))
+			Mtr055Det(lImpSep .And. Empty(CU_NCRED),Empty(CU_NCRED))	
+			lImpSep	:= .F.
+		ElseIf (mv_par07 == 2  .And.!Empty(CU_NCRED)) .Or. (mv_par07 == 3 .And. !Empty(CU_NCRED))
+			lImpSep := Iif(lImpSep .And. Li == 8,.F.,lImpSep)
+			Mtr055Det(!lImpSep .And.!Empty(CU_NCRED),Empty(CU_NCRED))	
+			lImpSep	:= .T.
+		EndIf
+	EndIf
+	dbSkip()
+EndDo
+
+If li < 59
+	Roda(0,Space(10),Tamanho)
+End
+
+Set Printer To
+dbCommitAll()
+
+OurSpool(WnRel)
+Ms_Flush()
+
+If !lQuery
+	Ferase(cArqInd+OrdBagExt())
+EndIf	
+
+Return lEnd
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³Mtr055Det ³ Autor ³ Alexandre  Silva      ³ Data ³ 28.10.02 ³±±
+±±³ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³Detalhe do Relatorio                                        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³Mtr055Det(ParL2,ParL2)                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³                                                            ³±±
+±±³          ³ ParL1 = Imprime seprador?                                  ³±±
+±±³          ³ ParL2 = Tipo do seprador encerradas ou abertas             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ SIGACOM                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function Mtr055Det(lImpCab,lLisPend)
+
+Local cFornece 	:= ""
+Local cMotivo	:= ""
+
+If lImpCab .And. lLisPend
+	Li++
+	@ Li++,00  pSay STR0002 //"|  P E N D E N T E S   |"
+	@ Li++,00  pSay __PrtfatLine()
+ElseIf lImpCab .And. !lLisPend
+	Li++
+	@ Li++,00  pSay STR0003 //"|  E N C E R R A D A S  |"
+	@ Li++,00 	pSay __PrtfatLine()
+EndIf
+
+If lQuery
+	cFornece	:= AllTrim(CU_FORNECE) + "-" + SubStr(A2_NOME,1,16)
+	cMotivo		:= Substr(Alltrim(&(RetX5Titulo())),1,22)
+Else
+	cFornece	:= AllTrim(CU_FORNECE) + "-" + Substr(Posicione("SA2",1,xFilial('SA2')+SCU->CU_FORNECE+SCU->CU_LOJA,"A2_NOME"),1,16)
+	cMotivo		:= Substr(Posicione("SX5",1,xFilial('SX5')+ 'O1'+ SCU->CU_MOTIVO,RetX5Titulo()),1,22)
+EndIf                 
+
+@ Li,aColPos[02] 	pSay CU_NUMERO 		  
+@ Li,aColPos[03] 	pSay cFornece
+@ Li,aColPos[04]+2	pSay CU_EMISSAO
+@ Li,aColPos[05] 	pSay xMoeda(CU_VALMIN,CU_MOEDA,mv_par08,CU_EMISSAO,nDecimal) Picture cPictVal
+@ Li,aColPos[06]+2 pSay CU_MOEDA
+@ Li,aColPos[07] 	pSay CU_NFISCAL
+@ Li,aColPos[08] 	pSay CU_SERNF
+@ Li,aColPos[09] 	pSay cMotivo
+@ Li,aColPos[10] 	pSay CU_NCRED
+@ Li,aColPos[11] 	pSay CU_SERNCP
+Li++
+
+Return Nil
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma   ³AJCABEC   ºAutor  ³Alexandre Silva     º Data ³  21/11/01   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.      ³Programa para o alinhamento do cabecalho,  com as colunas   º±±
+±±º           ³dos relatorios.                                             º±±
+±±ºParamet.   ³aCabCamp matriz com tres elementos, que vao definir as ca-  º±±
+±±º           ³ racteristicas do cabecalho.                                º±±
+±±º           ³aCabCamp[1]-Parametro obrigatorio deve conter o campo para  º±±
+±±º           ³ alinhamento no formato ARQ->CAMPO ou texto para ser alinha º±±
+±±º           ³ do entre "".                                               º±±
+±±º           ³aCabCamp[2]-Parametro opcional indica o tipo de alinhamento º±±
+±±º           ³ da coluna, C-Centralizado,E-esquerdo,D-Direto.             º±±
+±±º           ³aCabCamp[3]-Parametro opcional indica o tamanho da coluna.  º±±
+±±º           ³----------------------------------------------------------- º±±
+±±º           ³aRelTipo Contem as caracteristicas do relatorio             º±±
+±±º           ³aRelTipo[1]-Paramentro obrigatorio contem o tamanho do rela º±±
+±±º           ³ torio                                                      º±±
+±±º           ³aRelTipo[2]-Parametro opcional contem o numero de espacos   º±±
+±±º           ³ entre as colunas do relatorio                              º±±
+±±º           ³aRelTipo[3]-Parametro opcional indica se o relatorio e cen  º±±
+±±º           ³ centralizado ou nao (.T.) centralizado                     º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso        ³ Generico                                                   º±±
+±±ºRetorno    ³ aRetCabec. Retorno do cabecalho onde o 1 elemento e a      º±±
+±±º           ³  um texto contendo todos os texto do cabec ja alinhado,    º±±
+±±º           ³  os demais elementos sao as posicoes das colunas.          º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function AjCabec(aCabCamp,aRelTipo)
+
+Local aRetCabec := {}
+Local aSX3Camp   := {}
+Local nTamTex   := 0
+Local nTamCam   := 0
+Local nEspUsado := 0
+Local nSomCol	:= 0
+Local nSomCam   := 0
+Local nPriCol   := 0
+Local nTamPag   := IIF(Upper(aRelTipo[1]) == "G",220,IIF(Upper(aRelTipo[1]) == "M",132,80))
+Local nZ 		:= 0
+Local nX 		:= 0
+Local nK 		:= 0
+Local nY 		:= 0
+
+aSize(aRelTipo,3)
+aSize(aRetCabec,Len(aCabCamp)+1)
+aRetCabec[1]    := ""
+
+If aCabCamp != NIL .AND. aRelTipo != NIL
+	For nY = 1 To Len(aCabCamp)
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Faz o acerto do tamanho dos campos e relatorio.³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		aSize(aCabCamp[nY],3)
+		If "->" $ aCabCamp[nY,1]  //Verifica se e para varrer o SX3
+			aSx3Camp := CaracCamp(aCabCamp[nY,1])
+			aCabCamp[nY,1]:= aSX3Camp[1]
+			If aCabCamp[nY,2] == NIL
+				aCabCamp[nY,2] := aSX3Camp[2]
+			EndIf
+			If aCabCamp[nY,3] == NIL
+				aCabCamp[nY,3] := aSX3Camp[3]
+			EndIf
+		Else
+			If aCabCamp[nY,3] == NIL
+				aCabCamp[nY,3] := Len(aCabCamp[nY,1])
+			EndIf
+		EndIf			
+		nSomCam += aCabCamp[nY,3]
+	End For
+	
+	If aRelTipo[2] == NIL .OR. aRelTipo[2] == 0 //Espacos entre colunas automatico?
+		aRelTipo[2] := NOROUND((nTamPag - nSomCam) / Len(aCabCamp),0)  //Espacos livre para os separadores.
+	EndIf	
+	
+	For nK = 1 To Len(aCabCamp) //Soma as colunas
+		nSomCol += aCabCamp[nK,3] +	aRelTipo[2]
+	End For
+	
+	If nSomCol <= nTamPag .AND. aRelTipo[2] >= 1 // Verifica se colunas cabem na pagina.
+		
+		If aRelTipo[3] != NIL .AND. aRelTipo[3] == .T.  //Relatorio e centralizado na pagina?
+			nPriCol := Round((nTamPag - nSomCol)/2,0)
+			aRetCabec[1] += Replicate(" ",nPricol)
+		EndIf
+		
+		For nX = 1 To Len(aCabCamp) //Alinha o cabecalho
+			nTamTex  :=  Len(aCabCamp[nX,1])
+			nTamCam  :=  aCabCamp[nX,3]
+			aCabCamp[nX,1] := LEFT(aCabCamp[nX,1],nTamCam)
+			nTamCam  += aRelTipo[2]
+			Do Case
+			Case Upper(aCabCamp[nX,2]) == "D" // Texto a Direita
+				aRetCabec[1] += PadL(aCabCamp[nX,1],nTamCam - aRelTipo[2]) + REPLICATE(" ", aRelTipo[2])
+			Case Upper(aCabCamp[nX,2]) == "E" // Texto a Esquerda
+				aRetCabec[1] += PadR(aCabCamp[nX,1],nTamCam)
+			Otherwise // Senao ao centro
+				aRetCabec[1] += PadC(aCabCamp[nX,1],nTamCam)
+			EndCase
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³Atualiza a matriz que vai retornar a posicao para impressao.³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			If nX == 1
+				aRetCabec[nX+1] := nPriCol 
+				nEspUsado += nPriCol
+			Else
+				aRetCabec[nX+1] := aCabCamp[nX-1,3] + nEspUsado + aRelTipo[2]
+				nEspUsado +=  (aCabCamp[nX-1,3]  + aRelTipo[2]) 
+			EndIf			
+		End For
+	Else
+		For nZ = 1 To Len(aRetCabec)
+			If nZ == 1
+				If aRelTipo[2] < 1
+					aRetCabec[nZ] := STR0004 //"Espaco insuficiente para impressao do relatorio"
+				Else
+					aRetCabec[nZ] := STR0004 //"Espaco insuficiente para impressao do relatorio"
+				EndIf
+			Else
+				aRetCabec[nZ] := 1
+			EndIf
+		End For		
+	EndIf		
+Else
+	MsgBox(STR0005,"INFO")  //"Erro na passagem do parametro aCabCamp ou aRelTipo"
+EndIf
+
+Return aRetCabec
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³CaracCamp ºAutor  ³Alexandre Silva     º Data ³  21/11/01   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Le no SX3 as caracteristicas do campo.                      º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Geral                                                      º±±
+±±ºRetorno   ³ Matriz contendo a descricao do campo alinhamento e tamanho º±±
+±±º          ³ para a coluna.                                             º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+FUNCTION CaracCamp(cCampoPesq)
+
+Local aSX3Camp 	:= {,,}
+Local aArea		:= GetArea()
+
+dbSelectArea("SX3")
+dbSetOrder(2)
+If dbSeek(SUBST(cCampoPesq,AT(">",cCampoPesq)+1,Len(cCampoPesq)))
+	aSx3Camp[1] := X3Titulo()
+	If X3_TIPO == "N"
+		aSx3Camp[2] := "D"
+	Else
+		aSx3Camp[2] := "E"			
+	EndIf		
+	aSx3Camp[3] := X3_TAMANHO
+Else
+	aSx3Camp[1] :=  STR0006 //"ERRO SX3"
+	aSx3Camp[2] :=  "E"
+	aSx3Camp[3] :=  8
+EndIf
+RestArea(aArea)
+
+Return aSx3Camp
+
+Static Function RetX5Titulo()
+
+Local cTitulo := "X5_DESCRI"
+
+If __Language=="SPANISH"
+	cTitulo := "X5_DESCSPA"
+ElseIf __Language=="ENGLISH"
+	cTitulo := "X5_DESCENG"
+EndIf
+
+Return cTitulo

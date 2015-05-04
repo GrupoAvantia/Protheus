@@ -1,0 +1,937 @@
+#INCLUDE "CNTR030.CH"
+#INCLUDE "PROTHEUS.CH"
+
+Function CNTR030()
+local cMens := ""
+Local nOpca := 0
+
+Private cTitRel := OemToAnsi(STR0001) //Medicoes
+Private lEnd	:= .F.
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Ajustar perguntas do SX1	   			  				     ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+AjustaSX1()
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Ajustar consulta padrao da medicao              		     ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+AjustaSXB()
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Variaveis utilizadas para parametros                         |
+//| mv_par01     // Medicao de:                                  |
+//| mv_par02	 // Medicao ate:	                             |
+//ณ mv_par03     // Contrato de:                                 ณ
+//ณ mv_par04     // Contrato ate:                                ณ
+//ณ mv_par05     // Data Inicio:                                 ณ
+//ณ mv_par06     // Data Fim:                                    ณ
+//ณ mv_par07     // Situacao de:                                 ณ
+//ณ mv_par08     // Situacao ate:                                ณ
+//ณ mv_par09     // Fornecedor de:                               ณ
+//ณ mv_par10     // Fornecedor ate:                              ณ
+//ณ mv_par11     // Tipo de Contrato?:                           ณ
+//ณ mv_par12     // Exibir Desconto: Sim/Nao                     ณ
+//ณ mv_par13     // Exibir Multas/Bonificacoes: Sim/Nao          ณ
+//ณ mv_par14     // Exibir Caucoes Retidas: Sim/Nao              ณ  
+//ณ mv_par15     // Cliente de:                                  ณ
+//ณ mv_par16     // Cliente ate:                                 ณ
+//| mv_par17     // Imprimir valores - Moeda do ctr/medic./outra ณ
+//| mv_par18     // Moeda: 										 ณ
+//| mv_par19     // Data de Referencia:							 ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+Pergunte("CNR030",.F.)
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Tela de configuracao do Relatorio			         	     ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+DEFINE MSDIALOG oDlg FROM  96,9 TO 310,592 TITLE OemToAnsi(STR0001) PIXEL    //"Medicoes"
+@ 18, 6 TO 66, 287 LABEL "" OF oDlg  PIXEL
+@ 29, 15 SAY OemToAnsi(STR0002) SIZE 268, 8 OF oDlg PIXEL    //"Este relatorio ira emitir uma relacao de medicoes, exibindo suas respectivas"
+@ 38, 15 SAY OemToAnsi(STR0003) SIZE 268, 8 OF oDlg PIXEL    //"multas/bonificacoes, descontos e caucoes retidas. Favor verificar os  "
+@ 48, 15 SAY OemToAnsi(STR0004) SIZE 268, 8 OF oDlg PIXEL    //"parametros do relatorio.."
+DEFINE SBUTTON FROM 80, 190 TYPE 5 ACTION Pergunte("CNR030",.T.) ENABLE OF oDlg
+DEFINE SBUTTON FROM 80, 223 TYPE 1 ACTION (oDlg:End(),nOpca:=1) ENABLE OF oDlg
+DEFINE SBUTTON FROM 80, 255 TYPE 2 ACTION oDlg:End() ENABLE OF oDlg
+ACTIVATE MSDIALOG oDlg CENTER
+
+If mv_par17 == 3
+	cTitRel += STR0016 +AllTrim(GetMv("MV_SIMB" +Ltrim(Str(mv_par18)))) +")"
+EndIf
+
+If nOpca == 1
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Processamento do Relatorio						             ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	RptStatus({|lEnd| CNR030Imp(@lEnd)})
+EndIf
+
+Return Nil
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  |AjustaSXB บAutor  ณFabio Alves Silva   บ Data ณ  28/09/06   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ                                                            บฑฑ
+ฑฑบ          ณAjustar consulta padrao da medicao                          บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ CNTR030                                                    บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function AjustaSXB()
+Local i,j
+Local aSXB
+Local aEstrut
+
+dbSelectArea("SXB")
+dbSetOrder(1)
+
+If !SXB->(dbSeek("CND"))
+	aSXB := {}
+	aEstrut:= {"XB_ALIAS","XB_TIPO","XB_SEQ","XB_COLUNA","XB_DESCRI","XB_DESCSPA","XB_DESCENG","XB_CONTEM"}
+	Aadd(aSXB,{"CND   ","1","01","DB","Medi็๕es"   ,""           ,""            ,"CND"            })
+	Aadd(aSXB,{"CND   ","2","01","01","Nr Medicao" ,"Nr Medicion","Measur. Nbr.",""               })
+	Aadd(aSXB,{"CND   ","4","01","01","Nr Contrato","Nr Contrato","Contract Nr" ,"CND_CONTRA"     })
+	Aadd(aSXB,{"CND   ","4","01","02","Nr Medicao" ,"Nr Medicao" ,"Nr Medicao"  ,"CND_NUMMED"     })
+	Aadd(aSXB,{"CND   ","5","01",""  ,""           ,""           ,""            ,"CND->CND_NUMMED"})
+	
+	For i:= 1 To Len(aSXB)
+		If !Empty(aSXB[i][1])
+			If !dbSeek(aSXB[i,1]+aSXB[i,2]+aSXB[i,3]+aSXB[i,4])
+				RecLock("SXB",.T.)
+				
+				For j:=1 To Len(aSXB[i])
+					If !Empty(FieldName(FieldPos(aEstrut[j])))
+						FieldPut(FieldPos(aEstrut[j]),aSXB[i,j])
+					EndIf
+				Next j
+				
+				dbCommit()
+				MsUnLock()
+			EndIf
+		EndIf
+	Next i
+EndIf
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑฺฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฟฑฑ
+ฑฑณFunao    ณ AjustaSX1ณ Autor ณ 					    ณ Data ณ          ณฑฑ
+ฑฑรฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤมฤฤฤฤฤฤฤมฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤมฤฤฤฤฤฤมฤฤฤฤฤฤฤฤฤฤดฑฑ
+ฑฑณDescri…o ณ Ajusta as perguntas do SX1                                 ณฑฑ
+ฑฑรฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤดฑฑ
+ฑฑณ Uso      ณ CNTR030		                                              ณฑฑ
+ฑฑภฤฤฤฤฤฤฤฤฤฤมฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤูฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+/*/
+Static Function AjustaSX1()
+Local aAreaAnt := GetArea()
+Local aHelpPor := {}
+Local aHelpEng := {}
+Local aHelpSpa := {}
+Local cPerg	   := "CNR030"
+
+//---------------------------------------MV_PAR01--------------------------------------------------
+aHelpPor := {"Numero inicial da Medicao"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"01","Medicao de:","","","mv_ch1","C",6,0,0,"G","","CND","","S","mv_par01","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+//---------------------------------------MV_PAR02--------------------------------------------------
+aHelpPor := {"Numero final da Medicao"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"02","Medicao ate:","","","mv_ch2","C",6,0,0,"G","","CND","","S","mv_par02","","","","ZZZZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+//---------------------------------------MV_PAR03--------------------------------------------------
+aHelpPor := {"Numero inicial do Contrato"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"03","Contrato de:","","","mv_ch3","C",15,0,0,"G","","CN9","","S","mv_par03","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+//---------------------------------------MV_PAR04--------------------------------------------------
+aHelpPor := {"Numero final do Contrato"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"04","Contrato ate:","","","mv_ch4","C",15,0,0,"G","","CN9","","S","mv_par04","","","","ZZZZZZZZZZZZZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+//---------------------------------------MV_PAR05--------------------------------------------------
+aHelpPor := {"Data de inicio da Vigencia"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"05","Vigencia de:","","","mv_ch5","D",08,0,0,"G","","","","S","mv_par05","","","","01/01/06","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+//---------------------------------------MV_PAR06--------------------------------------------------
+aHelpPor := {"Data de termino da Vigencia"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"06","Vigencia ate:","","","mv_ch6","D",08,0,0,"G","","","","S","mv_par06","","","","31/12/49","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+//---------------------------------------MV_PAR07--------------------------------------------------
+aHelpPor := {"Codigo inicial da Situacao"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"07","Situacao de:","","","mv_ch7","C",2,0,0,"G","","","","S","mv_par07","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+//---------------------------------------MV_PAR08--------------------------------------------------
+aHelpPor := {"Codigo final da Situacao"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"08","Situacao ate:","","","mv_ch8","C",2,0,0,"G","","","","S","mv_par08","","","","99","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+//---------------------------------------MV_PAR09--------------------------------------------------
+aHelpPor := {"Codigo inicial do Fornecedor"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"09","Fornecedor de:","","","mv_ch9","C",6,0,0,"G","CNR030ClFr('1')","SA2","","S","mv_par09","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+//---------------------------------------MV_PAR10--------------------------------------------------
+aHelpPor := {"Codigo final do Fornecedor"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"10","Fornecedor ate:","","","mv_cha","C",6,0,0,"G","CNR030ClFr('1')","SA2","","S","mv_par10","","","","ZZZZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+//---------------------------------------MV_PAR11--------------------------------------------------
+aHelpPor := {"Codigo do Tipo de Contrato"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSX1(cPerg,"11","Tipo de Contrato ?","","","mv_chb","C",3,0,0,"G","","CN1","","S","mv_par11","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+//---------------------------------------MV_PAR12--------------------------------------------------
+aHelpPor := {"Utilizada para exibir os Descontos","do Contrato (Sim/Nao)"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSx1(cPerg,"12","Exibir Descontos ?","","","mv_chc","N",1,0,1,"C","","","","","mv_par12","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+//---------------------------------------MV_PAR13--------------------------------------------------
+aHelpPor := {"Utilizada para exibir Multas/Bonificacoes","do Contrato (Sim/Nao)"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSx1(cPerg,"13","Exibir Multas/Bonificacoes?","","","mv_chd","N",1,0,1,"C","","","","","mv_par13","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+//---------------------------------------MV_PAR14--------------------------------------------------
+aHelpPor := {"Utilizada para exibir Caucoes Retidas ","do Contrato (Sim/Nao)"}
+aHelpEng := {""}
+aHelpSpa := {""}
+
+PutSx1(cPerg,"14","Exibir Caucoes Retidas?","","","mv_che","N",1,0,1,"C","","","","","mv_par14","Sim","Si","Yes","","Nao","No","No","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+//---------------------------------------MV_PAR15--------------------------------------------------
+aHelpPor := {"Codigo inicial do Cliente"}
+aHelpSpa := {"Codigo inicio del Cliente"}
+aHelpEng := {"Client initial Code"}
+
+PutSX1(cPerg,"15","Cliente de:","","","mv_chf","C",6,0,0,"G","CNR030ClFr('2')","SA1","","S","mv_par15","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+//---------------------------------------MV_PAR16--------------------------------------------------
+aHelpPor := {"Codigo final do Cliente"}
+aHelpSpa := {"Codigo final del Cliente"}
+aHelpEng := {"Client final Code"}
+
+PutSX1(cPerg,"16","Cliente ate:","","","mv_chg","C",6,0,0,"G","CNR030ClFr('2')","SA1","","S","mv_par16","","","","ZZZZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+If !SX1->(dbSeek(PadR(cPerg,Len(SX1->X1_GRUPO)) + "17" ) ) 	
+	//---------------------------------------MV_PAR17--------------------------------------------------
+	aHelpPor := {"Define se a impressใo dos valores","no relat๓rio serแ realizada na","moeda da medi็ใo, contrato ou outra."}
+	aHelpEng := {"Define if the values will be printed","using measurement, contract or ","other currency"}
+	aHelpSpa := {"Define si la impresi๓n de los valores","en el informe serแ realizada en la ","moneda del medici๓n, contrato o otra."}
+	
+	PutSX1(cPerg,"17","Imprimir valores na moeda","Imprimir valores en moneda","Print values in currency","mv_chh","N",1,0,0,"C","","","","S","mv_par17","Da medi็ใo","De la medici๓n","From Measurem.","","Do contrato","Del contrato","Of Contract","Informada","Informada","Informed","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+EndIf
+
+If !SX1->(dbSeek(PadR(cPerg,Len(SX1->X1_GRUPO)) + "18" ) ) 	
+	//---------------------------------------MV_PAR18--------------------------------------------------
+	aHelpPor := {"Indica a moeda para impressใo","dos valores. A pergunta anterior",'deve estar como "Informada".'}
+	aHelpEng := {"Indica la moneda para impresi๓n","de los valores. La pregunta anterior",'debe estar como "Informada".'}
+	aHelpSpa := {"Indicates the values currency ","printing. The previous question must",'be set as "Informed".'}
+	
+	PutSX1(cPerg,"18","Moeda","Moneda","Currency","mv_chi","N",1,0,0,"C","","","","S","mv_par18","Moeda 1","Moneda 1","Currency 1","","Moeda 2","Moneda 2","Currency 2","Moeda 3","Moneda 3","Currency 3","Moeda 4","Moneda 4","Currency 4","Moeda 5","Moneda 5","Currency 5",aHelpPor,aHelpEng,aHelpSpa)
+EndIf
+
+If !SX1->(dbSeek(PadR(cPerg,Len(SX1->X1_GRUPO)) + "19" ) ) 	
+	//---------------------------------------MV_PAR19--------------------------------------------------
+	aHelpPor := {"Data de refer๊ncia para conversใo","dos valores entre moedas."}
+	aHelpEng := {"Fecha de referencia para conversi๓n","de los valores entre monedas."}
+	aHelpSpa := {"Reference date for values","convertion between currency."}
+	
+	PutSX1(cPerg,"19","Data de referencia","Fecha de referencia","Reference date","mv_chj","D",8,0,0,"G","","","","S","mv_par19","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+EndIf
+
+RestArea(aAreaAnt)
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  |CNR030Imp บAutor  ณFabio Alves Silva   บ Data ณ  28/09/06   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณImpressao do Relatorio de Medicao                           บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ CNTR030                                                    บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+Function CNR030Imp(lEnd,cNumMed)
+Local cQuery := ""
+Local cAliasCND := GetNextAlias()
+Local cAliasCNE
+Local cAliasCNR
+Local cAliasCNT   
+Local cMedicao  := ""
+Local cContra   := ""
+Local cRevisa   := ""
+Local aStrucCND := CND->(dbStruct())
+Local aStrucCNE := CNE->(dbStruct())
+Local aStrucCNR := {}
+Local aStrucCNT :={}
+Local nX
+
+Local cDirSpool := GetMv("MV_RELT")
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Inicializa Fontes											 ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+Local oFont06	:= TFont():New("Arial",06,08,,.T.,,,,.T.,.F.)
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Recupera Picture dos Campos								           ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+
+Local cPtVLMEAC := PesqPict("CND","CND_VLMEAC")
+Local cPtVLSALD := PesqPict("CND","CND_VLSALD")
+Local cPtVLTOT1 := PesqPict("CND","CND_VLTOT")
+Local cPtQTDSOL := PesqPict("CNE","CNE_QTDSOL")
+Local cPtQTAMED := PesqPict("CNE","CNE_QTAMED")
+Local cPtQUANT  := PesqPict("CNE","CNE_QUANT")
+Local cPtPERC   := PesqPict("CNE","CNE_PERC")
+Local cPtVLUNIT := PesqPict("CNE","CNE_VLUNIT")
+Local cPtVLTOT  := PesqPict("CNE","CNE_VLTOT")
+Local lFiltForn := .F.
+
+Default cNumMed := ""
+
+If !Empty(cNumMed)
+	AjustaSx1()  
+	Pergunte("CNR030",.F.)
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Parametros para imprimir a medicao dentro da rotina medicoes/entregas. ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	mv_par01 := cNumMed
+	mv_par02 := cNumMed
+	mv_par03 := Space(TamSx3("CN9_NUMERO")[1])
+	mv_par04 := Replicate("Z",TamSx3("CN9_NUMERO")[1])
+	mv_par05 := CTOD("01/01/06")
+	mv_par06 := CTOD("31/12/49")
+	mv_par07 := Space(TamSx3("CN9_SITUAC")[1])
+	mv_par08 := Replicate("Z",TamSx3("CN9_SITUAC")[1])
+	mv_par09 := Space(TamSx3("A2_COD")[1])
+	mv_par10 := Replicate("Z",TamSx3("A2_COD")[1])
+	mv_par11 := Space(TamSx3("CN9_TPCTO")[1])
+	mv_par12 := 1
+	mv_par13 := 1
+	mv_par14 := 1 
+	mv_par15 := Space(TamSx3("A1_COD")[1])
+	mv_par16 := Replicate("Z",TamSx3("A1_COD")[1])
+	mv_par17 := 1
+	mv_par18 := 1
+	mv_par19 := ctod("  /  /  ")
+EndIf      
+
+lFiltForn := !Empty(mv_par09) .Or. (!Empty(mv_par10) .And. UPPER(mv_par10) != REPLICATE("Z",TamSx3("A2_COD")[1]))
+
+If mv_par13 == 1
+	aStrucCNR := CNR->(dbStruct())
+EndIf
+
+If mv_par14 == 1 .And. AliasInDic("CNT")
+	aStrucCNT := CNT->(dbStruct())
+EndIf
+
+Private nlin	:= 2900
+Private nPagina := 0
+Private oPrint
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Inicializa Objeto TMSPrinter									        ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+oPrint	:= TMSPrinter():New(OemToAnsi(STR0001))
+oPrint	:SetLandscape()	//-- Retrato
+oPrint	:Setup()
+
+aStrucCND := CND->(dbStruct())
+cQuery := " SELECT CND.CND_NUMMED, CND.CND_CONTRA, CND.CND_REVISA, CND.CND_NUMERO, CND.CND_FORNEC, CND.CND_LJFORN, CND.CND_CLIENT, "
+cQuery += "        CND.CND_LOJACL, CND.CND_COMPET, CND.CND_DTVENC, CND.CND_VLMEAC, CND.CND_VLSALD, CND.CND_VLTOT, CN9.*"
+cQuery += "   FROM " + RetSQLName("CND")+ " CND," + RetSQLName("CN9") + " CN9 "
+cQuery += "  WHERE CND.CND_FILIAL = '"+xFilial("CND")+"'"
+cQuery += "    AND CN9.CN9_FILIAL = '"+xFilial ("CN9")+"'"
+cQuery += "    AND CND.CND_CONTRA = CN9.CN9_NUMERO "
+cQuery += "    AND CND.CND_REVISA = CN9.CN9_REVISA "
+cQuery += "    AND CND.CND_NUMMED >= '"+MV_PAR01+"'"
+cQuery += "    AND CND.CND_NUMMED <= '"+MV_PAR02+"'"
+cQuery += "    AND CND.CND_CONTRA >= '"+MV_PAR03+"'"
+cQuery += "    AND CND.CND_CONTRA <= '"+MV_PAR04+"'"
+cQuery += "    AND CN9.CN9_DTINIC >= '"+dtos(MV_PAR05)+"'"
+cQuery += "    AND CN9.CN9_DTFIM  <= '"+ dtos (MV_PAR06)+"'"
+cQuery += "    AND CN9.CN9_SITUAC >= '"+MV_PAR07+"'"
+cQuery += "    AND CN9.CN9_SITUAC <= '"+MV_PAR08+"'"
+If lFiltForn
+	cQuery += "    AND CND.CND_FORNEC >= '"+MV_PAR09+"'"
+	cQuery += "    AND CND.CND_FORNEC <= '"+MV_PAR10+"'"
+Else
+	cQuery += "    AND CND.CND_CLIENT >= '"+MV_PAR15+"'"
+	cQuery += "    AND CND.CND_CLIENT <= '"+MV_PAR16+"'"
+EndIf
+
+cQuery += "    AND "
+If !Empty(MV_PAR11)
+	cQuery += " CN9.CN9_TPCTO   = '"+MV_PAR11 + "' AND "
+EndIf
+cQuery += "        CND.D_E_L_E_T_ = ' ' "
+cQuery += "    AND CN9.D_E_L_E_T_ = ' ' "
+
+cQuery := ChangeQuery(cQuery)
+MsAguarde({|| dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQuery),cAliasCND,.F.,.T.)},OemToAnsi(STR0005)) //-- Processando
+
+For nX := 1 to Len(aStrucCND)
+	If aStrucCND[nX,2] != 'C' .And. aStrucCND[nX,2]  <> "M" .And. (cAliasCND)->( FieldPos( aStrucCND[nx,1] ) ) > 0
+		TCSetField(cAliasCND,aStrucCND[nX,1], aStrucCND[nX,2],aStrucCND[nX,3],aStrucCND[nX,4])
+	EndIf
+Next nX
+
+While !(cAliasCND)->(Eof())
+	dbSelectArea("CND")
+	
+	cMedicao := (cAliasCND)->CND_NUMMED 
+	cContra  := (cAliasCND)->CND_CONTRA
+	cRevisa  := (cAliasCND)->CND_REVISA 
+	cEspCtr  := If(Empty((cAliasCND)->CN9_CLIENT),"1","2")
+
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Informacoes sobre a Medicao	     		 			   ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	nLin += 50
+	CNRBox(0050,2350,OemToAnsi(STR0006),,.T.,1)
+	//-- Numero da Medicao
+	CNRBox(0050,0300,RetTitle("CND_NUMMED"),(cAliasCND)->CND_NUMMED,.F.)
+	//-- Numero da Planilha
+	CNRBox(0305,0600,RetTitle("CND_NUMERO"),(cAliasCND)->CND_NUMERO,.F.)
+	//-- Numero do Contrato
+	CNRBox(0605,1000,RetTitle("CND_CONTRA"),(cAliasCND)->CND_CONTRA,.F.)
+	If lFiltForn
+		//-- Fornecedor                                                                    '
+		CNRBox(1005,1600,RetTitle("CND_FORNEC"),(cAliasCND)->CND_FORNEC,.F.)
+		//-- Loja Fornecedor
+		CNRBox(1605,2000,RetTitle("CND_LJFORN"),(cAliasCND)->CND_LJFORN,.F.)
+	Else
+		//-- Cliente                                                                    '
+		CNRBox(1005,1600,RetTitle("CND_CLIENT"),(cAliasCND)->CND_CLIENT,.F.)
+		//-- Loja Cliente
+		CNRBox(1605,2000,RetTitle("CND_LOJACL"),(cAliasCND)->CND_LOJACL,.F.)
+	EndIf
+	//-- Competencia
+	CNRBox(2005,2350,RetTitle("CND_COMPET"),(cAliasCND)->CND_COMPET,.T.)
+	//-- Data de Vencimento
+	CNRBox(0050,0400,RetTitle("CND_DTVENC"),DTOC((cAliasCND)->CND_DTVENC),.F.)
+	//-- Medicoes Acumuladas
+	CNRBox(0405,1050,RetTitle("CND_VLMEAC"),TransForm((cAliasCND)->(C030xMoeda(CND_CONTRA,CND_REVISA,CND_NUMMED,"CND_VLMEAC")),cPtVLMEAC),.F.)
+	//-- Saldo da Medicao                                                 
+	CNRBox(1055,1800,RetTitle("CND_VLSALD"),TransForm((cAliasCND)->(C030xMoeda(CND_CONTRA,CND_REVISA,CND_NUMMED,"CND_VLSALD")),cPtVLSALD),.F.)
+	//-- Valor Total
+	CNRBox(1805,2350,RetTitle("CND_VLTOT"),TransForm((cAliasCND)->(C030xMoeda(CND_CONTRA,CND_REVISA,CND_NUMMED,"CND_VLTOT")),cPtVLTOT1),.T.)
+	
+	dbSelectArea("CNE")
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Cabecalho dos Itens da Medicao		   	 	  	       ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	CNRBox(0050,0230,RetTitle("CNE_ITEM"),,.F.,2,oFont06)
+	CNRBox(0235,0700,RetTitle("CNE_PRODUT"),,.F.,2,oFont06)
+	CNRBox(0705,1000,RetTitle("CNE_QTDSOL"),,.F.,2,oFont06,.T.)
+	CNRBox(1005,1300,RetTitle("CNE_QTAMED"),,.F.,2,oFont06,.T.)
+	CNRBox(1305,1600,RetTitle("CNE_QUANT"),,.F.,2,oFont06,.T.)
+	CNRBox(1605,1800,RetTitle("CNE_PERC"),,.F.,2,oFont06,.T.)
+	CNRBox(1805,2050,RetTitle("CNE_VLUNIT"),,.F.,2,oFont06,.T.)
+	CNRBox(2055,2350,RetTitle("CNE_VLTOT"),,.T.,2,oFont06,.T.)
+	
+	cQuery := "SELECT CNE_ITEM,   CNE_PRODUT, CNE_QTDSOL, CNE_QTAMED, CNE_QUANT, CNE_PERC,"
+	cQuery += "       CNE_VLUNIT, CNE_VLTOT "
+	cQuery += "  FROM "+ RetSQLName("CNE")+ " CNE "
+	cQuery += " WHERE CNE.CNE_NUMMED = '"+cMedicao+"'"  
+	cQuery += "   AND CNE.CNE_CONTRA = '"+cContra+"'"
+	cQuery += "   AND CNE.CNE_REVISA = '"+cRevisa+"'"
+	cQuery += "   AND CNE.CNE_FILIAL = '"+xFilial("CNE")+"'"
+	cQuery += "   AND CNE.D_E_L_E_T_ = ' ' "
+	
+	cAliasCNE := GetNextAlias()
+	cQuery := ChangeQuery(cQuery)
+	MsAguarde({|| dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQuery),cAliasCNE,.F.,.T.)},OemToAnsi(STR0005)) //-- Processando
+	
+	For nX := 1 to Len(aStrucCNE)
+		If aStrucCNE[nX,2] != 'C' .And. (cAliasCNE)->( FieldPos( aStrucCNE[nx,1] ) ) > 0
+			TCSetField(cAliasCNE,aStrucCNE[nX,1], aStrucCNE[nX,2],aStrucCNE[nX,3],aStrucCNE[nX,4])
+		EndIf
+	Next nX
+	
+	While !(cAliasCNE)->(Eof())
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ Impressao dos Itens da Medicao			  	  		   ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		//-- Item da Medicao
+		CNRBox(0050,0230,(cAliasCNE)->CNE_ITEM,,.F.,2,oFont06)
+		//-- Produto
+		CNRBox(0235,0700,(cAliasCNE)->CNE_PRODUT,,.F.,2,oFont06)
+		//-- Quantidade Solicitada
+		CNRBox(0705,1000,TransForm((cAliasCNE)->CNE_QTDSOL,cPtQTDSOL),,.F.,2,oFont06,.T.)
+		//-- Quantidade Medida
+		CNRBox(1005,1300,TransForm((cAliasCNE)->CNE_QTAMED,cPtQTAMED),,.F.,2,oFont06,.T.)
+		//-- Quantidade
+		CNRBox(1305,1600,TransForm((cAliasCNE)->CNE_QUANT,cPtQUANT),,.F.,2,oFont06,.T.)
+		//-- Percentual
+		CNRBox(1605,1800,TransForm((cAliasCNE)->CNE_PERC,cPtPERC),,.F.,2,oFont06,.T.)
+		//-- Valor Unitario
+		CNRBox(1805,2050,TransForm((cAliasCNE)->(C030xMoeda(cContra,cRevisa,(cAliasCND)->CND_NUMMED,"CNE_VLUNIT")),cPtVLUNIT),,.F.,2,oFont06,.T.)
+		//-- Valor Total
+		CNRBox(2055,2350,TransForm((cAliasCNE)->(C030xMoeda(cContra,cRevisa,(cAliasCND)->CND_NUMMED,"CNE_VLTOT")),cPtVLTOT),,.T.,2,oFont06,.T.)
+		
+		(cAliasCNE)->(dbSkip())
+	EndDo
+	
+	(cAliasCNE)->(dbCloseArea())
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ MULTAS E BONIFICACOES			     			             ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	If mv_par13 == 1
+		CNTR030Mul(cMedicao,oFont06,cContra,cRevisa)
+	Endif
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ DESCONTOS									                 ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	If mv_par12 == 1
+		CNTR030Desc(cMedicao,oFont06,cContra,cRevisa)
+	EndIf
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ CAUCOES									           	         ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	If mv_par14 == 1 .And. AliasInDic( "CNT" )
+		CNR030Cauc (cMedicao, oFont06, cContra, cEspCtr, lFiltForn, cRevisa)
+	EndIf
+	
+	nLin := 2900 //-- Forca a Quebra da pagina por Contrato
+	(cAliasCND)->(dbSkip())
+EndDo
+
+(cAliasCND)->(dbCloseArea())
+
+//-- Grava Imagem em Disco
+If !Empty(cDirSpool)
+	oPrint:SaveAllAsJPEG(cDirSpool+"CNTR030",875,1170,140)
+EndIF
+
+//-- Visualiza antes de Imprimir
+oPrint:Preview()
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณCNTR03DescบAutor  ณFabio Alves Silva   บ Data ณ  28/09/06   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณcExp01- Relatorio de Descontos dentro de uma medicao.       บฑฑ
+ฑฑบ          ณcExp02 - N๚mero do contrato                                 บฑฑ
+ฑฑบ          ณcExp03 - 1 - Fornecedor; 2 - Cliente                        บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ CNTR030                                                    บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+Function CNTR030Desc(cMedicao,oFont06,cContra,cRevisa)
+Local cQuery    := ""
+Local cAliasCNQ   
+Local cPtVALOR1 := PesqPict("CNQ","CNQ_VALOR")
+
+Local nX
+Local ntot      := 0
+Local nValor    := 0
+Local aStrucCNQ := CNQ->(dbStruct()) 
+DEFAULT cContra := ""
+
+cQuery := "SELECT CNQ.CNQ_TPDESC, CNQ.CNQ_VALOR, CNP.CNP_DESCRI "
+cQuery += "  FROM "+RetSQLName("CNQ")+" CNQ, "+RetSQLName("CNP")+" CNP "
+cQuery += " WHERE CNQ.CNQ_FILIAL = '"+xfilial("CNQ")+"' AND CNP.CNP_FILIAL='"+xfilial("CNP")+"' "
+cQuery += "   AND CNQ.CNQ_NUMMED = '"+cMedicao+"'"       
+cQuery += "   AND CNQ.CNQ_CONTRA = '"+cContra +"'"
+cQuery += "   AND CNQ.CNQ_TPDESC = CNP.CNP_CODIGO"
+cQuery += "   AND CNQ.D_E_L_E_T_ = ' ' "
+cquery += "   AND CNP.D_E_L_E_T_ = ' ' "
+
+cAliasCNQ := GetNextAlias()
+cQuery := ChangeQuery(cQuery)
+MsAguarde({|| dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQuery),cAliasCNQ,.F.,.T.)},OemToAnsi(STR0005)) //-- Processando
+
+If !(cAliasCNQ)->(Eof())
+	nLin += 25
+	For nX := 1 to Len(aStrucCNQ)
+		If aStrucCNQ[nX,2] != 'C' .And. (cAliasCNQ)->( FieldPos( aStrucCNQ[nx,1] ) ) > 0
+			TCSetField(cAliasCNQ,aStrucCNQ[nX,1], aStrucCNQ[nX,2],aStrucCNQ[nX,3],aStrucCNQ[nX,4])
+		EndIf
+	Next nX
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Cabecalho dos Itens de Desconto						 		  ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	CNRBox(0050,2350,OemToAnsi(STR0008)+" - "+ OemToAnsi(STR0015)+ cMedicao,,.T.,1)
+	CNRBox(0050,0500,RetTitle("CNQ_TPDESC"),,.F.,2,oFont06)
+	CNRBox(0505,1800,RetTitle("CNP_DESCRI"),,.F.,2,oFont06)
+	CNRBox(1805,2350,RetTitle("CNQ_VALOR"),,.T.,2,oFont06)
+	
+	dbSelectArea ("CNQ")
+	While !(cAliasCNQ)->(Eof())
+		nValor := (cAliasCNQ)->(C030xMoeda(cContra,cRevisa,cMedicao,"CNQ_VALOR"))
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ Impressao de Desconto					   		       ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		//--Tipo de Desconto
+		CNRBox(0050,0500,(cAliasCNQ)->CNQ_TPDESC,,.F.,2,oFont06)
+		//--Descricao do Desconto
+		CNRBox(0505,1800,(cAliasCNQ)->CNP_DESCRI,,.F.,2,oFont06)
+		//-- Valor do Desconto
+		CNRBox(1805,2350,TransForm(nValor,cPtVALOR1),,.T.,2,oFont06,.T.)
+		
+		If nLin >= 2900
+			CNRCabec(Nil,Nil,OemToAnsi(cTitRel)) //-- Impressao do Cabecalho da pagina
+		EndIf
+		
+		ntot += nValor
+		(cAliasCNQ)->(dbSkip())
+		
+	EndDo
+	cTexto := +TransForm(nTot,cPtVALOR1)
+	oPrint:Say(nLin+7,1970-TamTexto(cTexto),(STR0014),oFont06)
+	CNRBox(2000,2350,cTexto,,.T.,2,oFont06,.T.)
+EndIf
+(cAliasCNQ)->(dbCloseArea())
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณCNTR030MulบAutor  ณFabio Alves Silva   บ Data ณ  09/28/06   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณcExp01- Relatorio de Multas em uma medicao.                 บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ CNTR030                                                    บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+Function CNTR030Mul(cMedicao,oFont06,cContra,cRevisa)
+
+Local cQuery :=''
+Local cPtVALOR  := PesqPict("CNR","CNR_VALOR")
+
+Local aliasCNR
+Local aStrucCNR:=CNR->(dbStruct())
+
+Local nX
+Local nTotMult:=0
+Local nTotBoni:=0
+Local nValor  :=0
+
+cQuery := "SELECT CNR.CNR_TIPO, CNR.CNR_DESCRI, CNR.CNR_VALOR "
+cQuery += "  FROM "+ RetSQLName("CNR")+ " CNR "
+cQuery += " WHERE CNR.CNR_FILIAL = '"+xfilial("CNR")+"'"
+cQuery += "   AND CNR.CNR_NUMMED = '"+cMedicao+"'"
+cQuery += "   AND CNR.D_E_L_E_T_ = ' ' "
+cQuery += "   ORDER BY CNR.CNR_TIPO "
+
+cAliasCNR := GetNextAlias()
+cQuery := ChangeQuery(cQuery)
+MsAguarde({|| dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQuery),cAliasCNR,.F.,.T.)},OemToAnsi(STR0005)) //-- Processando
+
+If !(cAliasCNR)->(Eof())
+	nLin += 25
+	For nX := 1 to Len(aStrucCNR)
+		If aStrucCNR[nX,2] != 'C' .And. (cAliasCNR)->( FieldPos( aStrucCNR[nx,1] ) ) > 0
+			TCSetField(cAliasCNR,aStrucCNR[nX,1], aStrucCNR[nX,2],aStrucCNR[nX,3],aStrucCNR[nX,4])
+		EndIf
+	Next nX
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Cabecalho dos Itens da Multa 						 		  ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	CNRBox(0050,2350,OemToAnsi(STR0007)+" - "+ OemToAnsi(STR0015)+ cMedicao,,.T.,1)
+	CNRBox(0050,0500,RetTitle("CNR_TIPO"),,.F.,2,oFont06)
+	CNRBox(0505,1800,RetTitle("CNR_DESCRI"),,.F.,2,oFont06)
+	CNRBox(1805,2350,RetTitle("CNR_VALOR"),,.T.,2,oFont06)
+	
+	While !(cAliasCNR)->(Eof())
+		nValor := (cAliasCNR)->(C030xMoeda(cContra,cRevisa,cMedicao,"CNR_VALOR"))
+		dbSelectArea("CNR")
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ Impressao das Multas						  		           ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		//-- Tipo da Multa
+		CNRBox(0050,0500,If((cAliasCNR)->CNR_TIPO=="1",STR0010,STR0011),,.F.,2,oFont06)
+		//-- Descricao da Multa
+		CNRBox(0505,1800,(cAliasCNR)->CNR_DESCRI,,.F.,2,oFont06)
+		//-- Valor da Multa
+		CNRBox(1805,2350,TransForm(nValor,cPtVALOR),,.T.,2,oFont06,.T.)
+		
+		If (cAliasCNR)->CNR_TIPO=="1"
+			nTotMult += nValor
+		else
+			nTotBoni += nValor
+		endif
+		(cAliasCNR)->(dbSkip())
+	EndDo
+	cTexto := +TransForm(nTotMult,cPtVALOR)
+	oPrint:Say(nLin+7,1970-TamTexto(cTexto),(STR0012),oFont06)
+	CNRBox(2000,2350,cTexto,,.T.,2,oFont06,.T.)
+	If nLin >= 2900
+	   CNRCabec(Nil,Nil,OemToAnsi(cTitRel)) //-- Impressao do Cabecalho da pagina
+	EndIf 
+	
+	cTexto := +TransForm(nTotBoni,cPtVALOR)
+	oPrint:Say(nLin+7,1970-TamTexto(cTexto),(STR0013),oFont06)
+	CNRBox(2000,2350,cTexto,,.T.,2,oFont06,.T.)
+	If nLin >= 2900
+	   CNRCabec(Nil,Nil,OemToAnsi(cTitRel)) //-- Impressao do Cabecalho da pagina
+	EndIf 
+EndIf
+(cAliasCNR)->(dbCloseArea())
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  CNTR030CaucบAutor  ณFabio Alves Silva   บ Data ณ  28/09/06   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณcExp01- Relatorio de retencao de caucoes dentro de uma      บฑฑ
+ฑฑบ          ณmedicao.                                                    บฑฑ 
+ฑฑบ          ณoExp01- Define a fonte do relat๓rio                         บฑฑ
+ฑฑบ          ณcExp02 - N๚mero do contrato                                 บฑฑ
+ฑฑบ          ณcExp03 - 1 - Fornecedor; 2 - Cliente                        บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ CNTR030                                                    บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/                             
+Function CNR030Cauc(cMedicao,oFont06,cContra,cEspCtr,lFiltForn,cRevisa)
+Local cQuery     := ''
+Local cAliasCNT
+Local cPtVLRET	 := PesqPict("CNT","CNT_VLRET")
+Local cPtVLBX	 := PesqPict("CNT","CNT_VLBX")
+Local aStrucCNT  := {}
+Local nX
+                        
+DEFAULT cContra   := ""
+DEFAULT cEspCtr   := "1"
+DEFAULT lFiltForn := .T.
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Verifica se o Alias CNT existe             ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+If AliasInDic("CNT")
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Carrega estrutura da CNT                   ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	aStrucCNT := CNT->(dbStruct())
+	cQuery := "SELECT  CNT.CNT_VLRET, CNT.CNT_VLBX, CNT.CNT_DTBX, "
+	If lFiltForn   
+		cQuery += "       CNT.CNT_FORNEC, CNT.CNT_LJFORN, SA2.A2_NOME "
+		cQuery += "  FROM "+RetSQLName("CNT")+" CNT, "+RetSQLName("SA2")+" SA2 "
+		cquery += "   WHERE SA2.A2_FILIAL   = '"+xfilial("SA2")+"'"
+		cQuery += "     AND CNT.CNT_FORNEC  = SA2.A2_COD  "
+		cQuery += "     AND CNT.CNT_LJFORN  = SA2.A2_LOJA "
+	Else  
+		cQuery += "       CNT.CNT_CLIENT, CNT.CNT_LOJACL, SA1.A1_NOME "  
+		cQuery += "  FROM "+RetSQLName("CNT")+" CNT, "+RetSQLName("SA1")+" SA1 "                                
+		cquery += " WHERE SA1.A1_FILIAL   = '"+xfilial("SA1")+"'"
+
+		cQuery += "   AND CNT.CNT_CLIENT  = SA1.A1_COD  "
+		cQuery += "   AND CNT.CNT_LOJACL  = SA1.A1_LOJA "
+	EndIf 
+
+	cQuery += "   AND CNT.CNT_FILIAL  = '"+xfilial("CNT")+"'"
+	cQuery += "   AND CNT.CNT_NUMMED  = '"+cMedicao+"'"   
+	cQuery += "   AND CNT.CNT_CONTRA  = '"+cContra +"'"   	     
+	
+	cQuery += "   AND CNT.D_E_L_E_T_  = ' ' "
+	
+	cAliasCNT := GetNextAlias()
+	cQuery := ChangeQuery(cQuery)
+	
+	MsAguarde({|| dbUseArea(.T.,"TOPCONN",TCGenQry(,,cQuery),cAliasCNT,.F.,.T.)},OemToAnsi(STR0005)) //-- Processando
+	
+	If !(cAliasCNT)->(Eof())
+		nLin += 25
+		For nX := 1 to Len(aStrucCNT)
+			If aStrucCNT[nX,2] != 'C' .And. (cAliasCNT)->( FieldPos( aStrucCNT[nx,1] ) ) > 0
+				TCSetField(cAliasCNT,aStrucCNT[nX,1], aStrucCNT[nX,2],aStrucCNT[nX,3],aStrucCNT[nX,4])
+			EndIf
+		Next nX
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ Cabecalho dos Itens de Retencao de Caucao				  ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		CNRBox(0050,2350,OemToAnsi(STR0009)+" - "+ OemToAnsi(STR0015)+ cMedicao,,.T.,1)
+		If lFiltForn  
+			CNRBox(0050,0400,RetTitle("CNT_FORNEC"),,.F.,2,oFont06)
+			CNRBox(0405,0800,RetTitle("CNT_LJFORN"),,.F.,2,oFont06)
+			CNRBox(0805,1500,RetTitle("A2_NOME"),,.F.,2,oFont06)     
+		Else
+			CNRBox(0050,0400,RetTitle("CNT_CLIENT"),,.F.,2,oFont06)
+			CNRBox(0405,0800,RetTitle("CNT_LOJACL"),,.F.,2,oFont06)
+			CNRBox(0805,1500,RetTitle("A1_NOME"),,.F.,2,oFont06)     		
+		EndIf
+		CNRBox(1505,1800,RetTitle("CNT_VLRET"),,.F.,2,oFont06)
+		CNRBox(1805,2100,RetTitle("CNT_VLBX"),,.F.,2,oFont06)
+		CNRBox(2105,2350,RetTitle("CNT_DTBX"),,.T.,2,oFont06)
+		
+		
+		While !(cAliasCNT)->(Eof())
+			dbSelectArea("CNT")
+			//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+			//ณ Impressao de Retencao de Caucao					       ณ
+			//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+			If cEspCtr=="1"
+				//--Codigo do Fornecedor
+				CNRBox(0050,0400,(cAliasCNT)->CNT_FORNEC,,.F.,2,oFont06)
+				//--Loja do Fornecedor
+				CNRBox(0405,0800,(cAliasCNT)->CNT_LJFORN,,.F.,2,oFont06)
+				//--Nome do Fornecedor
+				CNRBox(0805,1500,(cAliasCNT)->A2_NOME,,.F.,2,oFont06)
+				//Posicione("SA2",1,xFilial("SA2")+(cAliasCNT)->CNT_FORNEC+(cAliasCNT)->CNT_LJFORN,"A2_NOME")
+			Else 
+				//--Codigo do Cliente
+				CNRBox(0050,0400,(cAliasCNT)->CNT_CLIENT,,.F.,2,oFont06)
+				//--Loja do Cliente
+				CNRBox(0405,0800,(cAliasCNT)->CNT_LOJACL,,.F.,2,oFont06)
+				//--Nome do Cliente
+				CNRBox(0805,1500,(cAliasCNT)->A1_NOME,,.F.,2,oFont06)
+			EndIf
+			//-- Valor Retido
+			CNRBox(1505,1800,Transform((cAliasCNT)->(C030xMoeda(cContra,cRevisa,cMedicao,"CNT_VLRET")),cPtVLRET),,.F.,2,oFont06)
+			//-- Valor da Baixa
+			CNRBox(1805,2100,Transform((cAliasCNT)->(C030xMoeda(cContra,cRevisa,cMedicao,"CNT_VLBX")),cPtVLBX),,.F.,2,oFont06)
+			//--Data da Baixa
+			CNRBox(2105,2350,DTOC((cAliasCNT)->CNT_DTBX),,.T.,2,oFont06)
+			
+			If nLin >= 2900
+				CNRCabec(Nil,Nil,OemToAnsi(cTitRel)) //-- Impressao do Cabecalho da pagina
+			EndIf
+			
+			(cAliasCNT)->(dbSkip())
+		EndDo
+	EndIf
+	(cAliasCNT)->(dbCloseArea())
+EndIf
+return
+
+/*/
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑฺฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฟฑฑ
+ฑฑณFun…o    ณCNR030ClFrณ Autor ณ Aline Sebrian         ณ Data ณ 25.04.11 ณฑฑ
+ฑฑรฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤมฤฤฤฤฤฤฤมฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤมฤฤฤฤฤฤมฤฤฤฤฤฤฤฤฤฤดฑฑ
+ฑฑณDescrio ณValida os parametro do Cliente e Fornecedor no relatorio.   ณฑฑ
+ฑฑรฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤดฑฑ
+ฑฑณSintaxe   ณCNR030ClFr()                                                ณฑฑ
+ฑฑรฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤดฑฑ
+ฑฑณ Uso      ณCNR040ClFr()                                                ณฑฑ
+ฑฑภฤฤฤฤฤฤฤฤฤฤมฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤูฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+/*/
+Function CNR030ClFr(cTipo)
+Local aSaveArea	:= GetArea()
+
+If cTipo=="1"    
+	If !Empty(mv_par09) .Or. (!Empty(mv_par10) .And. UPPER(mv_par10) != REPLICATE("Z",TamSx3("A2_COD")[1]))
+		MV_PAR15	:= Space(6)
+		MV_PAR16	:= REPLICATE("Z",TamSx3("A1_COD")[1])	 
+	EndIf
+Else
+	If !Empty(mv_par15) .Or. (!Empty(mv_par16) .And. UPPER(mv_par16) != REPLICATE("Z",TamSx3("A1_COD")[1]))
+		MV_PAR09	:= Space(6)
+		MV_PAR10	:= REPLICATE("Z",TamSx3("A2_COD")[1])    
+	EndIf
+EndIf   
+
+	    
+RestArea(aSaveArea)
+
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณC030xMoedaบAutor  ณMicrosiga           บ Data ณ  11/06/11   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDescricao ณ Realiza a conversao entre moedas de um determinado valor.  บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบParametrosณ cContra: numero do contrato que esta sendo impresso.		  บฑฑ
+ฑฑบ			 ณ cRev: revisao do contrato que esta sendo impresso.		  บฑฑ
+ฑฑบ			 ณ cNumMed: medicao do contrato que esta sendo impressa.	  บฑฑ
+ฑฑบ			 ณ cCampo: nome do campo a ser convertido.					  บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบRetorno	 ณ nRet: valor apos conversao								  บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ CNTR030													  บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function C030xMoeda(cContra,cRev,cNumMed,cCampo)
+Local nMoedaOri	:= Posicione("CND",4,xFilial("CND")+cNumMed,"CND_MOEDA")
+Local nMoedaDes := nMoedaOri
+Local nRet 		:= &(cCampo)
+
+If mv_par17 == 2
+	nMoedaDes := Posicione("CN9",1,xFilial("CN9")+cContra+cRev,"CN9_MOEDA")
+ElseIf mv_par17 == 3
+	nMoedaDes := mv_par18
+EndIf
+
+nRet := Round(xMoeda(nRet,nMoedaOri,nMoedaDes,If(Empty(mv_par19),dDataBase,mv_par19),6),TamSX3(cCampo)[2])
+
+Return nRet

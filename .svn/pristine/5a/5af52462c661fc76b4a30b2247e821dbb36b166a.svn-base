@@ -1,0 +1,602 @@
+#include "Protheus.ch"
+#include "MATRPAR1.ch"
+
+// LAYOUT NO MODO TEXTO
+// 0        1         2         3         4         5         6         7         8
+// 12345678901234567890123456789012345678901234567890123456789012345678901234567890
+//'SUB SECRETARIA DE ESTADO DE TRIBUTACION                         TALON RESUMEN   '
+//'Proveedores de la Entidad                                       DE LOS DISKETTES'
+//'Confrontacion de Operaciones Autodeclaradas (C.O.A.)                            '
+//'                                                                                '
+//'Identificador RUC:                     RAZON SOCIAL:                            '
+//'                                                                                '
+//'                         TOTALES MENSUALES DE COMPRAS                           '
+//'________________________________________________________________________________'
+//'             Compras          Compras          Importaciones    Compras e       '
+//'MES          Detalhadas       sin detallar     gravadas         importaciones   '
+//'             por Proveedor    por Proveedor    por el IVA       exoneradas      '
+//'________________________________________________________________________________'
+//'01/01/2005   1234567890123.45 1234567890123.45 1234567890123.45 1234567890123.45'
+//'01/01/2005   1234567890123.45 1234567890123.45 1234567890123.45 1234567890123.45'
+//'01/01/2005   1234567890123.45 1234567890123.45 1234567890123.45 1234567890123.45'
+//'01/01/2005   1234567890123.45 1234567890123.45 1234567890123.45 1234567890123.45'
+//'________________________________________________________________________________'
+//'Totales      1234567890123.45 1234567890123.45 1234567890123.45 1234567890123.45'
+//'                                                                                '
+//'Monto total de compras informadas: 1234567890123.45                             '
+//'Cantiddad de registros de los archivos de informacion: 4                        '
+//'Lugar y fecha _______________________________,____/____/________                '
+//'                                                                                '
+//'Declaro bajo fe de juramento que los datos y cifras consignados en este Talon   '
+//'Resumen y en el/ los Diskettes que lo acompa๑an son correctos y completos.      '
+//'                                                                                '
+//'                                                                                '
+//'                                                                                '
+//'          _________________________          _________________________          '
+//'                    Firma                       Aclaracion de Firma             '
+//'                                                                                '
+//'________________________________________________________________________________'
+//'                  Uso Sub Secretaria de Estado de Tributacion                   '
+//'                                                                                '
+//'              LOS SOPORTES MAGNETICOS ESTAN SUJETOS A VERIFICACION              '
+//'________________________________________________________________________________'
+//'                                                                                '
+//'Dependencia Receptionante: _________________________   Fecha: ____/____/________'
+//'                                                                                '
+//'                                                                                '
+//'                                                                                '
+//'          _________________________          _________________________          '
+//'            Firma del Funcionario               Aclaracion de Firma             '
+//'                                                                                '
+//'                                                                                '
+//'                                                                                '
+//'                                                                                '
+Function MATRPAR1(cTipo)
+//Verificar cancelacion !!!
+If Select('R00') > 0
+	If cTipo == "G"
+		COA2002Gra()	
+	Else
+		COA2002Txt()	
+	Endif	
+Endif
+Return
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณCOA2002GRAบAutor  ณAdilson H Yamaguchi บ Data ณ  01/02/2005 บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Relatorio COA modo Grafico                                 บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ AP                                                         บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+STATIC Function COA2002Gra()
+	Local cTitulo	:= STR0001
+	Local cOpcao	:= ""
+	Local aPutSX1	:= {}
+	Local oDlg
+	Local oBmp
+	Local cArqTRB	:= ""
+	Local aLetras	:= {}
+	Local Letra		:= 3
+	PRIVATE oPrint	:= TMSPrinter():New("COA002")
+	PRIVATE oFontR12, oFontN12, oBrush
+	
+	//Monta a tela para configuracao
+	DEFINE MSDIALOG oDlg TITLE OemtoAnsi(STR0001) FROM 0,0 TO 120,430 PIXEL
+	@ 000, 000 BITMAP oBmp RESNAME "LOGIN" oF oDlg SIZE 30, 120 NOBORDER WHEN .F. PIXEL
+	@ 010, 035 SAY STR0002 PIXEL
+	@ 020, 030 TO 16 ,400 LABEL '' OF oDlg  PIXEL
+	@ 030, 035 BUTTON "Configurar"  SIZE 40,12 PIXEL OF oDlg ACTION oPrint:Setup()
+//	@ 030, 080 BUTTON "Parโmetros"  SIZE 40,12 PIXEL OF oDlg ACTION Pergunte(cPerg, .T.)
+	@ 030, 125 BUTTON "Imprimir"    SIZE 40,12 PIXEL OF oDlg ACTION (cOpcao := "I", oDlg:End())
+	@ 030, 170 BUTTON "Cancelar"    SIZE 40,12 PIXEL OF oDlg ACTION (cOpcao := "", oDlg:End())
+	ACTIVATE MSDIALOG oDlg CENTER
+	
+	If cOpcao == ""
+		Return
+	EndIF
+
+	CursorWait()
+	aLetras:={"Arial","Courier New","Times New Roman","Verdana"}
+	Letra:=3	
+	oFontN12 	:= TFont():New(aLetras[Letra], , 14, ,.T., , , ,.F.,.F.)		
+	oFontR12 	:= TFont():New(aLetras[Letra], , 14, ,.F., , , ,.F.,.F.)		
+    RptStatus({|| RunReport() },"Preparando Relat๓rio...")
+	oPrint:Preview()
+	oPrint:End()
+	CursorArrow()
+//	MsgInfo("Relat๓rio Enviado เ Impressora.")
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณRunQuery  บAutor  ณAdilson H Yamaguchi บ Data ณ  01/02/2005 บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Seleciona os registros para emissao do relatorio           บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ AP                                                        บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+Static Function RunQuery(cArqTrb)
+	Local cQuery := ""
+
+	cArqTrb := GetNextAlias()
+	
+	cQuery	:= ""
+
+	MemoWrite("C:\SENR050.SQL",cQuery)
+	dbUseArea(.T.,"TOPCONN", TCGENQRY(,,cQuery),cArqTrb, .F., .T.)
+	
+	TcSetField(cArqTrb, ""  	,"D")
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณRunReport บAutor  ณAdilson H Yamaguchi บ Data ณ  10/02/2005 บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Monta e imprime o relatorio                                บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ AP                                                        บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function RunReport()
+	Local nLinha	:= 0
+	Local nCount	:= 0
+	Local nPagina	:= 1
+	Private nColMAX	:= 0
+	Private	nLinMAX	:= 0
+
+	Private nTOTCOMP	:= 0
+	Private nTOTAGRU	:= 0
+	Private nTOTIMPO	:= 0
+	Private nTOTEXON	:= 0
+	Private nTOTTOT	:= 0
+	
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Contar registros na area temporaria.                              ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	DbSelectArea("R00")
+	DbGoTop()
+	
+	DbSelectArea("R01")
+	DbGoTop()
+	DbEval( {|| nCount++ } )
+	
+	SetRegua(nCount)
+	DbGoTop()
+
+	oPrint:SetPage(9)					//A4
+	oPrint:SetPortrait()	 			// vlr validos: SetPortrait;SetLandscape
+	nColMAX	:= oPrint:nHorzRes()
+	nLinMAX	:= oPrint:nVertRes()
+
+	While !R00->(Eof())
+		CabecGra(R00->RUC, R00->NOME)
+		nLinha	:= 700
+		R01->(DbSetOrder(1))
+		R01->(DbSeek(R00->RUC))
+		While !R01->(Eof()) .And. R01->RUC == R00->RUC
+			IncRegua("Aguarde... gerando relat๓rio...")
+			If nLinha >= 1600
+				RodapeGra(nPagina, nCount)
+				nPagina++
+				CabecGra(R00->RUC, R00->NOME)
+				nLinha := 700
+				nTOTCOMP	:= 0
+				nTOTAGRU	:= 0
+				nTOTIMPO	:= 0
+				nTOTEXON	:= 0
+				nTOTTOT		:= 0
+			EndIf
+			oPrint:Say (nLinha, 0150, R01->PERFISC                , oFontR12, 390)
+			oPrint:Say (nLinha, 0550, AllTrim(Str(R01->TOTCOMP))  , oFontR12, 390)
+			oPrint:Say (nLinha, 0950, AllTrim(Str(R01->TOTAGRU))  , oFontR12, 390)
+			oPrint:Say (nLinha, 1350, AllTrim(Str(R01->TOTIMPO))  , oFontR12, 390)
+			oPrint:Say (nLinha, 1750, AllTrim(Str(R01->TOTEXON))  , oFontR12, 390)
+
+			nTOTCOMP	+= R01->TOTCOMP
+			nTOTAGRU	+= R01->TOTAGRU
+			nTOTIMPO	+= R01->TOTIMPO
+			nTOTEXON	+= R01->TOTEXON
+			nTOTTOT		:= nTOTCOMP + nTOTAGRU + nTOTIMPO + nTOTEXON
+			nLinha += 60
+			R01->( DbSkip() )
+		EndDO
+		R00->( DbSkip() )
+		If nLinha # 700
+			RodapeGra(nPagina, nCount)
+			nLinha :=700
+		EndIf
+	EndDo
+Return
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณCabec บ Autor ณ Adilson H Yamaguchiบ Data ณ 01/02/2005  บ    ฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDescricao ณ Cabecalho do Relatorio                                     บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ AP                                                         บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+/*/
+Static Function CabecGra(cRUC, cNOME)
+	oPrint:StartPage() // Inicia uma nova pแgina
+	oPrint:Say (100, 150, "SUB SECRETARIA DE ESTADO DE TRIBUTACIำN"				,oFontR12,390)
+	oPrint:Say (150, 150, "Proveedores de la Entidad"							,oFontR12,390)
+	oPrint:Say (200, 150, "Confrontaci๓n de Operaciones Autodeclaradas (C.O.A.)",oFontR12,390)
+	oPrint:Say (100, 2600, "TALON RESUMEN"										,oFontR12,390)
+	oPrint:Say (150, 2600, "DE LOS DISKETTES"  									,oFontR12,390)
+	oPrint:Say (300, 150, "Identificador RUC: " + AllTrim(cRUC)					,oFontR12,390)
+	oPrint:Say (300, 1300, "Raz๓n Social: " + AllTrim(cNOME)						,oFontR12,390)
+	oPrint:Say (400, 800, "TOTALES MENSUALES DE COMPRAS: "						,oFontR12,390)
+    oPrint:Say (450, 150,"__________________________________________________________________________________________", oFontR12, 390)
+	oPrint:Say (500, 150, "Mes"  												, oFontR12, 390)
+
+	oPrint:Say (500, 550,"Compras"  											, oFontR12, 390)
+	oPrint:Say (550, 550,"Detalhadas"  											, oFontR12, 390)
+	oPrint:Say (600, 550,"por Proveedor"  										, oFontR12, 390)	
+
+	oPrint:Say (500, 950,"Compras"		  										, oFontR12, 390)	
+	oPrint:Say (550, 950,"sin detallar"  										, oFontR12, 390)	
+	oPrint:Say (600, 950,"por Proveedor"  										, oFontR12, 390)		
+
+	oPrint:Say (500, 1350,"Importaciones"  										, oFontR12, 390)	
+	oPrint:Say (550, 1350,"gravadas"	  										, oFontR12, 390)	
+	oPrint:Say (600, 1350,"por el IVA"  										, oFontR12, 390)	
+			
+	oPrint:Say (500, 1750,"Compras e"	  										, oFontR12, 390)	
+	oPrint:Say (550, 1750,"importaciones"  										, oFontR12, 390)	
+	oPrint:Say (600, 1750,"exoneradas"  										, oFontR12, 390)	
+
+	oPrint:Say (610, 150,"__________________________________________________________________________________________", oFontR12, 390)
+
+Return(Nil)
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณRodapeGra บAutor  ณAdilson H Yamaguchi บ Data ณ  01/02/05   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ                                                            บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ AP                                                        บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+Static Function RodapeGra(nPagina, nCount)
+	Local nLin	:= 1700
+	Local nSpace:= 60
+	oPrint:Say (nLin, 150,"__________________________________________________________________________________________", oFontR12, 390)
+	nLin+=nSpace
+	oPrint:Say (nLin, 150,"Totales"																					  , oFontR12, 390)
+	oPrint:Say (nLin, 550, AllTrim(Str(nTOTCOMP))                                                                     , oFontR12, 390)
+	oPrint:Say (nLin, 950, AllTrim(Str(nTOTAGRU))																	  , oFontR12, 390)
+	oPrint:Say (nLin, 1350, AllTrim(Str(nTOTIMPO))																	  , oFontR12, 390)
+	oPrint:Say (nLin, 1750, AllTrim(Str(nTOTEXON))																	  , oFontR12, 390)
+	nLin+=nSpace
+	nLin+=nSpace
+	oPrint:Say (nLin, 150, "Monto total de compras informadas: " + AllTrim(Str(nTOTTOT))							  , oFontR12, 390)
+	nLin+=nSpace
+	oPrint:Say (nLin, 150, "Cantidad de registros de los archivos de informaci๓n: " + AllTrim(Str(nCount))			  , oFontR12, 390)
+	nLin+=nSpace
+	nLin+=nSpace	
+	oPrint:Say (nLin, 150, "Lugar y fecha ______________________,____/____/________"								  , oFontR12, 390)
+	nLin+=nSpace
+	nLin+=nSpace
+	oPrint:Say (nLin, 150, "Declaro bajo fe de juramento que los datos y cifras consignados en este Tal๓n"			  , oFontR12, 390)
+	nLin+=nSpace
+	oPrint:Say (nLin, 150, "Resumen y en el/ los Diskettes que lo acompa๑an son correctos y completos."				  , oFontR12, 390)
+	nLin+=nSpace
+	nLin+=nSpace
+	oPrint:Say (nLin, 300,"_______________________________"  														  , oFontR12, 390)
+	oPrint:Say (nLin, 1300,"_______________________________"  														  , oFontR12, 390)
+	nLin+=nSpace	
+	oPrint:Say (nLin, 480,"Firma"																					  , oFontR12, 390)
+	oPrint:Say (nLin, 1380,"Aclaraci๓n de Firma"																	  , oFontR12, 390)
+	nLin+=nSpace
+	nLin+=nSpace		
+   
+	oPrint:Say (nLin, 150,"__________________________________________________________________________________________", oFontR12, 390)
+	nLin+=nSpace	
+	oPrint:Say (nLin, 150,"                       Uso Sub Secretaria de Estado de Tributaci๓n"  		              , oFontR12, 390)
+	nLin+=nSpace	                              
+	nLin+=nSpace		
+	oPrint:Say (nLin, 150,"                   LOS SOPORTES MAGNETICOS ESTAN SUJETOS A VERIFICACIำN"                   , oFontN12, 390)
+	nLin+=nSpace/2	
+	oPrint:Say (nLin, 150,"__________________________________________________________________________________________", oFontR12, 390)
+	nLin+=nSpace	
+	nLin+=nSpace		
+	oPrint:Say (nLin, 150, "Dependencia Recepcionante:______________________________________ Fecha:____/____/________", oFontR12, 390)	
+	nLin+=nSpace		
+	nLin+=nSpace	
+	oPrint:Say (nLin, 300,"_______________________________"  														  , oFontR12, 390)
+	oPrint:Say (nLin, 1300,"_______________________________"														  , oFontR12, 390)
+	nLin+=nSpace	
+	oPrint:Say (nLin, 480,"Firma del Funcionario"																	  , oFontR12, 390)	
+	oPrint:Say (nLin, 1380,"Aclaraci๓n de Firma"																	  , oFontR12, 390)		
+	oPrint:EndPage() 															// finaliza a pagina
+Return Nil
+
+
+
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณCOA2002txtบAutor  ณAdilson H Yamaguchi บ Data ณ  02/01/05   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Relatorio COA formato TXT                                  บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ AP                                                        บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+Function COA2002txt()
+
+Local titulo    := 'TITULO'
+Local cDesc1    := 'DESCRI 1'
+Local cDesc2    := 'DESCRI 2'
+Local cString   := "R00"
+Local Tamanho   := "P"
+
+Private _aCampos:= {}
+Private aReturn := { 'Zebrado', 1, 'Administracao', 1, 2, 1, "", 1 }
+Private nomeprog:= "COA2002"
+Private nLastKey:= 0
+Private wnrel   := "COA2002"
+Private cArqTmp := ""
+
+wnrel := AllTrim(SetPrint(cString,wnrel,"",@titulo,cDesc1,cDesc2," ",.F.,,,Tamanho))
+	
+If nLastKey == 27
+	DbClearFilter()
+	Return
+EndIf
+	
+SetDefault(aReturn,cString)
+	
+If nLastKey == 27
+	DbClearFilter()
+	Return
+EndIf
+	
+// Chamada da rotina de impressao do relatขrio...
+RptStatus({|lEnd| RunTXT(@lEnd,titulo,wnRel,tamanho) })
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณRunTXT    บAutor  ณAdilson H Yamaguchi บ Data ณ  02/01/05   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Montagem do relatorio formato TXT                          บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ AP                                                        บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+Static Function RunTXT(lEnd,titulo,wnRel,tamanho)
+Local aDriver    	:= ReadDriver()
+Local nTOTCOMP 		:= 0
+Local nTOTAGRU		:= 0
+Local nTOTIMPO		:= 0
+Local nTOTEXON		:= 0
+Local nTOTTOT		:= 0
+Local nRegistros	:= 0
+Private 			Li:=1
+
+SetRegua(10)
+
+If lEnd
+	li++
+	@ PROW()+1,001 PSAY 'Cancelado pelo operador' //"CANCELADO PELO OPERADOR"
+	Return
+EndIf
+@ 0,0 PSAY &(aDriver[3])
+R00->(DbGoTop())
+While !R00->(EOF())
+	nTOTCOMP	:= 0
+	nTOTAGRU	:= 0
+	nTOTIMPO	:= 0
+	nTOTEXON	:= 0
+	nTOTTOT		:= 0
+	nRegistros 	:= 0
+	CabecaTXT(R00->RUC, R00->NOME)
+	li:=14	
+	R01->(DbSetOrder(1))
+	R01->(DbSeek(R00->RUC))
+	WHILE !lABORTPRINT .And. !R01->(Eof()) .And. R00->RUC == R01->RUC
+		If li >= 33
+			RodapeTXT(nRegistros, nTOTCOMP,nTOTAGRU,nTOTIMPO,nTOTEXON,nTOTTOT)
+			li:=1
+			nTOTCOMP := 0
+			nTOTAGRU := 0
+			nTOTIMPO := 0
+			nTOTEXON := 0
+			nTOTTOT  := 0
+			CabecaTXT(R00->RUC, R00->NOME)
+			li:=14				
+		Endif
+		nRegistros++
+		IncRegua()
+		@ li,001 PSAY R01->PERFISC
+		@ li,014 PSAY AllTrim(Str(R01->TOTCOMP))
+		@ li,031 PSAY AllTrim(Str(R01->TOTAGRU))
+		@ li,048 PSAY AllTrim(Str(R01->TOTIMPO))
+		@ li,065 PSAY AllTrim(Str(R01->TOTEXON))
+		nTOTCOMP+=R01->TOTCOMP
+		nTOTAGRU+=R01->TOTAGRU
+		nTOTIMPO+=R01->TOTIMPO
+		nTOTEXON+=R01->TOTEXON
+		nTOTTOT :=nTOTCOMP+nTOTAGRU+nTOTIMPO+nTOTEXON
+		li++           
+		R01->(DbSkip())
+	EndDo
+	If li # 14
+		RodapeTXT(nRegistros, nTOTCOMP,nTOTAGRU,nTOTIMPO,nTOTEXON,nTOTTOT)	
+	EndIf
+	R00->(DbSkip())
+End
+
+If aReturn[5] == 1
+	Set Printer To
+	dbCommitAll()
+	OurSpool(wnrel)
+EndIf
+
+MS_FLUSH()
+
+Return Nil
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณCabecaTXT บAutor  ณAdilson H Yamaguchi บ Data ณ  02/01/05   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณCabecalho do relatorio para formato TXT                     บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ AP                                                        บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function CabecaTXT(cRUC, cNOME)
+	Local nLin:= 1
+	@ nLin,001 PSAY 'SUB SECRETARIA DE ESTADO DE TRIBUTACION                         TALON RESUMEN   '
+	nLin++
+	@ nLin,001 PSAY 'Proveedores de la Entidad                                       DE LOS DISKETTES'
+	nLin++
+	@ nLin,001 PSAY 'Confrontacion de Operaciones Autodeclaradas (C.O.A.)                            '
+	nLin++
+	@ nLin,001 PSAY '                                                                                '
+	nLin++
+	@ nLin,001 PSAY 'Identificador RUC: ' + AllTrim(cRUC)
+	@ nLin,040 PSAY 'RAZON SOCIAL: ' + AllTrim(cNOME)
+	nLin++
+	@ nLin,001 PSAY '                                                                                '
+	nLin++
+	@ nLin,001 PSAY '                         TOTALES MENSUALES DE COMPRAS                           '
+	nLin++
+	@ nLin,001 PSAY '________________________________________________________________________________'
+	nLin++
+	@ nLin,001 PSAY '             Compras          Compras          Importaciones    Compras e       '
+	nLin++
+	@ nLin,001 PSAY 'MES          Detalhadas       sin detallar     gravadas         importaciones   '
+	nLin++
+	@ nLin,001 PSAY '             por Proveedor    por Proveedor    por el IVA       exoneradas      '
+	nLin++
+	@ nLin,001 PSAY '________________________________________________________________________________'
+	nLin++
+Return NIL
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณRodapeTXT บAutor  ณAdilson H Yamaguchi บ Data ณ  02/01/05   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณRodape do relatorio em formato TXT                          บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ AP                                                        บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+Static Function RodapeTXT(nRegistros, nTOTCOMP,nTOTAGRU,nTOTIMPO,nTOTEXON,nTOTTOT)
+	nLin:=34
+	@ nLin,001 PSAY '________________________________________________________________________________'
+	nLin++
+	@ nLin,001 PSAY 'Totales'
+	@ nLin,014 PSAY AllTrim(Str(nTOTCOMP))
+	@ nLin,031 PSAY AllTrim(Str(nTOTAGRU))
+	@ nLin,048 PSAY AllTrim(Str(nTOTIMPO))
+	@ nLin,065 PSAY AllTrim(Str(nTOTEXON))
+	nLin++
+	nLin++
+	@ nLin,001 PSAY 'Monto total de compras informadas: '
+ 	@ nLin,036 PSAY AllTrim(Str(nTOTTOT))
+	nLin++
+	@ nLin,001 PSAY 'Cantiddad de registros de los archivos de informacion: ' + AllTrim(Str(nRegistros))
+	nLin++
+	nLin++
+	@ nLin,001 PSAY 'Lugar y fecha _______________________________,____/____/________                '
+	nLin++
+	nLin++
+	@ nLin,001 PSAY 'Declaro bajo fe de juramento que los datos y cifras consignados en este Talon   '
+	nLin++
+	@ nLin,001 PSAY 'Resumen y en el/ los Diskettes que lo acompa๑an son correctos y completos.      '
+	nLin++
+	nLin++
+	nLin++
+	nLin++
+	@ nLin,001 PSAY '          _________________________          _________________________          '
+	nLin++
+	@ nLin,001 PSAY '                    Firma                       Aclaracion de Firma             '
+	nLin++
+	nLin++
+	@ nLin,001 PSAY '________________________________________________________________________________'
+	nLin++
+	@ nLin,001 PSAY '                  Uso Sub Secretaria de Estado de Tributacion                   '
+	nLin++
+	nLin++
+	@ nLin,001 PSAY '              LOS SOPORTES MAGNETICOS ESTAN SUJETOS A VERIFICACION              '
+	nLin++
+	@ nLin,001 PSAY '________________________________________________________________________________'
+	nLin++
+	nLin++
+	@ nLin,001 PSAY 'Dependencia Receptionante: _________________________   Fecha: ____/____/________'
+	nLin++
+	nLin++
+	nLin++
+	nLin++
+	@ nLin,001 PSAY '          _________________________          _________________________          '
+	nLin++
+	@ nLin,001 PSAY '            Firma del Funcionario               Aclaracion de Firma             '
+	@ nLin,001 PSAY Chr(13)
+Return NIL

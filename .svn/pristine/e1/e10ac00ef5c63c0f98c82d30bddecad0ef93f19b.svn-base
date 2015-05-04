@@ -1,0 +1,74 @@
+#include "rwmake.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณCALCTOT   บAutor  ณGrayson B.Tavares   บ Data ณ  07/01/09   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณExecblock para replicar o indice para os outros itens da    บฑฑ
+ฑฑบ          ณcomposi็ใo                                                  บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณGestao de Projetos                                         บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+User Function CalcT07
+//Chamado pelo gatilho no campo AF4_VALOR
+
+nPValor  := ASCAN(aHeader,{|x|x[2] = "AF4_VALOR"})
+nPQuant  := ASCAN(aHeader,{|x|x[2] = "AF4_QUANT"})
+nPVlrUni := ASCAN(aHeader,{|x|x[2] = "AF4_VLRUNI"})
+
+nTCusUni := 0
+nTCusVen := 0
+nTTotUni := 0
+nTTotVen := 0
+
+For _nx:=1 To Len(aCols)	
+        
+    If _nx <> n
+    	nCusUni:=aCols[_nx,nPValor]
+    	nCusTot:=(nCusUni*M->AF2_QUANT)
+    Else
+    	nCusUni:=aCols[_nx,nPVlrUni]*M->AF4_QUANT//nValor
+    	nCusTot:=(aCols[_nx,nPVlrUni]*M->AF4_QUANT*M->AF2_QUANT)
+    EndIf	
+    
+	nTCusUni += nCusUni
+	nTCusVen += nCusUni+(nCusUni*(M->AF2_BDI/100))
+	nTTotUni += nCusTot
+	nTTotVen += nCusTot+(nCusTot*(M->AF2_BDI/100))
+Next 
+
+For _nx:= 1 to len(aColsSv[4]) //5 recurso  3 quant; 8 custd
+	nCusUni:=(aColsSv[4][_nx][6]*aColsSv[4][_nx][7])
+    nCusTot:=(nCusUni*M->AF2_QUANT)
+	
+	nTCusUni += nCusUni                                        
+	nTCusVen += nCusUni+(nCusUni*(M->AF2_BDI/100))
+	nTTotUni += nCusTot
+	nTTotVen += nCusTot+(nCusTot*(M->AF2_BDI/100))
+Next
+
+For _nx:= 1 to len(aColsSv[1]) //1 produto  7 quant; 9 custd
+	nCusUni:=(aColsSv[1][_nx][7]*aColsSv[1][_nx][9])
+    nCusTot:=(nCusUni*M->AF2_QUANT)
+	
+	nTCusUni += nCusUni
+	nTCusVen += nCusUni+(nCusUni*(M->AF2_BDI/100))
+	nTTotUni += nCusTot
+	nTTotVen += nCusTot+(nCusTot*(M->AF2_BDI/100))
+Next
+
+M->AF2_TOTAL  := nTCusVen 
+M->AF2_CUSTO  := nTCusUni
+M->AF2_VALBDI := nTCusUni*(M->AF2_BDI/100)
+M->AF2_TOTCUS := nTTotUni
+M->AF2_TOTVEN := nTTotVen
+
+GetDRefresh()
+
+Return M->AF4_QUANT

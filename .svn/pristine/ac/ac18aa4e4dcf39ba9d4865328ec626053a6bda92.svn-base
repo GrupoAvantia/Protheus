@@ -1,0 +1,1521 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "PROTHEUS.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\fatr600.prw"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\DBTREE.CH"
+#line 3 "d:\totvs 11\microsiga\protheus\my projects\materiais\fatr600.prw"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MSOLE.CH"
+#line 4 "d:\totvs 11\microsiga\protheus\my projects\materiais\fatr600.prw"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FATR600.CH"
+#line 25 "d:\totvs 11\microsiga\protheus\my projects\materiais\fatr600.prw"
+Function FATR600(cTemplate)
+
+Local aArea			:= GetArea()
+Local cPais			:= Criavar("AG4_PAIS")
+Local cIdioma		:= Criavar("AG4_IDIOMA")
+Local cCodigo		:= SPACE(len(AG1->AG1_CODIGO))
+Local aComponente	:= {}
+Local oObrigat
+Local oOpcSelec
+Local oOpcNSelec
+Local oTree
+Local lHtml 		:= FindFunction("ISHTML") .And.  IsHTML()
+
+cTemplate := If( cTemplate == nil, "", cTemplate ) ;
+
+
+
+If lHtml
+	FWAvisoHTML()
+	Return( .T. )
+EndIf
+
+AjustaSXB()
+
+oDlg = MsDialog():New( 000, 000, 425, 450, "Impressão de Modelo - Integração com Word",,,.F.,,,,, oMainWnd,.T.,, ,.F. )
+
+ TSay():New( 07, 015,{||  If(cPaisLoc$"ANG|PTG","País:","Pais:")},,,,.F.,.F.,.F.,.T.,,,,,.F.,.F.,.F.,.F.,.F.,.F. )
+ TGet():New( 06, 040, { | u | If( PCount() == 0, cPais, cPais := u ) },,,, "@!",{||  ExistCpo("SYA",cPais)},,,,.F.,,.T.,,.F.,{||  (IIF(Empty(Alltrim(cPais)), .T. , .F. ))},.F.,.F.,,.F.,.F. ,"SYA","cPais",,,, )
+
+ TSay():New( 07, 072,{||  "Idioma:"},,,,.F.,.F.,.F.,.T.,,,,,.F.,.F.,.F.,.F.,.F.,.F. )
+ TGet():New( 06, 097, { | u | If( PCount() == 0, cIdioma, cIdioma := u ) },,,, "@!",{||  ExistCpo("SX5","F8"+cIdioma)},,,,.F.,,.T.,,.F.,{||  (IIF(Empty(Alltrim(cIdioma)), .T. , .F. ))},.F.,.F.,,.F.,.F. ,"F8","cIdioma",,,, )
+
+ TSay():New( 21, 015,{||  "Modelo:"},,,,.F.,.F.,.F.,.T.,,,,,.F.,.F.,.F.,.F.,.F.,.F. )
+ TGet():New( 19, 040, { | u | If( PCount() == 0, cCodigo, cCodigo := u ) },,,, "@!",{||  (ExistCpo("AG1",M->cCodigo,1) .AND. MsgRun(If(cPaisLoc$"ANG|PTG","A carregar modelo ...","Carregando modelo ..."),If(cPaisLoc$"ANG|PTG","Aguarde...","Aguarde"),{||R600Tree(cCodigo,@aComponente,cPais,cIdioma,oTree)}))},,,,.F.,,.T.,,.F.,{||  (IIF(Empty(Alltrim(cCodigo)), .T. , .F. ))},.F.,.F.,,.F.,.F. ,"AG1MOD","cCodigo",,,, )
+ TGet():New( 19, 073, { | u | If( PCount() == 0, Posicione("AG1",01,xFilial("AG1")+cCodigo,"AG1_DESCRI"), Posicione("AG1",01,xFilial("AG1")+cCodigo,"AG1_DESCRI") := u ) },, 135, 10,,,,,,.F.,,.T.,,.F.,{||  .F. },.F.,.F.,,.F.,.F. ,,'Posicione("AG1",01,xFilial("AG1")+cCodigo,"AG1_DESCRI")',,,, )
+
+
+oTree := DbTree():New(060,015,190,210,oDlg,{||R600MudaStatus(aComponente,@oTree:GetCargo(),oTree),oTree:Refresh()},, .T. , .F. )
+
+
+oObrigat 	:= TBitmap():New(003,002,008,008,"br_vermelho",, .T. ,oDlg)
+ TSay():New( 42, 025,{||  If(cPaisLoc$"ANG|PTG","Elem. obrigatório","Item Obrigatorio")},,,,.F.,.F.,.F.,.T.,,,,,.F.,.F.,.F.,.F.,.F.,.F. )
+
+oOpcSelec	:= TBitmap():New(003,009,008,008,"br_azul",, .T. ,oDlg)
+ TSay():New( 42, 081,{||  If(cPaisLoc$"ANG|PTG","Opcional selecionado","Opcional Selecionado")},,,,.F.,.F.,.F.,.T.,,,,,.F.,.F.,.F.,.F.,.F.,.F. )
+
+oOpcNSelec 	:= TBitmap():New(003,018,008,008,"br_cinza",, .T. ,oDlg)
+ TSay():New( 42, 153,{||  If(cPaisLoc$"ANG|PTG","Opcional não seleccionado","Opcional não selecinado")},,,,.F.,.F.,.F.,.T.,,,,,.F.,.F.,.F.,.F.,.F.,.F. )
+
+
+ oBtnV1 := SButton():New( 195, 140,1,{||  (R600Impressao(aComponente,cIdioma,cCodigo,cTemplate),oDlg:End(),RestArea(aArea))}, oDlg,.T.,,)
+ oBtnV2 := SButton():New( 195, 180,2,{||  (RestArea(aArea),oDlg:End())}, oDlg,.T.,,)
+
+oDlg:Activate( oDlg:bLClicked, oDlg:bMoved, oDlg:bPainted,.T.,,,, oDlg:bRClicked, )
+
+RestaRea( aArea )
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R600Tree(cCodigo,aComponente,cPais,cIdioma,oTree)
+
+Local nItemArray	:= 0
+Local cProcessa		:= "2"
+
+aComponente:={}
+
+If 	Empty(cCodigo) .or.  Empty(cPais) .or.  Empty(cIdioma)
+	Return ( .T. )
+Endif
+
+oTree:Reset()
+oTree:BeginUpdate()
+
+oTree:AddTree(PADR("Impressão de Modelo - Integração com Word",TAMSX3("AG3_DESCRI")[1]), .T. ,"MENUDOWN","MENURIGHT",,,"!")
+
+DbSelectArea("AG2")
+DbSetOrder(1)
+MsSeek(xFilial("AG2")+cCodigo)
+
+cComp  	:=	AG2->AG2_COMPPR
+cCompAs	:=  AG2->AG2_COMPAS
+
+DbSelectArea("AG3")
+DbSetOrder(1)
+MsSeek(xFilial("AG3")+AG2->AG2_COMPPR)
+
+cCompPrDs 	:=AG3->AG3_DESCRI
+
+MsSeek(xFilial("AG3")+AG2->AG2_COMPAS)
+
+cCompAsDs 	:=  AG3->AG3_DESCRI
+
+DbSelectArea("AG4")
+DbSetorder(2)
+
+If 	MsSeek(xFilial("AG4")+cCompAs+cPais+cIdioma)
+	cRotina 	:=  AG4->AG4_FUNCAO
+	cAtualiza	:=  AG4->AG4_ATUALI
+Else
+	oTree:EndTree()
+	oTree:EndUpdate()
+	Return .F. 
+Endif
+
+If 	Empty(AG4->AG4_VLDCOM)
+	cProcessa:=AG2->AG2_OBRIGA
+Else
+	cProcessa:=&(AllTrim(AG4->AG4_VLDCOM))
+Endif
+
+If 	cProcessa <> "3"
+
+	nItemArray:=1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	aadd(aComponente,{cComp,cCompPrDs,cCompAsDs,cProcessa,alltrim(AG4->AG4_DOCWOR),chr(nItemArray+33),iif(cProcessa=="1", .T. , .F. ),AllTrim(cRotina),AG4->AG4_NIVEL,AG4->AG4_SUBNIV,AG2->AG2_INCCAP,cAtualiza,cCompAs})
+
+
+	oTree:AddTree(aComponente[nItemArray][2], .T. ,"MENUDOWN","MENURIGHT",,,"!")
+	oTree:AddTreeItem(aComponente[nItemArray][3],,R600Status(aComponente,aComponente[nItemArray][6]),chr(nItemArray+33))
+Endif
+
+cComp   	:=	AG2->AG2_COMPPR
+
+AG2->(DbSkip())
+
+While cCodigo == AG2->AG2_COD .and.  AG2->(!Eof())
+
+	DbSelectArea("AG3")
+	DbSetOrder(1)
+	MsSeek(xFilial("AG3")+AG2->AG2_COMPPR)
+
+	cCompPrDs 	:=AG3->AG3_DESCRI
+
+	MsSeek(xFilial("AG3")+AG2->AG2_COMPAS)
+
+	cCompAsDs 	:=  AG3->AG3_DESCRI
+
+	DbSelectArea("AG4")
+	DbSetorder(2)
+
+	If 	MsSeek(xFilial("AG4")+AG2->AG2_COMPAS+cPais+cIdioma)
+		cRotina 	:=  AG4->AG4_FUNCAO
+		cAtualiza	:=  AG4->AG4_ATUALI
+	Else
+		oTree:EndTree()
+		oTree:EndUpdate()
+
+		Iif(FindFunction("APMsgAlert"), APMsgAlert(If(cPaisLoc$"ANG|PTG","Este modelo não está disponível para impressão nesse PAÍS/IDIOMA. Tradução não encontrada para: ","Este modelo não está disponível para impressao nesse PAIS/IDIOMA. Tradução não encontrada para: ")+cCompAsDs, "Atenção"), MsgAlert(If(cPaisLoc$"ANG|PTG","Este modelo não está disponível para impressão nesse PAÍS/IDIOMA. Tradução não encontrada para: ","Este modelo não está disponível para impressao nesse PAIS/IDIOMA. Tradução não encontrada para: ")+cCompAsDs, "Atenção"))
+	Endif
+
+	cCompPr		:=  AG2->AG2_COMPPR
+	cCompAs		:=	AG2->AG2_COMPAS
+
+	If 	Empty(AG4->AG4_VLDCOM)
+		cProcessa:=AG2->AG2_OBRIGA
+	Else
+		cProcessa:=&(AllTrim(AG4->AG4_VLDCOM))
+	Endif
+
+	If 	cProcessa <> "3"
+
+		nItemArray++
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		aadd(aComponente,{cCompPr,cCompPrDs,cCompAsDs,cProcessa,alltrim(AG4->AG4_DOCWOR),chr(nItemArray+33),iif(cProcessa=="1", .T. , .F. ),AllTrim(cRotina),AG4->AG4_NIVEL,AG4->AG4_SUBNIV,AG2->AG2_INCCAP,cAtualiza,cCompAs})
+
+		If 	cComp<> AG2->AG2_COMPPR
+			If 	nItemArray > 1
+				oTree:EndTree()
+			Endif
+			oTree:AddTree(aComponente[nItemArray][2], .T. ,"MENUDOWN","MENURIGHT",,,"!")
+		Endif
+
+
+		oTree:AddTreeItem(aComponente[nItemArray][3],,R600Status(aComponente,aComponente[nItemArray][6]),chr(nItemArray+33))
+	Endif
+
+	cComp := AG2->AG2_COMPPR
+	AG2->(DbSkip())
+
+Enddo
+
+oTree:EndTree()
+oTree:EndUpdate()
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R600Status(aComponente,cItens)
+
+Local cRetorno	:= ""
+Local nPos		:= Ascan(aComponente,{|x|x[6]==cItens})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+If cItens == "!" .or.  cItens == " " .or.  nPos == 0
+	Return Iif (nFunc == 1,NIL,cRetorno)
+ElseIf aComponente[nPos][4]=="1"
+	Return ("br_vermelho")
+ElseIf aComponente[nPos][4]=="2" .and.  aComponente[nPos][7]== .F. 
+	Return("br_cinza")
+ElseIf aComponente[nPos][4]=="2" .and.  aComponente[nPos][7]== .T. 
+	Return ("br_azul")
+Else
+
+
+	Return ("br_cinza")
+Endif
+
+
+oTree:Refresh()
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R600MudaStatus(aComponente,cItens,oTree)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+nPos:=Ascan(aComponente,{|x|x[6]==cItens})
+
+If 	cItens == "!" .or.  cItens == " "
+
+	Return
+ElseIf 	aComponente[nPos][4]=="1"
+
+	aComponente[nPos][7]:= .T. 
+ElseIf 	aComponente[nPos][7]== .F.  .and.  aComponente[nPos][4]=="2"
+
+	aComponente[nPos][7]:= .T. 
+
+	oTree:ChangeBMP("br_azul","br_azul")
+	oTree:Refresh()
+ElseIf aComponente[nPos][7]== .T.  .and.  aComponente[nPos][4]=="2"
+
+	aComponente[nPos][7]:= .F. 
+
+	oTree:ChangeBMP("br_cinza","br_cinza")
+	oTree:Refresh()
+Else
+
+	aComponente[nPos][7]:= .F. 
+	oTree:ChangeBMP("br_cinza","br_cinza")
+Endif
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R600Impressao(aComponente,cIdioma,cCodigo,cTemplate)
+
+Local aArea			:= GetArea()
+Local hWord 		:= Nil
+Local cPathOri		:= AllTrim(SuperGetMv("MV_PATWORD"))
+Local cPathFinal 	:= AllTrim(SuperGetMv("MV_PATTERM"))
+Local cPathServer	:= Alltrim(SuperGetMv("MV_DOCAR"))
+Local cDotMacros	:= IIf(cTemplate == "VistoriaTec",Alltrim(SuperGetMv("MV_VISTDOT", .F. ,"CRM-Exec_Macro_Vistoria.dot")),Alltrim(SuperGetMv("MV_NOMEDOT",,"CRM-Exec_Macro.dot")))
+Local lMsDocument	:= SuperGetMv("MV_FTMSDOC",, .F. )
+Local lFR600Val		:= ExistBlock("FR600VAL")
+Local lRet600Val	:= .T. 
+Local cRevisao		:= ""
+Local cArqUsr		:= ""
+LocaL nCount 		:= 1
+
+Local lPdf			:= R600ImpPDF()
+
+Private cNomeWord	:= "Documento"
+
+If	!File(cPathServer+cDotMacros)
+
+	Iif(FindFunction("APMsgAlert"), APMsgAlert(If(cPaisLoc$"ANG|PTG","Modelo do WORD:","Modelo do WORD :")+cDotMacros+If(cPaisLoc$"ANG|PTG"," Utilizado na integração não encontrado no servidor. Impressão cancelada!"," usado na integração não encontrado no servidor. Impressão cancelada !"), "Atenção"), MsgAlert(If(cPaisLoc$"ANG|PTG","Modelo do WORD:","Modelo do WORD :")+cDotMacros+If(cPaisLoc$"ANG|PTG"," Utilizado na integração não encontrado no servidor. Impressão cancelada!"," usado na integração não encontrado no servidor. Impressão cancelada !"), "Atenção"))
+	Return NIL
+Endif
+
+If	lFR600Val
+
+	lRet600Val := ExecBlock( "FR600VAL", .F. , .F. )
+	If 	ValType(lRet600Val) <> "L"
+		lRet600Val := .T. 
+	EndIf
+Endif
+
+If	!lRet600Val
+	Return( .T. )
+Endif
+
+
+Processa({|| R600Dots(aComponente,cPathOri,cPathFinal,cPathServer,cDotMacros)},If( cPaisLoc $ "ANG|PTG", "A verificar documentos na estação...", "Verificando documentos na estaçãoo..." ),If( cPaisLoc $ "ANG|PTG", "Aguarde...", "Aguarde" ), .F. )
+
+
+
+
+hWord := OLE_CreateLink("TMSOLEWORD97")
+
+OLE_SetProperty(hWord,"207","MAX" )
+OLE_SetProperty(hWord,"206", .T. )
+
+
+
+
+R600IniDoc(@hWord,cPathOri,cDotMacros,aComponente)
+
+
+
+
+R600Numera(aComponente,hWord)
+
+
+
+
+R600Macros(aComponente,hWord)
+
+
+
+
+OLE_UpDateFields(hWord)
+
+
+If lMsDocument
+
+
+
+
+
+	DbSelectArea("ACB")
+	DbSetOrder(2)
+
+	If lPdf
+		If !DbSeek(xFilial("ACB")+Upper(cNomeWord+".pdf"))
+			OLE_SaveAsFile(hWord,cPathFinal+cNomeWord,,, .F. ,"0")
+			MsgRun("Aguarde","Impressão em PDF...",{||ConvPDF(hWord,cPathFinal,cNomeWord)})
+			Iif(FindFunction("APMsgInfo"), APMsgInfo(cNomeWord+If(cPaisLoc$"ANG|PTG"," Salva no diretório:"," salva no diretório:")+cPathFinal, "Atenção"), MsgInfo(cNomeWord+If(cPaisLoc$"ANG|PTG"," Salva no diretório:"," salva no diretório:")+cPathFinal, "Atenção"))
+		Else
+			While ACB->(!Eof())
+				cRevisao := " - R"+cValToChar(nCount)
+				If !DbSeek(xFilial("ACB")+Upper(cNomeWord+cRevisao+".pdf"))
+					OLE_SaveAsFile(hWord,cPathFinal+cNomeWord+cRevisao,,, .F. ,"0")
+					MsgRun("Aguarde","Impressão em PDF...",{||ConvPDF(hWord,cPathFinal,cNomeWord,cRevisao)})
+					Iif(FindFunction("APMsgInfo"), APMsgInfo(cNomeWord+cRevisao+If(cPaisLoc$"ANG|PTG"," Salva no diretório:"," salva no diretório:")+cPathFinal, "Atenção"), MsgInfo(cNomeWord+cRevisao+If(cPaisLoc$"ANG|PTG"," Salva no diretório:"," salva no diretório:")+cPathFinal, "Atenção"))
+					Exit
+				EndIf
+				nCount++
+				ACB->(DbSkip())
+			End
+		EndIf
+
+
+
+
+		cArqUsr := cPathFinal+cNomeWord+cRevisao+".pdf"
+		R600GrvBco(cArqUsr)
+
+	Else
+		If !DbSeek(xFilial("ACB")+Upper(cNomeWord+".doc"))
+			OLE_SaveAsFile(hWord,cPathFinal+cNomeWord,,, .F. ,"0")
+			Iif(FindFunction("APMsgInfo"), APMsgInfo(cNomeWord+If(cPaisLoc$"ANG|PTG"," Salva no diretório:"," salva no diretório:")+cPathFinal, "Atenção"), MsgInfo(cNomeWord+If(cPaisLoc$"ANG|PTG"," Salva no diretório:"," salva no diretório:")+cPathFinal, "Atenção"))
+		Else
+			While ACB->(!Eof())
+				cRevisao := " - R"+cValToChar(nCount)
+				If !DbSeek(xFilial("ACB")+Upper(cNomeWord+cRevisao+".doc"))
+					OLE_SaveAsFile(hWord,cPathFinal+cNomeWord+cRevisao,,, .F. ,"0")
+					Iif(FindFunction("APMsgInfo"), APMsgInfo(cNomeWord+cRevisao+If(cPaisLoc$"ANG|PTG"," Salva no diretório:"," salva no diretório:")+cPathFinal, "Atenção"), MsgInfo(cNomeWord+cRevisao+If(cPaisLoc$"ANG|PTG"," Salva no diretório:"," salva no diretório:")+cPathFinal, "Atenção"))
+					Exit
+				EndIf
+				nCount++
+				ACB->(DbSkip())
+			End
+		EndIf
+
+
+
+
+
+		cArqUsr := cPathFinal+cNomeWord+cRevisao+".doc"
+		R600GrvBco(cArqUsr)
+
+	EndIf
+
+Else
+
+
+
+
+	OLE_SaveAsFile(hWord,cPathFinal+cNomeWord,,, .F. ,"0")
+
+	If lPdf
+		MsgRun("Aguarde","Impressão em PDF...",{||ConvPDF(hWord,cPathFinal,cNomeWord)})
+	EndIf
+
+	Iif(FindFunction("APMsgInfo"), APMsgInfo(cNomeWord+If(cPaisLoc$"ANG|PTG"," Salva no diretório:"," salva no diretório:")+cPathFinal, "Atenção"), MsgInfo(cNomeWord+If(cPaisLoc$"ANG|PTG"," Salva no diretório:"," salva no diretório:")+cPathFinal, "Atenção"))
+
+EndIf
+
+
+
+
+hWord := OLE_CloseLink()
+
+RestArea(aArea)
+
+
+Return cArqUsr
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R600IniDoc(hWord,cPathOri,cDotMacros,aComponente)
+
+Local i
+Local nComponente	:= 0
+Local cCapitulo		:= " "
+
+Ole_NewFile(hWord,cPathOri+cDotMacros)
+
+Ole_SetDocumentVar(hWord,"cDiretorio",alltrim(cPathOri))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+For i := 1 To Len(aComponente)
+
+	If	!Empty(alltrim(aComponente[i][5])) .and.  aComponente[i][7]== .T. 
+
+		nComponente++
+		OLE_SetDocumentVar(hWord,"cComponente"+alltrim(str(nComponente)),ALLTRIM(aComponente[i][5]))
+
+		IF 	I==1
+			OLE_SetDocumentVar(hWord,"nAltCap"+alltrim(str(nComponente)),"0")
+		Else
+			If 	aComponente[ i,1 ] <> cCapitulo
+				cCapitulo 	:= alltrim( aComponente[ i ,1 ] )
+				OLE_SetDocumentVar(hWord,"nAltCap"+alltrim(str(nComponente)),"1")
+			Else
+				OLE_SetDocumentVar(hWord,"nAltCap"+alltrim(str(nComponente)),"0")
+			EndIf
+		Endif
+
+	Endif
+
+next
+
+Ole_SetDocumentVar(hWord,"nComponente",alltrim(str(nComponente)))
+
+
+
+
+OLE_ExecuteMacro(hWord,"AlimentaArray")
+
+
+
+
+OLE_ExecuteMacro(hWord,"Insere_Componente")
+
+Return nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R600Dots(aComponente,cPathOri,cPathFinal,cPathServer,cDotMacros)
+
+Local i
+Local nPosLocal:=0
+Local nPosServer:=0
+nHandle := fCreate(cPathOri+"TESTE")
+
+If nHandle <> -1
+	fClose(nHandle)
+	fErase(cPathOri+"TESTE")
+Else
+	If	MAKEDIR(cPathOri)<> 0
+
+		return nil
+	EndIf
+EndIf
+
+nHandle := fCreate(cPathFinal+"TESTE")
+
+If nHandle <> -1
+	fClose(nHandle)
+	fErase(cPathFinal+"TESTE")
+Else
+	If	MAKEDIR(cPathFinal)<> 0
+
+		return nil
+	EndIf
+EndIf
+
+
+
+aDocServer:=Directory(cPathServer+"*.DOT")
+
+aDocLocal:=Directory(cPathOri+"*.dot")
+
+
+aSort(aDocServer,,,{|x,y| UPPER(x[1]) < UPPER(y[1])})
+aSort(aDocLocal,,, {|x,y| UPPER(x[1]) < UPPER(y[1])})
+
+
+
+
+ProcRegua(len(aComponente))
+
+For i:=1 to len(aComponente)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	IncProc(aComponente[i][3])
+	nPosLocal:=aScan(aDocLocal,{|x|alltrim(x[1])==Upper(alltrim(aComponente[i][5]))+".DOT"})
+	nPosServer:=aScan(aDocServer,{|x|alltrim(x[1])==Upper(alltrim(aComponente[i][5]))+".DOT"})
+	if nPosServer <=0
+		Iif(FindFunction("APMsgStop"), APMsgStop(Upper(alltrim(aComponente[i][5]))+".DOT"+" não encontrado no servidor.",), MsgStop(Upper(alltrim(aComponente[i][5]))+".DOT"+" não encontrado no servidor.",))
+	Endif
+	if aComponente[i][12] <> "2" .and.  nPosLocal == 0
+		__CopyFile( cPathServer+alltrim(aComponente[i][5])+".DOT" , cPathOri+alltrim(aComponente[i][5])+".DOT" )
+	Elseif aComponente[i][12] <> "2" .and.  nPosServer > 0 .and.  (aDocLocal[nPosLocal][2] <> aDocServer[nPosServer][2] .or.  aDocLocal[nPosLocal][3] <> aDocServer[nPosServer][3] .or.  aDocLocal[nPosLocal][4] <> aDocServer[nPosServer][4])
+		__CopyFile( cPathServer+alltrim(aComponente[i][5])+".DOT" , cPathOri+alltrim(aComponente[i][5])+".DOT" )
+	Endif
+Next
+
+__CopyFile( cPathServer+cDotMacros , cPathOri+cDotMacros  )
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R600Numera(aComponente,hWord)
+
+Local nCapitulo	:= 0
+Local nItem		:= 0
+Local nSubitem	:= 0
+Local cCapitulo	:= ""
+Local nx1
+Local nx2
+Local nx3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+For nx1 := 1 to Len( aComponente )
+
+	lMarcado 	:= acomponente[nx1,7]
+	cIncrementa := alltrim( acomponente[nx1,11] )
+
+
+	If !lMarcado
+		Loop
+	Endif
+
+
+	If 	aComponente[ nx1,1 ] <> cCapitulo .and.  cIncrementa == "1"
+		nCapitulo 	++
+		nItem		:= 0
+		cCapitulo 	:= alltrim( aComponente[ nx1 ,1 ] )
+	EndIf
+
+
+	cComponente	:= alltrim (aComponente[ nx1,13 ] )
+
+
+	cVWordCap 	:= cComponente
+	cConteudo	:= alltrim (str( nCapitulo ) )
+	Ole_SetDocumentVar(hWord,cVWordCap,cConteudo+" - ")
+
+	nCItem 		:= aComponente[ nx1 , 9 ]
+	nCSubitem	:= aComponente[ nx1 , 10 ]
+
+
+	For nx2 := 1 To nCItem
+
+		nItem 		++
+		cVWordItem	:= cComponente + "." + alltrim (str( nx2 ) )
+		cConteudo	:= alltrim( str( nCapitulo ) )+ "." + alltrim( str( nItem ) )
+		Ole_SetDocumentVar(hWord,cVWordItem,cConteudo+" - ")
+		nSubItem	:= 0
+
+
+		For nx3 := 1 To nCSubItem
+
+			nSubItem 		++
+			cVWordSubItem	:= cComponente + "." + alltrim( str( nx2 ) ) + "." + alltrim( str( nx3 ) )
+			cConteudo		:= alltrim( str( nCapitulo ) ) + "." + alltrim( str( nItem ) ) + "." + alltrim( str( nSubitem ) )
+
+			Ole_SetDocumentVar(hWord,cVWordSubItem,cConteudo+" - ")
+
+		next
+
+	next
+
+next
+
+return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R600Macros(aComponente,hWord)
+
+Local nfuncao:=0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+For nfuncao:=1 To Len(aComponente)
+
+
+
+
+
+	If !Empty(alltrim(aComponente[nfuncao][5])) .AND.  aComponente[nfuncao][7] == .T.  .AND.  !Empty(alltrim(aComponente[nfuncao][8]))
+
+
+
+
+		ExecBlock(aComponente[nfuncao][8], .F. , .F. ,{hWord} )
+
+	Endif
+
+next
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R600GrvBco(cPathUsr)
+
+Local cFile      := ""
+Local cExten     := ""
+Local aAreaACB	 := ACB->(GetArea())
+Local aAreaAD1   := AD1->(GetArea())
+Local aAreaAC9   := AC9->(GetArea())
+Local nReg		 := AD1->(RecNo())
+Local lMultDir   := .T. 
+Local lRet 		 := Ft340CpyObj(cPathUsr)
+
+
+If lRet
+
+
+
+
+
+	SplitPath(cPathUsr,,,@cFile, @cExten )
+	cObjeto := Left(Upper(cFile+cExten ),Len(cPathUsr))
+	cCodObj := GetSXENum("ACB","ACB_CODOBJ")
+
+	dbSelectArea( "ACB" )
+	dbSetOrder(1)
+
+	RecLock("ACB", .T. )
+	ACB->ACB_FILIAL  := xFilial( "ACB" )
+	ACB->ACB_CODOBJ  := cCodObj
+	ACB->ACB_OBJETO	 := cObjeto
+	ACB->ACB_DESCRI	 :=	cFile
+	If FindFunction( "MsMultDir" ) .And.  MsMultDir()
+		ACB->ACB_PATH	:= MsDocPath(lMultDir)
+	Endif
+
+	ACB->(MsUnLock())
+	ACB->(ConfirmSX8())
+
+	dbSelectArea("AD1")
+	DbGoto(nReg)
+	cCodEnt  := PadR(AD1_NROPOR, TamSX3("AC9_CODENT")[1])
+
+
+
+
+	RecLock( "AC9", .T.  )
+	AC9->AC9_FILIAL := xFilial("AC9")
+	AC9->AC9_FILENT := xFilial("AD1")
+	AC9->AC9_ENTIDA := "AD1"
+	AC9->AC9_CODENT := cCodEnt
+	AC9->AC9_CODOBJ := cCodObj
+	AC9->(MsUnLock())
+
+Endif
+
+RestArea(aAreaACB)
+RestArea(aAreaAD1)
+RestArea(aAreaAC9)
+
+Return(lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function R600TWrd()
+
+Local lTempWord 	:= SuperGetMv("MV_TEMPWRD",, .T. )
+Local cPathDot 		:= " "
+Local cMacroPdr 	:= "CRM-Exec_Macro.dot"
+Local cMacroVt		:= "CRM-Exec_Macro_Vistoria.dot"
+Local cPathUsr 		:= "c:\wordtmp\"
+Local cPathUsrDot 	:= "c:\wordstd\"
+
+Static cCodigo		:= A620NUMSEQ("AG1","AG1_CODIGO")
+Static cCodVist		:= Soma1(cCodigo)
+
+If lTempWord
+
+
+
+
+
+
+
+			cPathDot := "samples\documents\crm\portugues\"
+
+
+
+
+
+
+
+	If AllTrim(SuperGetMv("MV_DOCAR")) <> cPathDot
+		PutMv("MV_DOCAR",cPathDot)
+	EndIf
+
+	If AllTrim(SuperGetMv("MV_NOMEDOT")) <> cMacroPdr
+		PutMv("MV_NOMEDOT",cMacroPdr)
+	EndIf
+	If AllTrim(SuperGetMv("MV_VISTDOT", .F. ,"")) <> cMacroVt
+		PutMv("MV_VISTDOT",cMacroVt)
+	EndIf
+	If AllTrim(SuperGetMv("MV_PATTERM")) <> cPathUsr
+		PutMv("MV_PATTERM",cPathUsr)
+	EndIf
+	If AllTrim(SuperGetMv("MV_PATWORD")) <> cPathUsrDot
+		PutMv("MV_PATWORD",cPathUsrDot)
+	EndIf
+
+	DbSelectArea("AG1")
+	DbSetOrder(1)
+
+	If !DbSeek(xFilial("AG1")+cCodigo)
+		CriaAG1()
+	EndIf
+
+	DbSelectArea("AG2")
+	DbSetOrder(1)
+
+	If !DbSeek(xFilial("AG2")+cCodigo)
+		CriaAG2()
+	EndIf
+
+	DbSelectArea("AG3")
+	DbSetOrder(1)
+	CriaAG3()
+
+	DbSelectArea("AG4")
+	DbSetOrder(1)
+	CriaAG4()
+
+	DbSelectArea("SX6")
+	DbSetOrder(1)
+
+	If !DbSeek( Space(FWSizeFilial()) + "MV_TEMPWRD" )
+		CriaMV()
+	EndIf
+
+	PutMv("MV_TEMPWRD", .F. )
+
+EndIf
+
+
+Return( .T. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function CriaAG1()
+
+DbSelectArea("AG1")
+DbSetOrder(1)
+
+RecLock("AG1", .T.  )
+AG1->AG1_FILIAL := xFilial("AG1")
+AG1->AG1_CODIGO := cCodigo
+AG1->AG1_DESCRI := "Template de Proposta Comercial"
+AG1->(MsUnLock())
+
+RecLock("AG1", .T.  )
+AG1->AG1_FILIAL := xFilial("AG1")
+AG1->AG1_CODIGO := cCodVist
+AG1->AG1_DESCRI := If( cPaisLoc $ "ANG|PTG", "Template de vistoria técnica", "Template de Vistoria Tecnica" )
+AG1->(MsUnLock())
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function CriaAG2()
+
+Local aAG2 	:= {}
+Local aAG2V	:= {}
+Local nX	:= 0
+Local nY	:= 0
+
+
+
+
+
+
+aAG2 := {{cCodigo,"001","Template de Proposta Comercial","P01","P02","1","2"}, {cCodigo,"002","Template de Proposta Comercial","P01","P03","1","2"}, {cCodigo,"003","Template de Proposta Comercial","P01","P04","1","2"}, {cCodigo,"004","Template de Proposta Comercial","P01","P05","1","2"}, {cCodigo,"005","Template de Proposta Comercial","P01","P06","1","2"}, {cCodigo,"006","Template de Proposta Comercial","P01","P07","1","2"}}
+
+
+aAG2V := {{cCodVist,"001",If( cPaisLoc $ "ANG|PTG", "Template de vistoria técnica", "Template de Vistoria Tecnica" ),"V01","V02","1","2"}, {cCodVist,"002",If( cPaisLoc $ "ANG|PTG", "Template de vistoria técnica", "Template de Vistoria Tecnica" ),"V01","V03","1","2"}}
+
+DbSelectArea("AG2")
+DbSetOrder(1)
+
+For nX := 1 To Len(aAG2)
+	RecLock("AG2", .T. )
+	AG2->AG2_FILIAL := xFilial("AG2")
+	AG2->AG2_COD    := aAG2[nX][1]
+	AG2->AG2_ORDEM  := aAG2[nX][2]
+	AG2->AG2_DESCRI := aAG2[nX][3]
+	AG2->AG2_COMPPR := aAG2[nX][4]
+	AG2->AG2_COMPAS := aAG2[nX][5]
+	AG2->AG2_OBRIGA := aAG2[nX][6]
+	AG2->AG2_INCCAP := aAG2[nX][7]
+	AG2->(MsUnlock())
+next
+
+For nY := 1 To Len(aAG2V)
+	RecLock("AG2", .T. )
+	AG2->AG2_FILIAL := xFilial("AG2")
+	AG2->AG2_COD    := aAG2V[nY][1]
+	AG2->AG2_ORDEM  := aAG2V[nY][2]
+	AG2->AG2_DESCRI := aAG2V[nY][3]
+	AG2->AG2_COMPPR := aAG2V[nY][4]
+	AG2->AG2_COMPAS := aAG2V[nY][5]
+	AG2->AG2_OBRIGA := aAG2V[nY][6]
+	AG2->AG2_INCCAP := aAG2V[nY][7]
+	AG2->(MsUnlock())
+next
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function CriaAG3()
+
+Local aAG3  	:= {}
+Local aAG3V		:= {}
+Local nX		:= 0
+Local nW		:= 0
+Local lNewReg	:= .F. 
+
+
+
+
+
+
+
+aAG3 := {{"P01","CRM Template de Proposta Comercial","1","1",0,0}, {"P02","CRM Capa","2","1",0,0}, {"P03","CRM Carta","2","1",0,0}, {"P04","CRM Proposta","2","1",0,0}, {"P05","CRM Serviços","2","1",0,0}, {"P06","CRM Condição de Pagamento","2","1",0,0}, {"P07","CRM Aceite","2","1",0,0}}
+
+
+
+aAG3V := {{"V01",If( cPaisLoc $ "ANG|PTG", "CRM Template de Vistoria Técnica", "CRM Template de Vistoria Tecnica" ),"1","1",0,0}, {"V02","CRM Capa Vistoria","2","1",0,0}, {"V03",If( cPaisLoc $ "ANG|PTG", "CRM Vistoria Técnica", "CRM Vistoria Tecnica" ),"2","1",0,0}}
+
+DbSelectArea("AG3")
+DbSetOrder(1)
+
+For nX := 1 To Len(aAG3)
+	lNewReg := AG3->( !DbSeek( xFilial( "AG3" ) + aAG3[nX][1] ) )
+
+	RecLock( "AG3", lNewReg )
+	AG3->AG3_FILIAL	:= xFilial("AG3")
+	AG3->AG3_CODIGO	:= aAG3[nX][1]
+	AG3->AG3_DESCRI	:= aAG3[nX][2]
+	AG3->AG3_TIPO	:= aAG3[nX][3]
+	AG3->AG3_ATUALI	:= aAG3[nX][4]
+	AG3->AG3_NIVEL	:= aAG3[nX][5]
+	AG3->AG3_SUBNIV	:= aAG3[nX][6]
+	AG3->(MsUnlock())
+next
+
+For nW := 1 To Len(aAG3V)
+	lNewReg := AG3->( !DbSeek( xFilial( "AG3" ) + aAG3V[nW][1] ) )
+	RecLock( "AG3", lNewReg )
+	AG3->AG3_FILIAL	:= xFilial("AG3")
+	AG3->AG3_CODIGO	:= aAG3V[nW][1]
+	AG3->AG3_DESCRI	:= aAG3V[nW][2]
+	AG3->AG3_TIPO	:= aAG3V[nW][3]
+	AG3->AG3_ATUALI	:= aAG3V[nW][4]
+	AG3->AG3_NIVEL	:= aAG3V[nW][5]
+	AG3->AG3_SUBNIV	:= aAG3V[nW][6]
+	AG3->(MsUnlock())
+next
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function CriaAG4()
+
+Local aAG4 	  := {}
+Local aAG4V	  := {}
+Local nX 	  := 0
+Local nZ	  := 0
+Local lNewReg := .F. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		aAG4 :=  {{"P01","","","","","","",0,0}, {"P02","01","105","001","","CRM01-CAPA_POR","1",0,0}, {"P03","01","105","001","","CRM02-CARTA_POR","1",0,0}, {"P04","01","105","001","FT600EXE","CRM03-PROPOSTA_POR","1",0,0}, {"P05","01","105","001","","CRM04-SERVICOS_POR","1",0,0}, {"P06","01","105","001","","CRM05-COND_PAGAMENTO_POR","1",0,0}, {"P07","01","105","001","","CRM06-ACEITE_POR","1",0,0}}
+
+
+		aAG4V :=  {{"V01","","","","","","",0,0}, {"V02","01","105","001","","CRM07-CAPA_VIST_POR","1",0,0}, {"V03","01","105","001","FV600EXE","CRM08-VISTORIA_POR","1",0,0}}
+
+
+
+
+DbSelectArea("AG4")
+DbSetOrder(1)
+
+For nX := 1 To Len(aAG4)
+	lNewReg := AG4->( !DbSeek( xFilial( "AG4" ) + aAG4[nX][1] + aAG4[nX][2] ) )
+
+	RecLock( "AG4", lNewReg )
+	AG4->AG4_FILIAL := xFilial("AG4")
+	AG4->AG4_CODIGO := aAG4[nX][1]
+	AG4->AG4_ITEM   := aAG4[nX][2]
+	AG4->AG4_PAIS   := aAG4[nX][3]
+	AG4->AG4_IDIOMA := aAG4[nX][4]
+	AG4->AG4_FUNCAO := aAG4[nX][5]
+	AG4->AG4_DOCWOR := aAG4[nX][6]
+	AG4->AG4_ATUALI := aAG4[nX][7]
+	AG4->AG4_NIVEL  := aAG4[nX][8]
+	AG4->AG4_SUBNIV := aAG4[nX][9]
+	AG4->(MsUnlock())
+next
+
+For nZ := 1 To Len(aAG4V)
+	lNewReg := AG4->( !DbSeek( xFilial( "AG4" ) + aAG4V[nZ][1] + aAG4V[nZ][2] ) )
+	RecLock( "AG4", lNewReg )
+	AG4->AG4_FILIAL := xFilial("AG4")
+	AG4->AG4_CODIGO := aAG4V[nZ][1]
+	AG4->AG4_ITEM   := aAG4V[nZ][2]
+	AG4->AG4_PAIS   := aAG4V[nZ][3]
+	AG4->AG4_IDIOMA := aAG4V[nZ][4]
+	AG4->AG4_FUNCAO := aAG4V[nZ][5]
+	AG4->AG4_DOCWOR := aAG4V[nZ][6]
+	AG4->AG4_ATUALI := aAG4V[nZ][7]
+	AG4->AG4_NIVEL  := aAG4V[nZ][8]
+	AG4->AG4_SUBNIV := aAG4V[nZ][9]
+	AG4->(MsUnlock())
+next
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function CriaMV()
+
+DbSelectArea("SX6")
+DbSetOrder(1)
+
+RecLock("SX6", .T. )
+SX6->X6_FIL     := Space(FWSizeFilial())
+SX6->X6_VAR     := "MV_TEMPWRD"
+SX6->X6_TIPO    := "L"
+
+
+
+
+
+
+
+
+		SX6->X6_DESCRIC := SubStr("Cria um modelo de integração Word para o Template de proposta comercial.",1,50)
+		SX6->X6_DESC1   := SubStr("Cria um modelo de integração Word para o Template de proposta comercial.",51,Len("Cria um modelo de integração Word para o Template de proposta comercial."))
+
+
+SX6->X6_PROPRI    := "S"
+SX6->X6_PYME      := "S"
+MsUnLock()
+
+Return Nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSXB()
+
+Local aAreaSXB 	:= SXB->(GetArea())
+
+SXB->(dbSetOrder(1))
+If SXB->(MsSeek("AG1MOD40101")) .And.  ("AG1_CODIGO" <> AllTrim(SXB->XB_CONTEM))
+	RecLock("SXB", .F. )
+	SXB->XB_CONTEM := "AG1_CODIGO"
+	MsUnlock()
+EndIf
+
+If SXB->(MsSeek("AG1MOD40102")) .And.  ("AG1_DESCRI" <> AllTrim(SXB->XB_CONTEM))
+	RecLock("SXB", .F. )
+	SXB->XB_CONTEM := "AG1_DESCRI"
+	MsUnlock()
+EndIf
+
+RestArea(aAreaSXB)
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function R600ImpPDF()
+Local lRetorno	:= .F. 
+Local cTipImp	:= M->AD1_PROVEN
+
+
+If AC1->(FieldPos("AC1_TPIMP")) > 0
+	DbSelectArea("AC1")
+	DbSetOrder(1)
+	If DbSeek(xFilial("AC1")+cTipImp)
+		If AC1->AC1_TPIMP == "2"
+			lRetorno := .T. 
+		EndIf
+	EndIf
+EndIf
+
+Return(lRetorno)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function ConvPDF(hWord,cPathFinal,cNomeWord,cRevisao)
+
+cRevisao := If( cRevisao == nil, "", cRevisao ) ;
+
+
+wdFormatPDF = "17"
+
+If Empty(cRevisao)
+	OLE_SaveAsFile(hWord,cPathFinal+cNomeWord+".pdf",,, .F. ,wdFormatPDF)
+	ShellExecute("open",cPathFinal+cNomeWord+".pdf","","",5)
+
+
+	OLE_CloseFile(hWord)
+	hWord := OLE_CloseLink()
+
+	FErase(cPathFinal+Alltrim(cNomeWord)+".doc" )
+
+Else
+	OLE_SaveAsFile(hWord,cPathFinal+cNomeWord+cRevisao+".pdf",,, .F. ,wdFormatPDF)
+	ShellExecute("open",cPathFinal+cNomeWord+cRevisao+".pdf","","",5)
+
+
+	OLE_CloseFile(hWord)
+	hWord := OLE_CloseLink()
+
+	FErase(cPathFinal+Alltrim(cNomeWord+cRevisao)+".doc" )
+
+EndIf
+
+Return

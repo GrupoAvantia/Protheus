@@ -1,0 +1,237 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Matr986.ch"
+#line 17 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr986.prx"
+Function MATR986()
+
+
+
+wnRel		:= "MATR986"
+Titulo	:= If( cPaisLoc $ "ANG|PTG", "Listagem De Cod. Mercadorias (mod. P11)", "Listagem de Cod. Mercadorias (Mod. P11)" )
+cDesc1	:= If( cPaisLoc $ "ANG|PTG", "Emissão do registo modelo p11 conforme parâmetro s", "Emissäo do Registro modelo P11 conforme parametros" )
+cDesc2	:= If( cPaisLoc $ "ANG|PTG", "Informados pelo utilizador.", "informados pelo usuario." )
+cDesc3	:= ""
+aReturn	:= { If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ), 1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administraçäo" ), 2, 2, 1, "",1 }
+nomeprog	:= "MATR986"
+cPerg		:= "MTR986"
+cString	:= "SB1"
+nPagina	:= 0
+nLin		:= 80
+Tamanho	:= "P"
+lEnd		:= .F. 
+
+
+
+
+
+Pergunte(cPerg, .F. )
+
+
+
+nLastKey:=0
+wnrel:=SetPrint(cString,wnrel,cPerg,Titulo,cDesc1,cDesc2,cDesc3, .F. ,"", .F. ,Tamanho,, .T. )
+If nLastKey==27
+	dbClearFilter()
+	Return
+Endif
+SetDefault(aReturn,cString)
+If nLastKey==27
+	dbClearFilter()
+	Return
+Endif
+
+
+
+RptStatus({|lEnd| R986Imp(@lEnd,wnRel,cString,Tamanho)},titulo)
+
+
+
+
+
+dbSelectArea("SB1")
+dbClearFilter()
+dbSetOrder(1)
+If aReturn[5]==1
+	Set( 24, "" )
+	ourspool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+Static Function R986Imp(lEnd,WnRel,cString,Tamanho)
+
+
+
+
+Local cFilterUser:= aReturn[07]
+
+Private cNomEmp	:= SM0->M0_NOMECOM
+Private cInscr	:= InscrEst()
+Private cCGC		:= TRANSFORM(SM0->M0_CGC,"@R 99.999.999/9999-99")
+Private cData  	:= dToC(ddatabase)
+Private lAbortPrint:= .F. 
+Private nLargMax	:= 80
+Private nLimPag	:= 55
+Private m_pag		:= 1
+
+
+
+cProdDe	:= mv_par01
+cProdAte	:= mv_par02
+lImpNBM	:= (mv_par03==1)
+
+
+
+aL:=NIL
+R986LayOut()
+
+dbSelectArea("SB1")
+dbSetOrder(1)
+dbSeek(xFilial()+cProdDe, .T. )
+
+SetRegua(Val(mv_par02)-Val(mv_par01))
+
+While !Eof() .And.  xFilial()==B1_FILIAL .And.  cProdAte>=B1_COD
+
+	IncRegua()
+	If Interrupcao(@lAbortPrint)
+		Exit
+	Endif
+
+
+
+
+	If !Empty(cFilterUser) .and. !(&cFilterUser)
+		dbSkip()
+		Loop
+	EndIf
+
+
+
+
+	If !lImpNBM .And.  Empty(B1_POSIPI)
+		dbSkip()
+		Loop
+	Endif
+
+
+
+
+	If nLin>nLimPag
+		R986Cabec()
+	Endif
+
+	aDados:=Array(03)
+
+	aDados[1]:=B1_COD
+	aDados[2]:=B1_DESC
+	aDados[3]:=B1_POSIPI
+
+	FmtLin(@aDados,aL[13],,,@nLin)
+
+	dbSelectArea("SB1")
+	dbSkip()
+
+EndDo
+
+
+
+
+R986Branco()
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+Function R986Cabec
+nPagina := nPagina+1
+cPagina := StrZero(nPagina,6)
+cPagina := Right(cPagina,4)
+
+
+
+If nPagina>1
+	FmtLin(,aL[01],,,@nLin)
+Endif
+nLin:=0
+FmtLin(,AvalImp(nLargMax),,,@nLin)
+FmtLin(,{aL[01],aL[02],aL[03]},,,@nLin)
+FmtLin({cNomEmp},aL[04],,,@nLin)
+FmtLin(,aL[05],,,@nLin)
+FmtLin({cInscr,cCGC},aL[06],,,@nLin)
+FmtLin(,aL[07],,,@nLin)
+FmtLin({cPagina,cData},aL[08],,,@nLin)
+FmtLin(,{aL[09],aL[10],aL[11],aL[12]},,,@nLin)
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+Function R986LayOut
+
+aL:=Array(13)
+
+aL[01]:="+--------------------------------------------------------------------------------+"
+aL[02]:=If( cPaisLoc $ "ANG|PTG", "|                        tabela de código s de mercadorias                        |", "|                        TABELA DE CODIGOS DE MERCADORIAS                        |" )
+aL[03]:="|                                                                                |"
+aL[04]:=If( cPaisLoc $ "ANG|PTG", "| firma: #############################                                           |", "| FIRMA: #############################                                           |" )
+aL[05]:="|                                                                                |"
+aL[06]:=If( cPaisLoc $ "ANG|PTG", "| insc.est: ###########           c.n.p.j.: ##############                       |", "| INSC.EST: ###########           C.N.P.J.: ##############                       |" )
+aL[07]:="|                                                                                |"
+aL[08]:=If( cPaisLoc $ "ANG|PTG", "| folha: #######                   data: ########                                |", "| FOLHA: #######                   DATA: ########                                |" )
+aL[09]:="|                                                                                |"
+aL[10]:="|-----------------+------------------------------------------------+-------------|"
+aL[11]:=If( cPaisLoc $ "ANG|PTG", "| cod. produto    | discriminação                                  |class.fiscal |", "| COD. PRODUTO    | DISCRIMINACAO                                  |CLASS.FISCAL |" )
+aL[12]:="|-----------------+------------------------------------------------+-------------|"
+aL[13]:="| ############### | ###############################################| ########### |"
+
+
+
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+Function R986Branco
+
+While nLin<nLimPag
+	FmtLin(Array(03),aL[13],,,@nLin)
+EndDo
+FmtLin(,aL[01],,,@nLin)
+
+Return

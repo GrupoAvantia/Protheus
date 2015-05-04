@@ -1,0 +1,1262 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATR230.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr230.prx"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "PROTHEUS.CH"
+#line 16 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr230.prx"
+Function MATR230()
+Local oReport
+
+If FindFunction("TRepInUse") .And.  TRepInUse()
+
+
+
+	oReport := ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR230R3()
+EndIf
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportDef()
+
+Local oReport
+Local oSection1
+Local oSection2
+Local oCell
+Local aOrdem := {}
+
+
+
+	Local cAliasSD3 := GetNextAlias()
+
+Local lVEIC    := Upper(GetMv("MV_VEICULO"))=="S"
+Local cTamVlr  := TamSX3("D3_CUSTO1" )[1]
+Local cPictVl  := X3Picture("D3_CUSTO1")
+Local cTamDesc := TamSX3("I3_DESC" )[1]
+
+
+
+
+AjustaSX1(lVEIC)
+
+
+
+
+
+
+
+
+
+
+
+
+oReport:= TReport():New("MATR230",If( cPaisLoc $ "ANG|PTG", "Requisições Para Consumo", "Requisicoes para Consumo" ),"MTR230", {|oReport| ReportPrint(oReport,cAliasSD3,lVEIC)},If( cPaisLoc $ "ANG|PTG", "Emite a relação das requisições feitas para consumo , dividindo por", "Emite a relacao das requisicoes feitas para consumo , dividindo por" )+" "+If( cPaisLoc $ "ANG|PTG", "Centro de Custo requisitante ou Conta Contabil.Este relatório é um", "Centro de Custo requisitante ou Conta Contabil.Este relatorio e' um" )+" "+If( cPaisLoc $ "ANG|PTG", "Pouco demorado porque cria o ficheiro de índice no momento.", "pouco demorado porque ele cria o arquivo de indice na hora." ))
+oReport:SetTotalInLine( .F. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pergunte("MTR230", .F. )
+
+Aadd( aOrdem, If( cPaisLoc $ "ANG|PTG", " centro custo ", " Centro Custo " ) )
+Aadd( aOrdem, If( cPaisLoc $ "ANG|PTG", " cta.contabilística ", " Cta.Contabil " ) )
+
+oSection1 := TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Itens De Movimentação Interna", "Itens de Movimentação Interna" ),{"SD3","SB1"},aOrdem)
+oSection1 :SetTotalInLine( .F. )
+
+TRCell():New(oSection1,"D3_EMISSAO"	,"SD3",			,,,,)
+TRCell():New(oSection1,"D3_CC"		,"SD3",			,,9			,,)
+TRCell():New(oSection1,"cDescCC"	,"   ",If( cPaisLoc $ "ANG|PTG", "Descrição", "Descricao" )				,"@!"		,cTamDesc	,,)
+TRCell():New(oSection1,"D3_CONTA"	,"SD3",			,,,,)
+TRCell():New(oSection1,"cDesCont"	,"   ",If( cPaisLoc $ "ANG|PTG", "Descrição", "Descricao" )				,"@!"		,25			,,)
+TRCell():New(oSection1,"nAc2"		,"   ","Valor"				,cPictVl	,cTamVlr	,,)
+TRCell():New(oSection1,"B1_COD"		,"SB1",			,,,,)
+TRCell():New(oSection1,"B1_CODITE"	,"SB1",			,,,,{|| SB1->B1_CODITE+" "+SB1->B1_COD })
+TRCell():New(oSection1,"B1_DESC"	,"SB1",			,,25			,,)
+TRCell():New(oSection1,"B1_UM"		,"SB1",			,,,,)
+TRCell():New(oSection1,"nAp1"		,"   ",			,,,,,,,"RIGHT")
+oSection1:Cell("nAp1"):GetFieldInfo("D3_QUANT")
+TRCell():New(oSection1,"nUnit"		,"   ","Custo"+Chr(13)+Chr(10)+If( cPaisLoc $ "ANG|PTG", "Unitário", "Unitario" ),cPictVl		,cTamVlr	,,,,,"RIGHT")
+TRCell():New(oSection1,"nAp2"		,"   ","Custo"+Chr(13)+Chr(10)+"Total",cPictVl		,cTamVlr	,,,,,"RIGHT")
+TRCell():New(oSection1,"D3_GRUPO"	,"SD3",			,,,,)
+
+Return(oReport)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportPrint(oReport,cAliasSD3,lVEIC)
+
+Local oSection1 := oReport:Section(1)
+Local nOrdem   := oReport:Section(1):GetOrder()
+Local cTitulo  := ""
+Local cOrder   := ""
+Local cCampoCus:= ""
+Local lImprime := .T. 
+Local lLista   := .F. 
+Local nAp1     := 0
+Local nAp2     := 0
+Local nUnit    := 0
+Local aEntCt   := If(CtbInUse(), { "CT1", "CTT" }, { "SI1", "SI3" })
+Local oBreak
+Local oBreak2
+Local dEmissao
+Local cProd		:= ""
+
+
+
+	Local cWhere := ""
+
+Private XSB1   := XFILIAL("SB1")
+
+If nOrdem == 1
+	oBreak  := TRBreak():New(oSection1,{|| oSection1:Cell("D3_CC"):GetValue()+ oSection1:Cell("D3_GRUPO"):GetValue() },If( cPaisLoc $ "ANG|PTG", "Total do grupo ", "Total do Grupo " ), .F. )
+	oBreak2 := TRBreak():New(oSection1,oSection1:Cell("D3_CC"),If( cPaisLoc $ "ANG|PTG", "Total c. custo   ", "Total C. Custo   " ), .F. )
+
+	TRFunction():New(oSection1:Cell("nAp1"),NIL,"SUM",oBreak,"",,, .F. , .F. )
+	TRFunction():New(oSection1:Cell("nAp2"),NIL,"SUM",oBreak,"",,, .F. , .F. )
+
+	TRFunction():New(oSection1:Cell("nAp1"),NIL,"SUM",oBreak2,"",,, .F. , .T. )
+	TRFunction():New(oSection1:Cell("nAp2"),NIL,"SUM",oBreak2,"",,, .F. , .T. )
+
+	cTitulo  := " (Por "+AllTrim(If( cPaisLoc $ "ANG|PTG", " centro custo ", " Centro Custo " ))+" ,em "+AllTrim(GetMv("MV_SIMB"+LTrim(Str(mv_par03))))+")"
+	oReport:SetTitle( oReport:Title()+cTitulo)
+
+	oSection1:Cell("D3_EMISSAO"):Disable()
+	oSection1:Cell("D3_CONTA"):Disable()
+	oSection1:Cell("cDesCont"):Disable()
+	oSection1:Cell("nAc2"):Disable()
+
+ElseIf nOrdem == 2
+
+	oBreak  := TRBreak():New(oSection1,oSection1:Cell("D3_CONTA"),If( cPaisLoc $ "ANG|PTG", "Total da conta --> ", "Total da Conta --> " ), .F. )
+
+	TRFunction():New(oSection1:Cell("nAc2"),NIL,"SUM",oBreak,"",,, .F. , .T. )
+
+	cTitulo  := " (Por "+AllTrim(If( cPaisLoc $ "ANG|PTG", " cta.contabilística ", " Cta.Contabil " ))+" ,em "+AllTrim(GetMv("MV_SIMB"+LTrim(Str(mv_par03))))+")"
+	oReport:SetTitle( oReport:Title()+cTitulo)
+
+	oSection1:Cell("B1_COD"):Disable()
+	oSection1:Cell("B1_DESC"):Disable()
+	oSection1:Cell("B1_UM"):Disable()
+	oSection1:Cell("nAp1"):Disable()
+	oSection1:Cell("nUnit"):Disable()
+	oSection1:Cell("nAp2"):Disable()
+	oSection1:Cell("D3_GRUPO"):Disable()
+
+Endif
+
+dbSelectArea("SD3")
+
+
+
+
+
+
+
+	MakeSqlExpr(oReport:uParam)
+
+
+
+
+	oReport:Section(1):BeginQuery()
+
+	cWhere :="%"
+	If ! lVEIC
+		cWhere += "AND D3_COD >= '"+mv_par08+"' AND D3_COD <= '"+mv_par09+"'"
+	Endif
+	cWhere +="%"
+
+	cOrder := "%"
+	If nOrdem == 1
+		cOrder += " D3_FILIAL, D3_CC, D3_GRUPO, D3_COD  "
+	Else
+		cOrder += " D3_FILIAL, D3_CONTA, D3_CC, D3_COD  "
+	EndIf
+	cOrder += "%"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasSD3," SELECT SD3.* FROM  "+RetSqlName('SD3')+" SD3 WHERE D3_FILIAL =  '" +xFilial('SD3')+"'  AND D3_CC >=  "+___SQLGetValue(MV_PAR01)+" AND D3_CC <=  "+___SQLGetValue(MV_PAR02)+" AND D3_LOCAL >=  "+___SQLGetValue(MV_PAR04)+" AND D3_LOCAL <=  "+___SQLGetValue(MV_PAR05)+" AND D3_TIPO >=  "+___SQLGetValue(MV_PAR10)+" AND D3_TIPO <=  "+___SQLGetValue(MV_PAR11)+" AND D3_CONTA >=  "+___SQLGetValue(MV_PAR14)+" AND D3_CONTA <=  "+___SQLGetValue(MV_PAR15)+" AND D3_EMISSAO >=  "+___SQLGetValue(MV_PAR06)+" AND D3_EMISSAO <=  "+___SQLGetValue(MV_PAR07)+" AND D3_GRUPO >=  "+___SQLGetValue(MV_PAR12)+" AND D3_GRUPO <=  "+___SQLGetValue(MV_PAR13)+" AND D3_ESTORNO = ' ' AND SD3.D_E_L_E_T_= ' '  "+___SQLGetValue(CWHERE)+" ORDER BY  "+___SQLGetValue(CORDER),{},.F.)
+
+
+
+
+
+
+
+
+	oReport:Section(1):EndQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TRPosition():New(oSection1,"SB1",1,{|| xFilial("SB1") + cProd})
+
+
+
+
+cCampoCus := "D3_CUSTO"+Str(mv_par03,1)
+If ! lVEIC
+	oSection1:Cell("B1_CODITE"):Disable()
+Else
+	oSection1:Cell("B1_COD"):Disable()
+Endif
+
+
+
+oReport:SetMeter(SD3->(LastRec()))
+
+Do Case
+
+		Case nOrdem == 1
+			oSection1:Init()
+			dbSelectArea(cAliasSD3)
+			While !oReport:Cancel() .And.  (cAliasSD3)->(!Eof())
+
+				If oReport:Cancel()
+					Exit
+				EndIf
+
+				cCcant := (cAliasSD3)->D3_CC
+				oSection1:Cell("D3_CC"):SetValue(cCcant)
+				lImprime := .T. 
+
+				While !oReport:Cancel() .And.  (cAliasSD3)->(!Eof()) .And.  (cAliasSD3)->D3_FILIAL+(cAliasSD3)->D3_CC == xFilial("SD3")+cCCAnt
+					cGrupant := (cAliasSD3)->D3_GRUPO
+					oSection1:Cell("D3_GRUPO"):SetValue(cGrupant)
+					While !oReport:Cancel() .And.  (cAliasSD3)->(!Eof()) .And.  (cAliasSD3)->D3_FILIAL+(cAliasSD3)->D3_CC+(cAliasSD3)->D3_GRUPO == xFilial("SD3")+cCCAnt+cGrupAnt
+
+						If lVEIC
+							lT := .T. 
+						   	dbSelectArea("SB1")
+						   	dbSeek( XSB1 + (cAliasSD3)->D3_COD )
+						   	If !Eof()
+						    	If (SB1->B1_CODITE >= mv_par08 .And.  SB1->B1_CODITE <= mv_par09)
+		      				   		lT := .F. 
+								Endif
+							Endif
+						   	dbSelectArea(cAliasSD3)
+						   	If lT
+								dbSkip()
+							   	Loop
+						   	Endif
+						Endif
+
+						cProd	 := (cAliasSD3)->D3_COD
+						cD3Local := (cAliasSD3)->D3_LOCAL
+						nAp1 := nAp2 := 0
+						While !oReport:Cancel() .And.  (cAliasSD3)->(!Eof()) .And.  (cAliasSD3)->D3_FILIAL+(cAliasSD3)->D3_CC+(cAliasSD3)->D3_GRUPO+(cAliasSD3)->D3_COD+(cAliasSD3)->D3_LOCAL == xFilial("SD3")+cCCAnt+cGrupAnt+cProd+cD3Local
+
+							oReport:IncMeter()
+
+
+
+
+							If SubStr((cAliasSD3)->D3_CF,2,1) <> "E"
+								dbSkip()
+								Loop
+							EndIf
+
+
+
+
+							If Substr((cAliasSD3)->D3_OP,7,2) # "OS" .And.  !Empty((cAliasSD3)->D3_OP)
+								dbSkip()
+								Loop
+							EndIf
+
+
+
+
+
+
+
+							If (cAliasSD3)->D3_TM <= "500"
+								nAp1 -= (cAliasSD3)->D3_QUANT
+								nAp2 -= (cAliasSD3)->&(cCampoCus)
+							Else
+								nAp1 += (cAliasSD3)->D3_QUANT
+								nAp2 += (cAliasSD3)->&(cCampoCus)
+							EndIf
+							dbSkip()
+						EndDo
+						If nAp1 <> 0 .Or.  nAp2 <> 0
+
+							SB1->(dbSeek(xFilial("SB1")+cProd))
+							IF nAp1 = 0
+								nUnit := nAp2
+							Else
+								nUnit := nAp2/nAp1
+							EndIf
+							oSection1:Cell("cDescCC"):SetValue(DescCC(cCcant, mv_par03))
+							oSection1:Cell("nAp1"):SetValue(nAp1)
+							oSection1:Cell("nUnit"):SetValue(nUnit)
+							oSection1:Cell("nAp2"):SetValue(nAp2)
+
+							If lImprime
+								oSection1:Cell("D3_CC"):Show()
+								oSection1:Cell("cDescCC"):Show()
+								lImprime := .F. 
+							Else
+								oSection1:Cell("D3_CC"):Hide()
+								oSection1:Cell("cDescCC"):Hide()
+							EndIf
+							oSection1:PrintLine()
+						EndIf
+					EndDo
+				EndDo
+			EndDo
+			oSection1:Finish()
+
+		Case nOrdem == 2
+
+			oSection1:Init()
+			dbSelectArea(cAliasSD3)
+			While !oReport:Cancel() .And.  (cAliasSD3)->(!Eof())
+				cContant := (cAliasSD3)->D3_CONTA
+				oSection1:Cell("D3_CONTA"):SetValue(cContant)
+				While !oReport:Cancel() .And.  (cAliasSD3)->(!Eof()) .And.  (cAliasSD3)->D3_FILIAL+(cAliasSD3)->D3_CONTA == xFilial("SD3")+cContant
+					dbSelectArea(cAliasSD3)
+					cCcant := (cAliasSD3)->D3_CC
+					oSection1:Cell("D3_CC"):SetValue(cCcant)
+					nAc2 := 0
+					lLista:= .F. 
+					While !oReport:Cancel() .And.  (cAliasSD3)->(!Eof()) .And.  (cAliasSD3)->D3_FILIAL+(cAliasSD3)->D3_CONTA+(cAliasSD3)->D3_CC == xFilial("SD3")+cContant+cCCAnt
+
+						If oReport:Cancel()
+							Exit
+						EndIf
+
+						oReport:IncMeter()
+
+					    dbSelectArea(cAliasSD3)
+						If lVEIC
+							lT := .T. 
+						   	dbSelectArea("SB1")
+						   	dbSeek( XSB1 + (cAliasSD3)->D3_COD )
+						   	If !Eof()
+						    	If (SB1->B1_CODITE >= mv_par08 .And.  SB1->B1_CODITE <= mv_par09)
+		      				   		lT := .F. 
+								Endif
+							Endif
+						   	dbSelectArea(cAliasSD3)
+						   	If lT
+								dbSkip()
+							   	Loop
+						   	Endif
+						Endif
+
+
+
+
+						If SubStr((cAliasSD3)->D3_CF,2,1) <> "E"
+							dbSkip()
+							Loop
+						EndIf
+
+
+
+
+						If Substr((cAliasSD3)->D3_OP,7,2) # "OS" .And.  !Empty((cAliasSD3)->D3_OP)
+							dbSkip()
+							Loop
+						EndIf
+						lLista:= .T. 
+
+
+
+
+
+
+
+						If D3_TM <= "500"
+							nAc2 -= (cAliasSD3)->&(cCampoCus)
+						Else
+							nAc2 += (cAliasSD3)->&(cCampoCus)
+						EndIf
+						dEmissao := (cAliasSD3)->D3_EMISSAO
+						oSection1:Cell("cDescCC"):SetValue(DescCC(cCcant, mv_par03))
+						oSection1:Cell("D3_EMISSAO"):SetValue(dEmissao)
+
+						dbSkip()
+					EndDo
+					If lLista
+
+						dbSelectArea(aEntCt[1])
+						dbSeek(xFilial()+cContant)
+
+						dbSelectArea(cAliasSD3)
+						oSection1:Cell("cDesCont"):SetValue(SubStr(If(aEntCt[1] = "CT1", &("CT1->CT1_DESC" + StrZero(mv_par03, 2)),AllTrim(SI1->I1_DESC)),1,25))
+						oSection1:Cell("nAc2"):SetValue(nAc2)
+
+						oSection1:PrintLine()
+
+					EndIf
+				EndDo
+			EndDo
+			oSection1:Finish()
+EndCase
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MATR230R3()
+
+
+
+LOCAL Tamanho  := "M"
+LOCAL titulo   := If( cPaisLoc $ "ANG|PTG", "Requisições Para Consumo", "Requisicoes para Consumo" )
+LOCAL cDesc1   := If( cPaisLoc $ "ANG|PTG", "Emite a relação das requisições feitas para consumo , dividindo por", "Emite a relacao das requisicoes feitas para consumo , dividindo por" )
+LOCAL cDesc2   := If( cPaisLoc $ "ANG|PTG", "Centro de Custo requisitante ou Conta Contabil.Este relatório é um", "Centro de Custo requisitante ou Conta Contabil.Este relatorio e' um" )
+LOCAL cDesc3   := If( cPaisLoc $ "ANG|PTG", "Pouco demorado porque cria o ficheiro de índice no momento.", "pouco demorado porque ele cria o arquivo de indice na hora." )
+LOCAL cString  := "SD3"
+LOCAL aOrd     := {OemToAnsi(If( cPaisLoc $ "ANG|PTG", " centro custo ", " Centro Custo " )),OemToAnsi(If( cPaisLoc $ "ANG|PTG", " cta.contabilística ", " Cta.Contabil " ))}
+LOCAL wnrel    := "MATR230"
+LOCAL cX3_F3   := If(CtbInUse(),"CT1","SI1")
+LOCAL nTamSX1  := Len(SX1->X1_GRUPO)
+
+
+
+
+Local aArea1	:= Getarea()
+
+
+
+Private lVEIC		:= UPPER(GETMV("MV_VEICULO"))=="S"
+Private aSB1Cod	:= {}
+Private aSB1Ite	:= {}
+Private nCOL1		:= 0
+Private nCOL2		:= 0
+Private XSB1		:= XFILIAL("SB1")
+
+
+
+
+PRIVATE aReturn:= {OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" )),1,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" )), 2, 2, 1, "",1}
+PRIVATE nLastKey:= 0 ,cPerg := "MTR230"
+
+
+
+
+PutSX1("MTR230","14","Da Conta Contabil  ?","¿De Cuenta Contable?","From Account       ?","mv_che","C",20,0,0,"G","",cX3_F3,"","","mv_par14","","","","","","","","","","","","","","","","",{"Conta contabil inicial a ser considerado","no filtro do cadastro de movimentacoes","internas (SD3)."},{"Cuenta contable inicial que se","considerara en el filtro del archivo","de movimientos internos (SD3)."},{"Initial ledger account to be considered","by the internal transactions file filter","SD3)."})
+PutSX1("MTR230","15","Ate Conta Contabil ?","¿A Cuenta Contable ?","To   Account       ?","mv_chf","C",20,0,0,"G","",cX3_F3,"","","mv_par15","","","","ZZZZZZZZZZZZZZZZZZZZ","","","","","","","","","","","","",{"Conta contabil final a ser considerado","no filtro do cadastro de movimentacoes","internas (SD3)."},{"Cuenta contable final que se","considerara en el filtro del archivo","de movimientos internos (SD3)."},{"Final ledger account to be considered by","the internal transactions file filter","SD3)."})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+aSB1Cod	:= TAMSX3("B1_COD")
+aSB1Ite	:= TAMSX3("B1_CODITE")
+
+if lVEIC
+   DBSELECTAREA("SX1")
+   DBSETORDER(1)
+   DBSEEK(PADR(cPerg,nTamSX1))
+   while SX1->X1_GRUPO==PADR(cPerg,nTamSX1) .AND. !SX1->(EOF())
+
+      IF "PRODU" $ UPPER(SX1->X1_PERGUNT) .AND.  UPPER(SX1->X1_TIPO) == "C" .AND.  (SX1->X1_TAMANHO <> aSB1Ite[1] .OR.  UPPER(SX1->X1_F3) <> "VR4")
+
+         RECLOCK("SX1", .F. )
+         SX1->X1_TAMANHO := aSB1Ite[1]
+         SX1->X1_F3 := "VR4"
+         DBCOMMIT()
+         MSUNLOCK()
+
+      ENDIF
+      DBSKIP()
+   ENDDO
+   DBCOMMITALL()
+   RESTAREA(aArea1)
+else
+   DBSELECTAREA("SX1")
+   DBSETORDER(1)
+   DBSEEK(PADR(cPerg,nTamSX1))
+   while SX1->X1_GRUPO==PADR(cPerg,nTamSX1) .AND. !SX1->(EOF())
+
+      IF "PRODU" $ UPPER(SX1->X1_PERGUNT) .AND.  UPPER(SX1->X1_TIPO) == "C" .AND.  (SX1->X1_TAMANHO <> aSB1Cod[1] .OR.  UPPER(SX1->X1_F3) <> "SB1")
+
+         RECLOCK("SX1", .F. )
+         SX1->X1_TAMANHO := aSB1Cod[1]
+         SX1->X1_F3 := "SB1"
+         DBCOMMIT()
+         MSUNLOCK()
+
+      ENDIF
+      DBSKIP()
+   ENDDO
+   DBCOMMITALL()
+   RESTAREA(aArea1)
+endif
+
+pergunte(cPerg, .F. )
+
+
+
+
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3, .F. ,aOrd,,Tamanho)
+
+if lVEIC .and.  aReturn[8] == 1
+	Tamanho  := "G"
+	nCOL1		:= ABS(aSB1Cod[1] - aSB1Ite[1]) + 1 +  aSB1Cod[1]
+Endif
+
+If nLastKey = 27
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey = 27
+	dbClearFilter()
+	Return
+Endif
+
+RptStatus({|lEnd| C230Imp(aOrd,@lEnd,wnRel,titulo,Tamanho)},titulo)
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function C230Imp(aOrd,lEnd,WnRel,titulo,Tamanho)
+
+
+
+
+LOCAL nTipo    	:= 0
+LOCAL cRodaTxt 	:= OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Registo(s)", "REGISTRO(S)" ))
+LOCAL nCntImpr 	:= 0
+LOCAL nAc1:=0,nAc2:=0,nAg1:=0,nAg2:=0,nAt1:=0,nAt2:=0,nAp1:=0,nAp2:=0
+LOCAL	lLista:= .F. 
+LOCAL dEmissao ,lImprime,nUnit:=0,cCcant,cGrupant,cContant
+LOCAL cCampoCus,lContinua,lPassou1,lPassou2,lPassou3
+LOCAL cCond 	:= 'D3_FILIAL=="'+xFilial("SD3")+'" .And. D3_CC >= "'+mv_par01+'"'
+Local aEntCt    := If(CtbInUse(), { "CT1", "CTT" }, { "SI1", "SI3" })
+
+LOCAL cProd, cD3Local
+
+
+
+
+LOCAL nAux1
+LOCAL nI
+LOCAL nLenc
+Local nIndr
+Local lT
+Local nTamI3DESC := TamSX3("I3_DESC")[1]
+
+cCond += '.And. D3_CC <= "'+mv_par02+'" .And. D3_LOCAL >= "'+mv_par04+'"'
+cCond += '.And. D3_LOCAL <= "'+mv_par05+'"'
+
+if ! lVEIC
+	cCond += '.And. D3_COD >= "'+mv_par08+'" .And. D3_COD <= "'+mv_par09+'"'
+endif
+
+cCond += '.And. D3_TIPO >= "'+mv_par10+'" .And. D3_TIPO <= "'+mv_par11+'"'
+cCond += '.And. D3_CONTA >= "'+mv_par14+'" .And. D3_CONTA <= "'+mv_par15+'"'
+cCond += '.And. DTOS(D3_EMISSAO) >= "'+DTOS(mv_par06)+'" .AND. DTOS(D3_EMISSAO) <= "'+DTOS(mv_par07)+'"'
+cCond += '.And. D3_GRUPO >= "'+mv_par12+'" .AND. D3_GRUPO <= "'+mv_par13+'"'
+cCond += '.And. D3_ESTORNO == " "'
+
+
+
+PRIVATE li := 80 ,m_pag := 1
+
+
+
+
+PRIVATE cNomArq
+
+
+
+
+If !Empty(aReturn[7])
+	cCond+=".And."+aReturn[7]
+EndIf
+
+
+
+
+nTipo  := IIF(aReturn[4]==1,15,18)
+
+
+
+
+If Type("NewHead")#"U"
+	NewHead += " (Por "+AllTrim(aOrd[aReturn[8]])+" ,em "+AllTrim(GetMv("MV_SIMB"+LTrim(Str(mv_par03))))+")"
+Else
+	Titulo  += " (Por "+AllTrim(aOrd[aReturn[8]])+" ,em "+AllTrim(GetMv("MV_SIMB"+LTrim(Str(mv_par03))))+")"
+EndIf
+
+
+
+
+cCampoCus := "SD3->D3_CUSTO"+Str(mv_par03,1)
+
+lContinua := .T. 
+
+
+
+
+dbSelectArea("SB1")
+dbSetOrder(1)
+dbSelectArea("SD3")
+SetRegua(LastRec())
+
+
+
+
+cNomArq := CriaTrab("", .F. )
+
+If aReturn[8] == 1
+
+
+
+	IndRegua("SD3",cNomArq,"D3_FILIAL+D3_CC+D3_GRUPO+D3_COD+D3_LOCAL",,cCond,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." )))
+	nIndr	:=	RetIndex("SD3")
+
+
+
+	dbSetOrder(nIndr + 1)
+
+	dbGoTop()
+
+
+
+
+	cabec1 :=OemToAnsi(If( cPaisLoc $ "ANG|PTG", "C.c       Descrição                 Código Produto  Descrição                 Um     Quantidade            Custo        C U S T O", "C.C       DESCRICAO                 CODIGO PRODUTO  DESCRICAO                 UM     QUANTIDADE            CUSTO        C U S T O" ))
+	cabec2 :=OemToAnsi(If( cPaisLoc $ "ANG|PTG", "                                                                                                        Unitário        T O T A L", "                                                                                                        UNITARIO        T O T A L" ))
+
+
+
+	if lVEIC
+
+		nAux1	:= AT("PRODU",UPPER(cabec1))
+		nLenc	:= LEN(cabec1)
+		IF nAux1 > 0
+	   	FOR nI := nAux1 TO nLenc
+	      	IF SUBStr(cabec1,nI, 1 ) == " "
+	         	exit
+		      endif
+		   next
+			cabec1  := substr(cabec1 ,1, nI-1) + SPACE(nCOL1) + substr(cabec1 ,nI)
+			IF !EMPTY(cabec2)
+				cabec2  := substr(cabec2 ,1, nI-1) + SPACE(nCOL1) + substr(cabec2 ,nI)
+			ENDIF
+		ENDIF
+
+	endif
+	nAt1 := nAt2 := 0
+	lPassou3 := .F. 
+	While lContinua .And.  !EOF()
+		cCcant := D3_CC
+		nAc1 := nAc2 := 0
+		lImprime := .T. 
+		lPassou2 := .F. 
+		While lContinua .And.  !EOF() .And.  D3_FILIAL+D3_CC == xFilial(Alias())+cCCAnt
+			cGrupant := D3_GRUPO
+			nAg1 := nAg2 := 0
+			lPassou1 := .F. 
+			While lContinua .And.  !EOF() .And.  D3_FILIAL+D3_CC+D3_GRUPO == xFilial(Alias())+cCCAnt+cGrupAnt
+				if lVEIC
+				   lT := .T. 
+				   DBSELECTAREA("SB1")
+				   DBSEEK( XSB1 + SD3->D3_COD )
+				   IF !EOF()
+				      IF (SB1->B1_CODITE >= mv_par08 .and.  SB1->B1_CODITE <= mv_par09)
+      				   lT := .F. 
+						ENDIF
+					ENDIF
+				   DBSELECTAREA("SD3")
+					if lT
+					   DBSKIP()
+					   LOOP
+				   endif
+				endif
+				cProd		:= D3_COD
+				cD3Local	:= D3_LOCAL
+				nAp1 := nAp2 := 0
+
+				while lContinua .And. !EOF() .And. D3_FILIAL+D3_CC+D3_GRUPO+D3_COD+D3_LOCAL==xFilial(Alias())+cCCAnt+cGrupAnt+cProd+cD3Local
+					If lEnd
+						PrintOut(_PROW()+1,001,OemToAnsi(If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR")),,)
+						lContinua := .F. 
+						Exit
+					EndIf
+					IncRegua()
+
+
+
+					If SubStr(D3_CF,2,1) <> "E"
+						dbSkip()
+						Loop
+					EndIf
+
+
+
+
+
+					If Substr(D3_OP,7,2) # "OS" .And.  !Empty(D3_OP)
+						dbSkip()
+						Loop
+					EndIf
+
+
+
+
+
+
+
+					If D3_TM <= "500"
+						nAp1 -= D3_QUANT
+						nAp2 -= &(cCampoCus)
+					Else
+						nAp1 += D3_QUANT
+						nAp2 += &(cCampoCus)
+					EndIf
+					dbSkip()
+				EndDo
+				If nAp1 <> 0 .Or.  nAp2 <> 0
+					IF li > 58
+						cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+						lImprime := .T. 
+					EndIf
+					If lImprime
+						PrintOut(li,000,SubStr(cCcant,1,9),,)
+						PrintOut(li,010,DescCC(cCcant,mv_par03),,)
+						If nTamI3DESC > 25
+						   li++
+						EndIf
+						lImprime := .F. 
+					EndIf
+
+
+
+					nCntImpr++
+					dbSelectArea("SB1")
+					dbSeek(xFilial(Alias())+cProd)
+					if ! lVEIC
+						PrintOut(li,036,B1_COD,,)
+					ELSE
+						PrintOut(li,036,B1_CODITE+" "+B1_COD,,)
+					ENDIF
+					PrintOut(li,052+nCOL1,Substr(B1_DESC,1,25),,)
+					PrintOut(li,078+nCOL1,B1_UM,,)
+					PrintOut(li,081+nCOL1,nAp1,PesqPictQt("D3_QUANT",16),)
+					dbSelectArea("SD3")
+					IF nAp1 = 0
+						nUnit := nAp2
+					Else
+						nUnit := nAp2/nAp1
+					EndIf
+					PrintOut(li,98+nCOL1,nUnit,tm(nUnit,14),)
+					PrintOut(li,113+nCOL1,nAp2,tm(nAp2,16),)
+					li++
+					nAg1 += nAp1
+					nAg2 += nAp2
+					lPassou1 := .T. 
+					dbSelectArea("SD3")
+				EndIf
+			EndDo
+			If lPassou1
+				Li++
+				IF li > 58
+					cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+				EndIf
+				PrintOut(li,030+nCOL1,OemToAnsi(If(cPaisLoc$"ANG|PTG","Total do grupo ","Total do Grupo "))+cGrupant+Replicate(".",19),,)
+				PrintOut(li,081+nCOL1,nAg1,PesqPictQt("D3_QUANT",16),)
+				PrintOut(li,113+nCOL1,nAg2,tm(nAg2,16),)
+				li++ ;li++
+				nAc1 += nAg1
+				nAc2 += nAg2
+				lPassou2 := .T. 
+			EndIf
+		EndDo
+		If lPassou2
+			IF li > 58
+				cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+			EndIf
+			PrintOut(li,030+nCOL1,OemToAnsi(If(cPaisLoc$"ANG|PTG","Total c. custo   ","Total C. Custo   "))+Padl(Alltrim(cCcant),20)+".",,)
+			PrintOut(li,081+nCOL1,nAc1,PesqPictQt("D3_QUANT",16),)
+			PrintOut(li,113+nCOL1,nAc2,tm(nAc2,16),)
+			li++ ;li++
+			nAt1 += nAc1
+			nAt2 += nAc2
+			lPassou3 := .T. 
+		EndIf
+	EndDo
+	If lPassou3
+		IF li > 58
+			cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+		EndIf
+		PrintOut(li,030+nCOL1,OemToAnsi(If(cPaisLoc$"ANG|PTG","Total Crial...........................","TOTAL GERAL...........................")),,)
+		PrintOut(li,081+nCOL1,nAt1,PesqPictQt("D3_QUANT",16),)
+		PrintOut(li,113+nCOL1,nAt2,tm(nAt2,16),)
+		li++
+	EndIf
+ElseIf aReturn[8] == 2
+
+
+
+	IndRegua("SD3",cNomArq,"D3_FILIAL+D3_CONTA+D3_CC+D3_COD",,cCond,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." )))
+	nIndr	:=	RetIndex("SD3")
+
+
+
+	dbSetOrder(nIndr + 1)
+	dbGoTop()
+
+
+
+
+	cabec1 := OemToAnsi(If( cPaisLoc $ "ANG|PTG", " D A T A    Centro     Descrição                  Conta Contabilística        Descrição                           V A L O R", " D A T A    CENTRO     DESCRICAO                  CONTA CONTABIL        DESCRICAO                           V A L O R" ))
+	cabec2 := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "            de custo                                                                                                 ", "            DE CUSTO                                                                                                 " ))
+
+
+
+	lPassou3 := .F. 
+	While lContinua .And.  !EOF()
+		cContant := D3_CONTA
+		nAc1 := 0
+		lPassou2 := .F. 
+		While lContinua .And.  !EOF() .And.  D3_FILIAL+D3_CONTA == xFilial(Alias())+cContant
+			DBSELECTAREA("SD3")
+			cCcant := D3_CC
+			nAc2 := 0
+			lLista:= .F. 
+			While lContinua .And.  !EOF() .And.  D3_FILIAL+D3_CONTA+D3_CC == xFilial(Alias())+cContant+cCCAnt
+				If lEnd
+					PrintOut(_PROW()+1,001,OemToAnsi(If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR")),,)
+					lContinua := .F. 
+					Exit
+				EndIf
+				IncRegua()
+
+			   DBSELECTAREA("SD3")
+				if lVEIC
+				   lT := .T. 
+				   DBSELECTAREA("SB1")
+				   DBSEEK( XSB1 + SD3->D3_COD )
+				   IF !EOF()
+				      IF (SB1->B1_CODITE >= mv_par08 .and.  SB1->B1_CODITE <= mv_par09)
+      				   lT := .F. 
+						ENDIF
+					ENDIF
+				   DBSELECTAREA("SD3")
+					if lT
+					   DBSKIP()
+					   LOOP
+				   endif
+				endif
+
+
+
+
+				If SubStr(D3_CF,2,1) <> "E"
+					dbSkip()
+					Loop
+				EndIf
+
+
+
+
+
+				If Substr(D3_OP,7,2) # "OS" .And.  !Empty(D3_OP)
+					dbSkip()
+					Loop
+				EndIf
+				lLista:= .T. 
+
+
+
+
+
+
+
+				If D3_TM <= "500"
+					nAc2 -= &(cCampoCus)
+				Else
+					nAc2 += &(cCampoCus)
+				EndIf
+				dEmissao := D3_EMISSAO
+				dbSkip()
+			EndDo
+			If lLista
+				IF li > 58
+					cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+				EndIf
+
+				dbSelectArea(aEntCt[1])
+				dbSeek(xFilial(Alias())+cContant)
+				dbSelectArea("SD3")
+
+
+
+				nCntImpr++
+				PrintOut(li,000,dEmissao,,)
+				PrintOut(li,012,SubStr(cCcant,1,9),,)
+				PrintOut(li,023,SubStr(DescCC(cCcant,mv_par03),1,25),,)
+				PrintOut(li,050,cContant,,)
+				PrintOut(li,072,SubStr(If(aEntCt[1]="CT1",&("CT1->CT1_DESC"+StrZero(mv_par03,2)),AllTrim(SI1->I1_DESC)),1,25),,)
+				PrintOut(li,099,nAc2,TM(nAc2,18),)
+				nAc1 += nAc2
+				lPassou2 := .T. 
+				li++
+			EndIf
+		EndDo
+		If lPassou2
+			PrintOut(li,000,OemToAnsi(If(cPaisLoc$"ANG|PTG","Total da conta --> ","Total da Conta --> "))+cContant,,)
+			PrintOut(li,099,nAc1,TM(nAc1,18),)
+			li += 2
+			nAg1 += nAc1
+			lPassou3 := .T. 
+  		EndIf
+	EndDo
+	If lPassou3
+		IF li > 58
+			cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+			lImprime := .T. 
+		EndIf
+		PrintOut(li,000,OemToAnsi(If(cPaisLoc$"ANG|PTG","T o t a l --->","T O T A L --->")),,)
+		PrintOut(li,099,nAg1,TM(nAg1,18),)
+	EndIf
+EndIf
+
+IF li <> 80
+	Roda(nCntImpr,cRodaTxt,Tamanho)
+EndIF
+
+
+
+
+dbSelectArea("SD3")
+dbClearFilter()
+RetIndex("SD3")
+dbSetOrder(1)
+
+
+
+
+cNomArq += OrdBagExt()
+if file(cNomArq)
+	ferase(cNomArq)
+endif
+
+If aReturn[5] = 1
+	Set( 24, "" )
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+return nil
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function DescCC(cCC, nMoeda)
+
+Local aAreaAnt   := GetArea()
+Local aAreaCC    := {}
+Local cRet       := Replicate("*", Len(SI3->I3_DESC))
+Local cSeekCC    := ""
+Local cAliasCC   := If(CtbInUse(),"CTT","SI3")
+
+cCC := If( cCC == nil, "", cCC ) ;
+nMoeda := If( nMoeda == nil, 1, nMoeda ) ;
+
+dbSelectArea(cAliasCC)
+aAreaCC := GetArea()
+dbSetOrder(1)
+If MsSeek(cSeekCC:=xFilial(cAliasCC)+cCC, .F. )
+	If cAliasCC == "CTT"
+		cRet := Left(&("CTT_DESC"+StrZero(nMoeda, 2)), Len(SI3->I3_DESC))
+	ElseIf cAliasCC == "SI3"
+		while !Eof() .And. cSeekCC==I3_FILIAL+I3_CUSTO
+			If I3_MOEDA$" ú0"
+				cRet := I3_DESC
+				Exit
+			EndIf
+			dbSkip()
+		EndDo
+	EndIf
+EndIf
+RestArea(aAreaCC)
+RestArea(aAreaAnt)
+
+Return cRet
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSX1(lVEIC)
+
+Local aSB1Cod := TamSX3("B1_COD")
+Local aSB1Ite := TamSX3("B1_CODITE")
+Local cX3_F3  := If(CtbInUse(),"CT1","SI1")
+Local cPerg   := "MTR230"
+Local nTamSX1 := Len(SX1->X1_GRUPO)
+
+PutSX1("MTR230","14","Da Conta Contabil  ?","¿De Cuenta Contable?","From Account       ?","mv_che","C",20,0,0,"G","",cX3_F3,"","","mv_par14","","","","","","","","","","","","","","","","",{"Conta contabil inicial a ser considerado","no filtro do cadastro de movimentacoes","internas (SD3)."},{"Cuenta contable inicial que se","considerara en el filtro del archivo","de movimientos internos (SD3)."},{"Initial ledger account to be considered","by the internal transactions file filter","SD3)."})
+PutSX1("MTR230","15","Ate Conta Contabil ?","¿A Cuenta Contable ?","To   Account       ?","mv_chf","C",20,0,0,"G","",cX3_F3,"","","mv_par15","","","","ZZZZZZZZZZZZZZZZZZZZ","","","","","","","","","","","","",{"Conta contabil final a ser considerado","no filtro do cadastro de movimentacoes","internas (SD3)."},{"Cuenta contable final que se","considerara en el filtro del archivo","de movimientos internos (SD3)."},{"Final ledger account to be considered by","the internal transactions file filter","SD3)."})
+
+
+
+
+If lVEIC
+   dbSelectArea("SX1")
+   dbSetOrder(1)
+   dbSeek(PADR(cPerg,nTamSX1))
+   while SX1->X1_GRUPO==PADR(cPerg,nTamSX1) .AND. !SX1->(Eof())
+
+      If "PRODU" $ Upper(SX1->X1_PERGUNT) .AND.  Upper(SX1->X1_TIPO) == "C" .AND.  (SX1->X1_TAMANHO <> aSB1Ite[1] .OR.  Upper(SX1->X1_F3) <> "VR4")
+
+         RECLOCK("SX1", .F. )
+         SX1->X1_TAMANHO := aSB1Ite[1]
+         SX1->X1_F3 := "VR4"
+         DBCOMMIT()
+         MSUNLOCK()
+
+      Endif
+      dbSkip()
+   EndDO
+   DBCOMMITALL()
+Else
+   dbSelectArea("SX1")
+   dbSetorder(1)
+   dbSeek(PADR(cPerg,nTamSx1))
+   while SX1->X1_GRUPO==PADR(cPerg,nTamSX1) .AND. !SX1->(Eof())
+
+      If "PRODU" $ Upper(SX1->X1_PERGUNT) .AND.  Upper(SX1->X1_TIPO) == "C" .AND.  (SX1->X1_TAMANHO <> aSB1Cod[1] .OR.  Upper(SX1->X1_F3) <> "SB1")
+
+         RECLOCK("SX1", .F. )
+         SX1->X1_TAMANHO := aSB1Cod[1]
+         SX1->X1_F3 := "SB1"
+         DBCOMMIT()
+         MSUNLOCK()
+
+      Endif
+      dbSkip()
+   EndDO
+   DBCOMMITALL()
+Endif
+
+Return Nil

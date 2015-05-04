@@ -1,0 +1,3914 @@
+#INCLUDE "MATR951.CH"
+#INCLUDE "PROTHEUS.CH"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³Matr951   ³ Autor ³ Andressa Fagundes     ³ Data ³03/07/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Relatorio auxiliar para preenchimento da DACON             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ ATUALIZACOES SOFRIDAS DESDE A CONSTRUCAO INICIAL.                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ PROGRAMADOR  ³ DATA   ³ BOPS ³  MOTIVO DA ALTERACAO                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³              ³        ³      ³                                        ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Function Matr951()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And. TRepInUse()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Interface de impressao                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport	:= ReportDef()
+	oReport:PrintDialog()
+Else
+	Matr951R3()
+EndIf
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportDef ³ Autor ³Andressa Fagundes      ³ Data ³03/07/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpO1: Objeto do relatório                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+Local oReport
+Local oCabec
+Local oFicha6
+Local oFicha7
+Local oFicha8
+Local oFicha9
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Componente de impressao³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport := TReport():New("MATR951",STR0003,"MTR951", {|oReport| ReportPrint(oReport)},STR0004+" "+"para auxiliar o preenchimento do DACON.")
+Pergunte("MTR951",.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Secao 1 - Dados da Empresa				                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oCabec	:= TRSection():New(oReport,"Dados da Empresa/Filial",{"SM0"},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)
+TRCell():New(oCabec,"M0_CGC"		,"SM0",STR0093 ,"@R 99.999.999/9999-99",20	,/*lPixel*/,/*{||  }*/)
+TRCell():New(oCabec,"PERIODO"		,""	,"Periodo" ,/*Picture*/,50,/*lPixel*/,/*{||  }*/)
+TRCell():New(oCabec,"MES"			,""	,"Mes" ,/*Picture*/,25,/*lPixel*/,/*{||  }*/)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Secao 2 - Regime Nao Cumulativo Ficha 06 e Ficha 12       	³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oFicha6:= TRSection():New(oReport,STR0133,{"SF3"},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)
+oFicha6:SetEdit(.F.)
+TRCell():New(oFicha6,"MOVIMENTO"	,"SF3"	,"CREDITOS A DESCONTAR A ALIQUOTA DE" ,/*Picture*/,100,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oFicha6,"VAL01"		,"SF3"	,"Mercado Interno" ,/*Picture*/,18,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oFicha6,"VAL02"		,"SF3"	,"Exportacao" ,/*Picture*/,18,/*lPixel*/,/*{|| code-block de impressao }*/)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Secao 3 - Regime Nao Cumulativo  Ficha 07 e Ficha 13         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oFicha7:= TRSection():New(oReport,STR0162,{"SF3"},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)
+oFicha7:SetEdit(.F.)
+TRCell():New(oFicha7,"MOVIMENTO"	,"SF3"	,"DEMONSTRACAO DA BASE DE CALCULO DA CONTRIBUICAO" ,/*Picture*/,100,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oFicha7,"VAL01"		,"SF3"	,"Regime Nao Cumulativo" ,/*Picture*/,18,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oFicha7,"VAL02"		,"SF3"	,"Regime Cumulativo" ,/*Picture*/,18,/*lPixel*/,/*{|| code-block de impressao }*/)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Secao 4 - Ficha 09  Aliquotas Diferenciadas	        		³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oFicha9:= TRSection():New(oReport,STR0207,{"TMP"},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)
+oFicha9:SetEdit(.F.)
+TRCell():New(oFicha9,"MOVIMENTO"	,"TMP"	,Substr(OemToAnsi(STR0113),4,48) ,/*Picture*/,55,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oFicha9,"VAL01"		,"TMP"	,"" ,"@E 99,999,999,999.99",18,/*lPixel*/,/*{|| code-block de impressao }*/)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Secao 5 - Regime Cumulativo Ficha 08A e Ficha 14A      		³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oFicha8:= TRSection():New(oReport,STR0098,{"SE5"},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)
+oFicha8:SetEdit(.F.)
+TRCell():New(oFicha8,"MOVIMENTO"	,"SE5"	,STR0099 ,/*Picture*/,100,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oFicha8,"VAL01"		,"SE5"	,"" ,"@E 99,999,999,999.99",18,/*lPixel*/,/*{|| code-block de impressao }*/)
+
+Return(oReport)
+               
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrin³ Autor ³Andressa Fagundes      ³ Data ³03/07/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportPrint devera ser criada para todos  ³±±
+±±³          ³os relatorios que poderao ser agendados pelo usuario.       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport)
+
+Local dDtIni	:= mv_par01
+Local dDtFin	:= mv_par02
+Local nVDeprAt	:= 0
+Local nTotVlMI	:= 0
+Local nTotVlEX	:= 0
+Local nTotVRec	:= 0
+Local nTotVCum	:= 0
+Local nBsCrdAqI	:= 0
+Local nBsCrdAqE	:= 0
+Local nPercInt	:= 0
+Local nPercExt	:= 0
+Local nRecFinC	:= 0
+Local nRecFinN	:= 0
+Local nOutRecN	:= 0
+Local nOutRecC	:= 0
+Local nPosMes	:= 0
+Local nI		:= 0
+Local nY		:= 0
+Local nX		:= 0
+Local nToCreMI	:= 0
+Local nToCreEX	:= 0
+Local nToMAMI1	:= 0
+Local nToMAEX1	:= 0
+Local nToMAMI3	:= 0
+Local nToMAEX3	:= 0
+Local nTot		:= 0
+Local nTotCum	:= 0
+Local nPis		:= 0
+Local nItem1	:= 0
+Local nItem2	:= 0
+Local nItem3	:= 0
+Local nValor1	:= 0
+Local nValor2	:= 0
+Local cCod		:= ""
+Local cMovimento:= ""
+Local aDescr	:= {}
+Local aDescr1	:= {}
+Local aDescr2	:= {}
+Local aDescr3	:= {}
+Local aArea		:= GetArea()
+Local lFirst	:= .T.
+Local lRet		:= .F.
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Validacao/tratamento do periodo informado              ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If Empty(mv_par01) .Or. Empty(mv_par02) .Or. (Year(mv_par01)<>Year(mv_par02)) .Or. R951RetPer(mv_par01,mv_par02)[2]
+	xMagHelpFis(OemToAnsi(STR0209),OemToAnsi(STR0210),OemToAnsi(STR0211))
+	Return Nil
+Else
+	If Day(mv_par01) <> 1
+		mv_par01 := CtoD("01/"+StrZero(Month(mv_par01),2)+"/"+StrZero(Year(mv_par01),4))
+	Endif
+	If Day(mv_par02) <> Day(LastDay(mv_par02))
+		mv_par02 := CtoD(StrZero(Day(LastDay(mv_par02)),2)+"/"+StrZero(Month(mv_par02),2)+"/"+StrZero(Year(mv_par02),4))
+	Endif
+Endif
+    
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Processamento do Dacon - Regime Cumulativo e Nao Cumulativo             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+aMes:= ProcDacon(@nVDeprAt,@nTotVlMI,@nTotVlEX,@nTotVRec,@nTotVCum,@nBsCrdAqI,@nBsCrdAqE,@nPercInt,@nPercExt,@nRecFinC,@nRecFinN,@nOutRecN,@nOutRecC,@nPosMes,@lRet)
+
+If lRet
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Descricao das Fichas 06 e 12         ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If mv_par06==2 // Regime Nao Cumulativo
+		aAdd(aDescr,{STR0012,3})//01.Bens para Revenda
+		aAdd(aDescr,{STR0013,4})//02.Bens Utilizados como Insumos
+		aAdd(aDescr,{STR0014,6})//03.Servicos Utilizados como Insumos
+		aAdd(aDescr,{STR0015,5})//04.Despesas de Energia Eletrica
+		aAdd(aDescr,{STR0135,20})//05.Despesas de Alugueis de Predios Locados de Pessoas Juridicas
+		aAdd(aDescr,{STR0136,21})//06.Despesas de Alugueis de Maquinas e Equipamentos Locados de Pessoas Juridicas
+		aAdd(aDescr,{STR0137,23})//07.Despesas de Armazenagem de Mercadoria e Frete na Operacao de Venda
+		aAdd(aDescr,{STR0138,99})//08.Despesas de Contraprestacoes de Arrendamento Mercantil
+		aAdd(aDescr,{STR0139,99})//09.Encargos de Depreciacao de Bens do Ativo Imobilizado
+		aAdd(aDescr,{STR0140,99})//10.Base de Calc. do Cred. a Desc. ref. Ativo Imob.(Lei 10.833/2003, Lei 11.051/2004)
+		aAdd(aDescr,{STR0141,99})//11.Encargos Amort. Ed.Benfeitor. em Imoveis "----"
+		aAdd(aDescr,{STR0142,7})//12.Devolucao de Vendas Sujeitas a Aliquota de 
+		aAdd(aDescr,{STR0143,22})//13.Outras Operacoes com Direito a Credito
+		aAdd(aDescr,{STR0144,99})//14.BASE DE CALCULO DOS CREDITOS A DESCONTAR
+		aAdd(aDescr,{STR0145,99})//15.Creditos a Descontar
+		aAdd(aDescr,{STR0027,99})//APURACAO DE OUTROS CREDITOS
+		aAdd(aDescr,{STR0146,1})//16.Creditos Calculados a Aliquotas Diferenciadas
+		aAdd(aDescr,{STR0147,99})//17.Creditos Calculados por Unidade de Produto
+		aAdd(aDescr,{STR0148,2})//18.Credito Presumido - Atividades Agroindustriais
+		aAdd(aDescr,{STR0149,99})//19.Credito Presumido Relativo a Estoque de Abertura
+		aAdd(aDescr,{STR0150,99})//20.Credito Presumido - Atividade Imobiliaria
+		aAdd(aDescr,{STR0151,99})//21.Demais Creditos da Atividade Imobiliaria
+		aAdd(aDescr,{STR0152,24})//22.Creditos a Descontar de PIS/Pasep Importacao - Aliquota de 1,65%
+		aAdd(aDescr,{STR0153,99})//23.Creditos a Descontar de PIS/Pasep Importacao - Aliq.Diferenciada
+		aAdd(aDescr,{STR0154,99})//24.Creditos a Descontar de PIS/Pasep Importacao - Aliq.por Unidade Produto
+		aAdd(aDescr,{STR0037,99})//25.Outros Creditos a Descontar
+		aAdd(aDescr,{STR0155,99})//26.TOTAL DE OUTROS CREDITOS
+		aAdd(aDescr,{STR0156,99})//27.TOTAL DE CREDITOS APURADO NO MES
+		aAdd(aDescr,{STR0040,99})//AJUSTES
+		aAdd(aDescr,{STR0157,99})//28.Credito Referente a Contribuicao Diferida em Meses Anteriores
+		aAdd(aDescr,{STR0158,99})//29.(-)Credito Referente a Contribuicao Diferida no Mes
+		aAdd(aDescr,{STR0159,99})//30.Ajustes Positivos de Creditos
+		aAdd(aDescr,{STR0160,99})//31.(-)Ajustes Negativos de Creditos
+		aAdd(aDescr,{STR0161,99})//32.TOTAL DE CREDITOS APURADO NO MES, APOS AJUSTES
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Descricao das Fichas 07 e 13         ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		aAdd(aDescr1,{STR0048,8})//01.Receita da Exportacao de Bens e Servicos
+		aAdd(aDescr1,{STR0100,9})//02.Receita da Venda no Mercado Interno de Produtos de Fabricacao Propria
+		aAdd(aDescr1,{STR0050,10})//03.Receita da Revenda de Mercadorias
+		aAdd(aDescr1,{STR0051,16})//04.Receita da Prestacao de Servicos
+		aAdd(aDescr1,{STR0052,99})//05.Receita das Unidades Imobiliarias Vendidas
+		aAdd(aDescr1,{STR0053,11})//06.Receita da Atividade Rural
+		aAdd(aDescr1,{STR0054,99})//07.Receitas Financeiras
+		aAdd(aDescr1,{STR0055,99})//08.Receitas de Juros sobre o Capital Proprio
+		aAdd(aDescr1,{STR0056,99})//09.Outras Receitas
+		aAdd(aDescr1,{STR0102,99})//10.TOTAL DAS RECEITAS
+		aAdd(aDescr1,{STR0058,99})//ISENCOES E EXCLUSOES
+		aAdd(aDescr1,{STR0163,12})//11.(-)Receitas de Exportacao com Direito a Credito de PIS/Pasep//Cofins
+		aAdd(aDescr1,{STR0164,25})//12.(-)Receitas de Exportacao sem Direito a Credito de PIS/Pasep//Cofins
+		aAdd(aDescr1,{STR0165,99})//13.(-)Receitas Isentas, nao Alcancadas pela Inc.Contribuicao, com Susp. ou Sujeitas a Aliq. Zero
+		aAdd(aDescr1,{STR0166,19})//14.(-)Vendas Canceladas e Descontos Incondicionais
+		aAdd(aDescr1,{STR0167,99})//15.(-)Devolucoes de Vendas - Regime Cumulativo
+		aAdd(aDescr1,{STR0064,15})//16.(-)IPI e ICMS/Substituto Tributario
+		aAdd(aDescr1,{STR0168,99})//17.(-)Reversao de Provisoes e Recuperacao de Creditos Baixados como Perda
+		aAdd(aDescr1,{STR0169,99})//18.(-)Resultados Positivos em Participacoes Societarias e em SCP
+		aAdd(aDescr1,{STR0170,14})//19.(-)Vendas de Bens do Ativo Permanente
+		aAdd(aDescr1,{STR0171,99})//20.(-)Vendas de Produtos Sujeitos a Substituicao
+		aAdd(aDescr1,{STR0172,99})//21.(-)Vendas de Produtos Sujeitos a Aliquotas Diferenciadas
+		aAdd(aDescr1,{STR0173,99})//22.(-)Vendas Sujeitas a Aliquotas por Unidade de Produto
+		aAdd(aDescr1,{STR0174,99})//23.(-)Receitas de Vendas Auferidas no Ambito do MAE
+		aAdd(aDescr1,{STR0175,99})//24.(-)Exclusoes Permitidas as Sociedades Cooperativas
+		aAdd(aDescr1,{STR0073,99})//25.(-)Outras Exclusoes
+		aAdd(aDescr1,{STR0176,99})//26.BASE DE CALCULO DA CONTRIBUICAO PARA O PIS/PASEP/COFINS
+		aAdd(aDescr1,{STR0177,99})//27.Contribuicao para o PIS/PASEP Apurada / Cofins
+		aAdd(aDescr1,{STR0178,99})//28.BASE DE CALCULO DA CONTRIBUICAO PARA O PIS/PASEP - SUBSTITUICAO/Cofins
+		aAdd(aDescr1,{STR0179,99})//29.Contribuicao para o PIS/PASEP Apurada - Substituicao/Cofins
+		aAdd(aDescr1,{STR0180,99})//30.BASE DE CALCULO PARA O PIS/PASEP - MAE / Cofins
+		aAdd(aDescr1,{STR0181,99})//31.Contribuicao para o PIS/PASEP Apurada - MAE
+		aAdd(aDescr1,{STR0182,99})//32.BASE DE CALCULO DA CONTRIBUICAO PARA O PIS/PASEP - FOLHA DE SALARIOS
+		aAdd(aDescr1,{STR0183,99})//33.Contribuicao para o PIS/PASEP Apurada - Folha de Salarios
+		aAdd(aDescr1,{STR0082,99})//INFORMACOES COMPLEMENTARES
+		aAdd(aDescr1,{STR0184,99})//34.Contribuicao para o PIS/PASEP a Pagar Retida de Cooperados/Cofins
+		aAdd(aDescr1,{STR0185,99})//35.Devolucoes de Vendas de Mercadorias Sujeitas a Substituicao
+	Else
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Descricao das Fichas 08A e 14A       ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		aAdd(aDescr3,{STR0048,8})//01.Receita da Exportacao de Bens e Servicos
+		aAdd(aDescr3,{STR0100,9})//02.Receita da Venda no Mercado Interno de Produtos de Fabricacao Propria
+		aAdd(aDescr3,{STR0050,10})//03.Receita da Revenda de Mercadorias
+		aAdd(aDescr3,{STR0051,16})//04.Receita da Prestacao de Servicos
+		aAdd(aDescr3,{STR0052,99})//05.Receita das Unidades Imobiliarias Vendidas
+		aAdd(aDescr3,{STR0053,11})//06.Receita da Atividade Rural
+		aAdd(aDescr3,{STR0101,99})//07.Receitas de Variacoes Cambiais - Operacoes Liquidadas no Mes
+		aAdd(aDescr3,{STR0055,99})//08.Receitas de Juros sobre o Capital Proprio
+		aAdd(aDescr3,{STR0056,17})//09.Outras Receitas
+		aAdd(aDescr3,{STR0102,99})//10.TOTAL DAS RECEITAS
+		aAdd(aDescr3,{STR0058,99})//ISENCOES E EXCLUSOES
+		aAdd(aDescr3,{STR0026,8})//11.(-)Receitas de Exportacao
+		aAdd(aDescr3,{STR0103,17})//12.(-)Receitas Isentas, nao Alcancadas Inc.Contribuicao, com Susp. ou Sujeitas a Aliq. Zero
+		aAdd(aDescr3,{STR0104,19})//13.(-)Vendas Canceladas, Devolucoes e Descontos Incondicionais
+		aAdd(aDescr3,{STR0045,15})//14.(-)IPI e ICMS/Substituto Tributario
+		aAdd(aDescr3,{STR0105,99})//15.(-)Receitas de Variacoes Cambiais Auferidas no Mes
+		aAdd(aDescr3,{STR0106,99})//16.(-)Reversao de Provisoes e Recuperacao de Creditos Baixados como Perda
+		aAdd(aDescr3,{STR0107,99})//17.(-)Resultados Positivos em Participacoes Societarias e em SCP
+		aAdd(aDescr3,{STR0077,14})//18.(-)Vendas de Bens do Ativo Permanente
+		aAdd(aDescr3,{STR0108,99})//19.(-)Vendas de Produtos Sujeitos a Substituicao
+		aAdd(aDescr3,{STR0109,99})//20.(-)Vendas de Produtos Sujeitos a Aliquotas Diferenciadas
+		aAdd(aDescr3,{STR0110,99})//21.(-)Vendas Sujeitas a Aliquotas por Unidade de Produto
+		aAdd(aDescr3,{STR0111,99})//22.(-)Receitas de Vendas Auferidas no Ambito do MAE
+		aAdd(aDescr3,{STR0112,99})//23.(-)Exclusoes Permitidas as Sociedades Cooperativas
+		aAdd(aDescr3,{STR0086,99})//24.(-)Outras Exclusoes
+		aAdd(aDescr3,{STR0113,99})//25.BASE DE CALCULO DA CONTRIBUICAO PARA O PIS/PASEP-INCIDENCIA CUMULATIVA
+		aAdd(aDescr3,{STR0114,99})//26.Contribuicao para o PIS/PASEP Apurada - Incidencia Cumulativa
+		aAdd(aDescr3,{STR0115,99})//27.BASE DE CALCULO DA CONTRIBUICAO PARA O PIS/PASEP - SUBSTITUICAO
+		aAdd(aDescr3,{STR0116,99})//28.Contribuicao para o PIS/PASEP Apurada - Substituicao
+		aAdd(aDescr3,{STR0117,99})//29.BASE DE CALCULO DA CONTRIBUICAO PARA O PIS/PASEP - MAE
+		aAdd(aDescr3,{STR0118,99})//30.Contribuicao para o PIS/PASEP Apurada - MAE
+		aAdd(aDescr3,{STR0119,99})//31.BASE DE CALCULO DA CONTRIBUICAO PARA O PIS/PASEP - FOLHA DE SALARIOS
+		aAdd(aDescr3,{STR0120,99})//32.Contribuicao para o PIS/PASEP Apurada - Folha de Salarios
+		aAdd(aDescr3,{STR0082,99})//INFORMACOES COMPLEMENTARES
+		aAdd(aDescr3,{STR0121,99})//33.Contribuicao para o PIS/PASEP a Pagar Retida de Cooperados
+		aAdd(aDescr3,{STR0122,99})//34.Devolucoes de Vendas de Mercadorias Sujeitas a Substituicao
+	Endif
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Descricao da Ficha 09 			    ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If mv_par07 == 2
+		aAdd(aDescr2,{STR0204})//01.Bens para Revenda
+		aAdd(aDescr2,{"02."+Substr(OemToAnsi(STR0166),4)})//02.Bens Utilizados como Insumos
+		aAdd(aDescr2,{STR0206})//03.Servicos Utilizados como Insumos
+		aAdd(aDescr2,{"04."+Substr(OemToAnsi(STR0113),4,48)})//04.Despesas de Energia Eletrica
+		aAdd(aDescr2,{"05."+Subs(OemToAnsi(STR0114),4,37)})//05.Despesas de Alugueis de Predios Locados de Pessoas Juridicas
+	Endif
+	
+	For nI := 1 to nPosMes
+		If mv_par06==2 // Regime Nao Cumulativo
+			For nY:= 1 To 4
+				nTotVlMI :=0
+				nTotVlMI += aMes[nI][2][3][1]+aMes[nI][2][4][1]+aMes[nI][2][6][1]+aMes[nI][2][5][1]+aMes[nI][2][7][1]+aMes[nI][2][20][1]+aMes[nI][2][21][1]+aMes[nI][2][22][1]+aMes[nI][2][23][1]+nBsCrdAqI
+				nTotVlEX :=0	
+				nTotVlEX += aMes[nI][2][3][2]+aMes[nI][2][4][2]+aMes[nI][2][6][2]+aMes[nI][2][5][2]+aMes[nI][2][7][2]+aMes[nI][2][20][2]+aMes[nI][2][21][2]+aMes[nI][2][22][2]+aMes[nI][2][23][2]+nBsCrdAqE
+				nTotVRec := 0
+				nTotVRec += (aMes[nI][2][8][1]+aMes[nI][2][9][1]+aMes[nI][2][10][1]+aMes[nI][2][11][1]+aMes[nI][2][16][1]+nRecFinN+nOutRecN)-(aMes[nI][2][12][1]+aMes[nI][2][13][1]+aMes[nI][2][15][1]+aMes[nI][2][14][1]+aMes[nI][2][19][1]+aMes[nI][2][25][1])
+		 		nTotVCum := 0
+				nTotVCum += (aMes[nI][2][8][2]+aMes[nI][2][9][2]+aMes[nI][2][10][2]+aMes[nI][2][11][2]+aMes[nI][2][16][2]+aMes[nI][2][17][2]+nRecFinC+nOutRecC)-(aMes[nI][2][12][2]+aMes[nI][2][13][2]+aMes[nI][2][15][2]+aMes[nI][2][14][2]+aMes[nI][2][17][2]+aMes[nI][2][19][2]+aMes[nI][2][25][2])
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Calcula o percentual em relacao ao total faturado de vendas ao mercado³
+				//³interno e vendas ao mercado externo.                                  ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				If aMes[nI][2][17][1] <> 0 .Or. aMes[nI][2][18][1] <> 0
+					nPercInt := aMes[nI][2][17][1] / (aMes[nI][2][17][1] + aMes[nI][2][18][1])
+					nPercExt := aMes[nI][2][18][1] / (aMes[nI][2][17][1] + aMes[nI][2][18][1])
+				Else                                  
+	    		   	nPercInt := 1
+				Endif
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Secao 1 - Cabecalho Padrao                             ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				oReport:Section(1):Cell("PERIODO"):SetBlock({|| R951RetPer(dDtIni,dDtFin)[1]+DtoC(dDtIni)+" a "+DtoC(dDtFin)})
+				oReport:Section(1):Cell("MES"):SetBlock({|| Alltrim(MesExtenso(aMes[nI][1]))})
+				oReport:SetMeter(1)
+		   		oReport:EndPage()
+	
+				oReport:Section(1):Init()
+				oReport:Section(1):PrintLine()
+				oReport:Section(1):Finish()	
+	
+				If nY == 1 .Or. nY == 3 //Ficha 06 ou Ficha 12
+			    	oReport:SkipLine()
+					oReport:PrintText(IIF(nY==1,STR0133, STR0186))
+					oReport:SkipLine()
+					oReport:Section(2):Cell("MOVIMENTO"):SetTitle(IIF(nY==1,STR0134+" 1,65% ", STR0134+" 7,60% ")+STR0201)
+				ElseIf nY == 2 .Or. nY == 4 // Ficha 07 ou Ficha 13
+					oReport:SkipLine()
+					oReport:PrintText(IIF (nY==2, STR0162, STR0190))
+					oReport:Section(3):Cell("MOVIMENTO"):SetTitle(IIF(nY==2,STR0099,STR0124))
+					oReport:SkipLine()
+				Endif
+				
+				If oReport:Cancel()
+					Exit
+				EndIf
+			                          
+				If (nY == 1 .Or. nY == 3)
+			
+					For nX := 1 to Len(aDescr)
+						cMovimento 	:= aDescr[nX,1]
+						oReport:Section(2):Init()
+						oReport:Section(2):Cell("MOVIMENTO"):SetBlock({|| cMovimento })
+						oReport:Section(2):Cell("VAL01"):SetBlock({||Iif(Substr(cMovimento,1,2)$('08,11,17,19,20,21,23,24,25,28,29,30,31'),"------------------",nValor1)})
+						oReport:Section(2):Cell("VAL02"):SetBlock({||Iif(Substr(cMovimento,1,2)$('08,11,17,19,20,21,23,24,25,28,29,30,31'),"------------------",nValor2)})
+					
+						If Substr(cMovimento,1,2) $('08,11,17,19,20,21,25,29,30,31')
+	  						oReport:Section(2):Cell("VAL01"):SetPicture ("@!")
+		  					oReport:Section(2):Cell("VAL02"):SetPicture ("@!")
+						Elseif Substr(cMovimento,1,2) == "09"
+							oReport:Section(2):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(2):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+	  						nValor1	:= nVDeprAt*nPercInt
+							nValor2	:= nVDeprAt*nPercExt
+		    	        Elseif Substr(cMovimento,1,2) == "10"
+							oReport:Section(2):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(2):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+	  						nValor1	:= nBsCrdAqI*nPercInt
+							nValor2	:= nBsCrdAqE*nPercExt
+						Elseif Substr(cMovimento,1,2) == "12"
+							oReport:Section(2):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(2):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+							cMovimento := IIF(nY==1,STR0142+" 1,65%",STR0142+" 7,60%")
+							nValor1	:= (aMes[nI][2][aDescr[nX,2]][1]+aMes[nI][2][aDescr[nX,2]][2])*nPercInt
+							nValor2	:= (aMes[nI][2][aDescr[nX,2]][1]+aMes[nI][2][aDescr[nX,2]][2])*nPercExt
+						Elseif Substr(cMovimento,1,2) == "14"
+							oReport:Section(2):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(2):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+	  						nValor1	:= (nTotVlMI+nTotVlEX)*nPercInt
+							nValor2	:= (nTotVlMI+nTotVlEX)*nPercExt
+						Elseif Substr(cMovimento,1,2) == "15"
+	   						oReport:Section(2):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(2):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+	  						nValor1	:= ((nTotVlMI+nTotVlEX)*nPercInt)*(IIF(nY==1,0.0165,0.076))
+							nValor2	:= ((nTotVlMI+nTotVlEX)*nPercExt)*(IIF(nY==1,0.0165,0.076))
+						Elseif cMovimento == "APURACAO DE OUTROS CREDITOS"
+	   						oReport:Section(2):Cell("VAL01"):Disable()
+							oReport:Section(2):Cell("VAL02"):Disable()
+							oReport:SkipLine()
+						Elseif Substr(cMovimento,1,2) == "16"
+							oReport:Section(2):Cell("VAL01"):Enable()
+							oReport:Section(2):Cell("VAL02"):Enable()
+							oReport:Section(2):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(2):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+		  					nValor1	:= (aMes[nI][2][aDescr[nX,2]][1]+aMes[nI][2][1][2])*nPercInt*0.008
+							nValor2	:= (aMes[nI][2][aDescr[nX,2]][1]+aMes[nI][2][1][2])*nPercExt*0.008
+							oReport:SkipLine()
+						Elseif Substr(cMovimento,1,2) == "22"
+	   						oReport:Section(2):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(2):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+							cMovimento := IIF(nY==1,STR0152,STR0187)
+		  					nValor1	:= ((aMes[nI][2][aDescr[nX,2]][1]+aMes[nI][2][aDescr[nX,2]][2])*nPercInt)*0.0165
+							nValor2	:= ((aMes[nI][2][aDescr[nX,2]][1]+aMes[nI][2][aDescr[nX,2]][2])*nPercExt)*0.0165
+						Elseif Substr(cMovimento,1,2)=="23"
+				  			oReport:Section(2):Cell("VAL01"):SetPicture ("@!")
+	  						oReport:Section(2):Cell("VAL02"):SetPicture ("@!")
+							cMovimento := IIF(nY==1,STR0153,STR0188)
+						Elseif Substr(cMovimento,1,2)=="24"
+				  			oReport:Section(2):Cell("VAL01"):SetPicture ("@!")
+		  					oReport:Section(2):Cell("VAL02"):SetPicture ("@!")
+							cMovimento := IIF(nY==1,STR0154,STR0189)
+						Elseif Substr(cMovimento,1,2) == "26"
+	   						oReport:Section(2):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(2):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+	  						nValor1	:= ((aMes[nI][2][1][1]+aMes[nI][2][1][2])*nPercInt*0.008)+((aMes[nI][2][2][1]+aMes[nI][2][2][2])*nPercInt)+(((aMes[nI][2][24][1]+aMes[nI][2][24][2])*nPercInt)*(IIF(nY==1,0.0165,0.076)))*nPercInt
+							nValor2	:= ((aMes[nI][2][1][1]+aMes[nI][2][1][2])*nPercExt*0.008)+((aMes[nI][2][2][1]+aMes[nI][2][2][2])*nPercExt)+(((aMes[nI][2][24][1]+aMes[nI][2][24][2])*nPercInt)*(IIF(nY==1,0.0165,0.076)))*nPercExt
+						Elseif Substr(cMovimento,1,2) == "27"
+	   						oReport:Section(2):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(2):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+							nToCreMI := (((nTotVlMI+nTotVlEX)*nPercInt)*(IIF(nY==1,0.0165,0.076)))+(((aMes[nI][2][1][1]+aMes[nI][2][1][2])*nPercInt*0.008)+((aMes[nI][2][2][1]+aMes[nI][2][2][2])*nPercInt))+(((aMes[nI][2][24][1]+aMes[nI][2][24][2])*nPercInt)*(IIF(nY==1,0.0165,0.076)))
+							nToCreEX := (((nTotVlMI+nTotVlEX)*nPercExt)*(IIF(nY==1,0.0165,0.076)))+(((aMes[nI][2][1][1]+aMes[nI][2][1][2])*nPercExt*0.008)+((aMes[nI][2][2][1]+aMes[nI][2][2][2])*nPercExt))+(((aMes[nI][2][24][1]+aMes[nI][2][24][2])*nPercExt)*(IIF(nY==1,0.0165,0.076)))
+		  					nValor1	:= (nToCreMI+nToCreEX)*nPercInt
+							nValor2	:= (nToCreMI+nToCreEX)*nPercExt
+						Elseif cMovimento == "AJUSTES"
+							oReport:Section(2):Cell("VAL01"):Disable()
+							oReport:Section(2):Cell("VAL02"):Disable()
+							oReport:SkipLine()
+						Elseif Substr(cMovimento,1,2) == "28"
+							oReport:Section(2):Cell("VAL01"):Enable()
+							oReport:Section(2):Cell("VAL02"):Enable()
+			  				oReport:Section(2):Cell("VAL01"):SetPicture ("@!")
+		  					oReport:Section(2):Cell("VAL02"):SetPicture ("@!")
+	  						oReport:SkipLine()
+						Elseif Substr(cMovimento,1,2) == "32"
+		   					oReport:Section(2):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(2):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+	   						nValor1	:= IIF(lFirst,(nToCreMI+nToCreEX)*nPercInt,IIF(nY==1,(nToMAMI1+nToCreMI+nToMAEX1+nToCreEX)*nPercInt,(nToMAMI3+nToCreMI+nToMAEX3+nToCreEX)*nPercInt))
+							nValor2	:= IIF(lFirst,(nToCreMI+nToCreEX)*nPercExt,IIF(nY==1,(nToMAMI1+nToCreMI+nToMAEX1+nToCreEX)*nPercExt,(nToMAMI3+nToCreMI+nToMAEX3+nToCreEX)*nPercExt))
+							If nY == 1
+								nToMAMI1 += nToCreMI
+								nToMAEX1 += nToCreEX
+							Else
+								nToMAMI3 += nToCreMI
+								nToMAEX3 += nToCreEX
+							Endif
+						Else
+			   				oReport:Section(2):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(2):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+							nValor1	:= (aMes[nI][2][aDescr[nX,2]][1]+aMes[nI][2][aDescr[nX,2]][2]*nPercInt)
+							nValor2	:= (aMes[nI][2][aDescr[nX,2]][1]+aMes[nI][2][aDescr[nX,2]][2]*nPercExt)
+						Endif
+						oReport:Section(2):PrintLine()
+					Next
+				Else // Calculo Pis/Cofins-2painel(Regime Nao Cumulativo+Regime Cumulativo)
+					For nX := 1 to Len(aDescr1)
+						cMovimento 	:= aDescr1[nX,1]
+							
+						oReport:Section(3):Init()
+						oReport:Section(3):Cell("MOVIMENTO"):SetBlock({|| cMovimento })
+						oReport:Section(3):Cell("VAL01"):SetBlock({||Iif(Substr(cMovimento,1,2)$('05,08,13,15,17,18,20,21,22,23,24,25,27,28,29,30,31,32,33,34,35'),"---------------------",nValor1)})
+						oReport:Section(3):Cell("VAL02"):SetBlock({||Iif(Substr(cMovimento,1,2)$('05,08,13,15,17,18,20,21,22,23,24,25,27,28,29,30,31,32,33,34,35'),"---------------------",nValor2)})
+	
+						If Substr(cMovimento,1,2) == "01"
+							oReport:Section(3):Cell("VAL01"):SetPicture("@E 99,999,999,999.99")
+							oReport:Section(3):Cell("VAL02"):SetPicture("@E 99,999,999,999.99")
+							nValor1	:= aMes[nI][2][aDescr1[nX,2]][1]
+							nValor2	:= aMes[nI][2][aDescr1[nX,2]][2]
+							nTot   	:= aMes[nI][2][aDescr1[nX,2]][1]
+							nTotCum	:= aMes[nI][2][aDescr1[nX,2]][2]
+						Elseif Substr(cMovimento,1,2)$('05,08,13,15,17,18,20,21,22,23,24,25')
+		  					oReport:Section(3):Cell("VAL01"):SetPicture ("@!")
+			  				oReport:Section(3):Cell("VAL02"):SetPicture ("@!")
+				 		Elseif Substr(cMovimento,1,2) == "07"
+							oReport:Section(3):Cell("VAL01"):SetPicture("@E 99,999,999,999.99")
+							oReport:Section(3):Cell("VAL02"):SetPicture("@E 99,999,999,999.99")
+	   						nValor1	:= nRecFinN
+							nValor2	:= nRecFinC
+							nTot    += nRecFinN
+							nTotCum += nRecFinC
+						Elseif Substr(cMovimento,1,2) == "09"
+							oReport:Section(3):Cell("VAL01"):SetPicture("@E 99,999,999,999.99")
+							oReport:Section(3):Cell("VAL02"):SetPicture("@E 99,999,999,999.99")
+							nValor1	:= nOutRecN
+							nValor2	:= nOutRecC
+							nTot    += nOutRecN
+							nTotCum += nOutRecC
+						Elseif Substr(cMovimento,1,2) == "10"
+							oReport:Section(3):Cell("VAL01"):SetPicture("@E 99,999,999,999.99")
+							oReport:Section(3):Cell("VAL02"):SetPicture("@E 99,999,999,999.99")
+							nValor1	:= nTot
+							nValor2	:= nTotCum
+						Elseif cMovimento == "ISENCOES E EXCLUSOES"
+	   						oReport:Section(3):Cell("VAL01"):Disable()
+							oReport:Section(3):Cell("VAL02"):Disable()
+							oReport:SkipLine()
+						Elseif Substr(cMovimento,1,2) == "11"
+							oReport:Section(3):Cell("VAL01"):Enable()
+							oReport:Section(3):Cell("VAL02"):Enable()
+							oReport:Section(3):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(3):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+							cMovimento := IIF(nY==2,STR0163,STR0191)
+							nValor1	:= aMes[nI][2][aDescr1[nX,2]][1]
+							nValor2	:= aMes[nI][2][aDescr1[nX,2]][2]
+							oReport:SkipLine()
+						Elseif Substr(cMovimento,1,2) == "12"
+	   						oReport:Section(3):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(3):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+							cMovimento := IIF(nY==2,STR0164,STR0192)
+							nValor1	:= aMes[nI][2][aDescr1[nX,2]][1]
+							nValor2	:= aMes[nI][2][aDescr1[nX,2]][2]
+						Elseif Substr(cMovimento,1,2) == "14"
+	   						oReport:Section(3):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(3):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+							nValor1	:= aMes[nI][2][aDescr1[nX,2]][1]
+							nValor2	:= aMes[nI][2][aDescr1[nX,2]][2]
+						Elseif Substr(cMovimento,1,2) == "16"
+			   				oReport:Section(3):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(3):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+							nValor1	:= aMes[nI][2][aDescr1[nX,2]][1]
+							nValor2	:= aMes[nI][2][aDescr1[nX,2]][2]
+						Elseif Substr(cMovimento,1,2) == "19"
+	   						oReport:Section(3):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(3):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+							nValor1	:= aMes[nI][2][aDescr1[nX,2]][1]
+							nValor2	:= aMes[nI][2][aDescr1[nX,2]][2]
+						Elseif Substr(cMovimento,1,2) == "26"
+							oReport:Section(3):Cell("VAL01"):SetPicture ("@E 99,999,999,999.99")
+							oReport:Section(3):Cell("VAL02"):SetPicture ("@E 99,999,999,999.99")
+							cMovimento := IIF (nY==2,STR0176,STR0193)
+							nValor1	:= nTotVRec
+							nValor2	:= nTotVCum
+							oReport:SkipLine()
+						Elseif Substr(cMovimento,1,2)=="27"
+			  				oReport:Section(3):Cell("VAL01"):SetPicture ("@!")
+			  				oReport:Section(3):Cell("VAL02"):SetPicture ("@!")
+							cMovimento := IIF(nY==2, STR0177, STR0194)
+						Elseif Substr(cMovimento,1,2)=="28"
+				  			oReport:Section(3):Cell("VAL01"):SetPicture ("@!")
+	  						oReport:Section(3):Cell("VAL02"):SetPicture ("@!")
+							cMovimento := IIF (nY==2, STR0178, STR0195)
+							oReport:SkipLine()
+						Elseif Substr(cMovimento,1,2)=="29"
+				  			oReport:Section(3):Cell("VAL01"):SetPicture ("@!")
+	  						oReport:Section(3):Cell("VAL02"):SetPicture ("@!")
+							cMovimento := IIF (nY==2, STR0179, STR0196)
+						Elseif Substr(cMovimento,1,2)=="30"
+			  				oReport:Section(3):Cell("VAL01"):SetPicture ("@!")
+	  						oReport:Section(3):Cell("VAL02"):SetPicture ("@!")
+							cMovimento := IIF (nY==2, STR0180, STR0197)
+							oReport:SkipLine()
+						Elseif Substr(cMovimento,1,2)=="31"
+		  					oReport:Section(3):Cell("VAL01"):SetPicture ("@!")
+	  						oReport:Section(3):Cell("VAL02"):SetPicture ("@!")
+							cMovimento := IIF (nY==2, STR0181, STR0198)
+						Elseif Substr(cMovimento,1,2)=="32"
+							If (nY==2)
+					  			oReport:Section(3):Cell("VAL01"):SetPicture ("@!")
+		  						oReport:Section(3):Cell("VAL02"):SetPicture ("@!")
+			  				Else                                           
+						  		oReport:Section(3):Cell("MOVIMENTO"):Disable()
+			   					oReport:Section(3):Cell("VAL01"):Disable()
+								oReport:Section(3):Cell("VAL02"):Disable()
+							Endif
+								oReport:SkipLine()
+						Elseif Substr(cMovimento,1,2)=="33" //.And. (nY==2)
+							If (nY==2)
+								oReport:Section(3):Cell("MOVIMENTO"):Enable()
+	   							oReport:Section(3):Cell("VAL01"):Enable()
+								oReport:Section(3):Cell("VAL02"):Enable()
+			  					oReport:Section(3):Cell("VAL01"):SetPicture ("@!")
+				  				oReport:Section(3):Cell("VAL02"):SetPicture ("@!")
+					  		Else                                           
+						  		oReport:Section(3):Cell("MOVIMENTO"):Disable()
+				   				oReport:Section(3):Cell("VAL01"):Disable()
+								oReport:Section(3):Cell("VAL02"):Disable()
+	       	    		    Endif 
+			 			Elseif Alltrim(cMovimento) == Alltrim("INFORMACOES COMPLEMENTARES")
+							oReport:Section(3):Cell("MOVIMENTO"):Enable()
+							oReport:Section(3):Cell("VAL01"):Disable()
+							oReport:Section(3):Cell("VAL02"):Disable()
+							oReport:SkipLine()
+			  			Elseif Substr(cMovimento,1,2)=="34"
+							oReport:Section(3):Cell("MOVIMENTO"):Enable()
+							oReport:Section(3):Cell("VAL01"):Enable()
+							oReport:Section(3):Cell("VAL02"):Enable()
+	  						oReport:Section(3):Cell("VAL01"):SetPicture ("@!")
+		  					oReport:Section(3):Cell("VAL02"):SetPicture ("@!")
+							cMovimento := IIF(nY==2, STR0184, STR0199)
+							oReport:SkipLine()
+						Elseif Substr(cMovimento,1,2)=="35"
+				  			oReport:Section(3):Cell("VAL01"):SetPicture ("@!")
+				  			oReport:Section(3):Cell("VAL02"):SetPicture ("@!")
+							cMovimento := IIF(nY==2, STR0185, STR0200)
+		  				Else
+			   				oReport:Section(3):Cell("VAL01"):SetPicture("@E 99,999,999,999.99")
+							oReport:Section(3):Cell("VAL02"):SetPicture("@E 99,999,999,999.99")
+							nValor1	:= aMes[nI][2][aDescr1[nX,2]][1]
+							nValor2	:= aMes[nI][2][aDescr1[nX,2]][2]
+							nTot   	+= aMes[nI][2][aDescr1[nX,2]][1]
+							nTotCum	+= aMes[nI][2][aDescr1[nX,2]][2]
+					    Endif             
+						oReport:Section(3):PrintLine()
+					Next
+				Endif
+				oReport:Section(2):Finish()
+				oReport:Section(3):Finish()
+		 	Next
+		Else //Regime Cumulativo
+			For nY:= 1 To 2
+		 		nTotVCum := 0
+				nTotVCum += (aMes[nI][2][8][2]+aMes[nI][2][9][2]+aMes[nI][2][10][2]+aMes[nI][2][11][2]+aMes[nI][2][16][2]+aMes[nI][2][17][2]+nRecFinC+nOutRecC)-(aMes[nI][2][8][2]+aMes[nI][2][12][2]+aMes[nI][2][13][2]+aMes[nI][2][15][2]+aMes[nI][2][14][2]+aMes[nI][2][17][2]+aMes[nI][2][19][2]+aMes[nI][2][25][2])
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Secao 1 - Cabecalho Padrao                             ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				oReport:Section(1):Cell("PERIODO"):SetBlock({|| R951RetPer(dDtIni,dDtFin)[1]+DtoC(dDtIni)+" a "+DtoC(dDtFin)})
+				oReport:Section(1):Cell("MES"):SetBlock({|| Alltrim(MesExtenso(aMes[nI][1]))})
+				oReport:SetMeter(1)
+	    		oReport:EndPage()
+	    		
+				oReport:Section(1):Init()
+				oReport:Section(1):PrintLine()
+				oReport:Section(1):Finish()
+		
+				If nY == 1 // Pis
+	  			    oReport:SkipLine()
+					oReport:PrintText(STR0098)
+					oReport:SkipLine()
+					oReport:Section(5):Cell("MOVIMENTO"):SetTitle(STR0099)
+	 			Else // Cofins
+					oReport:SkipLine()
+					oReport:PrintText(STR0123)
+					oReport:Section(5):Cell("MOVIMENTO"):SetTitle(STR0124)
+					oReport:SkipLine()
+				Endif
+				
+				If oReport:Cancel()
+					Exit
+				EndIf
+				                          
+				For nX := 1 to Len(aDescr3)
+					cMovimento 	:= aDescr3[nX,1]
+							
+					oReport:Section(5):Init()
+					oReport:Section(5):Cell("MOVIMENTO"):SetBlock({|| cMovimento })
+					oReport:Section(5):Cell("VAL01"):SetBlock({||Iif(Substr(cMovimento,1,2)$('05,07,08,15,16,17,19,20,21,22,23,24,26,27,28,29,30,31,32,33,34'),"---------------------",nValor1)})
+					oReport:Section(5):Cell("VAL01"):Enable()
+						
+					If Substr(cMovimento,1,2)$('05,07,08,15,16,17,19,20,21,22,23,24')
+	  					oReport:Section(5):Cell("VAL01"):SetPicture ("@!")
+					Elseif Substr(cMovimento,1,2) == "01"
+						oReport:Section(5):Cell("VAL01"):SetPicture("@E 99,999,999,999.99")
+	   					nValor1	:= aMes[nI][2][aDescr3[nX,2]][2]
+						nTotCum := aMes[nI][2][aDescr3[nX,2]][2]
+		   	        Elseif Substr(cMovimento,1,2) == "10"
+			   	        nValor1	:=nTotCum
+					Elseif cMovimento == "ISENCOES E EXCLUSOES"
+						oReport:Section(5):Cell("VAL01"):Disable()
+						oReport:SkipLine()
+					Elseif Substr(cMovimento,1,2) =="11"
+						oReport:Section(5):Cell("VAL01"):Enable()
+						nValor1	:=aMes[nI][2][aDescr3[nX,2]][2]
+						oReport:SkipLine()
+					Elseif Substr(cMovimento,1,2) $('11,12,13,14,18')
+						oReport:Section(5):Cell("VAL01"):SetPicture("@E 99,999,999,999.99")
+						oReport:Section(5):Cell("VAL01"):Enable()
+						nValor1	:=aMes[nI][2][aDescr3[nX,2]][2]
+					Elseif Substr(cMovimento,1,2) =="25"             
+						oReport:Section(5):Cell("VAL01"):SetPicture("@E 99,999,999,999.99")
+						cMovimento := IIF(nY==1,STR0113,STR0125)
+						nValor1	:=nTotVCum
+					Elseif Substr(cMovimento,1,2) =="26"
+						oReport:Section(5):Cell("VAL01"):SetPicture ("@!")
+						cMovimento := IIF(nY==1,STR0114,STR0126)
+					Elseif Substr(cMovimento,1,2) =="27"
+						oReport:Section(5):Cell("VAL01"):SetPicture ("@!")
+						cMovimento := IIF(nY==1,STR0115,STR0127)
+						oReport:SkipLine()
+					Elseif Substr(cMovimento,1,2) =="28"
+						oReport:Section(5):Cell("VAL01"):SetPicture ("@!")
+						cMovimento := IIF(nY==1,STR0116,STR0128)
+					Elseif Substr(cMovimento,1,2) =="29"
+						oReport:Section(5):Cell("VAL01"):SetPicture ("@!")
+						cMovimento := IIF(nY==1,STR0117,STR0129)
+						oReport:SkipLine()
+					Elseif Substr(cMovimento,1,2) =="30"
+						oReport:Section(5):Cell("VAL01"):SetPicture ("@!")
+						cMovimento := IIF(nY==1,STR0118,STR0130)
+					Elseif Substr(cMovimento,1,2)=="31"
+						If (nY==1)
+				  			oReport:Section(5):Cell("VAL01"):SetPicture ("@!")
+			  			Else                                           
+					  		oReport:Section(5):Cell("MOVIMENTO"):Disable()
+			   				oReport:Section(5):Cell("VAL01"):Disable()
+						Endif
+							oReport:SkipLine()
+					Elseif Substr(cMovimento,1,2)=="32"
+						If (nY==1)
+							oReport:Section(5):Cell("MOVIMENTO"):Enable()
+	   						oReport:Section(5):Cell("VAL01"):Enable()
+			  				oReport:Section(5):Cell("VAL01"):SetPicture ("@!")
+				  		Else
+					  		oReport:Section(5):Cell("MOVIMENTO"):Disable()
+			   				oReport:Section(5):Cell("VAL01"):Disable()
+	       	    	    Endif 
+		 			Elseif Alltrim(cMovimento) == Alltrim("INFORMACOES COMPLEMENTARES")
+						oReport:Section(5):Cell("MOVIMENTO"):Enable()
+						oReport:Section(5):Cell("VAL01"):Disable()
+						oReport:SkipLine()
+		  			Elseif Substr(cMovimento,1,2)=="33"
+						oReport:Section(5):Cell("MOVIMENTO"):Enable()
+						oReport:Section(5):Cell("VAL01"):Enable()
+	  					oReport:Section(5):Cell("VAL01"):SetPicture ("@!")
+						cMovimento := IIF(nY==1,STR0121,STR0131)
+						oReport:SkipLine()
+					Elseif Substr(cMovimento,1,2)=="34"
+			  			oReport:Section(5):Cell("VAL01"):SetPicture ("@!")
+						cMovimento := IIF(nY==1,STR0122,STR0132)
+		   	        Else
+			   			oReport:Section(5):Cell("VAL01"):SetPicture("@E 99,999,999,999.99")
+	   					nValor1	:= aMes[nI][2][aDescr3[nX,2]][2]
+						nTotCum	+= aMes[nI][2][aDescr3[nX,2]][2]
+				    Endif                 
+					oReport:Section(5):PrintLine()
+				Next
+				oReport:Section(5):Finish()
+			Next
+			oReport:SkipLine()
+			oReport:ThinLine()
+			oReport:IncMeter()
+		Endif
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Impressao Ficha 09	      ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If mv_par07 == 2 // Aliquotas Diferenciadas
+			dbSelectArea("TMP")
+							
+			cMes :=	StrZero(aMes[nI,1],2)
+			
+			If dbSeek(cMes)
+				oReport:Section(1):Cell("PERIODO"):SetBlock({|| R951RetPer(dDtIni,dDtFin)[1]+DtoC(dDtIni)+" a "+DtoC(dDtFin)})
+				oReport:Section(1):Cell("MES"):SetBlock({|| Alltrim(MesExtenso(aMes[nI,1]))})
+				oReport:EndPage()
+				oReport:SetMeter(1)
+				oReport:Section(1):Init()
+				oReport:Section(1):PrintLine()
+				oReport:Section(1):Finish()	
+		                                         
+				oReport:Section(4):Init()
+				oReport:SkipLine()
+				oReport:PrintText(STR0207)
+				oReport:SkipLine()
+	
+				nPis := TMP->PIS
+				cCod := TMP->CODIGO
+						
+				oReport:SkipLine()
+				cProduto:= Alltrim(cCod) + " - " + Alltrim(Posicione("SB1",1,xFilial("SB1")+cCod,"B1_DESC"))
+				oReport:PrintText("Produto: "+cProduto)
+					
+				While !Eof() .And. TMP->MES == cMes //.And. TMP->PIS == nPis
+		
+	             	If TMP->CODIGO <> cCod
+						oReport:Section(1):Cell("PERIODO"):SetBlock({|| R951RetPer(dDtIni,dDtFin)[1]+DtoC(dDtIni)+" a "+DtoC(dDtFin)})
+						oReport:Section(1):Cell("MES"):SetBlock({|| Alltrim(MesExtenso(aMes[nI,1]))})
+						oReport:EndPage()
+						oReport:SetMeter(1)
+						oReport:Section(1):Init()
+						oReport:Section(1):PrintLine()
+						oReport:Section(1):Finish()	
+								                             
+						oReport:SkipLine()
+						oReport:PrintText(STR0207)
+						oReport:SkipLine()
+	        	
+						nPis := TMP->PIS
+						cCod := TMP->CODIGO
+						cProduto:= Alltrim(cCod) + " - " + Alltrim(Posicione("SB1",1,xFilial("SB1")+cCod,"B1_DESC"))
+							
+						oReport:SkipLine()
+						oReport:PrintText("Produto: "+cProduto)
+						oReport:SkipLine()
+						oReport:Section(4):PrintHeader()
+	   	    		Endif
+						
+					Do Case
+						Case TMP->ITEM == "01"	;	nItem1 := TMP->VALOR
+						Case TMP->ITEM == "02"	;	nItem2 := TMP->VALOR
+						Case TMP->ITEM == "03"	;	nItem3 := TMP->VALOR
+					EndCase
+					                       
+					For nX := 1 to Len(aDescr2)
+	
+						cMovimento 	:= aDescr2[nX,1]
+	   		        	oReport:Section(4):Cell("MOVIMENTO"):SetBlock({|| cMovimento })
+						oReport:Section(4):Cell("VAL01"):SetBlock({||nValor1})
+						cMes :=	StrZero(aMes[nI,1],2)
+		            	
+						If Substr(cMovimento,1,2) =="01"
+							nValor1	:= nItem1
+						Elseif Substr(cMovimento,1,2) == "02"
+					  		nValor1	:= nItem2
+						Elseif Substr(cMovimento,1,2) == "03"
+							nValor1	:= nItem3
+						Elseif Substr(cMovimento,1,2) == "04"
+							nValor1	:= (nItem1-(nItem2+nItem3))
+						Else
+							nValor1	:= (((nItem1-(nItem2+nItem3))*nPis)/100)
+						Endif
+						oReport:Section(4):PrintLine()
+					Next
+					nPis 	:= TMP->PIS
+					cCod 	:= TMP->CODIGO
+					nItem1	:= 0
+					nItem2	:= 0
+					nItem3	:= 0
+				dbSelectArea("TMP")
+				dbSkip()
+				Enddo
+			Endif
+			oReport:Section(4):Finish()
+		Endif
+		oReport:SkipLine()
+		oReport:ThinLine() 
+		oReport:IncMeter()
+	Next
+Endif
+
+RestArea(aArea)
+	
+dbSelectArea("TMP")
+dbCloseArea()
+
+Return Nil
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ MATR951R3³ Autor ³Andressa Ataides       ³ Data ³14/07/05  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Relatorio auxiliar para preenchimento da DACON              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±ºUso       ³ Sigafis                                                    º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Function MATR951R3()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Define Variaveis                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local aCFOPs	:= {}
+Local lRet		:= .T.
+Local aArea		:= GetArea()
+Local Titulo    := OemToAnsi(STR0003)  //"DACON - Demonstrativo de Apuracao de Contribuicoes Sociais"
+Local cDesc1    := OemToAnsi(STR0004)  //"Este relatorio emite as informacoes necessarias "
+Local cDesc2    := OemToAnsi(STR0097)  //"para auxiliar o preenchimento da DACON"
+Local cDesc3    := ""
+Local lDic      := .F. 					// Habilita/Desabilita Dicionario
+Local lComp     := .F. 					// Habilita/Desabilita o Formato Comprimido/Expandido
+Local lFiltro   := .F. 					// Habilita/Desabilita o Filtro
+Local wnrel     := "MATR951"  			// Nome do Arquivo utilizado no Spool
+Local nomeprog  := "MATR951"  			// nome do programa
+Local cString	:= "SF3"
+Local nPagina	:= 1
+Local aWizard	:=	{}
+Local cRegime   := ""
+//
+Private Tamanho := "M"					// P/M/G
+Private Limite  := 132 					// 80/132/220
+Private cPerg   := "MTR951"				// Pergunta do Relatorio
+Private aReturn := {STR0007,1,STR0008,1,2,1,"",1}	//"Zebrado"###"Administracao"
+Private lEnd    := .F.					// Controle de cancelamento do relatorio
+Private m_pag   := 1  					// Contador de Paginas
+Private nLastKey:= 0  					// Controla o cancelamento da SetPrint e SetDefault
+
+AjustaSx1()
+If Pergunte("MTR951",.T.)
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Validacao/tratamento do periodo informado              ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If Empty(mv_par01) .Or. Empty(mv_par02) .Or. (Year(mv_par01)<>Year(mv_par02)) .Or. R951RetPer(mv_par01,mv_par02)[2]
+		xMagHelpFis(OemToAnsi(STR0209),OemToAnsi(STR0210),OemToAnsi(STR0211))
+		Return Nil
+	Else
+		If Day(mv_par01) <> 1
+			mv_par01 := CtoD("01/"+StrZero(Month(mv_par01),2)+"/"+StrZero(Year(mv_par01),4))
+		Endif
+		If Day(mv_par02) <> Day(LastDay(mv_par02))
+			mv_par02 := CtoD(StrZero(Day(LastDay(mv_par02)),2)+"/"+StrZero(Month(mv_par02),2)+"/"+StrZero(Year(mv_par02),4))
+		Endif
+	Endif        
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Envia para a SetPrinter                                                 ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If lRet
+		wnrel:=SetPrint(cString,wnrel,"",@titulo,cDesc1,cDesc2,cDesc3,lDic,,lComp,Tamanho,lFiltro,.F.)
+		If ( nLastKey==27 )
+			dbSelectArea(cString)
+			dbSetOrder(1)
+			dbClearFilter()
+			Return
+		Endif
+		SetDefault(aReturn,cString)
+		If ( nLastKey==27 )
+			dbSelectArea(cString)
+			dbSetOrder(1)
+			dbClearFilter()
+			Return
+		Endif
+		
+		RptStatus({|lEnd| ImpDacon(lEnd,wnrel,cString,Tamanho,nPagina,cRegime,Titulo,nomeprog)},Titulo)
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Restaura Ambiente                                            ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		dbSelectArea(cString)
+		dbClearFilter()
+		Set Device To Screen
+		Set Printer To
+		
+		If ( aReturn[5] = 1 )
+			dbCommitAll()
+			OurSpool(wnrel)
+		Endif
+		MS_FLUSH()
+
+		dbSelectArea("TMP")
+		dbCloseArea()
+	EndIf
+Endif
+
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ Wiz_NCum   ºAutor  ³Andressa Ataides    º Data ³ 14/07/05         º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Monta a wizard com as perguntas necessarias- REGIME NAO CUMULATIVO º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³Matr951                                                            º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function Wiz_NCum()
+	// ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	// ³Declaracao das variaveis³
+	// ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	Local aTxtPre 		:= {}
+	Local aPaineis 		:= {}
+	Local cTitObj1		:= ""                
+	Local nPos			:= 0	
+	Local nCampo		:= 240
+	Local lRet			:=	.F.
+	// ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	// ³Monta wizard com as perguntas necessarias³
+	// ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	aAdd(aTxtPre,STR0003) //"DACON - Demonstrativo de Apuracao de Contribuicoes Sociais"
+	aAdd(aTxtPre,STR0001) //"Atencao"
+	aAdd(aTxtPre,STR0002) //"Preencha corretamente as informacoes solicitadas."
+	aAdd(aTxtPre,STR0004+STR0005)	//"Este relatorio emite as informacoes necessarias"
+									//"para auxiliar o preenchimento da DACON - Regime Nao-Cumulativo"
+									
+	// ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	// ³Painel 1 Apuracao Pis/Pasep e Cofis - Nao Cumulativo ³
+	// ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	aAdd(aPaineis,{})
+	nPos :=	Len(aPaineis)
+	aAdd(aPaineis[nPos],STR0009) //"Assistente de parametrizacao"
+	aAdd(aPaineis[nPos],STR0010) //"Apuracao dos Creditos para o Pis/Pasep(Aliq.1,65%) e Cofins(Aliq.7,60%) - Nao Cumulativo"
+	aAdd(aPaineis[nPos],{})
+
+	cTitObj1 :=	STR0011 //"CREDITOS A DESCONTAR"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	cTitObj1 :=	STR0012 //"01.Bens para Revenda"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0013 //"02.Bens Utilizados como Insumos"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0014 //"03.Servicos Utilizados como Insumos"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0015 //"04.Despesas de Energia Eletrica"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+ 	cTitObj1 :=	STR0016 //"05.Desp.Alug. Predios Locados de PJ"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0017 //"06.Desp.Alug. Maq/Equip. Locados de PJ"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0018 //"07.Desp.Armaz. Merc./Frete na Oper. Venda"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0019 //"08.Desp. Contraprest. Arrend. Mercantil"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0020 //"09.Encargos Deprec. Bens Ativo Imob."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0087}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0021 //"10.Base Calc.Cred. Descontar Ref. Ativo Imob."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0087}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0022 //"11.Encargos Amort. Ed.Benfeitor. em Imoveis"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0023 //"12.Devolucao de Vendas Sujeitas a Aliq."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0087}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0024 //"13.Outras Oper. com Direito Cred."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0027 //"APURACAO DE OUTROS CREDITOS"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0028 //"16.Cred. Calc. a Aliq. Diferenciadas"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0029 //"17.Cred. Calc. por Un. de Produto" 
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0030 //"18.Cred. Presumido-Ativ. Agroindust."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0031 //"19.Cred. Presumido Rel. Est.Abertura"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0032 //"20.Cred. Presumido-Ativ.Imobiliaria"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0033 //"21.Demais Cred. da Ativ.Imobiliaria"  
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0034 //"22.Creditos a Descontar Importacao"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0035 //"23.Cred.Descontar Import.-Aliq.Dif."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0036 //"24.Cred.Descont. Import.-Aliq.Uni.Prod."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0037 //"25.Outros Creditos a Descontar" 
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0040 //"AJUSTES"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0041 //"28.Cred. Ref.Contr. Diferida Meses Ant." 
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0042 //"29.(-)Cred.Contribuicao Diferida no Mes"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0043 //"30.Ajustes Positivos de Creditos"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0044 //"31.(-)Ajustes Negativos de Creditos"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	// ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	// ³Painel 2 Calculo Pis/Pasep e Cofins - Nao Cumulativo ³
+	// ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	aAdd(aPaineis,{})
+	nPos :=	Len(aPaineis)
+	aAdd(aPaineis[nPos],STR0009) //"Assistente de parametrizacao"
+	aAdd(aPaineis[nPos],STR0046) //"Calculo da Contribuicao para o Pis/Pasep e Cofins"
+	aAdd(aPaineis[nPos],{})
+
+	cTitObj1 :=	STR0047 //"DEMONSTRACAO NA BASE DE CALCULO"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	cTitObj1 :=	STR0048 //"01.Receita da Exportacao de Bens e Servicos"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0049 //"02.Receita Venda Mer.Int.Prod.Fabric.Propria"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0050 //"03.Receita da Revenda de Mercadorias"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0051 //"04.Receita da Prestacao de Servicos"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0087}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0052 //"05.Receita das Unidades Imobiliarias Vendidas"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0053 //"06.Receita da Atividade Rural"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0054 //"07.Receitas Financeiras"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0087}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0055 //"08.Receitas de Juros sobre o Capital Proprio"   
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0056 //"09.Outras Receitas"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0087}})	
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0058 //"ISENCOES E EXCLUSOES"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0059 //"11.(-)Receitas de Expor. com Direito a Cred."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0060 //"12.(-)Receitas de Expor. sem Direito a Cred."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0061 //"13.(-)Receit. Isent.com Susp./Sujeitas Aliq.Zero"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0062 //"14.(-)Vendas Canc. e Desc.Incondic."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0063 //"15.(-)Devol. Vendas-Reg. Cumulativo" 
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0064 //"16.(-)IPI e ICMS/Substituto Tributario"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0065 //"17.(-)Rev. Prov.Recup.Cred.Baix.como Perda"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0066 //"18.(-)Result. Pos.Partic. Societ. e em SCP"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0067 //"19.(-)Vendas de Bens do Ativo Permanente"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0068 //"20.(-)Vendas de Prod. Sujeitos a Subst."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0069 //"21.(-)Vendas Prod. Sujeitos Aliq. Dif."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0070 //"22.(-)Vendas Sujeitas a Aliq.Un. Produto" 
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0071 //"23.(-)Receitas Vendas Auf. Ambito do MAE"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0072 //"24.(-)Exclus. Permitidas Soc. Cooper." 
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0073 //"25.(-)Outras Exclusoes"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0075 //"26.BASE DE CALCULO PIS/PASEP E COFINS"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0087}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+   	cTitObj1 :=	STR0082 //"INFORMACOES COMPLEMENTARES"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	"34."+STR0083 //"PIS e Cofins a Pagar Ret.Cooper."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	"35."+STR0084 //"Dev.Vendas Merc. Sujeitas Subst."  
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //                                                    
+	cTitObj1 :=	STR0089 //"VALORES PARA PROPORCAO - MERCADO INTERNO/MERCADO EXTERNO"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //  
+	cTitObj1 :=	STR0090 //"Faturamento Mercado Interno"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //  
+	cTitObj1 :=	STR0091 //"Faturamento Mercado Externo"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	// Ú Ficha 09 - PIS/PASEP ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	// ³Painel Calculo Pis/Pasep - Aliquotas Diferenciadas ³
+	// ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If mv_par07 == 2	//Imprime Ficha 09
+		Wizard_AD(@aPaineis,nPos,cTitObj1,nCampo)
+	Endif
+    //
+	lRet :=	xMagWizard(aTxtPre,aPaineis,"MTR951")
+Return(lRet)
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ Wiz_Cum    ºAutor  ³Andressa Ataides    º Data ³14/07/05        º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Monta a wizard com as perguntas necessarias - REGIME CUMULATIVO  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³Matr951                                                          º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function Wiz_Cum()
+	Local	lRet	:=	.F.
+	// ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	// ³Declaracao das variaveis³
+	// ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	Local aTxtPre 		:= {}
+	Local aPaineis 		:= {}
+	Local cTitObj1		:= ""                
+	Local nPos			:= 0
+	Local nCampo		:= 240
+	// ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	// ³Monta wizard com as perguntas necessarias³
+	// ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	aAdd(aTxtPre,STR0003) //"DACON - Demonstrativo de Apuracao de Contribuicoes Sociais"
+	aAdd(aTxtPre,STR0001) //"Atencao"
+	aAdd(aTxtPre,STR0002) //"Preencha corretamente as informacoes solicitadas."
+	aAdd(aTxtPre,STR0004+STR0006)	//"Este relatorio emite as informacoes necessarias"
+									//"para auxiliar o preenchimento da DACON - Regime Cumulativo"
+									
+	// ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	// ³Painel 1 Calculo Pis/Pasep e Cofis - Cumulativo      ³
+	// ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	aAdd(aPaineis,{})
+	nPos :=	Len(aPaineis)
+	aAdd(aPaineis[nPos],STR0009) //"Assistente de parametrizacao"
+	aAdd(aPaineis[nPos],STR0046) //"Calculo da Contribuicao para o Pis/Pasep e Cofins"
+	aAdd(aPaineis[nPos],{})
+
+	cTitObj1 :=	STR0047 //"DEMONSTRACAO NA BASE DE CALCULO"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	cTitObj1 :=	STR0048 //"01.Receita da Exportacao de Bens e Servicos"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0049 //"02.Receita Venda Mer.Int.Prod.Fabric.Propria"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0050 //"03.Receita da Revenda de Mercadorias"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0051 //"04.Receita da Prestacao de Servicos"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0087}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0052 //"05.Receita das Unidades Imobiliarias Vendidas"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0053 //"06.Receita da Atividade Rural"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0025 //"07.Rec. de Var. Cambiais-Ope.Liquid.no Mes"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0055 //"08.Receitas de Juros sobre o Capital Proprio"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0056 //"09.Outras Receitas"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0058 //"ISENCOES E EXCLUSOES"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0026 //"11.(-)Receitas de Exportacao"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0087}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0038 //"12.(-)Rec. Isentas com Susp./Sujeitas Aliq.Zero"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0087}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0039 //"13.(-)Vendas Canceladas, Dev.e Desc. Incond."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0045 //"14.(-)IPI e ICMS/Substituto Tributario"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0057 //"15.(-)Rec. Variacoes Cambiais Auf. no Mes"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0074 //"16.(-)Rev. Prov.Recup.Cred.Baix.como Perda"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0076 //"17.(-)Result. Posit. em Partic. Societ. e em SCP"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0077 //"18.(-)Vendas de Bens do Ativo Permanente"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0078 //"19.(-)Vendas de Produtos Sujeitos a Subst."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0079 //"20.(-)Vendas de Produtos Sujeitos a Aliq. Dif."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0080 //"21.(-)Vendas Sujeitas a Aliq. por Un. Produto"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0081 //"22.(-)Receitas Auferidas no Ambito do MAE"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0085 //"23.(-)Exclus. Permitidas Soc. Cooper."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	STR0086 //"24.(-)Outras Exclusoes"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+   	cTitObj1 :=	STR0082 //"INFORMACOES COMPLEMENTARES"
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	"33."+STR0083 //"PIS e Cofins a Pagar Ret.Cooper."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+    //
+	cTitObj1 :=	"34."+STR0084 //"Dev.Vendas Merc. Sujeitas Subst."
+	aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+	aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T., STR0088}})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+	//
+	// Ú Ficha 09 - PIS/PASEP ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	// ³Painel Calculo Pis/Pasep - Aliquotas Diferenciadas ³
+	// ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If mv_par07 == 2	//Imprime Ficha 09
+		Wizard_AD(@aPaineis,nPos,cTitObj1,nCampo)
+	Endif
+    //  
+	lRet :=	xMagWizard(aTxtPre,aPaineis,"MTR951C")
+	
+Return(lRet)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Program   ³Wizard_AD ³ Autor ³Sergio S. Fuzinaka     ³ Data ³   12.08.2005   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³Wizard da Aliquota Diferenciada - PIS/PASEP - Ficha 09            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³MATR951                                                           ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/                                                                                
+Static Function Wizard_AD(aPaineis,nPos,cTitObj1,nCampo)
+
+// Ú Ficha 09 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// ³Painel do Calculo Pis/Pasep - Aliquotas Diferenciadas ³
+// ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+aAdd(aPaineis,{})
+nPos :=	Len(aPaineis)
+aAdd(aPaineis[nPos],STR0009) //"Assistente de parametrizacao"
+aAdd(aPaineis[nPos],STR0202) //"Calculo da Contribuicao para o Pis/Pasep - Aliquotas Diferenciadas"
+aAdd(aPaineis[nPos],{})
+
+cTitObj1 :=	STR0203 //"BASE DE CALCULO - PIS/PASEP E COFINS"
+aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+
+cTitObj1 :=	STR0204 //"01.Receitas de Vendas"
+aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,})
+aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+
+cTitObj1 :=	STR0205 //"02.(-)Vendas Canc. e Desc.Incondic."
+aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo})
+aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+
+cTitObj1 :=	STR0206 //	"03.(-)Outras Exclusoes"
+aAdd(aPaineis[nPos][3],{1,cTitObj1,,,,,,}) 
+aAdd(aPaineis[nPos][3],{2,,Replicate("X",nCampo),1,,,,nCampo,{.T.,STR0087}})	
+aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+aAdd(aPaineis[nPos][3],{0,"",,,,,,})
+
+Return Nil
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Program   ³ProcDacon ³ Autor ³Andressa Ataides       ³ Data ³30/06/06        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Processamento dos Dados para preenchimento do DACON               ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±ºUso       ³ MATR951                                                          º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/                                                                                
+                
+Static Function ProcDacon(nVDeprAt,nTotVlMI,nTotVlEX,nTotVRec,nTotVCum,nBsCrdAqI,nBsCrdAqE,nPercInt,nPercExt,nRecFinC,nRecFinN,nOutRecN,nOutRecC,nPosMes,lRet)
+
+Local dDtIni   := mv_par01
+Local dDtFin   := mv_par02
+Local dDtIDep  := CTOD("  /  /  ")
+Local dDtFDep  := CTOD("  /  /  ")
+Local dDtFAq   := CTOD("  /  /  ")
+Local dDtIAq   := CTOD("  /  /  ")
+Local lQuery   := .F.
+Local lProcessa := .F.
+Local cCfop01 := cCfop02 := cCfop03 := cCfop04 := ""
+Local cCfop07 := cCfop08 := cCfop09 := cCfop10 := cCfop11 := cCfop12 := ""
+Local cCfop13 := cCfop14 := cCfop15 := cCfop16 := cCfop17 := cCfop18 := ""
+Local cCfop19 := cCfop20 := cCfop21 := cCfop22 := cCfop23 := cCfop24 := ""
+Local cCfop25 := ""
+Local cChaveF3:= ""
+Local cCFOP   := ""
+Local nX       := 0
+Local nX1      := 0
+Local nBaseCred	:= 0   
+Local nItemValCont := 0
+Local i			:= 0
+Local aAtivo    := {}
+Local aAtAqu    := {}
+Local cCondicao := ""
+Local cAliasSF3 := "SF3"
+Local cFilDe    := mv_par04
+Local cFilAte   := mv_par05
+Local nRegEmp 	:= SM0->(RecNo())
+Local cMVCALC   :=	"" //GetNewPar("MV_CALC951","") // Parametro de Calculo do Pis/Cofins
+Local cMVCALCAD	:=	"" //GetNewPar("MV_CALCAD","")  // Parametro de Calculo do Pis/Cofins - Aliquota Diferenciada
+Local cMVAPUR   :=	"" //GetNewPar("MV_APUR951","") // Parametro de Apuracao do Pis/Cofins
+Local nTpReg    :=  SF4->(FieldPos("F4_TPREG"))
+Local lAliqDif	:= .F.	// PIS/PASEP e COFINS - Aliquota Diferenciada
+Local nPPis		:= 0	//Percentual de PIS/PASEP
+Local nPCofins	:= 0	//Percentual de COFINS
+Local cDebSTCOF := GetNewPar("MV_DBSTCOF","1")
+Local cDebSTPIS := GetNewPar("MV_DBSTPIS","1")
+Local cMVRecFin := GetNewPar("MV_RECFIN","") // Receitas Financeiras
+Local cMVOutRec := GetNewPar("MV_OUTREC","") // Outras Receitas
+//
+Local nX2         := 0
+Local nBasPisPas  := 0
+Local nPsVlPisSa  := 0
+Local nPsBsPisSa  := 0 
+Local nPsBsCofSa  := 0  
+Local nBasPisDev  := 0
+Local nBasCofDev  := 0
+Local nBasPisCof  := 0
+Local nValIpiDev  := 0
+Local nValIcmDev  := 0
+Local nPag		  := 0	
+Local cChaveAnt   := ""
+Local cChaveSe1   := "" 
+Local lValido     := .F.
+Local lConsCmp    := .F.
+Local lApurac     := (SF4->(FieldPos("F4_PISFISC")) > 0)
+Local cQuery	  := ""
+Local aStruSE5    := {}
+Local cAliasSE5	  := "SE5"
+Local cAliasSE1	  := "SE1"
+Local cAliasSD2   := "SD2"
+Local cAliasSD1   := "SD1"
+Local cAliasSF2	  := "SF2"
+Local cAliasSF4	  := "SF4"
+Local cAliasSB1	  := "SB1"
+Local cAliasSA1	  := "SA1"
+Local cIndex      := ""
+Local cFiltro     := ""
+Local cFatura     := ""
+Local cCliente    := ""
+Local cTpFatura   := ""
+Local nTotAbat    := 0
+Local cPrefAnt    := "" 
+Local cNumAnt     := "" 
+Local cParcAnt    := "" 
+Local cTpAnt      := "" 
+Local cClAnt      := "" 
+Local cLjAnt      := "" 
+Local aRelImp2    := MaFisRelImp("MT100",{ "SD2" })
+Local lRegCaixa   := GetNewPar("MV_RGCAIXA",.F.) // Regime de Caixa
+Local nTamTit	  := TamSX3("E1_PREFIXO")[1]+TamSX3("E1_NUM")[1]+TamSX3("E1_PARCELA")[1]+1
+Local nDevol 	  :=0
+Local nI	:= 0
+Local nY		:= 0
+Local aMes		:={}
+Local aWizard	:={}
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Processa a Wizard com as configuracoes para o relatorio³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If mv_par06 == 1
+	cRegime	:=	"C"
+	lRet	:=	Wiz_Cum()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Le a wizard com as configuracoes dos CFOPs³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	xMagLeWiz("MTR951C",@aWizard,.T.)
+Else
+	cRegime	:=	"NC"
+	lRet	:=	Wiz_NCum()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Le a wizard com as configuracoes dos CFOPs³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	xMagLeWiz("MTR951",@aWizard,.T.)
+Endif
+                                                 
+If Empty(cFilDe) .And. Empty(cFilAte)
+	cFilDe := cFilAnt
+	cFilAte:= cFilAnt
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Gera arquivo temporario para impressao das fichas 9 e 15     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+GeraTmp()
+                
+If lRet
+
+	If mv_par06 ==2 // Nao cumulativo
+		cCfop01 := Alltrim(aWizard[01][01]) // Bens para Revenda
+		cCfop02 := Alltrim(aWizard[01][02]) // Bens Utilizados como Insumos
+		cCfop03 := Alltrim(aWizard[01][03]) // Servicos Utilizados como Insumos
+		cCfop14 := Alltrim(aWizard[01][04]) // Despesas de Energia Eletrica
+		cCfop15 := Alltrim(aWizard[01][14]) // Cred. Calc. a Aliq. Diferenciadas
+		cCfop04 := Alltrim(aWizard[01][16]) //	Credito Presumido - Agroindustria
+			
+		cCfop06 := Alltrim(aWizard[02][01]) // Receita da Exportacao de Bens e Servicos
+		cCfop07 := Alltrim(aWizard[02][02]) // Receita da Venda no Mercado Interno de Produtos de Fabricacao Propria
+		cCfop08 := Alltrim(aWizard[02][03]) // Receita da Revenda de Mercadorias
+		cCfop09 := Alltrim(aWizard[02][06]) // Receita da Atividade Rural
+		cCfop10 := Alltrim(aWizard[02][10]) // Receita de Exportacao com Dir. Cred. PIS/Pasep e Cofins
+		cCfop25 := Alltrim(aWizard[02][11]) // Receitas de Exportacao sem Direito a Credito de Pis e Cofins
+		cCfop22 := Alltrim(aWizard[02][13]) // Vendas Canceladas e Descontos Incondicionais
+		cCfop12 := Alltrim(aWizard[02][15]) // IPI e ICMS/Substituto Tributario
+		cCfop13 := Alltrim(aWizard[02][18]) // Vendas de Bens do Ativo Imobilizado/Permanente
+		
+		cCfop17 := Alltrim(aWizard[02][28]) // Faturamento Mercado Interno
+		cCfop16 := Alltrim(aWizard[02][29]) // Faturamento Mercado Externo
+		If mv_par07 == 2 //Imprime Ficha 09
+			cCfop18 := Alltrim(aWizard[03][01]) // Receitas de Vendas
+			cCfop22 := Alltrim(aWizard[03][02]) // Vendas Canceladas e Descontos Incondicionais
+		Endif
+		
+		cCfop19 := Alltrim(aWizard[01][05]) // Desp. De alugueis de Predios locados PJ
+		cCfop20 := Alltrim(aWizard[01][06]) // Desp. De alugueis de Maquinas e Equip. locados PJ
+	    cCfop23 := Alltrim(aWizard[01][07]) // Desp.Armaz. Merc./Frete na Oper. Venda
+		cCfop21 := Alltrim(aWizard[01][13]) // Outras Operacoes com Direito a Credito
+		cCfop24 := Alltrim(aWizard[01][20]) // Creditos a Descontar Importacao
+	Else
+		cCfop06 := Alltrim(aWizard[01][01]) //
+		cCfop07 := Alltrim(aWizard[01][02]) //
+		cCfop08 := Alltrim(aWizard[01][03]) //
+		cCfop09 := Alltrim(aWizard[01][06]) // Receita da Atividade Rural
+		cCfop11 := Alltrim(aWizard[01][09]) // Outras Receitas
+		cCfop22 := Alltrim(aWizard[01][12]) // Vendas Canceladas e Descontos Incondicionais
+		cCfop12 := Alltrim(aWizard[01][13]) // IPI e ICMS/Substituto Tributario
+		cCfop13 := Alltrim(aWizard[01][17]) // Vendas de Bens do Ativo Imobilizado/Permanente
+		If mv_par07 == 2 //Imprime Ficha 09
+			cCfop18 := Alltrim(aWizard[02][01]) // Receitas de Vendas
+			cCfop22 := Alltrim(aWizard[02][02]) // Vendas Canceladas e Descontos Incondicionais
+		Endif	
+	Endif
+	dbSelectArea("SM0")
+	dbSeek(cEmpAnt+cFilDe,.T.)
+	
+	Do While !Eof() .and. SM0->M0_CODIGO == cEmpAnt .and. SM0->M0_CODFIL <= cFilAte
+
+	DbSelectArea("SX6")
+	SX6->(DbSetOrder(1))
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³MV_CALC951 - Parametro de Calculo do Pis/Cofins	³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	SX6->(DbSeek(xFilial("SX6")+"MV_CALC95"))
+	Do While !SX6->(Eof()) .And. xFilial("SX6")==SX6->X6_FIL .And. "MV_CALC95"$SX6->X6_VAR
+		cMVCALC	+=	AllTrim (SX6->X6_CONTEUD)
+		SX6->(DbSkip())
+	EndDo
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³MV_APUR951 - Parametro de Apuracao do Pis/Cofins	³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	SX6->(DbSeek(xFilial("SX6")+"MV_APUR95"))
+	Do While !SX6->(Eof()) .And. xFilial("SX6")==SX6->X6_FIL .And. "MV_APUR95"$SX6->X6_VAR
+		cMVAPUR	+=	AllTrim (SX6->X6_CONTEUD)
+		SX6->(DbSkip())
+	EndDo
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³MV_CALCAD - Parametro de Calculo do Pis/Cofins - Aliquota Diferenciada	³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	SX6->(DbSeek(xFilial("SX6")+"MV_CALCAD"))
+	Do While !SX6->(Eof()) .And. xFilial("SX6")==SX6->X6_FIL .And. "MV_CALCAD"$SX6->X6_VAR
+		cMVCALCAD	+=	AllTrim (SX6->X6_CONTEUD)
+		SX6->(DbSkip())
+	EndDo
+
+	If !lRegCaixa // se nao for Regime de caixa, pode ser de Competencia e regime Cumulativo
+	                                   
+		cFilAnt	:=	SM0->M0_CODFIL
+		
+		dbSelectArea("SF3")
+		dbSetOrder(1)
+		
+		If !(FindFunction("TRepInUse") .And. TRepInUse())
+			SetRegua(SF3->(LastRec()))
+	    Endif
+		
+		#IFDEF TOP
+		    If TcSrvType()<>"AS/400"
+			    lQuery := .T.
+				cAliasSF3 := "QRYSF3"
+				aStruSF3  := SF3->(dbStruct())
+				cQuery := "SELECT * "
+				cQuery += "FROM "+RetSqlName("SF3")+" "
+				cQuery += "WHERE F3_FILIAL='"+xFilial("SF3")+"' AND "
+				cQuery += "F3_ENTRADA>='"+Dtos(dDtIni)+"' AND "
+				cQuery += "F3_ENTRADA<='"+Dtos(dDtFin)+"' AND "	
+				cQuery += "D_E_L_E_T_ = ' ' "
+				//
+				//Livro Selecionado
+				If !((Empty (MV_PAR03)) .Or. ("*"$MV_PAR03))
+					cQuery += " AND F3_NRLIVRO='"+MV_PAR03+"' "
+				EndIf
+				//
+				cQuery += "ORDER BY "+SqlOrder(SF3->(IndexKey()))
+			
+				cQuery := ChangeQuery(cQuery)
+				dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQuery),cAliasSF3)
+			
+				For nX := 1 To len(aStruSF3)
+					If aStruSF3[nX][2] <> "C" .And. FieldPos(aStruSF3[nX][1])<>0
+						TcSetField(cAliasSF3,aStruSF3[nX][1],aStruSF3[nX][2],aStruSF3[nX][3],aStruSF3[nX][4])
+					EndIf
+				Next nX
+				dbSelectArea(cAliasSF3)	
+			Else
+		#ENDIF
+			    cIndex    := CriaTrab(NIL,.F.)
+			    cCondicao := 'F3_FILIAL="'+xFilial ("SF3")+'" .And. '
+			   	cCondicao += 'DTOS(F3_ENTRADA)>="'+DTOS(dDtIni)+'".And.DTOS(F3_ENTRADA)<="'+DTOS(dDtFin)+'" '
+				//
+				//Livro Selecionado
+				If !((Empty (MV_PAR03)) .Or. ("*"$MV_PAR03))
+					cCondicao += ' .AND. F3_NRLIVRO=="'+MV_PAR03+'" '
+				EndIf
+				//
+			    IndRegua(cAliasSF3,cIndex,SF3->(IndexKey()),,cCondicao)
+			    nIndex := RetIndex("SF3")
+				#IFNDEF TOP
+					dbSetIndex(cIndex+OrdBagExt())
+				#ENDIF
+				dbSelectArea("SF3")
+			    dbSetOrder(nIndex+1)
+			
+			    dbSelectArea(cAliasSF3)
+			    ProcRegua(LastRec())
+			    dbGoTop()
+		#IFDEF TOP
+			Endif    
+		#ENDIF
+		
+		dbSelectArea(cAliasSF3) 
+		Do While !Eof() 
+		
+			//
+			nPosMes	:=	aScan (aMes, {|aX| aX[1]==Month((cAliasSF3)->F3_ENTRADA)})
+			If nPosMes==0
+				aAdd (aMes, {Month((cAliasSF3)->F3_ENTRADA), {}})
+				nPosMes	:=	aScan(aMes, {|aX| aX[1]==Month((cAliasSF3)->F3_ENTRADA)})
+				For nI := 1 To 25         //Mercado Interno
+					aAdd (aMes[nPosMes][2], {0,0})
+				Next (nI)                   //Exportacao
+			EndIf
+			//
+		   	Do While !Eof() .And. aMes[nPosMes][1] == Month((cAliasSF3)->F3_ENTRADA)
+		   		lAliqDif := .F.
+		   		
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Processa por item cada documento fiscal³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		        If Substr((cAliasSF3)->F3_CFO,1,1) <> Substr(cCFOP,1,1) .And. cCFOP <> ""
+		        	cChaveF3 := ""
+		        Endif
+				If cChaveF3 <> (cAliasSF3)->F3_NFISCAL+(cAliasSF3)->F3_SERIE+(cAliasSF3)->F3_CLIEFOR+(cAliasSF3)->F3_LOJA
+					cChaveF3 := (cAliasSF3)->F3_NFISCAL+(cAliasSF3)->F3_SERIE+(cAliasSF3)->F3_CLIEFOR+(cAliasSF3)->F3_LOJA
+		            cCFOP    := (cAliasSF3)->F3_CFO	
+					If Substr((cAliasSF3)->F3_CFO,1,1) < "5" //Apuracao dos Creditos
+					    dbSelectArea("SD1")
+					    dbSetOrder(1)
+					    If dbSeek(xFilial("SD1")+(cAliasSF3)->F3_NFISCAL+(cAliasSF3)->F3_SERIE+(cAliasSF3)->F3_CLIEFOR+(cAliasSF3)->F3_LOJA)
+					        While !Eof() .And. (cAliasSF3)->F3_NFISCAL+(cAliasSF3)->F3_SERIE+(cAliasSF3)->F3_CLIEFOR+(cAliasSF3)->F3_LOJA ==;
+					            SD1->D1_DOC+SD1->D1_SERIE+SD1->D1_FORNECE+SD1->D1_LOJA
+					            dbSelectArea("SB1")
+					            dbSeek(xFilial("SB1")+SD1->D1_COD)
+								//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+								//³Processa somente TES com direito a credito de PIS e/ou COFINS³
+								//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+								SF4->(dbSetOrder(1))
+								If ! SF4->(dbSeek(xFilial("SF4")+SD1->D1_TES)) .Or. SF4->F4_PISCOF == "4" .Or. AllTrim (SD1->D1_TIPO)$"I"
+							        dbSelectArea("SD1")
+						        	dbSkip()                                     
+						        	Loop
+								Endif
+								//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+								//³O IPI nao deve constar no valor contabil a ser lancado³
+								//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+								nItemValCont := SD1->D1_TOTAL+SD1->D1_ICMSRET+SD1->D1_VALFRE+SD1->D1_SEGURO+SD1->D1_DESPESA+IIf(SF4->F4_AGREG$"I/B",SD1->D1_VALICM,0)-SD1->D1_VALDESC
+	                           	//
+								//Copiado da funcao da MATXFIS - MaFisBSCOF, MaFisBSPIS
+								//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+								//³ Indica o tratamento para retirada do valor do ICMS solidario na base do PIS apurado    ³
+								//³ 1 - Nunca retira                                                                       ³
+								//³ 2 - Retira se houver credito do ICMS ST                                                ³
+								//³ 3 - Retira se nao houver credito do ICMS ST                                            ³
+								//³ 4 - Retira se houver credito do ICMS normal                                            ³
+								//³ 5 - Retira se nao houver credito do ICMS normal                                        ³
+								//³ 6 - Sempre retira                                                                      ³
+								//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+								If (SD1->D1_ICMSRET>0)
+									If (SF4->F4_PISCRED<>"3") .And. (SF4->F4_PISCOF$"23")
+										If (cDebSTCOF=="6") .Or. ;
+											(SF4->F4_CREDST=="1" .And. cDebSTCOF=="2") .Or. ;
+											(SF4->F4_CREDST=="2" .And. cDebSTCOF=="3") .Or. ;
+											(SF4->F4_CREDICM=="S" .And. cDebSTCOF=="4") .Or. ;
+											(SF4->F4_CREDICM=="N" .And. cDebSTCOF=="5")
+											nItemValCont -= SD1->D1_ICMSRET
+										Endif
+									Else
+										If (SF4->F4_PISCRED<>"3") .And. (SF4->F4_PISCOF$"13")
+											If (cDebSTPIS=="6") .Or. ;
+												(SF4->F4_CREDST=="1" .And. cDebSTPIS=="2") .Or. ;
+												(SF4->F4_CREDST=="2" .And. cDebSTPIS=="3") .Or. ;
+												(SF4->F4_CREDICM=="S" .And. cDebSTPIS=="4") .Or. ;
+												(SF4->F4_CREDICM=="N" .And. cDebSTPIS=="5")
+												nItemValCont -= SD1->D1_ICMSRET
+											EndIf
+										Endif
+									EndIf
+								EndIf
+								//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+								//³Verifica as aliquotas de PIS/COFINS diferenciada³
+								//³PIS Padrao: 1.65% - COFINS Padrao: 7.6%         ³
+								//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		            			If SB1->(FieldPos("B1_PPIS")) > 0
+			            			//Cred. Calc. a Aliq. Diferenciadas
+									If SB1->B1_PPIS <> 1.65 .And. SB1->B1_PPIS > 0
+	                                    lProcessa := .F.  // Checa se o CFOP deve ser processado
+	                                    If mv_par06 ==2
+											If (AllTrim(SD1->D1_CF)$cCfop15) .Or. "16-"+AllTrim(SD1->D1_TES)+"-"+AllTrim(SD1->D1_CF)$cMVAPUR
+												lProcessa := .T.
+											Endif
+	    	                                If lProcessa
+												If Substr(SD1->D1_CF,1,1) == "3"
+													aMes[nPosMes][2][1][2]	+=	nItemValCont
+												Else
+													aMes[nPosMes][2][1][1]	+=	nItemValCont
+			                	                Endif
+										        dbSelectArea("SD1")
+								    	    	dbSkip()
+								        		Loop
+									    	Endif   
+									    Endif	
+									Endif
+								Endif      
+								//
+		            			If SB1->(FieldPos("B1_PCOFINS")) > 0
+			            			// Cred. Calc. a Aliq. Diferenciadas
+									If SB1->B1_PCOFINS <> 7.6 .And. SB1->B1_PCOFINS > 0
+	                                    lProcessa := .F.
+	                                    If mv_par06 ==2
+											If (AllTrim(SD1->D1_CF)$cCfop15) .Or. "16-"+AllTrim(SD1->D1_TES)+"-"+AllTrim(SD1->D1_CF)$cMVAPUR
+												lProcessa := .T.
+											Endif
+	    	                                If lProcessa
+												If Substr(SD1->D1_CF,1,1) == "3"
+													aMes[nPosMes][2][1][2]	+=	nItemValCont
+												Else
+													aMes[nPosMes][2][1][1]	+=	nItemValCont
+				                                Endif
+										        dbSelectArea("SD1")
+									        	dbSkip()
+									        	Loop 
+									    	Endif
+								    	Endif
+									Endif
+								Endif
+								//                 
+	                            If mv_par06 ==2
+			            			If ! SD1->D1_TIPO $ "DB"
+			            			// Credito Presumido Agroindustria
+		                                lProcessa := .F.
+		            					If AllTrim(SD1->D1_CF)$cCfop04 .Or. "18-"+AllTrim(SD1->D1_TES)+"-"+AllTrim(SD1->D1_CF)$cMVAPUR
+			                                lProcessa := .T.
+										    dbSelectArea("SA2")
+										    dbSetOrder(1)
+							   				If dbSeek(xFilial("SA2")+SD1->D1_FORNECE+SD1->D1_LOJA) .And. SA2->A2_TIPO == "F"
+									            If Left(SB1->B1_POSIPI,2) $ "02/03/04/08/12/23" .Or.;
+									               Left(SB1->B1_POSIPI,4) $ "0103/0105/0504/0702/0708/0710/0712/0713/0714/1517/1803/1804/1805/2009/2209" .Or.;
+									               (Left(SB1->B1_POSIPI,4) >= "1507" .And. Left(SB1->B1_POSIPI,4) <= "1514") .Or.;
+									               Left(SB1->B1_POSIPI,5) $ "07019/07061/07099/15152/15162/17029" .Or.;
+									               AllTrim(SB1->B1_POSIPI) $ "17011100/17019900/21011110"
+													If lProcessa
+												    	If Substr(SD1->D1_CF,1,1) == "3"
+													   		aMes[nPosMes][2][2][2]	+=	nItemValCont
+														Else
+													    	aMes[nPosMes][2][2][1]	+=	nItemValCont
+														Endif
+													Endif
+									            Endif
+											Endif
+		                                Endif
+						        		//Bens para Revenda
+		                                lProcessa := .F.
+										If (AllTrim(SD1->D1_CF)$cCfop01) .Or. "01-"+AllTrim(SD1->D1_TES)+"-"+AllTrim(SD1->D1_CF)$cMVAPUR
+											lProcessa := .T.
+										Endif
+		                                If lProcessa
+											If Substr(SD1->D1_CF,1,1) == "3"
+											   	aMes[nPosMes][2][3][2]	+=	nItemValCont
+											Else
+											    aMes[nPosMes][2][3][1]	+=	nItemValCont
+											Endif
+									    Endif
+										//Bens Utilizados como Insumos
+		                                lProcessa := .F.
+										If (AllTrim(SD1->D1_CF)$cCfop02) .Or. "02-"+AllTrim(SD1->D1_TES)+"-"+AllTrim(SD1->D1_CF)$cMVAPUR
+											lProcessa := .T.
+										Endif
+		                                If lProcessa
+											If Substr(SD1->D1_CF,1,1) == "3"
+										    	aMes[nPosMes][2][4][2]	+=	nItemValCont
+										    Else
+											    aMes[nPosMes][2][4][1]	+=	nItemValCont
+											Endif
+									    Endif
+										//Servicos Utilizados como Insumos
+		                                lProcessa := .F.
+										If ((AllTrim(SD1->D1_CF)$cCfop03) .Or. "03-"+AllTrim(SD1->D1_TES)+"-"+AllTrim(SD1->D1_CF)$cMVAPUR) .And. (cAliasSF3)->F3_TIPO == "S"
+											lProcessa := .T.
+										Endif    
+		                                If lProcessa
+											If Substr(SD1->D1_CF,1,1) == "3"
+										    	aMes[nPosMes][2][6][2]	+=	nItemValCont
+										    Else
+											    aMes[nPosMes][2][6][1]	+=	nItemValCont
+											Endif
+									    Endif
+										//Despesas de Energia Eletrica
+		                                lProcessa := .F.
+										If (AllTrim(SD1->D1_CF)$cCfop14) .Or. "04-"+AllTrim(SD1->D1_TES)+"-"+AllTrim(SD1->D1_CF)$cMVAPUR
+											lProcessa := .T.
+										Endif    
+		                                If lProcessa
+											If Substr(SD1->D1_CF,1,1) == "3"
+										    	aMes[nPosMes][2][5][2]	+=	nItemValCont
+										    Else
+											    aMes[nPosMes][2][5][1]	+=	nItemValCont
+											Endif
+									    Endif                          
+									    //Desp. de Alugueis de Predios Locados PJ
+		                                lProcessa := .F.
+										If (AllTrim(SD1->D1_CF)$cCfop19) .Or. "05-"+AllTrim(SD1->D1_TES)+"-"+AllTrim(SD1->D1_CF)$cMVAPUR
+											lProcessa := .T.
+										Endif    
+		                                If lProcessa
+											If Substr(SD1->D1_CF,1,1) == "3"
+										    	aMes[nPosMes][2][20][2]	+=	nItemValCont
+										    Else
+											    aMes[nPosMes][2][20][1]	+=	nItemValCont
+											Endif
+									    Endif                          
+									    //Desp. de Alugueis de Maquinas e Eqptos Locados PJ
+		                                lProcessa := .F.
+										If (AllTrim(SD1->D1_CF)$cCfop20) .Or. "06-"+AllTrim(SD1->D1_TES)+"-"+AllTrim(SD1->D1_CF)$cMVAPUR
+											lProcessa := .T.
+										Endif    
+		                                If lProcessa
+											If Substr(SD1->D1_CF,1,1) == "3"
+										    	aMes[nPosMes][2][21][2]	+=	nItemValCont
+										    Else
+											    aMes[nPosMes][2][21][1]	+=	nItemValCont
+											Endif
+									    Endif                      
+									    //Outras Operacoes com Direito a Credito
+		                                lProcessa := .F.
+										If (AllTrim(SD1->D1_CF)$cCfop21) .Or. "13-"+AllTrim(SD1->D1_TES)+"-"+AllTrim(SD1->D1_CF)$cMVAPUR
+											lProcessa := .T.
+										Endif    
+		                                If lProcessa
+											If Substr(SD1->D1_CF,1,1) == "3"
+										    	aMes[nPosMes][2][22][2]	+=	nItemValCont
+										    Else
+											    aMes[nPosMes][2][22][1]	+=	nItemValCont
+											Endif
+									    Endif
+									    //Desp.Armaz. Merc./Frete na Oper. Venda
+		                                lProcessa := .F.
+										If (AllTrim(SD1->D1_CF)$cCfop23) .Or. "07-"+AllTrim(SD1->D1_TES)+"-"+AllTrim(SD1->D1_CF)$cMVAPUR
+											lProcessa := .T.
+										Endif    
+		                                If lProcessa
+											If Substr(SD1->D1_CF,1,1) == "3"
+										    	aMes[nPosMes][2][23][2]	+=	nItemValCont
+										    Else
+											    aMes[nPosMes][2][23][1]	+=	nItemValCont
+											Endif
+									    Endif
+	   								    //Creditos a Descontar Importacao
+		                                lProcessa := .F.
+										If (AllTrim(SD1->D1_CF)$cCfop24) .Or. "22-"+AllTrim(SD1->D1_TES)+"-"+AllTrim(SD1->D1_CF)$cMVAPUR
+											lProcessa := .T.
+										Endif    
+		                                If lProcessa
+											If Substr(SD1->D1_CF,1,1) == "3"
+										    	aMes[nPosMes][2][24][2] +=	nItemValCont
+										    Else
+											    aMes[nPosMes][2][24][1] +=	nItemValCont
+											Endif
+									    Endif                                               
+									Elseif SD1->D1_TIPO == "D"
+										If Substr(SD1->D1_CF,1,1) == "3"
+								    		aMes[nPosMes][2][7][2]	+=	nItemValCont
+									    Else
+										    aMes[nPosMes][2][7][1]	+=	nItemValCont
+									    Endif	
+			                        Endif
+			                    Endif
+						        dbSelectArea("SD1")
+					          	dbSkip()
+							Enddo
+						Endif
+					Else //Calculo das Contribuicoes Pis/Cofins  -- >Saidas
+					    dbSelectArea("SD2")
+					    dbSetOrder(3)
+					    If dbSeek(xFilial("SD2")+(cAliasSF3)->F3_NFISCAL+(cAliasSF3)->F3_SERIE+(cAliasSF3)->F3_CLIEFOR+(cAliasSF3)->F3_LOJA)
+					        While !Eof() .And. (cAliasSF3)->F3_NFISCAL+(cAliasSF3)->F3_SERIE+(cAliasSF3)->F3_CLIEFOR+(cAliasSF3)->F3_LOJA ==;
+					            SD2->D2_DOC+SD2->D2_SERIE+SD2->D2_CLIENTE+SD2->D2_LOJA
+								//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+								//³Verifica se as Aliquotas de PIS/COFINS sao Diferenciadas³
+								//³PIS Padrao: 1.65% - COFINS Padrao: 7.6%                 ³
+								//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+								If SB1->(FieldPos("B1_PPIS")) > 0 .And. SB1->(FieldPos("B1_PCOFINS")) > 0
+									nPPis	:= 0
+									nPCofins:= 0
+									SB1->(dbSetOrder(1))
+									If SB1->(dbSeek(xFilial("SB1")+SD2->D2_COD))
+										nPPis	:= SB1->B1_PPIS
+										nPCofins:= SB1->B1_PCOFINS
+										If (nPPis <> 1.65 .And. nPPis > 0) .Or. (nPCofins <> 7.6 .And. nPCofins > 0)
+											lAliqDif := .T.
+										Endif
+									Endif
+								Endif
+	
+								//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+								//³Verifica quais as TES que dao direito ao credito de PIS/COFINS³
+								//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+								SF4->(dbSetOrder(1))
+								If !SF4->(dbSeek(xFilial("SF4")+SD2->D2_TES)) .Or. (SF4->F4_PISCOF == "4" .And. !(Left (AllTrim (SD2->D2_CF), 1)=="7"))
+							        dbSelectArea("SD2")
+						        	dbSkip()
+						        	Loop
+								Endif
+								//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+								//³No caso das receitas, o valor da receita deve ser o bruto,     ³
+								//³sendo que o IPI e o ICMS ST devem ser lançados na linha propria³
+								//³de deducoes dos valores lancados nas outras linhas.            ³
+								//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+								nItemValCont := SD2->D2_TOTAL+SD2->D2_ICMSRET+SD2->D2_VALFRE+SD2->D2_SEGURO+SD2->D2_DESPESA+SD2->D2_VALIPI
+		
+								If !SD2->D2_TIPO $ "DB"
+	     							//Receita da Exportacao de Bens e Servicos
+	                                lProcessa := .F.
+									If (AllTrim(SD2->D2_CF)$cCfop06) .Or. "01-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC
+										lProcessa := .T.
+									Endif
+	                                If lProcessa
+										If nTpReg <> 0 .And. (SF4->F4_TPREG=="1") // Regime Nao-Cumulativo
+									   		aMes[nPosMes][2][8][1]	+= nItemValCont
+										Else // Regime Cumulativo
+			                                aMes[nPosMes][2][8][2] += nItemValCont
+								        EndIf
+								    Endif
+									//Receita da Venda no Mercado Interno de Produtos de Fabricacao Propria
+	                                lProcessa := .F.
+									If (AllTrim(SD2->D2_CF)$cCfop07) .Or. "02-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC
+										lProcessa := .T.
+									Endif
+	                                If lProcessa
+										If nTpReg <> 0 .And. (SF4->F4_TPREG=="1") // Regime Nao-Cumulativo
+											aMes[nPosMes][2][9][1]	+= nItemValCont
+										Else
+											aMes[nPosMes][2][9][2]	+= nItemValCont
+								        EndIf
+								    Endif
+								    //Receita da Revenda de Mercadorias
+	                                lProcessa := .F.
+									If (AllTrim(SD2->D2_CF)$cCfop08) .Or. "03-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC
+										lProcessa := .T.
+									Endif
+	                                If lProcessa
+										If nTpReg <> 0 .And. (SF4->F4_TPREG=="1") // Regime Nao-Cumulativo
+											aMes[nPosMes][2][10][1]+=	nItemValCont
+										Else
+											aMes[nPosMes][2][10][2]+=	nItemValCont
+								        EndIf
+								    Endif
+									//Receita da Atividade Rural
+	                                lProcessa := .F.
+									If (AllTrim(SD2->D2_CF)$cCfop09) .Or. "06-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC
+										lProcessa := .T.
+							    		dbSelectArea("SA1")
+									    dbSetOrder(1)
+									Endif
+	                                If lProcessa
+	 								    If dbSeek(xFilial("SA1")+SD2->D2_CLIENTE+SD2->D2_LOJA) .And. SA1->A1_TIPO == "L"
+		 									If nTpReg <> 0 .And. (SF4->F4_TPREG=="1") // Regime Nao-Cumulativo
+												aMes[nPosMes][2][11][1]+=	nItemValCont
+											Else                                        
+												aMes[nPosMes][2][11][2]+=	nItemValCont
+									        EndIf
+									    Endif
+								    Endif
+							    	//Receita de Exportacao com Dir. Cred. PIS/Pasep e Cofins
+	                                lProcessa := .F.
+									If (AllTrim(SD2->D2_CF)$cCfop10) .Or. "11-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC
+										lProcessa := .T.
+									Endif
+	                                If lProcessa
+										If nTpReg <> 0 .And. (SF4->F4_TPREG=="1") // Regime Nao-Cumulativo
+											aMes[nPosMes][2][12][1]+=	nItemValCont
+										Else                                        
+											aMes[nPosMes][2][12][2]+=	nItemValCont
+								        EndIf
+								    Endif                                           
+	   						    	//Receita de Exportacao sem Direito a Credito de Pis/Cofins
+	                                lProcessa := .F.
+									If (AllTrim(SD2->D2_CF)$cCfop25) .Or. "12-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC
+										lProcessa := .T.
+									Endif
+	                                If lProcessa
+										If nTpReg <> 0 .And. (SF4->F4_TPREG=="1") // Regime Nao-Cumulativo
+											aMes[nPosMes][2][25][1]+=	nItemValCont
+										Else                                        
+											aMes[nPosMes][2][25][2]+=	nItemValCont
+								        EndIf
+								    Endif
+									//Vendas de Bens do Ativo Imobilizado/Permanente
+	                                lProcessa := .F.
+	                               	If mv_par06==02
+										If (AllTrim(SD2->D2_CF)$cCfop13) .Or. "19-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC
+											lProcessa := .T.
+										Endif	
+									Else
+										If (AllTrim(SD2->D2_CF)$cCfop13) .Or. "18-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC
+											lProcessa := .T.
+										Endif
+									Endif
+	                                If lProcessa
+										If nTpReg <> 0 .And. (SF4->F4_TPREG=="1") // Regime Nao-Cumulativo
+											aMes[nPosMes][2][14][1]+=	nItemValCont
+										Else
+											aMes[nPosMes][2][14][2]+=	nItemValCont
+								        EndIf
+								    Endif
+								ElseIf (SD2->D2_TIPO$"D")
+									If mv_par06==1
+										If (AllTrim(SD2->D2_CF)$cCfop22) .Or. "13-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC
+											lProcessa := .T.
+										Endif
+										If lProcessa
+											If nTpReg <> 0 .And. (SF4->F4_TPREG=="1") // Regime Nao-Cumulativo
+												aMes[nPosMes][2][19][1]+=	nItemValCont
+											Else                                                            
+												aMes[nPosMes][2][19][2]+=	nItemValCont
+												//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+												//³Linha 09/03 - (-)Outras Exclusoes      ³
+												//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+												If lAliqDif
+													Gravaf09(Month((cAliasSF3)->F3_ENTRADA),"03",nPPis,nPCofins,nItemValCont)
+												Endif										
+									        EndIf
+								        EndIf
+									Endif
+							    Endif
+		                        //IPI e ICMS/Substituto Tributario -> Como o IPI e lancado nas outras linhas, de ser sempre verificado
+		                        //Se nunca retira da base de Pis/Cofins o icms retido, nao podera ser excluido nessa linha.
+	                            lProcessa := .F.
+	                            If mv_par06 ==2
+									If ((AllTrim(SD2->D2_CF)$cCfop12) .Or. "16-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC) .And. SD2->D2_VALIPI+SD2->D2_ICMSRET > 0
+										lProcessa := .T.
+									Endif		
+								Else
+									If ((AllTrim(SD2->D2_CF)$cCfop12) .Or. "14-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC) .And. SD2->D2_VALIPI+SD2->D2_ICMSRET > 0
+										lProcessa := .T.
+									Endif
+								Endif
+	       						If lProcessa
+									If nTpReg <> 0 .And. (SF4->F4_TPREG=="1") // Regime Nao-Cumulativo
+									    If (cDebSTCOF=="1") .And. (cDebSTPIS=="1") //Nunca retira o Icms Retido da Base
+											aMes[nPosMes][2][15][1]+=	SD2->D2_VALIPI
+										Else
+											aMes[nPosMes][2][15][1]+=	SD2->D2_VALIPI + SD2->D2_ICMSRET
+										Endif
+									Else                    
+										If (cDebSTCOF=="1") .And. (cDebSTPIS=="1")
+											aMes[nPosMes][2][15][2]+=	SD2->D2_VALIPI 
+										Else
+											aMes[nPosMes][2][15][2]+=	SD2->D2_VALIPI + SD2->D2_ICMSRET
+										Endif	
+							        EndIf
+							    Endif
+							    //Receita da Prestacao de Servicos
+							    If (cAliasSF3)->F3_TIPO == "S"
+							    	If nTpReg <> 0 .And. (SF4->F4_TPREG=="1")
+										aMes[nPosMes][2][16][1]+=nItemValCont
+									Else                                      
+										aMes[nPosMes][2][16][2]+=nItemValCont
+									Endif	
+					    		Endif
+								//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+								//³Totaliza os faturamentos do Mercado Interno e Externo³
+								//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+								If AllTrim(SD2->D2_CF)$cCfop17
+									aMes[nPosMes][2][17][1]+=nItemValCont
+								ElseIf AllTrim(SD2->D2_CF)$cCfop16  
+									aMes[nPosMes][2][18][1]+=nItemValCont
+								Endif
+	
+								//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+								//³Imprime Fichas 09-PIS/PASEP e 15-COFINS³
+								//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+								If lAliqDif .And. (AllTrim(SD2->D2_CF)$cCfop18 .Or. "01-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALCAD)
+									//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+									//³Linha 09/01 - Receita de Vendas        ³
+									//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+									Gravaf09(Month((cAliasSF3)->F3_ENTRADA),"01",nPPis,nPCofins)
+									//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+									//³Linha 09/03 - (-)Outras Exclusoes      ³
+									//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+									If SD2->D2_ICMSRET > 0
+										Gravaf09(Month((cAliasSF3)->F3_ENTRADA),"03",nPPis,nPCofins,SD2->D2_ICMSRET)
+									Endif
+								Endif
+	
+							    dbSelectArea("SD2")
+							    dbSkip() 
+		                    Enddo
+		                Endif
+			            //Descontos Incondicionais
+					    dbSelectArea("SF2")
+					    dbSetOrder(1)
+					    If dbSeek(xFilial("SF2")+(cAliasSF3)->F3_NFISCAL+(cAliasSF3)->F3_SERIE+(cAliasSF3)->F3_CLIEFOR+(cAliasSF3)->F3_LOJA)
+						    dbSelectArea("SD2")
+						    dbSetOrder(3)
+					    	dbSeek(xFilial("SD2")+(cAliasSF3)->F3_NFISCAL+(cAliasSF3)->F3_SERIE+(cAliasSF3)->F3_CLIEFOR+(cAliasSF3)->F3_LOJA)
+			            
+				    		If SF2->F2_DESCONT > 0
+					    		lProcessa := .F.
+			    		        If mv_par06==02 // Nao cumulativo
+									If (AllTrim(SD2->D2_CF)$cCfop22) .Or. "14-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC
+										lProcessa := .T.
+									Endif
+								Else
+									If (AllTrim(SD2->D2_CF)$cCfop22) .Or. "13-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC
+										lProcessa := .T.
+									Endif
+								Endif
+					            If lProcessa
+			   				    	If nTpReg <> 0 .And. (SF4->F4_TPREG=="1")
+								    	aMes[nPosMes][2][19][1] +=	SF2->F2_DESCONT
+							    	Else                                                
+								    	aMes[nPosMes][2][19][2] +=	SF2->F2_DESCONT	
+							    	Endif
+								//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+								//³Linha 09/02 - (-)Vendas Canc. e Desc. Incond.³
+								//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+						    		If lAliqDif .And. (AllTrim(SD2->D2_CF)$cCfop22 .Or. "02-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALCAD)
+										Gravaf09(Month((cAliasSF3)->F3_ENTRADA),"02",nPPis,nPCofins,SF2->F2_DESCONT)
+									Endif
+						    	Endif                 
+						    Endif
+						Endif
+					Endif
+			    Endif
+			    //
+				dbSelectArea(cAliasSF3)
+				dbSkip() 
+			EndDo
+		Enddo
+		//
+		If lQuery
+			dbSelectArea(cAliasSF3)
+			dbCloseArea()
+		Else
+		  	dbSelectArea("SF3")
+			RetIndex("SF3")
+			dbClearFilter()
+			Ferase(cIndex+OrdBagExt())
+		EndIf                  
+		//
+	    dbSelectArea ("SM0")
+	    dbSkip()
+	    //
+	Else // Regime de Caixa
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³  Regime de Caixa - Cumulativo - Lucro Presumido                   ³
+		//³ Processamento das Saidas - De acordo com SE5                      ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Tratamento para os campos do PIS - Saida                          ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If !Empty( nScanPis := aScan(aRelImp2,{|x| x[1]=="SD2" .And. x[3]=="IT_BASEPS2"} ) )
+			cCpBsPisSa := aRelImp2[nScanPis,2]
+			nPsBsPisSa := SD2->(FieldPos(cCpBsPisSa))
+		EndIf
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Tratamento para os campos do COF - Saida                          ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If !Empty( nScanCof := aScan(aRelImp2,{|x| x[1]=="SD2" .And. x[3]=="IT_BASECF2"} ) )
+			cCpBsCofSa := aRelImp2[nScanCof,2]
+			nPsBsCofSa := SD2->(FieldPos(cCpBsCofSa))
+		EndIf 	
+		//                        
+		cFilAnt	:=	SM0->M0_CODFIL
+		//
+		dBSelectArea("SE5")
+		(dbSetOrder(1))                                  
+		
+		If !(FindFunction("TRepInUse") .And. TRepInUse())
+			SetRegua(SE5->(LastRec()))
+		Endif
+			
+		#IFDEF TOP
+			If TcSrvType()<>"AS/400"
+				lQuery := .T.
+				cAliasSE5 := "a996AMontSE5"
+				aStruSE5  := SE5->(dbStruct())
+				
+				cQuery 	:= "SELECT "
+				cQuery  += "E5_FILIAL,E5_NUMERO, E5_DATA, E5_VALOR, E5_RECPAG, E5_TIPODOC, E5_PREFIXO, E5_PARCELA, E5_MOTBX, "
+				cQuery  +=	"E5_BANCO, E5_AGENCIA, E5_CONTA, E5_NUMCHEQ, E5_TIPO, E5_CLIFOR, E5_LOJA, E5_SEQ, E5_DOCUMEN "
+				cQuery 	+= "FROM "+RetSqlName("SE5")+" SE5 "
+				cQuery 	+= "WHERE E5_FILIAL='"+xFilial("SE5")+"' AND "
+				cQuery 	+= "E5_DATA>='"+Dtos(dDtIni)+"' AND "
+				cQuery 	+= "E5_DATA<='"+Dtos(dDtFin)+"' AND "           
+				cQuery  += "E5_RECPAG = 'R'  AND " 		// Indica que e recebimento
+				cQuery  += "E5_TIPODOC IN ('BA','CP','VL','V2','LJ','ES') AND " // Principais Tp.Doc(Nao considera desconto/multa)
+				cQuery  += "E5_MOTBX <> 'FAT'  AND "   // Indica que nao e baixa por fatura
+				cQuery  += "SE5.D_E_L_E_T_ = ' ' "              
+				cQuery += "ORDER BY "+SqlOrder(SE5->(IndexKey()))
+	
+				cQuery := ChangeQuery(cQuery)
+				dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQuery),cAliasSE5,.T.,.T.)
+				
+				For nX2 := 1 To len(aStruSE5)
+					If aStruSE5[nX2][2] <> "C" .And. FieldPos(aStruSE5[nX2][1])<>0
+						TcSetField(cAliasSE5,aStruSE5[nX2][1],aStruSE5[nX2][2],aStruSE5[nX2][3],aStruSE5[nX2][4])
+					EndIf
+				Next nX2
+			
+				dbSelectArea(cAliasSE5)
+				dbSelectArea(cAliasSD2)                                      
+				nPsBsPisSa := ( cAliasSD2 )->( FieldPos( cCpBsPisSa ) )
+				nPsBsCOfSa := ( cAliasSD2 )->( FieldPos( cCpBsCofSa ) )
+			Else	
+		#ENDIF
+				cIndex    := CriaTrab(NIL,.F.)
+				cFiltro := "E5_FILIAL=='"+xFilial("SE5")+"'.And."
+				cFiltro += "Dtos(E5_DATA)>='" + Dtos(dDtIni) + "'.And."
+				cFiltro += "Dtos(E5_DATA)<='" + Dtos(dDtFin) + "'.And."
+				cFiltro += "E5_TIPODOC $('BA,CP,VL,V2,LJ,ES') .And. "// Principais Tp.Doc(Nao considera desconto/multa)
+				cFiltro += "E5_MOTBX != 'FAT' .And."
+				cFiltro += "E5_RECPAG=='R' "
+				
+			    IndRegua(cAliasSE5,cIndex,SE5->(IndexKey()),,cFiltro)
+				nIndex := RetIndex("SE5")
+				#IFNDEF TOP
+					dbSetIndex(cIndex+OrdBagExt())
+				#ENDIF
+				dbSelectArea("SE5")
+			    dbSetOrder(nIndex+1)
+				
+			    dbSelectArea(cAliasSE5)
+			    ProcRegua(LastRec())
+			    dbGoTop()
+		#IFDEF TOP
+			Endif    
+		#ENDIF
+		//	                      
+		While (cAliasSE5)->(!Eof())
+		
+			//
+			nPosMes	:=	aScan (aMes, {|aX| aX[1]==Month((cAliasSE5)->E5_DATA)})
+			If nPosMes==0
+				aAdd (aMes, {Month((cAliasSE5)->E5_DATA), {}})
+				nPosMes	:=	aScan(aMes, {|aX| aX[1]==Month((cAliasSE5)->E5_DATA)})
+				For nI := 1 To 25
+					aAdd (aMes[nPosMes][2], {0,0})
+				Next (nI)
+			EndIf
+	        //
+	        Do While (cAliasSE5)->(!Eof()) .And. aMes[nPosMes][1] == Month((cAliasSE5)->E5_DATA)
+				lValido := .T.
+				//
+				//Verifica se tem baixa cancelada
+				//
+			 	If TemBxCanc((cAliasSE5)->E5_PREFIXO+(cAliasSE5)->E5_NUMERO+(cAliasSE5)->E5_PARCELA+(cAliasSE5)->E5_TIPO+(cAliasSE5)->E5_CLIFOR+(cAliasSE5)->E5_LOJA+(cAliasSE5)->E5_SEQ)
+					(cAliasSE5)->(dbskip())
+					Loop
+				EndIf
+				//
+				//Compensacao com RA, Liquidacao e NCC devem ser consideradas para calculo do PIS/Cofins no Dacon
+				//
+			    lConsCmp:=.F.
+				If (((cAliasSE5)->E5_MOTBX == "CMP" .And. SUBSTR((cAliasSE5)->E5_DOCUMEN,nTamTit,3)$MVRECANT));
+				 .Or. ((cAliasSE5)->E5_MOTBX == "LIQ").OR. ;
+	 			 ((cAliasSE5)->E5_TIPO$MV_CRNEG) .And. ((cAliasSE5)->E5_MOTBX == "CMP")
+		   			lConsCmp :=.T.
+				Endif
+				//
+				//Desconsidera Baixa por Dacao
+				//  
+				If !(cAliasSE5)->E5_MOTBX == "CEC" // Compensacao entre Carteiras considera na apuracao
+					If !lConsCmp .And. !MovBcoBx((cAliasSE5)->E5_MOTBX,.T.)
+						(cAliasSE5)->(dbskip())
+						Loop
+					Endif
+				Endif	
+			    //
+				cChaveAnt   :=	(cAliasSE5)->E5_NUMERO+(cAliasSE5)->E5_PREFIXO+(cAliasSE5)->E5_CLIFOR+(cAliasSE5)->E5_LOJA
+				cChaveSe1   :=	(cAliasSE5)->E5_CLIFOR+(cAliasSE5)->E5_LOJA+(cAliasSE5)->E5_PREFIXO+(cAliasSE5)->E5_NUMERO+(cAliasSE5)->E5_PARCELA+(cAliasSE5)->E5_TIPO			
+				cClAnt		:=	(cAliasSE5)->E5_CLIFOR
+				cLjAnt		:=	(cAliasSE5)->E5_LOJA
+				//
+				// Compensacao da Devolucao de Venda - Considerar como Devoluçao de Venda
+				//
+				If ((cAliasSE5)->E5_TIPO$MV_CRNEG) .And. ((cAliasSE5)->E5_MOTBX == "CMP")
+					DbSelectArea("SE1")
+					SE1->(dbSetOrder(2))
+					SE1->(MsSeek(xFilial("SE1")+(cAliasSE5)->E5_CLIFOR+(cAliasSE5)->E5_LOJA+(cAliasSE5)->E5_PREFIXO+(cAliasSE5)->E5_NUMERO+(cAliasSE5)->E5_PARCELA+(cAliasSE5)->E5_TIPO))
+					cChaveSD1   := (cAliasSE1)->E1_NUM+(cAliasSE1)->E1_SERIE+(cAliasSE1)->E1_CLIENTE+(cAliasSE1)->E1_LOJA
+					//
+				    DbSelectArea("SD1")
+				    SD1->(dbSetOrder(1))
+				    SD1->(MsSeek(xFilial("SD1")+cChaveSD1)) // procurar a nf original
+				    //
+		    		While !((cAliasSD1)->(Eof())) .And. xFilial("SD1") == (cAliasSD1)->D1_FILIAL .And.;
+						(cAliasSD1)->(D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA)==cChaveSD1 .And.;
+						(cAliasSD1)->D1_TIPO =="D"
+						SF4->(dbSetOrder(1))
+						SF4->(MsSeek(xFilial("SF4")+(cAliasSD1)->D1_TES))
+							If (cAliasSF4)->F4_AGREG <> "N" .And. (cAliasSF4)->F4_DUPLIC == "S"
+								If SF4->(FieldPos("F4_PISCOF")) > 0
+									If (cAliasSF4)->F4_PISCOF <> "4" //Nao Calcula
+										nDevol += (cAliasSD1)->D1_TOTAL	 // D1_TOTAL --> D2 ATRAVES D1_NFORI
+										cChaveAnt:=	(cAliasSD1)->D1_NFORI+(cAliasSD1)->D1_SERIE+(cAliasSD1)->D1_FORNECE+(cAliasSD1)->D1_LOJA
+									Endif
+								Endif	
+							Endif	
+						(cAliasSD1)->(dbskip())
+						Loop
+					Enddo
+				Endif
+				//
+				// Considerar o faturamento
+				//
+				If ((cAliasSE5)->E5_TIPO$MVNOTAFIS)
+					nPag 	+= (cAliasSE5)->E5_VALOR
+				EndIf
+				//
+				SE1->(dbSetOrder(2))
+				SE1->(MsSeek(xFilial("SE1")+(cAliasSE5)->E5_CLIFOR+(cAliasSE5)->E5_LOJA+(cAliasSE5)->E5_PREFIXO+(cAliasSE5)->E5_NUMERO+(cAliasSE5)->E5_PARCELA+(cAliasSE5)->E5_TIPO))
+				nTotAbat  := SumAbatRec((cAliasSE1)->E1_PREFIXO,(cAliasSE1)->E1_NUM,(cAliasSE1)->E1_PARCELA,(cAliasSE1)->E1_MOEDA,"V",(cAliasSE1)->E1_BAIXA)
+				nPag += nTotAbat
+				//
+				If (cAliasSE1)->(E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO)==cChaveSe1
+					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+					//³ Tratamento para fatura a receber                             ³
+					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ						
+					If (AllTrim ((cAliasSE1)->E1_FATURA)=="NOTFAT")
+						cFatura    := (cAliasSE1)->E1_PREFIXO+(cAliasSE1)->E1_NUM
+						cCliente   := (cAliasSE1)->E1_CLIENTE+(cAliasSE1)->E1_LOJA
+						cTpFatura  := (cAliasSE1)->E1_TIPO
+						//
+						//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+						//³ Titulos de origem da fatura                                  ³
+						//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+						dbSelectArea("SE1")
+						dbSetOrder(10)
+						MsSeek(xFilial("SE1")+cCliente+cFatura,.F.)
+						While ( !Eof() .And. xFilial("SE1")==(cAliasSE1)->E1_FILIAL .And.;
+							(cAliasSE1)->E1_CLIENTE+(cAliasSE1)->E1_LOJA+(cAliasSE1)->E1_FATPREF+(cAliasSE1)->E1_FATURA==cCliente+cFatura)
+								cChaveAnt:= (cAliasSE1)->E1_NUM+(cAliasSE1)->E1_PREFIXO+(cAliasSE1)->E1_CLIENTE+(cAliasSE1)->E1_LOJA
+								cChaveSe1:= (cAliasSE1)->E1_CLIENTE+(cAliasSE1)->E1_LOJA+(cAliasSE1)->E1_PREFIXO+(cAliasSE1)->E1_NUM+(cAliasSE1)->E1_PARCELA+(cAliasSE1)->E1_TIPO
+							SE1->(dbSkip())
+						EndDo
+					EndIf
+				EndIf			
+				//
+				SD2->(dbSetOrder(3))
+				SD2->(MsSeek(xFilial("SD2")+cChaveAnt))
+				SF2->(dbSetOrder(1))
+				SF2->(MsSeek(xFilial("SF2")+cChaveAnt))
+			 	SA1->(dbSetOrder(1))
+				SA1->(MsSeek(xFilial("SA1")+cClAnt+cLjAnt))
+				//
+				While !((cAliasSD2)->(Eof())) .And. xFilial("SD2") == (cAliasSD2)->D2_FILIAL .And.;
+					 	(cAliasSD2)->(D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA)==cChaveAnt
+					SF4->(dbSetOrder(1))
+					SF4->(MsSeek(xFilial("SF4")+(cAliasSD2)->D2_TES))
+					SB1->(dbSetOrder(1))
+					SB1->(MsSeek(xFilial("SB1")+(cAliasSD2)->D2_COD))
+					//				
+					If lApurac
+						lValido := (cAliasSF4)->F4_PISFISC<>"2" //Aplica Credito de Pis/Cofins
+					Endif
+					//
+					#IFDEF SHELL
+						dbSelectArea(cAliasSD2)
+						If (cAliasSD2)->D2_CANCEL == "S"
+							lValido := .F.
+						EndIf
+					#ENDIF
+					If lValido
+						If (cAliasSF4)->F4_AGREG <> "N" //Agrega Valor
+							If SF4->(FieldPos("F4_PISCOF")) > 0
+								If (cAliasSF4)->F4_PISCOF <> "4" //Nao Calcula
+									If !Empty(nPsBsPisSa) .Or. !Empty(nPsBsCofSa)
+										nBasPisPas := (nPag*(cAliasSD2)->(FieldGet(nPsBsPisSa)))/(cAliasSF2)->F2_VALFAT
+										nBasCofins := (nPag*(cAliasSD2)->(FieldGet(nPsBsCofSa)))/(cAliasSF2)->F2_VALFAT
+										nValIpi    := (nPag*((cAliasSD2)->D2_VALIPI)/(cAliasSF2)->F2_VALFAT)
+										nValIcm    := (nPag*((cAliasSD2)->D2_ICMSRET)/(cAliasSF2)->F2_VALFAT)
+	                                    //
+	                                    //Devolucoes
+	                                    //
+										nBasPisDev := (nDevol*(cAliasSD2)->(FieldGet(nPsBsPisSa)))/(cAliasSF2)->F2_VALFAT
+										nBasCofDev := (nDevol*(cAliasSD2)->(FieldGet(nPsBsCofSa)))/(cAliasSF2)->F2_VALFAT
+										nValIpiDev := (nDevol*((cAliasSD2)->D2_VALIPI)/(cAliasSF2)->F2_VALFAT)
+										nValIcmDev := (nDevol*((cAliasSD2)->D2_ICMSRET)/(cAliasSF2)->F2_VALFAT)
+										//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+										//³ Caso a TES esteja com calcula ambos, a base nao sera acumulada novamente  ³
+										//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+										If (cAliasSF4)->F4_PISCOF =="3" //3-Ambos
+											nBasCofins := 0
+											nBasCofDev := 0
+										Endif	
+										//                                                  
+	 									If (cDebSTCOF=="1") .And. (cDebSTPIS=="1") //Nunca retira o Icms Retido da Base
+											nItemValCont := nBasPisPas+nBasCofins+nValIpi+nBasPisDev+nBasCofDev+nValIpiDev 
+										Else 	
+											nItemValCont := nBasPisPas+nBasCofins+nValIpi+nValIcm+nBasPisDev+nBasCofDev+nValIpiDev+nValIcmDev
+	                                    Endif
+									EndIf
+									//
+									If !(SD2->D2_TIPO $ "DB") 
+										//Receita da Venda no Mercado Interno de Produtos de Fabricacao Propria
+		        	                    lProcessa := .F.
+										If ((AllTrim(SD2->D2_CF)$cCfop07) .Or. "02-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC) .And. Empty((cAliasSD2)->D2_CODISS) //Para nao contemplar nfs com iss
+											lProcessa := .T.
+										Endif
+		                                If lProcessa
+											If nTpReg <> 0 .And. (SF4->F4_TPREG=="2") // Regime Cumulativo
+												aMes[nPosMes][2][9][2]	+= nItemValCont
+									        EndIf
+									    Endif
+								    	//Receita da Revenda de Mercadorias
+			                            lProcessa := .F.
+										If ((AllTrim(SD2->D2_CF)$cCfop08) .Or. "03-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC) .And. Empty((cAliasSD2)->D2_CODISS) //Para nao contemplar nfs com iss
+											lProcessa := .T.
+										Endif
+			                            If lProcessa
+											If nTpReg <> 0 .And. (SF4->F4_TPREG=="2") // Regime Cumulativo
+												aMes[nPosMes][2][10][2]+=	nItemValCont
+									        EndIf
+									    Endif
+										//Receita da Atividade Rural
+			                            lProcessa := .F.
+										If ((AllTrim(SD2->D2_CF)$cCfop09) .Or. "06-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC) .And. Empty((cAliasSD2)->D2_CODISS) //Para nao contemplar nfs com iss
+											lProcessa := .T.
+										Endif
+		            	                If lProcessa
+										    If dbSeek(xFilial("SA1")+cClAnt+cLjAnt) .And. (cAliasSA1)->A1_TIPO == "L"
+		 										If nTpReg <> 0 .And. (SF4->F4_TPREG=="2") // Regime Cumulativo
+													aMes[nPosMes][2][11][2]+=	nItemValCont
+										        EndIf
+										    Endif
+									    Endif
+										//Vendas de Bens do Ativo Imobilizado/Permanente
+		        	                    lProcessa := .F.
+										If ((AllTrim(SD2->D2_CF)$cCfop13) .Or. "18-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC) .And. Empty((cAliasSD2)->D2_CODISS) //Para nao contemplar nfs com iss
+											lProcessa := .T.
+										Endif
+		                                If lProcessa
+											If nTpReg <> 0 .And. (SF4->F4_TPREG=="2") // Regime Cumulativo
+												aMes[nPosMes][2][14][2]+=	nItemValCont
+									        EndIf
+									    Endif
+										//ISENCOES E EXCLUSOES
+							    		//Devolucoes e Descontos Incondicionais
+				                        lProcessa := .F.
+										If (AllTrim(SD2->D2_CF)$cCfop22) .Or. "13-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC
+											lProcessa := .T.
+										Endif
+										If lProcessa
+											If nTpReg <> 0 .And. (SF4->F4_TPREG=="2") // Regime Cumulativo
+												If (cDebSTCOF=="1") .And. (cDebSTPIS=="1") //Nunca retira o Icms Retido da Base										
+											 		aMes[nPosMes][2][19][2]+=	nBasPisDev+nValIpiDev
+											 	Else
+													aMes[nPosMes][2][19][2]+=	nBasPisDev+nValIpiDev+nValIcmDev
+											 	Endif	
+											Endif
+										Endif
+									Endif
+			                        //IPI e ICMS/Substituto Tributario -> Como o IPI e lancado nas outras linhas, deve ser excluido
+			                        //Se nunca retira da base de Pis/Cofins o icms retido, nao podera ser excluido nessa linha.
+		                          	lProcessa := .F.                 
+									If ((AllTrim(SD2->D2_CF)$cCfop12) .Or. "14-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC) .And. SD2->D2_VALIPI+SD2->D2_ICMSRET > 0
+										lProcessa := .T.
+									Endif
+		       						If lProcessa
+										If nTpReg <> 0 .And. (SF4->F4_TPREG=="2") // Regime Cumulativo
+											If (cDebSTCOF=="1") .And. (cDebSTPIS=="1") //Nunca retira o Icms Retido da Base
+												aMes[nPosMes][2][15][2]+=	nValIpi
+											Else
+												aMes[nPosMes][2][15][2]+=	nValIpi+nValIcm
+											Endif	
+								        EndIf
+								    Endif
+								    //Receita da Prestacao de Servicos
+								    If !Empty((cAliasSD2)->D2_CODISS)
+								    	If nTpReg <> 0 .And. (SF4->F4_TPREG=="2") // Regime Cumulativo
+											aMes[nPosMes][2][16][2]+= nBasPisPas+nBasCofins+nBasPisDev+nBasCofDev
+										Endif	
+						    		Endif
+								Elseif (cAliasSF4)->F4_PISCOF =="4" // Nao calcula Pis/Cofins
+								    //
+									nBasPisCof := (nPag*((cAliasSD2)->D2_TOTAL)/(cAliasSF2)->F2_VALFAT)
+									nValIpi    := (nPag*((cAliasSD2)->D2_VALIPI)/(cAliasSF2)->F2_VALFAT)
+									nValIcm    := (nPag*((cAliasSD2)->D2_ICMSRET)/(cAliasSF2)->F2_VALFAT)
+									//
+									If (cDebSTCOF=="1") .And. (cDebSTPIS=="1") //Nunca retira o Icms Retido da Base
+										nItemValCont := nBasPisCof+nValIpi
+									Else 	
+										nItemValCont := nBasPisCof+nValIpi+nValIcm
+	                                Endif
+	                                //
+									//Receita da Exportacao de Bens e Servicos
+			       	              	lProcessa := .F.
+			       	              	If (cAliasSA1)->A1_EST == "EX" .And. (AllTrim(Substr(SD2->D2_CF,1,1))$"67")
+										If (AllTrim(SD2->D2_CF)$cCfop06) .Or. "01-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC
+											lProcessa := .T.
+										Endif
+			                	        If lProcessa
+											If nTpReg <> 0 .And. (SF4->F4_TPREG=="2") // Regime Cumulativo
+			    	                            aMes[nPosMes][2][8][2] += nItemValCont
+										    Endif
+										Endif    
+	                                Endif
+									//Outras Receitas --> Venda para Zona Franca de Manaus
+			       	              	lProcessa := .F.
+			       	              	If !Empty((cAliasSA1)->A1_SUFRAMA) .And. !Empty((cAliasSA1)->A1_CODMUN) .And. (cAliasSA1)->A1_CALCSUF$"1S"
+										If (AllTrim(SD2->D2_CF)$cCfop11) .Or. "09-"+AllTrim(SD2->D2_TES)+"-"+AllTrim(SD2->D2_CF)$cMVCALC
+											lProcessa := .T.
+										Endif
+			                	        If lProcessa
+											If nTpReg <> 0 .And. (SF4->F4_TPREG=="2") // Regime Cumulativo
+			    	                            aMes[nPosMes][2][17][2] += nItemValCont
+										    Endif
+										Endif
+	                                Endif
+								Endif
+							EndIf
+						EndIf
+					Endif	//lValido
+				(cAliasSd2)->( dbSkip())
+				EndDo
+				nPag:=0
+				nDevol:=0
+			(cAliasSE5)->( dbSkip())
+			EndDo		
+		EndDo
+		If lQuery
+			dbSelectArea(cAliasSE5)
+			dbCloseArea()
+		Else
+			dbSelectArea("SE5")
+			RetIndex("SE5")
+			dbClearFilter()
+			FErase(cIndex+OrdBagExt())
+		EndIf
+		//
+	    dbSelectArea ("SM0")
+	    dbSkip()
+	Endif
+	
+	Enddo
+	//
+	SM0->(dbGoTo(nRegEmp))
+	cFilAnt := SM0->M0_CODFIL
+		
+	//
+	For nI := 1 To Len (aMes)
+		dDtIDep	:=	CtoD ("01/"+StrZero(aMes[nI][1],2)+"/"+StrZero(Year(mv_par02),4))
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Deducoes do Imobilizado                                     ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ	
+		If !Empty (xFilial ("SN1"))
+			dDtFDep		:= CtoD (Str(F_UltDia(dDtIDep), 2)+"/"+StrZero (Month (dDtIDep), 2)+"/"+StrZero(Year(mv_par02),4))
+		    nX			:= 0
+		    nBaseCred	:= 0
+			aAtivo 		:= DeprecAtivo (dDtIDep,dDtFDep,.T.)
+			//
+			If (ValType (aAtivo)=="A")
+				nX        := aAtivo[1]
+				nBaseCred := aAtivo[2] 
+			Else 
+				nX        := aAtivo
+				nBaseCred := 0 
+			EndIf
+			//
+			If (nX>0)
+				nVDeprAt := Round ((nX*SuperGetMv ("MV_TXPIS")/100), 2) + Round ((nX*SuperGetMv ("MV_TXCOFIN")/100), 2)
+			Else 
+				nVDeprAt := Round ((nBaseCred*SuperGetMv ("MV_TXPIS")/100), 2)+Round ((nBaseCred*SuperGetMv ("MV_TXCOFIN")/100), 2)
+			Endif
+		EndIf
+		//
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Aquisicoes do Imobilizado                                   ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ	
+	 	dDtIAq	:=	CtoD ("01/"+StrZero(aMes[nI][1],2)+"/"+StrZero(Year(mv_par02),4))
+		If !Empty (xFilial ("SN1"))
+			dDtFAq 	:=  CtoD(Str(F_UltDia(dDtIAq), 2)+"/"+StrZero(Month(dDtIAq), 2)+"/"+StrZero(Year(mv_par02),4))
+		   	nX1			:= 0
+		    nBsCrdAqI	:= 0
+	  	    nBsCrdAqE	:= 0
+			aAtAqu  	:= DeprecAtivo (dDtIAq,dDtFAq,.T.,.T.)
+			//
+			If Substr(SD1->D1_CF,1,1) == "3"
+				If (ValType (aAtAqu)=="A")
+					nX1        := aAtAqu[1]
+					nBsCrdAqE  := aAtAqu[2]
+				Else 
+					nX1        := aAtAqu
+					nBsCrdAqE  := 0
+				EndIf
+			Else
+				If (ValType (aAtAqu)=="A")
+					nX1        := aAtAqu[1]
+					nBsCrdAqI  := aAtAqu[2]
+				Else 
+					nX1        := aAtAqu
+					nBsCrdAqI  := 0
+				EndIf
+			EndIf
+		Endif
+	
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³  Receitas Financeiras                                       ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ	
+	 	dDtIRec	:=	CtoD ("01/"+StrZero(aMes[nI][1],2)+"/"+StrZero(Year(mv_par02),4))
+		dDtFRec :=  CtoD(Str(F_UltDia(dDtIRec), 2)+"/"+StrZero(Month(dDtIRec), 2)+"/"+StrZero(Year(mv_par02),4))
+	                           
+		nRecFinN :=0
+		nRecFinC :=0
+	
+		dbSelectArea("SE2")
+		dbSetOrder(5)
+		dbSeek(xFilial("SE2")+DTOS(dDtIRec))
+			While SE2->(E2_EMISSAO)>= dDtIRec .And. SE2->(E2_EMISSAO) <= dDtFRec .And. !Eof()
+	         	If (AllTrim(SE2->E2_NATUREZ)$cMVRecFin)
+					If nTpReg <> 0 .And. (SF4->F4_TPREG=="1") // Regime Nao-Cumulativo
+						nRecFinN +=SE2->(E2_VALOR)
+					Else
+						nRecFinC +=SE2->(E2_VALOR)
+				    EndIf                                       
+			    Endif
+			SE2->(DbSkip())    
+		    Enddo
+		    
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³  Outras Receitas                                            ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ	
+	 	dDtIRec	:=	CtoD ("01/"+StrZero(aMes[nI][1],2)+"/"+StrZero(Year(mv_par02),4))
+		dDtFRec :=  CtoD(Str(F_UltDia(dDtIRec), 2)+"/"+StrZero(Month(dDtIRec), 2)+"/"+StrZero(Year(mv_par02),4))
+	                           
+		nOutRecN :=0
+		nOutRecC :=0
+	
+		dbSelectArea("SE2")
+		dbSetOrder(5)
+		dbSeek(xFilial("SE2")+DTOS(dDtIRec))
+			While SE2->(E2_EMISSAO)>= dDtIRec .And. SE2->(E2_EMISSAO) <= dDtFRec .And. !Eof()
+	         	If (AllTrim(SE2->E2_NATUREZ)$cMVOutRec)
+					If nTpReg <> 0 .And. (SF4->F4_TPREG=="1") // Regime Nao-Cumulativo
+						nOutRecN +=SE2->(E2_VALOR)
+					Else
+						nOutRecC +=SE2->(E2_VALOR)
+				    EndIf                                       
+			    Endif
+			SE2->(DbSkip())
+		    Enddo
+		//	
+	Next (nY)     
+	
+Endif //lret
+
+Return(aMes)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Program   ³ImpDacon  ³ Autor ³Andressa Ataides       ³ Data ³30/06/06        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Impressao dos Dados para preenchimento da DACON - NAO CUMULATIVO  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±ºUso       ³ MATR951                                                          º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/                                                                                
+Static Function ImpDacon(lEnd,wnrel,cString,Tamanho,nPagina,cRegime,Titulo,nomeprog)
+
+Local li      := 100
+Local lFirst  := .T.
+Local cCabec1 := ""
+Local cCabec2 := ""
+Local cCabec3 := ""
+Local cCabec4 := ""
+Local cCabec5 := ""
+Local dDtIni  := mv_par01
+Local dDtFin  := mv_par02
+Local nTot     :=0
+Local nTotCum  :=0
+Local nToCreMI := 0
+Local nToCreEX := 0
+Local nToMAMI1 := 0
+Local nToMAMI3 := 0
+Local nToMAEX1 := 0
+Local nToMAEX3 := 0
+Local nI	:= 0
+Local nY	:= 0                  
+//
+Local nVDeprAt	:= 0
+Local nTotVlMI := 0
+Local nTotVlEX := 0
+Local nTotVRec := 0
+Local nTotVCum := 0
+Local nBsCrdAqI	:= 0
+Local nBsCrdAqE	:= 0
+Local nPercInt  := 0
+Local nPercExt  := 0
+Local nRecFinC  :=0
+Local nRecFinN  :=0
+Local nOutRecN  :=0
+Local nOutRecC  :=0
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Processamento do Dacon - Regime Cumulativo e Nao Cumulativo             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+aMes:= ProcDacon(@nVDeprAt,@nTotVlMI,@nTotVlEX,@nTotVRec,@nTotVCum,@nBsCrdAqI,@nBsCrdAqE,@nPercInt,@nPercExt,@nRecFinC,@nRecFinN,@nOutRecN,@nOutRecC)
+
+cCabec1 := STR0093+TRANSFORM(SM0->M0_CGC,"@R 99.999.999/9999-99")+Space(04)+R951RetPer(dDtIni,dDtFin)[1]+"Periodo: "+DtoC(dDtIni)+" a "+DtoC(dDtFin)
+cCabec2 := STR0095 //"Discriminacao / Mercado Interno / Exportacao"
+cCabec3 := cCabec1
+cCabec4 := Left(STR0095,13)
+cCabec5 := cCabec2 
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³For de impressao do array³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+For nI := 1 To Len (aMes)
+
+	nTotVlMI :=0
+	nTotVlMI += aMes[nI][2][3][1]+aMes[nI][2][4][1]+aMes[nI][2][6][1]+aMes[nI][2][5][1]+aMes[nI][2][7][1]+aMes[nI][2][20][1]+aMes[nI][2][21][1]+aMes[nI][2][22][1]+aMes[nI][2][23][1]+nBsCrdAqI
+	nTotVlEX :=0	
+	nTotVlEX += aMes[nI][2][3][2]+aMes[nI][2][4][2]+aMes[nI][2][6][2]+aMes[nI][2][5][2]+aMes[nI][2][7][2]+aMes[nI][2][20][2]+aMes[nI][2][21][2]+aMes[nI][2][22][2]+aMes[nI][2][23][2]+nBsCrdAqE
+	nTotVRec := 0
+	nTotVRec += (aMes[nI][2][8][1]+aMes[nI][2][9][1]+aMes[nI][2][10][1]+aMes[nI][2][11][1]+aMes[nI][2][16][1]+nRecFinN+nOutRecN)-(aMes[nI][2][12][1]+aMes[nI][2][13][1]+aMes[nI][2][15][1]+aMes[nI][2][14][1]+aMes[nI][2][19][1]+aMes[nI][2][25][1])
+ 	nTotVCum := 0
+	nTotVCum += (aMes[nI][2][8][2]+aMes[nI][2][9][2]+aMes[nI][2][10][2]+aMes[nI][2][11][2]+aMes[nI][2][16][2]+aMes[nI][2][17][2]+nRecFinC+nOutRecC)-(aMes[nI][2][8][2]+aMes[nI][2][12][2]+aMes[nI][2][13][2]+aMes[nI][2][15][2]+aMes[nI][2][14][2]+aMes[nI][2][17][2]+aMes[nI][2][19][2]+aMes[nI][2][25][2])
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Calcula o percentual em relacao ao total faturado de vendas ao mercado³
+	//³interno e vendas ao mercado externo.                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If aMes[nI][2][17][1] <> 0 .Or. aMes[nI][2][18][1] <> 0
+		nPercInt := aMes[nI][2][17][1] / (aMes[nI][2][17][1] + aMes[nI][2][18][1])
+		nPercExt := aMes[nI][2][18][1] / (aMes[nI][2][17][1] + aMes[nI][2][18][1])
+	Else                                  
+       	nPercInt := 1
+	Endif
+
+	If mv_par06 ==2 // Nao Cumulativo
+		//        
+		For nY:= 1 To 4
+			If nY == 3 .Or. nY == 1
+				cCabec1:= cCabec3+Space(35)+Alltrim(MesExtenso(aMes[nI][1]))
+				cCabec2:= cCabec5
+			ElseIf nY == 2 .Or. nY == 4
+				cCabec1:= cCabec3+Space(35)+Alltrim(MesExtenso(aMes[nI][1]))
+				cCabec2:= STR0096
+			Endif	
+			//If nY <> 1
+				li := cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15)
+				li++
+			//Endif	
+			If nY == 1 .Or. nY == 3
+				@Li, 001 PSAY IIF(nY==1,STR0133, STR0186)
+			ElseIf nY == 2 .Or. nY == 4
+				@Li, 001 PSAY IIF (nY==2, STR0162, STR0190)
+			Endif
+			li++	
+			@Li, 000 PSAY Repli("-",Limite)
+			li++	
+			If (nY == 1 .Or. nY == 3) .And. mv_par06==2
+				@Li, 001 PSAY IIF(nY==1,STR0134+" 1,65% ", STR0134+" 7,60% ")+STR0201
+				li++
+				li++
+				@Li, 001 PSAY STR0012 // Bens para Revenda
+				@Li, 095 PSAY (aMes[nI][2][3][1]+aMes[nI][2][3][2])*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY (aMes[nI][2][3][1]+aMes[nI][2][3][2])*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0013
+				@Li, 095 PSAY (aMes[nI][2][4][1]+aMes[nI][2][4][2])*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY (aMes[nI][2][4][1]+aMes[nI][2][4][2])*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0014
+				@Li, 095 PSAY (aMes[nI][2][6][1]+aMes[nI][2][6][2])*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY (aMes[nI][2][6][1]+aMes[nI][2][6][2])*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0015
+				@Li, 095 PSAY (aMes[nI][2][5][1]+aMes[nI][2][5][2])*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY (aMes[nI][2][5][1]+aMes[nI][2][5][2])*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0135
+				@Li, 095 PSAY (aMes[nI][2][20][1]+aMes[nI][2][20][2])*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY (aMes[nI][2][20][1]+aMes[nI][2][20][2])*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0136
+				@Li, 095 PSAY (aMes[nI][2][21][1]+aMes[nI][2][21][2])*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY (aMes[nI][2][21][1]+aMes[nI][2][21][2])*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0137
+				@Li, 095 PSAY (aMes[nI][2][23][1]+aMes[nI][2][23][2])*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY (aMes[nI][2][23][1]+aMes[nI][2][23][2])*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0138
+				@Li, 108 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0139 //09.Encargos de Depreciacao de Bens do Ativo Imobilizado
+				@Li, 095 PSAY nVDeprAt*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY nVDeprAt*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0140 // 10.Base de Calc. do Cred. a Desc. ref. Ativo Imob.
+				@Li, 095 PSAY nBsCrdAqI*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY nBsCrdAqE*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0141
+				@Li, 108 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++        
+				@Li, 001 PSAY IIF(nY==1,STR0142+"1,65%",STR0142+"7,60%")
+				@Li, 095 PSAY (aMes[nI][2][7][1]+aMes[nI][2][7][2])*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY (aMes[nI][2][7][1]+aMes[nI][2][7][2])*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0143
+				@Li, 095 PSAY (aMes[nI][2][22][1]+aMes[nI][2][22][2])*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY (aMes[nI][2][22][1]+aMes[nI][2][22][2])*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0144    //14.BASE DE CALCULO DOS CREDITOS A DESCONTAR
+				@Li, 095 PSAY (nTotVlMI+nTotVlEX)*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY (nTotVlMI+nTotVlEX)*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0145   //15.Creditos a Descontar"
+				@Li, 095 PSAY ((nTotVlMI+nTotVlEX)*nPercInt)*(IIF(nY==1,0.0165,0.076)) Picture "@E 99,999,999,999.99" 
+				@Li, 115 PSAY ((nTotVlMI+nTotVlEX)*nPercExt)*(IIF(nY==1,0.0165,0.076)) Picture "@E 99,999,999,999.99" 
+				li++
+				li++
+				@Li, 001 PSAY STR0027
+				li++
+				li++                        
+				@Li, 001 PSAY STR0146
+				@Li, 095 PSAY (aMes[nI][2][1][1]+aMes[nI][2][1][2])*nPercInt*0.008 Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY (aMes[nI][2][1][1]+aMes[nI][2][1][2])*nPercExt*0.008 Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0147
+				@Li, 108 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0148 //"18.Credito Presumido - Atividades Agroindustriais"
+				@Li, 095 PSAY (aMes[nI][2][2][1]+aMes[nI][2][2][2])*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY (aMes[nI][2][2][1]+aMes[nI][2][2][2])*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0149
+				@Li, 108 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0150
+				@Li, 108 PSAY "----"                 
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0151
+				@Li, 108 PSAY "----"                 
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY IIF(nY==1,STR0152,STR0187) //22.Creditos a Descontar de PIS/Pasep Importacao
+				@Li, 095 PSAY ((aMes[nI][2][24][1]+aMes[nI][2][24][2])*nPercInt)*(IIF(nY==1,0.0165,0.076)) Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY ((aMes[nI][2][24][1]+aMes[nI][2][24][2])*nPercExt)*(IIF(nY==1,0.0165,0.076)) Picture "@E 99,999,999,999.99"
+				li++			
+				@Li, 001 PSAY IIF(nY==1,STR0153,STR0188)
+				@Li, 108 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY IIF(nY==1,STR0154,STR0189)
+				@Li, 108 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0037 //outros creditos a descontar
+				@Li, 108 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				//
+				@Li, 001 PSAY STR0155 //"26.TOTAL DE OUTROS CREDITOS"
+				@Li, 095 PSAY ((aMes[nI][2][1][1]+aMes[nI][2][1][2])*nPercInt*0.008)+((aMes[nI][2][2][1]+aMes[nI][2][2][2])*nPercInt)+(((aMes[nI][2][24][1]+aMes[nI][2][24][2])*nPercInt)*(IIF(nY==1,0.0165,0.076)))*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY ((aMes[nI][2][1][1]+aMes[nI][2][1][2])*nPercExt*0.008)+((aMes[nI][2][2][1]+aMes[nI][2][2][2])*nPercExt)+(((aMes[nI][2][24][1]+aMes[nI][2][24][2])*nPercInt)*(IIF(nY==1,0.0165,0.076)))*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				//
+				nToCreMI := (((nTotVlMI+nTotVlEX)*nPercInt)*(IIF(nY==1,0.0165,0.076)))+(((aMes[nI][2][1][1]+aMes[nI][2][1][2])*nPercInt*0.008)+((aMes[nI][2][2][1]+aMes[nI][2][2][2])*nPercInt))+(((aMes[nI][2][24][1]+aMes[nI][2][24][2])*nPercInt)*(IIF(nY==1,0.0165,0.076)))
+				nToCreEX := (((nTotVlMI+nTotVlEX)*nPercExt)*(IIF(nY==1,0.0165,0.076)))+(((aMes[nI][2][1][1]+aMes[nI][2][1][2])*nPercExt*0.008)+((aMes[nI][2][2][1]+aMes[nI][2][2][2])*nPercExt))+(((aMes[nI][2][24][1]+aMes[nI][2][24][2])*nPercExt)*(IIF(nY==1,0.0165,0.076)))
+				//
+				@Li, 001 PSAY STR0156 //"27.TOTAL DE CREDITOS APURADO NO MES"
+				@Li, 095 PSAY (nToCreMI+nToCreEX)*nPercInt Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY (nToCreMI+nToCreEX)*nPercExt Picture "@E 99,999,999,999.99"
+				li++
+				li++
+				@Li, 001 PSAY STR0040
+				li++
+				li++
+				@Li, 001 PSAY STR0157
+				@Li, 108 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++                 
+				@Li, 001 PSAY STR0158
+				@Li, 108 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0159
+				@Li, 108 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0160
+				@Li, 108 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0161
+				@Li, 095 PSAY IIF(lFirst,(nToCreMI+nToCreEX)*nPercInt,IIF(nY==1,(nToMAMI1+nToCreMI+nToMAEX1+nToCreEX)*nPercInt,(nToMAMI3+nToCreMI+nToMAEX3+nToCreEX)*nPercInt)) Picture "@E 99,999,999,999.99" 
+				@Li, 115 PSAY IIF(lFirst,(nToCreMI+nToCreEX)*nPercExt,IIF(nY==1,(nToMAMI1+nToCreMI+nToMAEX1+nToCreEX)*nPercExt,(nToMAMI3+nToCreMI+nToMAEX3+nToCreEX)*nPercExt)) Picture "@E 99,999,999,999.99" 
+				If nY == 1
+					nToMAMI1 += nToCreMI
+					nToMAEX1 += nToCreEX
+				Else
+					nToMAMI3 += nToCreMI
+					nToMAEX3 += nToCreEX
+				Endif	
+			Else  // Calculo Pis/Cofins - 2 painel (Regime Nao Cumulativo + Regime Cumulativo)
+				@Li, 001 PSAY IIF (nY==2, STR0099, STR0124)
+				li++
+				li++
+				@Li, 001 PSAY STR0048
+				@Li, 88  PSAY aMes[nI][2][8][1] Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY aMes[nI][2][8][2] Picture "@E 99,999,999,999.99"
+				nTot   := aMes[nI][2][8][1]
+				nTotCum:= aMes[nI][2][8][2]
+				li++                 
+				@Li, 001 PSAY STR0100
+				@Li, 88  PSAY aMes[nI][2][9][1] Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY aMes[nI][2][9][2] Picture "@E 99,999,999,999.99"
+				nTot    += aMes[nI][2][9][1]
+				nTotCum += aMes[nI][2][9][2]
+				li++
+				@Li, 001 PSAY STR0050
+				@Li, 88  PSAY aMes[nI][2][10][1] Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY aMes[nI][2][10][2] Picture "@E 99,999,999,999.99"
+				nTot    += aMes[nI][2][10][1]
+				nTotCum += aMes[nI][2][10][2]
+				li++
+				@Li, 001 PSAY STR0051
+				@Li, 88  PSAY aMes[nI][2][16][1] Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY aMes[nI][2][16][2] Picture "@E 99,999,999,999.99"
+				nTot    += aMes[nI][2][16][1]
+				nTotCum += aMes[nI][2][16][2]
+				li++
+				@Li, 001 PSAY STR0052
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0053
+				@Li, 88  PSAY aMes[nI][2][11][1] Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY aMes[nI][2][11][2] Picture "@E 99,999,999,999.99"
+				nTot    += aMes[nI][2][11][1]
+				nTotCum += aMes[nI][2][11][2]
+				li++
+				@Li, 001 PSAY STR0054   // Receitas Financeiras
+				@Li, 88  PSAY nRecFinN Picture "@E 99,999,999,999.99"  //Nao cumulativo
+				@Li, 115 PSAY nRecFinC Picture "@E 99,999,999,999.99"  //Cumulativo
+				nTot    += nRecFinN
+				nTotCum += nRecFinC
+				li++
+				@Li, 001 PSAY STR0055
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0056   // Outras Receitas  
+				@Li, 88  PSAY nOutRecN Picture "@E 99,999,999,999.99"  //Nao cumulativo
+				@Li, 115 PSAY nOutRecC Picture "@E 99,999,999,999.99"  //Cumulativo
+				nTot    += nOutRecN
+				nTotCum += nOutRecC
+				li++
+				@Li, 001 PSAY STR0102 // total das receitas
+				@Li, 88  PSAY nTot    Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY nTotCum Picture "@E 99,999,999,999.99"
+				li++
+				li++
+				@Li, 001 PSAY STR0058 // Isencoes e Exclusoes
+				li++
+				li++
+				@Li, 001 PSAY IIF(nY==2,STR0163,STR0191) //com direito a creditos
+				@Li, 89  PSAY aMes[nI][2][12][1] Picture "@E 99,999,999,999.99"
+				@Li, 116 PSAY aMes[nI][2][12][2] Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY IIF(nY==2,STR0164,STR0192) //12.(-)Receitas de Exportacao sem Direito a Credito
+				@Li, 88  PSAY aMes[nI][2][25][1] Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY aMes[nI][2][25][2] Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0165
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0166
+				@Li, 88  PSAY aMes[nI][2][19][1] Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY aMes[nI][2][19][2] Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0167
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0064
+				@Li, 88  PSAY aMes[nI][2][15][1] Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY aMes[nI][2][15][2] Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0168
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0169
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0170  //19.(-)Vendas de Bens do Ativo Permanente
+				@Li, 88  PSAY aMes[nI][2][14][1] Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY aMes[nI][2][14][2] Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0171
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0172
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0173
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0174
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0175
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0073
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				li++
+				@Li, 001 PSAY IIF (nY==2, STR0176, STR0193) // Base de Calculo do Pis/Cofins
+				@Li, 88  PSAY nTotVRec Picture "@E 99,999,999,999.99"
+				@Li, 115 PSAY (nTotVCum)+(aMes[nI][2][8][2]) Picture "@E 99,999,999,999.99"
+				li++                            
+				@Li, 001 PSAY IIF (nY==2, STR0177, STR0194) // Contribuicao para o Pis/Cofins apurada
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				li++
+				@Li, 001 PSAY IIF (nY==2, STR0178, STR0195)
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY IIF (nY==2, STR0179, STR0196)
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				li++
+				@Li, 001 PSAY IIF (nY==2, STR0180, STR0197)
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++	                                
+				@Li, 001 PSAY IIF (nY==2, STR0181, STR0198)
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++
+				IF (nY==2)
+					li++
+					@Li, 001 PSAY STR0182
+					@Li, 101 PSAY "----"				
+					@Li, 128 PSAY "----"
+					li++
+					@Li, 001 PSAY STR0183
+					@Li, 101 PSAY "----"
+					@Li, 128 PSAY "----" 
+				EndIf
+				li++
+				li++
+				@Li, 001 PSAY STR0082
+				li++
+				li++                 
+				@Li, 001 PSAY IIF(nY==2, STR0184, STR0199)
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+				li++															
+				@Li, 001 PSAY IIF(nY==2, STR0185, STR0200)
+				@Li, 101 PSAY "----"
+				@Li, 128 PSAY "----"
+			Endif
+		Next // 
+	Else // regime cumulativo
+		//If (Li>58)
+			cCabec1:= cCabec3+Space(45)+Alltrim(MesExtenso(aMes[nI][1]))
+			cCabec2:= cCabec4
+		//	li := cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15)
+		//	li++
+		//Endif
+		//
+		For nY:= 1 To 2 // Pis e Cofins - Regime Cumulativo
+			//
+			//If nY <> 1
+				li := cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15)
+				li++
+			//Endif
+			If nY == 1 // Pis
+				@Li, 001 PSAY STR0098//ficha 08a --> PIS
+			Else // Cofins
+				@Li, 001 PSAY STR0123 //ficha 14a --> COFINS
+			Endif
+				li++
+				@Li, 000 PSAY Repli("-",Limite)
+				li++
+				@Li, 001 PSAY IIF (nY==1, STR0099, STR0124)
+				li++
+				li++				
+				@Li, 001 PSAY STR0048 //01.Receita da Exportacao de Bens e Servicos
+				@Li, 115 PSAY aMes[nI][2][8][2] Picture "@E 99,999,999,999.99"
+				nTotCum:= aMes[nI][2][8][2]
+				li++                 
+				@Li, 001 PSAY STR0100
+				@Li, 115 PSAY aMes[nI][2][9][2] Picture "@E 99,999,999,999.99"
+				nTotCum += aMes[nI][2][9][2]
+				li++
+				@Li, 001 PSAY STR0050
+				@Li, 115 PSAY aMes[nI][2][10][2] Picture "@E 99,999,999,999.99"
+				nTotCum += aMes[nI][2][10][2]
+				li++
+				@Li, 001 PSAY STR0051
+				@Li, 115 PSAY aMes[nI][2][16][2] Picture "@E 99,999,999,999.99"
+				nTotCum += aMes[nI][2][16][2]
+				li++
+				@Li, 001 PSAY STR0052
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0053
+				@Li, 115 PSAY aMes[nI][2][11][2] Picture "@E 99,999,999,999.99"
+				nTotCum += aMes[nI][2][11][2]
+				li++
+				@Li, 001 PSAY STR0101 //07
+				@Li, 128 PSAY "----"			
+				li++
+				@Li, 001 PSAY STR0055
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0056 // outras receitas
+				@Li, 115 PSAY aMes[nI][2][17][2] Picture "@E 99,999,999,999.99"
+				nTotCum += aMes[nI][2][17][2]
+				li++
+				@Li, 001 PSAY STR0102 // total das receitas
+				@Li, 115 PSAY nTotCum Picture "@E 99,999,999,999.99"
+				li++
+				li++
+				@Li, 001 PSAY STR0058 // Isencoes e Exclusoes
+				li++
+				li++
+				@Li, 001 PSAY STR0026 //11.(-)Receitas de Exportacao
+				@Li, 115 PSAY aMes[nI][2][8][2] Picture "@E 99,999,999,999.99" //Aqui
+				li++
+				@Li, 001 PSAY STR0103 //12.(-)Receitas Isentas, nao Alcancadas Inc.Contribuicao, com Susp. ou Sujeitas a Aliq. Zero
+				@Li, 115 PSAY aMes[nI][2][17][2] Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0104 // 13.(-)Vendas Canceladas, Devolucoes e Descontos Incondicionais 
+				@Li, 115 PSAY aMes[nI][2][19][2] Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0045 //14.
+				@Li, 115 PSAY aMes[nI][2][15][2] Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0105
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0106 //16.
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0107  //17.(-)Resultados Positivos em Participacoes Societarias e em SCP
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0077
+				@Li, 115 PSAY aMes[nI][2][14][2] Picture "@E 99,999,999,999.99"
+				li++
+				@Li, 001 PSAY STR0108 //19.
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0109
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0110//21
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0111
+				@Li, 128 PSAY "----"			
+				li++
+				@Li, 001 PSAY STR0112
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY STR0086 // 24.(-)Outras Exclusoes
+				@Li, 128 PSAY "----"
+				li++
+				@Li, 001 PSAY IIF (nY==1, STR0113,STR0125)
+				@Li, 115 PSAY nTotVCum Picture "@E 99,999,999,999.99"
+				li++                            
+				@Li, 001 PSAY IIF (nY==1, STR0114,STR0126)
+				@Li, 128 PSAY "----"			
+				li++
+				li++
+				@Li, 001 PSAY IIF (nY==1, STR0115,STR0127)
+				@Li, 128 PSAY "----"			
+				li++
+				@Li, 001 PSAY IIF (nY==1, STR0116,STR0128)
+				@Li, 128 PSAY "----"			
+				li++
+				li++
+				@Li, 001 PSAY IIF (nY==1, STR0117,STR0129)
+				@Li, 128 PSAY "----"
+				li++	                                
+				@Li, 001 PSAY IIF (nY==1, STR0118,STR0130)
+				@Li, 128 PSAY "----"
+				li++
+				IF (nY==1) //Pis/Pasep
+					li++
+					@Li, 001 PSAY STR0119
+					@Li, 128 PSAY "----"
+					li++
+					@Li, 001 PSAY STR0120
+					@Li, 128 PSAY "----"
+				EndIf
+				li++
+				li++
+				@Li, 001 PSAY STR0082 // informacoes complementares
+				li++
+				li++                 
+				@Li, 001 PSAY IIF(nY==1, STR0121,STR0131)
+				@Li, 128 PSAY "----"
+				li++															
+				@Li, 001 PSAY IIF(nY==1, STR0122,STR0132)
+				@Li, 128 PSAY "----"
+		Next
+	Endif
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Imprime Ficha 09 - PIS/PASEP - Aliquotas Diferenciadas ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If mv_par07 == 2
+		Impf09(aMes[nI,1],Titulo,nPagina,NomeProg,Tamanho,cCabec1)	
+	Endif
+Next (nY)
+
+Return(.T.)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Program   ³Gravaf09  ³ Autor ³Sergio S. Fuzinaka     ³ Data ³   12.08.2005   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³Grava a Ficha 09(PIS/PASEP) - Diferencial de Aliquota             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³MATR951                                                           ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/                                                                                
+Static Function Gravaf09(nMes,cItem,nPPis,nPCofins,nValor)
+
+Local aArea	:= GetArea()
+
+If cItem == "01"	//Receitas de Vendas
+	nValor := SD2->D2_TOTAL+SD2->D2_ICMSRET+SD2->D2_VALFRE+SD2->D2_SEGURO+SD2->D2_DESPESA+SD2->D2_VALIPI
+Endif
+
+dbSelectArea("TMP")
+dbSetOrder(1)
+If !dbSeek(StrZero(nMes,2)+cItem+Str(nPPis,5,2)+Str(nPCofins,5,2))
+	RecLock("TMP",.T.)
+	TMP->MES	:= StrZero(nMes,2)
+	TMP->CODIGO	:= SD2->D2_COD
+	TMP->ITEM	:= cItem
+	TMP->PIS	:= nPPis
+	TMP->COFINS	:= nPCofins
+Else
+	RecLock("TMP",.F.)
+Endif
+TMP->VALOR	+= nValor
+MsUnlock()
+
+RestArea(aArea)
+
+Return Nil
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Program   ³Impf09    ³ Autor ³Sergio S. Fuzinaka     ³ Data ³   12.08.2005   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³Imprime a Ficha 09(PIS/PASEP) - Diferencial de Aliquota           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³MATR951                                                           ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/                                                                                
+Static Function Impf09(nMes,Titulo,nPagina,NomeProg,Tamanho,cCabec1)
+
+Local aArea		:= GetArea()
+Local cCabec2	:= Left(STR0095,13)
+Local cMes		:= StrZero(nMes,2)
+Local cCod		:= ""
+Local nLin		:= 0
+Local nPis		:= 0
+Local nItem1	:= 0
+Local nItem2	:= 0
+Local nItem3	:= 0
+
+dbSelectArea("TMP")
+If dbSeek(cMes)
+	nPis := TMP->PIS
+	cCod := TMP->CODIGO
+	While !Eof() .And. TMP->MES == cMes
+		While !Eof() .And. TMP->MES == cMes .And. TMP->PIS == nPis
+			Do Case
+				Case TMP->ITEM == "01"	;	nItem1 := TMP->VALOR
+				Case TMP->ITEM == "02"	;	nItem2 := TMP->VALOR				
+				Case TMP->ITEM == "03"	;	nItem3 := TMP->VALOR				
+			EndCase			
+			dbSelectArea("TMP")
+			dbSkip()
+		Enddo
+		nLin := Cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15)
+		@ ++nLin	, 001 PSAY OemToAnsi(STR0207)	//"Ficha 09  - Calculo da Contribuicao para o PIS/PASEP - Aliquotas Diferenciadas"
+		@ ++nLin	, 000 PSAY Replicate("-",Limite)
+		@ ++nLin	, 001 PSAY "Produto: " + Alltrim(cCod) + " - " + Alltrim(Posicione("SB1",1,xFilial("SB1")+cCod,"B1_DESC"))
+		@ ++nLin	, 000 PSAY Replicate("-",Limite)
+		@ ++nLin	, 001 PSAY Substr(OemToAnsi(STR0113),4,48)	//"BASE DE CALCULO DA CONTRIBUICAO PARA O PIS/PASEP"
+		@ ++nLin	, 001 PSAY OemToAnsi(STR0204) 	//"01.Receitas de Vendas"
+		@ nLin		, 115 PSAY nItem1 Picture "@E 99,999,999,999.99"			
+		@ ++nLin	, 001 PSAY "02."+Substr(OemToAnsi(STR0166),4)	//"02.(-)Vendas Canceladas e Descontos Incondicionais"
+		@ nLin		, 115 PSAY nItem2 Picture "@E 99,999,999,999.99"						
+		@ ++nLin	, 001 PSAY OemToAnsi(STR0206)	//"03.(-)Outras Exclusoes"
+		@ nLin		, 115 PSAY nItem3 Picture "@E 99,999,999,999.99"						
+		@ ++nLin	, 001 PSAY "04."+Substr(OemToAnsi(STR0113),4,48)	//"04.BASE DE CALCULO DA CONTRIBUICAO PARA O PIS/PASEP"	
+		@ nLin		, 115 PSAY (nItem1-(nItem2+nItem3)) Picture "@E 99,999,999,999.99"	
+		@ ++nLin	, 001 PSAY "05."+Subs(OemToAnsi(STR0114),4,37)		//"05.Contribuicao para o PIS/PASEP Apurada"
+		@ nLin		, 115 PSAY (((nItem1-(nItem2+nItem3))*nPis)/100) Picture "@E 99,999,999,999.99"
+		nPis 	:= TMP->PIS
+		cCod 	:= TMP->CODIGO		
+		nItem1	:= 0
+		nItem2	:= 0
+		nItem3	:= 0
+	Enddo
+Endif
+RestArea(aArea)
+
+Return Nil
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Program   ³GeraTmp   ³ Autor ³Sergio S. Fuzinaka     ³ Data ³   12.08.2005   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³Gera arquivo temporario para impressao das fichas 9 e 15          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³MATR951                                                           ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/                                                                                
+Static Function GeraTmp()
+
+Local aStru	:= {}
+Local cArq	:= ""
+
+AADD(aStru,{"MES"		,"C",002,0})	//Mes de Referencia
+AADD(aStru,{"CODIGO"	,"C",015,0})	//Codigo do Produto
+AADD(aStru,{"ITEM"		,"C",002,0})	//Numero do Item: 01.Receitas de Vendas; 02.(-)Vendas Canc. e Desc. Incondic.; 03.(-)Outras Exclusoes
+AADD(aStru,{"PIS"		,"N",005,2})	//Aliquota PIS/PASEP
+AADD(aStru,{"COFINS"	,"N",005,2})	//Aliquota COFINS
+AADD(aStru,{"VALOR"		,"N",015,2})	//Valor 
+
+cArq := CriaTrab(aStru)
+dbUseArea(.T.,__LocalDriver,cArq,"TMP")
+IndRegua("TMP",cArq,"MES+ITEM+STR(PIS,5,2)+STR(COFINS,5,2)")
+
+Return Nil
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Program   ³R951RetPer³ Autor ³Sergio S. Fuzinaka     ³ Data ³   24.02.2006   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³Retorna a periodicidade conforme as datas informadas              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³MATR951                                                           ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/                                                                                
+Static Function R951RetPer(dDtIni,dDtFin)
+
+Local aRet			:= {}
+Local nMesIni		:= Month(dDtIni)
+Local nMesFim		:= Month(dDtFin)
+Local cTrimestre	:= OemToAnsi(STR0094)+StrZero(Year(dDtFin),4)+" - "
+Local cSemestre		:= OemToAnsi(STR0208)+StrZero(Year(dDtFin),4)+" - "
+
+If nMesIni <> nMesFim
+	Do Case
+		Case nMesIni ==  1 .And. nMesFim ==  6
+			aRet := {"1"+cSemestre,.F.}	//1o. Semestre
+		Case nMesIni ==  7 .And. nMesFim == 12
+			aRet := {"2"+cSemestre,.F.}	//2o. Semestre
+		Case nMesIni ==  1 .And. nMesFim ==  3
+			aRet := {"1"+cTrimestre,.F.}	//1o. Trimestre
+		Case nMesIni ==  4 .And. nMesFim ==  6
+			aRet := {"2"+cTrimestre,.F.}	//2o. Trimestre
+		Case nMesIni ==  7 .And. nMesFim ==  9
+			aRet := {"3"+cTrimestre,.F.}	//3o. Trimestre
+		Case nMesIni == 10 .And. nMesFim == 12
+			aRet := {"4"+cTrimestre,.F.}	//4o. Trimestre
+		Otherwise
+			aRet := {"",.T.}				//Periodo Incorreto
+	EndCase
+Else
+	aRet := {Space(Len(cTrimestre)),.F.}	//Mensal	
+Endif
+
+Return(aRet)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³AjustaSX1 ³ Autor ³ Nereu Humberto Jr     ³ Data ³12.12.2002³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Cria as perguntas necesarias para o programa                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao Efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function AjustaSX1()
+
+Local aHelpPor :={} 
+Local aHelpEng :={} 
+Local aHelpSpa :={} 
+      
+dbSelectArea("SX1")
+dbSetOrder(1)
+
+/*-----------------------MV_PAR01--------------------------*/
+Aadd( aHelpPor, "Informe a Data Inicial do Período da    " )
+Aadd( aHelpPor, "Apuração. Somente serão aceitas as      " )
+Aadd( aHelpPor, "periodicidades: mensal, trimestral e    " )
+Aadd( aHelpPor, "semestral.                              " )
+
+Aadd( aHelpEng, "Informe a Data Inicial do Período da    " )
+Aadd( aHelpEng, "Apuração. Somente serão aceitas as      " )
+Aadd( aHelpEng, "periodicidades: mensal, trimestral e    " )
+Aadd( aHelpEng, "semestral.                              " )
+
+Aadd( aHelpSpa, "Informe a Data Inicial do Período da    " )
+Aadd( aHelpSpa, "Apuração. Somente serão aceitas as      " )
+Aadd( aHelpSpa, "periodicidades: mensal, trimestral e    " )
+Aadd( aHelpSpa, "semestral.                              " )
+
+If dbSeek("MTR95101")
+	If SX1->X1_TIPO <> "D"
+		RecLock("SX1",.F.)
+		dbDelete()
+		MsUnlock()
+	Endif
+Endif
+PutSx1( "MTR951","01","Data Inicial","Data Inicial","Data Inicial","mv_ch1",;
+"D",8,0,0,"G","","","","","mv_par01","","","","","","","","","","","","","","","","",;
+aHelpPor,aHelpEng,aHelpSpa)
+		
+aHelpPor :={} 
+aHelpEng :={} 
+aHelpSpa :={} 
+/*-----------------------MV_PAR02--------------------------*/
+Aadd( aHelpPor, "Informe a Data Final do Período da      " )
+Aadd( aHelpPor, "Apuração. Somente serão aceitas as      " )
+Aadd( aHelpPor, "periodicidades: mensal, trimestral e    " )
+Aadd( aHelpPor, "semestral.                              " )
+
+Aadd( aHelpEng, "Informe a Data Final do Período da      " )
+Aadd( aHelpEng, "Apuração. Somente serão aceitas as      " )
+Aadd( aHelpEng, "periodicidades: mensal, trimestral e    " )
+Aadd( aHelpEng, "semestral.                              " )
+
+Aadd( aHelpSpa, "Informe a Data Final do Período da      " )
+Aadd( aHelpSpa, "Apuração. Somente serão aceitas as      " )
+Aadd( aHelpSpa, "periodicidades: mensal, trimestral e    " )
+Aadd( aHelpSpa, "semestral.                              " )
+
+If dbSeek("MTR95102")
+	If SX1->X1_TIPO <> "D"
+		RecLock("SX1",.F.)
+		dbDelete()
+		MsUnlock()
+	Endif
+Endif
+PutSx1( "MTR951","02","Data Final","Data Final","Data Final","mv_ch2",;
+"D",8,0,0,"G","","","","","mv_par02","","","","","","","","","","","","","","","","",;
+aHelpPor,aHelpEng,aHelpSpa)
+
+aHelpPor :={} 
+aHelpEng :={} 
+aHelpSpa :={} 
+/*-----------------------MV_PAR03--------------------------*/
+Aadd( aHelpPor, "Informe numero do livro a ser processado" )
+Aadd( aHelpEng, "Informe numero do livro a ser processado" )
+Aadd( aHelpSpa, "Informe numero do livro a ser processado" ) 
+
+PutSx1( "MTR951","03","Livro Selecionado","Livro Selecionado","Livro Selecionado","mv_ch3",;
+"C",1,0,0,"G","","","","","mv_par03","","","","","","","","","","","","","","","","",;
+aHelpPor,aHelpEng,aHelpSpa)
+
+aHelpPor :={} 
+aHelpEng :={} 
+aHelpSpa :={} 
+/*-----------------------MV_PAR04--------------------------*/
+Aadd( aHelpPor, "Informe a filial inicial das informações ")
+Aadd( aHelpPor, "apuradas.                               " )
+//
+Aadd( aHelpEng, "Informe a filial inicial das informações ")
+Aadd( aHelpeng, "apuradas.                               " )
+//
+Aadd( aHelpSpa, "Informe a filial inicial das informações ")
+Aadd( aHelpSpa, "apuradas.                               " )
+
+
+PutSx1( "MTR951","04","Filial de","Filial de","Filial de","mv_ch4",;
+"C",2,0,0,"G","","","","","mv_par04","","","","","","","","","","","","","","","","",;
+aHelpPor,aHelpEng,aHelpSpa)
+
+aHelpPor :={} 
+aHelpEng :={} 
+aHelpSpa :={} 
+/*-----------------------MV_PAR05--------------------------*/
+Aadd( aHelpPor, "Informe a filial final das informações  " )
+Aadd( aHelpPor, "apuradas.                               " )
+//
+Aadd( aHelpEng, "Informe a filial final das informações  " )
+Aadd( aHelpeng, "apuradas.                               " )
+//
+Aadd( aHelpSpa, "Informe a filial final das informações   ")
+Aadd( aHelpSpa, "apuradas.                               " )
+
+
+PutSx1( "MTR951","05","Filial ate","Filial ate","Filial de","mv_ch5",;
+"C",2,0,0,"G","","","","","mv_par05","","","","","","","","","","","","","","","","",;
+aHelpPor,aHelpEng,aHelpSpa)
+       
+aHelpPor :={} 
+aHelpEng :={} 
+aHelpSpa :={} 
+/*-----------------------MV_PAR06--------------------------*/
+Aadd( aHelpPor, "Regime de Apuracao de Pis/Pasep e Cofins" )
+//
+Aadd( aHelpEng, "Regime de Apuracao de Pis/Pasep e Cofins" )
+//
+Aadd( aHelpSpa, "Regime de Apuracao de Pis/Pasep e Cofins")
+
+PutSx1( "MTR951","06","Regime de Apuracao","Regime de Apuracao","Regime de Apuracao","mv_ch6",;
+"N",1,0,1,"C","","","","","mv_par06","Cumulativo","Cumulativo","Cumulativo","","Nao Cumulativo","Nao Cumulativo","Nao Cumulativo","","","","","","","","","",;
+aHelpPor,aHelpEng,aHelpSpa)
+
+aHelpPor :={} 
+aHelpEng :={} 
+aHelpSpa :={} 
+/*-----------------------MV_PAR07--------------------------*/
+Aadd( aHelpPor, "Imprime a Ficha 09-PIS/PASEP - Aliquota " )
+Aadd( aHelpPor, "Diferenciada                            " )
+//
+Aadd( aHelpEng, "Imprime a Ficha 09-PIS/PASEP - Aliquota " )
+Aadd( aHelpEng, "Diferenciada                            " )
+//
+Aadd( aHelpSpa, "Imprime a Ficha 09-PIS/PASEP - Aliquota " )
+Aadd( aHelpSpa, "Diferenciada                            " )
+
+PutSx1( "MTR951","07","Imprime Ficha 09","Imprime Ficha 09","Imprime Ficha 09","mv_ch7",;
+"N",1,0,1,"C","","","","","mv_par07","Nao","Nao","Nao","","Sim","Sim","Sim","","","","","","","","","",;
+aHelpPor,aHelpEng,aHelpSpa)
+Return

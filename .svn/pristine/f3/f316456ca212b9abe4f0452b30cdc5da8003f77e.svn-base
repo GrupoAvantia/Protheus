@@ -1,0 +1,600 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATR650.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr650.prx"
+#line 1 ""
+#line 18 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr650.prx"
+Function MATR650()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And.  TRepInUse()
+
+	oReport := ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR650R3()
+EndIf
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportDef()
+
+Local oReport
+Local nQuant    := 0
+Local lValadi	:= cPaisLoc == "MEX" .AND.  SD2->(FieldPos("D2_VALADI")) > 0
+
+
+	Local cAliasQry := GetNextAlias()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+oReport := TReport():New("MATR650",If( cPaisLoc $ "ANG|PTG", "Relação das facturas para as transportadoras", "Relacao das Notas Fiscais para as Transportadoras" ),"MTR650", {|oReport| ReportPrint(oReport,cAliasQry)},If( cPaisLoc $ "ANG|PTG", "Este programa irá emitir a relação de facturas por", "Este programa ira emitir a relacao de notas fiscais por" ) + " " + If( cPaisLoc $ "ANG|PTG", "Ordem De Transportadora.", "ordem de Transportadora." ))
+oReport:SetPortrait()
+oReport:SetTotalInLine( .F. )
+
+
+
+
+Pergunte(oReport:uParam, .F. )
+
+
+
+
+oNFTransp := TRSection():New(oReport,"Notas Fiscais",{"SF2","SD2","SA4"},,,)
+oNFTransp:SetTotalInLine( .F. )
+
+TRCell():New(oNFTransp,"CTEXTO"		, ,"Data Hora"				,					,11							,,{|| "    |    | "															})
+TRCell():New(oNFTransp,"F2_DOC"		,"SF2"		,RetTitle("F2_DOC")		,PesqPict("SF2","F2_DOC")		,TamSx3("F2_DOC"		)[1],,{|| (cAliasQry)->F2_DOC 											},,,,,, .F. )
+TRCell():New(oNFTransp,"F2_SERIE"	,"SF2"		,RetTitle("F2_SERIE")	,PesqPict("SF2","F2_SERIE")		,TamSx3("F2_SERIE"		)[1],,{|| (cAliasQry)->F2_SERIE 											})
+TRCell():New(oNFTransp,"F2_VOLUME1"	,"SF2"		,"Volume"				,PesqPict("SF2","F2_VOLUME1")	,TamSx3("F2_VOLUME1"	)[1],,{|| (cAliasQry)->F2_VOLUME1 										})
+TRCell():New(oNFTransp,"CNOME"		,	,If( cPaisLoc $ "ANG|PTG", "N o m e  do  c l i e n t e", "N o m e  do  C l i e n t e" )				,PesqPict("SA1","A1_NOME")		,TamSx3("A1_NOME"		)[1],,{|| IIF((cAliasQry)->F2_TIPO $ "NCIP",SA1->A1_NOME,SA2->A2_NOME) 	})
+TRCell():New(oNFTransp,"NQUANT"		,	,"Quantidade"				,PesqPict("SD2","D2_QUANT")		,TamSx3("D2_QUANT"		)[1],,{|| nQuant 															})
+If lValadi
+	TRCell():New(oNFTransp,"NVALADI",	,RetTitle("F2_VALADI")	,PesqPict("SF2","F2_VALADI")	,TamSx3("F2_VALADI"		)[1],,{|| nValadi 														})
+EndIf
+TRCell():New(oNFTransp,"F2_VALBRUT"	,"SF2"		,RetTitle("F2_VALBRUT")	,PesqPict("SF2","F2_VALBRUT")	,TamSx3("F2_VALBRUT"	)[1],,{|| xMoeda((cAliasQry)->F2_VALBRUT,1,mv_par05,(cAliasQry)->F2_EMISSAO)})
+TRCell():New(oNFTransp,"CMUN"		, ,If( cPaisLoc $ "ANG|PTG", "Concelho", "Municipio" )				,PesqPict("SA1","A1_MUN")		,TamSx3("A1_MUN"		)[1],,{|| IIF((cAliasQry)->F2_TIPO $ "NCIP",SA1->A1_MUN,SA2->A2_MUN) 		})
+TRCell():New(oNFTransp,"CEST"		,	,RetTitle("A1_EST")		,PesqPict("SA1","A1_EST")		,TamSx3("A1_EST"		)[1],,{|| IIF((cAliasQry)->F2_TIPO $ "NCIP",SA1->A1_EST,SA2->A2_EST) 		})
+TRCell():New(oNFTransp,"F2_PBRUTO"	,"SF2"		,RetTitle("F2_PBRUTO")	,PesqPict("SF2","F2_PBRUTO")	,TamSx3("F2_PBRUTO"		)[1],,{|| (cAliasQry)->F2_PBRUTO 										})
+
+TRFunction():New(oNFTransp:Cell("F2_DOC"		),,"COUNT"	,,,,, .T. , .F. ,)
+TRFunction():New(oNFTransp:Cell("F2_VOLUME1"	),,"SUM"	,,,,, .T. , .F. ,)
+TRFunction():New(oNFTransp:Cell("NQUANT"		),,"SUM"	,,,,, .T. , .F. ,)
+If lValadi
+	TRFunction():New(oNFTransp:Cell("NVALADI"		),,"SUM"	,,,,, .T. , .F. ,)
+EndIf
+TRFunction():New(oNFTransp:Cell("F2_VALBRUT"	),,"SUM"	,,,,, .T. , .F. ,)
+TRFunction():New(oNFTransp:Cell("F2_PBRUTO"		),,"SUM"	,,,,, .T. , .F. ,)
+
+
+
+
+oReport:Section(1):SetHeaderPage()
+
+
+
+
+oNFTransp:SetPageBreak( .T. )
+
+
+
+
+TRPosition():New(oReport:Section(1),"SA4",1,{|| xFilial("SA4")+(cAliasQry)->F2_TRANSP})
+
+Return(oReport)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportPrint(oReport,cAliasQry)
+
+Local cTransp 	:= ""
+Local lValadi	:= cPaisLoc == "MEX" .AND.  SD2->(FieldPos("D2_VALADI")) > 0
+Local cExpAdi	:= Iif(lValadi,"%MIN(F2_VALADI) F2_VALADI,%","%%")
+
+
+
+
+	Local cWhere    := ""
+
+
+
+
+
+
+
+oReport:Section(1):Cell("NQUANT" 	):SetBlock({|| nQuant		})
+
+
+
+
+oReport:SetTitle(oReport:Title() + " - " + GetMv("MV_MOEDA"+STR(mv_par05,1)) )
+
+
+
+
+MakeSqlExpr(oReport:uParam)
+
+
+
+
+
+
+
+
+
+
+	cWhere := "% AND NOT ("+IsRemito(2,"F2_TIPODOC")+")"
+	If mv_par09 == 1
+		cWhere += " AND F2_TIPO <> 'D'"
+	EndIf
+	If mv_par08 == 1
+		cWhere += " AND F2_TIPO <> 'B'"
+	EndIf
+	cWhere += "%"
+
+	dbSelectArea("SF2")
+	dbSetOrder(1)
+
+	oReport:Section(1):BeginQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasQry," SELECT MIN(F2_FILIAL) F2_FILIAL, MIN(F2_TIPO) F2_TIPO, F2_DOC, F2_SERIE, MIN(F2_EMISSAO) F2_EMISSAO, MIN(F2_CLIENTE) F2_CLIENTE ,MIN(F2_LOJA) F2_LOJA ,MIN(F2_TRANSP) F2_TRANSP ,MIN(F2_VOLUME1) F2_VOLUME1,  "+___SQLGetValue(CEXPADI)+" MIN(F2_VALBRUT) F2_VALBRUT,MIN(F2_PBRUTO) F2_PBRUTO ,MIN(A4_NOME) A4_NOME ,SUM(D2_QUANT) TOTQUANT FROM  "+RetSqlName('SF2')+" SF2 LEFT JOIN  "+RetSqlName('SA4')+" SA4 ON A4_FILIAL =  '" +xFilial('SA4')+"'  AND A4_COD = F2_TRANSP AND SA4.D_E_L_E_T_= ' ',  "+RetSqlName('SD2')+" SD2 WHERE F2_FILIAL =  '" +xFilial('SF2')+"'  AND F2_DOC >=  "+___SQLGetValue(MV_PAR03)+" AND F2_DOC <=  "+___SQLGetValue(MV_PAR04)+" AND F2_EMISSAO >=  "+___SQLGetValue(DTOS(MV_PAR06))+" AND F2_EMISSAO <=  "+___SQLGetValue(DTOS(MV_PAR07))+" AND F2_TRANSP >=  "+___SQLGetValue(MV_PAR01)+" AND F2_TRANSP <=  "+___SQLGetValue(MV_PAR02)+" AND F2_DOC = D2_DOC AND F2_SERIE = D2_SERIE AND SF2.D_E_L_E_T_= ' ' AND SD2.D_E_L_E_T_= ' '  "+___SQLGetValue(CWHERE)+" GROUP BY F2_DOC,F2_SERIE ORDER BY F2_FILIAL,F2_TRANSP,F2_DOC,F2_SERIE",{},.F.)
+	oReport:Section(1):EndQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+oReport:SetMeter((cAliasQry)->(LastRec()))
+dbSelectArea(cAliasQry)
+oReport:Section(1):Init()
+
+While !oReport:Cancel() .And.  !(cAliasQry)->(Eof()) .And.  xFilial("SF2")=F2_FILIAL
+
+
+
+
+	cTransp := (cAliasQry)->F2_TRANSP
+
+
+
+
+
+
+	oReport:PrintText("Transportadora" + " " + (cAliasQry)->F2_TRANSP + " - " + A4_NOME)
+	oReport:SkipLine()
+
+	dbSelectArea(cAliasQry)
+	While !oReport:Cancel() .And.  !(cAliasQry)->(Eof()) .And.  xFilial("SF2") = F2_FILIAL .And.  F2_TRANSP = cTransp
+
+
+
+
+
+
+
+
+
+
+
+
+			nQuant := (cAliasQry)->TOTQUANT
+
+
+		nValadi	:= Iif(lValadi,(cAliasQry)->F2_VALADI,0)
+
+		If !(cAliasQry)->F2_TIPO $ "DB"
+			TRPosition():New(oReport:Section(1),"SA1",1,{|| xFilial("SA1")+(cAliasQry)->F2_CLIENTE+(cAliasQry)->F2_LOJA })
+		Else
+			TRPosition():New(oReport:Section(1),"SA2",1,{|| xFilial("SA1")+(cAliasQry)->F2_CLIENTE+(cAliasQry)->F2_LOJA })
+		Endif
+		oReport:Section(1):PrintLine()
+		dbSelectArea(cAliasQry)
+		dbSkip()
+		oReport:IncMeter()
+	End
+
+	oReport:Section(1):SetTotalText(If( cPaisLoc $ "ANG|PTG", "Total Da Transportadora", "Total da Transportadora" ) + " " + cTransp)
+	oReport:Section(1):Finish()
+
+
+	oReport:nrow := 5000
+	oReport:skipLine()
+
+	oReport:Section(1):Init()
+
+End
+
+oReport:Section(1):SetPageBreak( .T. )
+
+
+
+
+(cAliasQry)->(dbCloseArea())
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function Matr650R3()
+
+
+
+LOCAL CbTxt,titulo
+LOCAL cDesc1 :=OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Este programa irá emitir a relação de facturas por", "Este programa ira emitir a relacao de notas fiscais por" ))
+LOCAL cDesc2 :=OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Ordem De Transportadora.", "ordem de Transportadora." ))
+LOCAL cDesc3 :=""
+LOCAL CbCont,wnrel
+LOCAL tamanho:="M"
+LOCAL limite :=132
+LOCAL cString:="SF2"
+
+PRIVATE aReturn := { If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ), 1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 1, 2, 1, "",1 }
+PRIVATE nomeprog:="MATR650"
+PRIVATE aLinha  := { },nLastKey := 0
+PRIVATE cPerg   :="MTR650"
+PRIVATE cVolPict:=PesqPict("SF2","F2_VOLUME1",8)
+
+
+
+
+titulo := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Relação Das Facturas Para As Transportadoras", "Relacao das Notas Fiscais para as Transportadoras" ))
+
+
+
+
+
+cbtxt    := SPACE(10)
+cbcont   := 0
+li       :=80
+m_pag    :=1
+
+
+
+pergunte("MTR650", .F. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+wnrel:="MATR650"
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3, .F. ,"",,Tamanho)
+
+If nLastKey==27
+	dbClearFilter()
+   Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey==27
+	dbClearFilter()
+   Return
+Endif
+
+RptStatus({|lEnd| C650Imp(@lEnd,wnRel,cString)},Titulo)
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function C650Imp(lEnd,WnRel,cString)
+
+
+
+
+LOCAL CbTxt,titulo
+
+LOCAL CbCont,cabec1,cabec2
+LOCAL tamanho:="M"
+LOCAL nNumNota,nTotVol,nTotQtde,nTotPeso,nTotVal,nQuant,lContinua:= .T. 
+LOCAL nTamNF := TamSX3("F2_DOC")[1]
+Local cCond  := ""
+
+
+
+titulo := If( cPaisLoc $ "ANG|PTG", "Relação Das Facturas Para As Transportadoras", "RELACAO DAS NOTAS FISCAIS PARA AS TRANSPORTADORAS" ) + " - " + GetMv("MV_MOEDA" + STR(MV_PAR05,1))
+cabec1 := IIF(mv_par08==1,If( cPaisLoc $ "ANG|PTG", "REC.DEP  |EMPRESA FACTURA          VOLUME  N O M E  D O  C L I E N T E QUANTIDADE           VALOR  CONCELHO        DT  PESO BRUTO ", "REC.DEP  |EMPRESA N.FISCAL          VOLUME  N O M E  D O  C L I E N T E QUANTIDADE           VALOR  MUNICIPIO        UF  PESO BRUTO " ),If( cPaisLoc $ "ANG|PTG", "REC.DEP  |EMPRESA FACTURA           VOLUME NOME DO CLIENTE/FORNECEDOR  QUANTIDADE           VALOR  CONCELHO        DT  PESO BRUTO", "REC.DEP  |EMPRESA N.FISCAL           VOLUME NOME DO CLIENTE/FORNECEDOR  QUANTIDADE           VALOR  MUNICIPIO        UF  PESO BRUTO" ))
+
+
+cabec2 := If( cPaisLoc $ "ANG|PTG", "Data Hora|", "DATA HORA|" )
+
+nTipo  := IIF(aReturn[4]==1,15,18)
+
+
+
+cbtxt    := SPACE(10)
+cbcont   := 0
+li       :=80
+m_pag    :=1
+
+dbSelectArea("SF2")
+cIndice := criatrab("", .f. )
+cCond   := "Dtos(F2_EMISSAO)>='"+Dtos(mv_par06)+"'.And.Dtos(F2_EMISSAO)<='"+Dtos(mv_par07)+"'"
+cCond   += " .And. !("+IsRemito(2,"SF2->F2_TIPODOC")+")"
+
+IndRegua("SF2",cIndice,"F2_FILIAL+F2_TRANSP+F2_DOC+F2_SERIE",,cCond,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+
+dbSeek(xFilial(Alias())+mv_par01, .T. )
+SetRegua(RecCount())
+
+While !Eof() .And.  xFilial(Alias())=F2_FILIAL .And.  F2_TRANSP >= mv_par01 .And.  F2_TRANSP <= mv_par02 .And.  lContinua
+
+	If F2_TIPO == "D"
+		DbSkip()
+		Loop
+	EndIf
+
+	If mv_par08 == 1 .And.  F2_TIPO == "B"
+		DbSkip()
+		Loop
+	EndIf
+
+	IF lEnd
+		PrintOut(_PROW()+1,001,If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR"),,)
+		EXIT
+	ENDIF
+	IncRegua()
+
+	IF F2_DOC < mv_par03 .OR.  F2_DOC > mv_par04
+		dbSkip()
+		Loop
+	EndIF
+	li := 80
+	nNumNota:=nTotVol:=nTotQtde:=nTotPeso:=nTotVal:=nQuant:=0
+	cTransp := F2_TRANSP
+	dbSelectArea("SA4")
+	dbSeek(xFilial(Alias())+cTransp)
+	dbSelectArea("SF2")
+	cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+	PrintOut(li,04,"|    | "+F2_TRANSP+" - "+PadR(SA4->A4_NOME,40),,)
+	li++
+	PrintOut(li,04,"|    | ",,)
+
+	While !EOF() .AND.  xFilial(Alias())=F2_FILIAL .And.  F2_TRANSP=cTransp
+
+		IF lEnd
+			PrintOut(_PROW()+1,001,If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR"),,)
+			lContinua := .F. 
+			Exit
+		Endif
+		IncRegua()
+
+		IF (F2_DOC < mv_par03 .OR.  F2_DOC > mv_par04)
+			dbSkip()
+			Loop
+		EndIF
+
+		If F2_TIPO == "D"
+			DbSkip()
+			Loop
+		EndIf
+
+		If mv_par08 == 1 .And.  F2_TIPO == "B"
+			DbSkip()
+			Loop
+		EndIf
+
+		dbSelectArea("SD2")
+		dbSetorder(3)
+		dbSeek(xFilial(Alias())+SF2->F2_DOC+SF2->F2_SERIE)
+		cNota := SF2->F2_DOC+SF2->F2_SERIE
+		While xFilial(Alias())=D2_FILIAL .And.  !Eof() .And.  D2_DOC+D2_SERIE == cNota
+			nQuant += D2_QUANT
+			dbSkip()
+		End
+
+		IF li > 53
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		EndIF
+
+		li++
+		PrintOut(li,004,"|    | ",,)
+		PrintOut(li,018,Substr(cNota,1,ntamNF)+"-"+Substr(cNota,nTamNF+1,3),,)
+		dbSelectArea("SF2")
+		PrintOut(li,035,F2_VOLUME1,cVolPict,)
+		If F2_TIPO <> "B"
+			dbSelectArea("SA1")
+			dbSeek(xFilial(Alias())+SF2->F2_CLIENTE+SF2->F2_LOJA)
+			IF Found()
+				PrintOut(li,044,SUBSTR(A1_NOME,1,25),,)
+			EndIF
+		Else
+			dbSelectArea("SA2")
+			dbSeek(xFilial(Alias())+SF2->F2_CLIENTE+SF2->F2_LOJA)
+			IF Found()
+				PrintOut(li,044,SUBSTR(A2_NOME,1,25),,)
+			EndIF
+		Endif
+		dbSelectArea("SF2")
+		PrintOut(li,071,nQuant,tm(nQuant,11),)
+		PrintOut(li,083,xMoeda(F2_VALBRUT,1,mv_par05,F2_EMISSAO),TM(F2_VALBRUT,15),)
+		PrintOut(li,100,IIF(F2_TIPO<>"B",PadR(SA1->A1_MUN,15),PadR(SA2->A2_MUN,15)),,)
+		PrintOut(li,117,IIF(F2_TIPO<>"B",SA1->A1_EST,SA2->A2_EST),,)
+		PrintOut(li,122,F2_PBRUTO,TM(F2_PBRUTO,9),)
+		nNumNota++
+		nTotVol += F2_VOLUME1
+		nTotQtde+= nQuant
+		nTotVal += F2_VALBRUT
+		nTotPeso+= F2_PBRUTO
+		nQuant := 0
+		dbSkip()
+	End
+	li++
+	PrintOut(li,04,"|    |",,)
+	li++
+	PrintOut(li,00,__PrtFatLine(),,)
+	li++
+	PrintOut(li,002,If(cPaisLoc$"ANG|PTG","Total ------->","TOTAL ------->"),,)
+	PrintOut(li,018,nNumNota,"999",)
+	PrintOut(li,035,nTotVol,cVolPict,)
+	PrintOut(li,071,nTotQtde,tm(nTotQtde,11),)
+	PrintOut(li,083,xMoeda(nTotVal,1,mv_par05,F2_EMISSAO),tm(nTotVal,15),)
+	PrintOut(li,122,nTotPeso,tm(nTotPeso,9),)
+	li++
+	PrintOut(li,00,__PrtFatLine(),,)
+	dbSelectArea("SF2")
+	nNumNota := 0
+	nTotVol := 0
+	nTotQtde := 0
+	nTotVal := 0
+	nTotPeso := 0
+End
+
+If li <> 80
+roda(cbcont,cbtxt)
+Endif
+
+RetIndex("SF2")
+dbClearFilter()
+fErase(cIndice+OrdBagExt())
+
+dbSelectArea("SD2")
+dbSetOrder(1)
+
+
+If aReturn[5] = 1
+	Set( 24, "" )
+	dbCommitAll()
+	ourspool(wnrel)
+Endif
+
+MS_FLUSH()

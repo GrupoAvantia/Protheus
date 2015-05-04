@@ -1,0 +1,515 @@
+Group Avantia
+   Version=7.0
+   VSSDB=
+   HasProperties=1
+   Properties
+      BeforeApply=
+      AfterApply=
+      Icon=
+      ID=
+      Version=
+      PalmName=
+      OutPut=
+   End
+   ProjectsCount=1
+   Project Avantia
+      FoldersCount=11
+      Folder Fontes
+         VSSPath=Fontes
+         FilesCount=2
+         File \Protheus10\my projects\Financeiro\NPosCCusto.prw
+             Type=T
+         End
+         File \Protheus10\my projects\Financeiro\PosCCusto.prw
+             Type=T
+         End
+      End
+      Folder Definições
+         VSSPath=Definições
+         FilesCount=0
+      End
+      Folder Estoque
+         VSSPath=Nova Pasta3
+         FilesCount=3
+         File \Microsiga\Protheus10\my projects\Estoques\Prodseq.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Estoques\CADSZ1.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Estoques\MT100AGR.prw
+             Type=T
+         End
+      End
+      Folder Financeiro
+         VSSPath=Nova Pasta4
+         FilesCount=3
+         File \Microsiga\Protheus10\my projects\Financeiro\ConvLD.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Financeiro\rfinm01.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Financeiro\PosCCusto.prw
+             Type=T
+         End
+      End
+      Folder Folha Pagamento
+         VSSPath=Nova Pasta5
+         FilesCount=4
+         File \Protheus_Data\UPDATES\Atualizações feitas na base TESTE\GPE (atualizações)\RDMAKE Padrão\IMPRESH.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPRESH.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\cad_cbo.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\gperecib.PRW
+             Type=T
+         End
+      End
+      Folder Faturamento
+         VSSPath=Nova Pasta6
+         FilesCount=4
+         File \Microsiga\Protheus10\my projects\Faturamento\SF2460I.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Faturamento\CARMEMO.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Faturamento\NFISCALPRD.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Faturamento\NFISCALSRV.PRW
+             Type=T
+         End
+      End
+      Folder Gestao de Projetos
+         VSSPath=Nova Pasta7
+         FilesCount=33
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\PosCCusto.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\SeqComp.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\AltInd.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\ARGA001.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\ARGA002.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\ARGA003.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\ARGR001.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\ARGR002.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\AtuGrd.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\AVPMSR01.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\AVPMSR02.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\AVPMSR03.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\AVPMSR04.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\AVPMSR05.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\CADSZ3.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\CalcT01.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\CalcT02.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\CalcT03.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\CalcT04.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\CalcT05.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\CalcT06.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\CalcT07.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\CodOrc.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\CodPjr.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\IMPCOMP.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\IMPCSV.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\PM110AF8.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\PM110AFA.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\PMA100Prj.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\PMA101IMP.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\PMA103REC.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\PMS100A4.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Gestao de Projetos\PMS103FI.prw
+             Type=T
+         End
+      End
+      Folder NFE2
+         VSSPath=Nova Pasta8
+         FilesCount=3
+         File \Microsiga\Protheus10\my projects\Livros Fiscais\danfeii.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Livros Fiscais\danfeIII.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Livros Fiscais\nfesefaz.prw
+             Type=T
+         End
+      End
+      Folder Sped pis\cofins
+         VSSPath=Nova Pasta10
+         FilesCount=1
+         File \Microsiga\Protheus10\my projects\Livros Fiscais\SPDR0001.PRW
+             Type=T
+         End
+      End
+      Folder Livros Fiscais
+         VSSPath=Nova Pasta10
+         FilesCount=4
+         File \Microsiga\Protheus10\my projects\Livros Fiscais\danfeii.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Livros Fiscais\danfeIII.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Livros Fiscais\nfesefaz.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Livros Fiscais\MT100AGR.prw
+             Type=T
+         End
+      End
+      Folder folha
+         VSSPath=Nova Pasta11
+         FilesCount=94
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\UpdPapon.prx
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\absent.prx
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\cad_cbo.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\calplano.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\CAPFOTO.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\CERT.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\COLETA.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\CONVIT.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\csa010.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\ETIQAS.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\ETIQCT.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\ETIQFER.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\ETIQMD.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\ETIQOPC.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\ETQVIST.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\ExpCigna.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\EXTRABH.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\FERARG.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\GERABC.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\GERATT.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\GERAVT.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\GETIMPCOOP.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\GPCONSIG.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\gpecr01.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\gpehrsef.prx
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\gperatam.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\gperecib.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\gperecibo.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\gperppp.prx
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\GPEWORD.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\GRHMID.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\grvamorhs.prx
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPCAT.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\ImpCigna.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPDARF.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPESP.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPETIQ.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPFER.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPGFIP.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPGPS.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\impgrcs.prx
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPGREC.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\impgrfc.prx
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPGRPS.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPIRPF.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPIRPJ.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\Imprcan.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPRESC.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPRESG.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPRESH.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPRESZ.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IMPRPA.prx
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\IRMULTV.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\libleyar.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\MAO_OBR.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\PONDW.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\PONETIQ.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\PONQDHR.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\PONWORK.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\raumsal.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\reaest.prx
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\REAJTAR.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\RECIBO.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\reqbenef.prx
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\RESULT.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\RGPER01.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\rgper02.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\RGPER03.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\RGPER04.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\RGPER05.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\rgper06.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\RGPER07.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\rgper08.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\rgper09.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\RGPER10.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\RGPER11.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\Rgper12.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\rgper13.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\RSR001.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\RSR003.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\rsr004.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\SALFAM.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\segdes1.prx
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\SEGDES.PRX
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\SIJPFUNC.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\TMSEDIOTP.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\TOIXFormulas.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\TRM010.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\TRM020.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\TRM030.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\TRM040.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\TRM060.PRW
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\trm070.prw
+             Type=T
+         End
+         File \Microsiga\Protheus10\my projects\Folha Pagamento\trm080.prw
+             Type=T
+         End
+      End
+   End
+End

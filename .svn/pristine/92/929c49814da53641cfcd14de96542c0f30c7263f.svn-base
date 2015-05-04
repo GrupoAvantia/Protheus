@@ -1,0 +1,945 @@
+#INCLUDE "matr997.ch"
+#INCLUDE "PROTHEUS.CH"
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³FUNCAO    ³ MATR997  ³ Autor ³ Liber de Esteban      ³ Data ³ 27/06/2006 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³DESCRICAO ³ Retenciones Analitica y Sintetica                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³ SIGAFIS - Colombia                                           ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+FUNCTION MATR997()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And. TRepInUse()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Interface de impressao                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport := ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR997R3()
+EndIf
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³FUNCAO    ³ReportDef ³ Autor ³ Liber de Esteban      ³ Data ³ 10/05/2006 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³DESCRICAO ³ Definicao do componente                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ ATUALIZACOES SOFRIDAS DESDE A CONSTRUCAO INICIAL.                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ PROGRAMADOR  ³ DATA   ³ BOPS ³  MOTIVO DA ALTERACAO                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function ReportDef()
+
+Local oReport
+Local oDoctos
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao do componente de impressao                                      ³
+//³TReport():New                                                           ³
+//³ExpC1 : Nome do relatorio                                               ³
+//³ExpC2 : Titulo                                                          ³
+//³ExpC3 : Pergunte                                                        ³
+//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+//³ExpC5 : Descricao                                                       ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+oReport := TReport():New("MATR997",STR0039,"MTR997",{|oReport| ReportPrint(oReport)},STR0040) //"Informe Auxiliar"###"Emição de Retenções"
+oReport:SetLandscape()
+
+oReport:SetTotalInLine(.F.)
+Pergunte("MTR997",.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da secao utilizada pelo relatorio                               ³
+//³                                                                        ³
+//³TRSection():New                                                         ³
+//³ExpO1 : Objeto TReport que a secao pertence                             ³
+//³ExpC2 : Descricao da seçao                                              ³
+//³ExpA3 : Array com as tabelas utilizadas pela secao. A primeira tabela   ³
+//³        sera considerada como principal para a seção.                   ³
+//³ExpA4 : Array com as Ordens do relatório                                ³
+//³ExpL5 : Carrega campos do SX3 como celulas                              ³
+//³        Default : False                                                 ³
+//³ExpL6 : Carrega ordens do Sindex                                        ³
+//³        Default : False                                                 ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da celulas da secao do relatorio                                ³
+//³                                                                        ³
+//³TRCell():New                                                            ³
+//³ExpO1 : Objeto TSection que a secao pertence                            ³
+//³ExpC2 : Nome da celula do relatório. O SX3 será consultado              ³
+//³ExpC3 : Nome da tabela de referencia da celula                          ³
+//³ExpC4 : Titulo da celula                                                ³
+//³        Default : X3Titulo()                                            ³
+//³ExpC5 : Picture                                                         ³
+//³        Default : X3_PICTURE                                            ³
+//³ExpC6 : Tamanho                                                         ³
+//³        Default : X3_TAMANHO                                            ³
+//³ExpL7 : Informe se o tamanho esta em pixel                              ³
+//³        Default : False                                                 ³
+//³ExpB8 : Bloco de código para impressao.                                 ³
+//³        Default : ExpC2                                                 ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+oDoctos := TRSection():New(oReport,STR0041,{"TRB"},{STR0057,STR0058}/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/) //"Documentos"###"NIT+CONTA+DOC"###"CONTA+NIT+DOC"
+
+TRCell():New(oDoctos,"NOMECF"  ,"TRB",STR0042,/*Picture*/,20,/*lPixel*/,/*{|| code-block de impressao }*/) //"Cliente"
+TRCell():New(oDoctos,"NIT"     ,"TRB",STR0062,/*Picture*/,14,/*lPixel*/,/*{|| code-block de impressao }*/) //"NIT"
+TRCell():New(oDoctos,"CONTA"   ,"TRB",STR0043,/*Picture*/,20,/*lPixel*/,/*{|| code-block de impressao }*/) //"Conta Contábil"
+TRCell():New(oDoctos,"DESCRCTA","TRB",STR0044,/*Picture*/,18,/*lPixel*/,/*{|| code-block de impressao }*/) //"Descrição da Conta"
+TRCell():New(oDoctos,"DOC"     ,"TRB",STR0045,/*Picture*/,TamSx3("D2_DOC")[1],/*lPixel*/,/*{|| code-block de impressao }*/) //"Documento"
+TRCell():New(oDoctos,"EMISSAO" ,"TRB",STR0046,/*Picture*/,08,/*lPixel*/,/*{|| code-block de impressao }*/) //"Data Doc"
+TRCell():New(oDoctos,"CIA"     ,"TRB",STR0047,/*Picture*/,02,/*lPixel*/,/*{|| code-block de impressao }*/) //"Cia"
+TRCell():New(oDoctos,"ASIENTO" ,"TRB",STR0048,/*Picture*/,06,/*lPixel*/,/*{|| code-block de impressao }*/) //"Origem"
+TRCell():New(oDoctos,"DTVENC"  ,"TRB",STR0049,,08,/*lPixel*/,/*{|| code-block de impressao }*/) //"Data Hist"
+TRCell():New(oDoctos,"ALIQIMP" ,"TRB",STR0050,,06,/*lPixel*/,/*{|| code-block de impressao }*/) //"Taxa %"
+TRCell():New(oDoctos,"BASIMP"  ,"TRB",STR0051,"@E 999,999,999.99",14,/*lPixel*/,/*{|| code-block de impressao }*/) //"Base Imposto"
+TRCell():New(oDoctos,"VALORD"  ,     ,STR0052,"@E 999,999,999.99",14,/*lPixel*/,{|| If(TRB->DC == "D",TRB->VALOR,0) }) //"Valor Debito"
+TRCell():New(oDoctos,"VALORC"  ,     ,STR0053,"@E 999,999,999.99",14,/*lPixel*/,{|| If(TRB->DC == "D",0,TRB->VALOR) }) //"Valor Credito"
+
+oBreak  := TRBreak():New(oDoctos,oDoctos:Cell("CONTA"),STR0054,.F.) //"Totais Conta Contábil"
+oBreak2 := TRBreak():New(oDoctos,oDoctos:Cell("NIT"),/*cTitulo*/,.F.)
+
+//Totaliza por quebra de conta contabil e no final do relatorio
+TRFunction():New(oDoctos:Cell("BASIMP"),NIL,"SUM",oBreak,/*cTitulo*/,/*cPicture*/,/*uFormula*/,.F.,.T.)
+TRFunction():New(oDoctos:Cell("VALORD"),NIL,"SUM",oBreak,/*cTitulo*/,/*cPicture*/,/*uFormula*/,.F.,.T.)
+TRFunction():New(oDoctos:Cell("VALORC"),NIL,"SUM",oBreak,/*cTitulo*/,/*cPicture*/,/*uFormula*/,.F.,.T.)
+
+Return(oReport)
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrint³ Autor ³Liber de Esteban       ³ Data ³10/05/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os  ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatório                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                             ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function ReportPrint(oReport)
+
+Local oDoctos    := oReport:Section(1)
+Local lSintetico := mv_par03 == 1  // Retorna .t. se Sintetico
+Local cNitAnt    := " "
+Local cCtaAnt    := " "
+Local cMContab	 := Alltrim(GetNewPar("MV_MCONTAB","CTB"))
+
+Private nOrdem := oDoctos:GetOrder()
+Private cArqTRB
+
+lEntrada    := mv_par02 == 1  // Retorna .t. se Entrada
+If lEntrada
+	nImposto := Val(SFB->FB_CPOLVRO)
+	cTrans   := "C"
+	cOper    := STR0059 //"Compras"
+	cAlias	 := "SD1"
+	SA2->(DbSetOrder(1))
+	SD1->(dbSetOrder(5))
+Else
+	nImposto := Val(SFB->FB_CPOLVRO)
+	cTrans   := "V"
+	cOper    := STR0060 //"Vendas"
+	cAlias	 := "SD2"
+	SA1->(DbSetOrder(1))
+	SD2->(dbSetOrder(1))
+EndIf
+
+SFB->(DbSetOrder(1))
+SFB->(DbSeek(xFilial()+mv_par01))
+
+oReport:SetTitle(STR0055 + Alltrim(SFB->FB_DESCR)) //"Informe Auxiliar de "
+oDoctos:SetTotalText(STR0056 + Alltrim(SFB->FB_DESCR) + STR0061 + cOper) //"Totais "###" por "
+
+&("Gera"+cMContab+"()")
+
+If lSintetico
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Desabilitando celulas que nao serao impressas no modelo sintetico |
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ	
+	oDoctos:Cell(5):Disable()
+	oDoctos:Cell(6):Disable()
+	oDoctos:Cell(7):Disable()
+	oDoctos:Cell(8):Disable()
+	oDoctos:Cell(9):Disable()
+	oDoctos:Cell(10):Disable()
+	oDoctos:Cell(11):Hide()
+	oDoctos:Cell(12):Hide()
+	oDoctos:Cell(13):Hide()
+
+	oDoctos:Cell(4):SetSize(40)
+EndIf
+
+If TRB->(RECCOUNT()) > 0
+	
+	oReport:SetMeter(TRB->(LastRec()))
+	oReport:PrintText(cOper,,10)
+	oReport:SkipLine()
+	oDoctos:Init()
+	
+	TRB->(dbGotop())
+	While !oReport:Cancel() .And. !TRB->(Eof())
+	
+		If !lSintetico
+			If cNitAnt == TRB->NIT
+				oDoctos:Cell(2):Hide()
+			Else
+				oDoctos:Cell(2):Show()
+				cNitAnt := TRB->NIT
+			EndIf
+			If cCtaAnt == TRB->CONTA
+				oDoctos:Cell(3):Hide()
+				oDoctos:Cell(4):Hide()
+			Else
+				oDoctos:Cell(2):Show()
+				oDoctos:Cell(3):Show()
+				oDoctos:Cell(4):Show()
+				cCtaAnt := TRB->CONTA
+			EndIf
+		EndIf
+		oDoctos:Printline()
+		oReport:IncMeter()
+		TRB->(dbSkip())
+	End
+	oDoctos:Finish()
+EndIf
+
+TRB->(DbCloseArea())
+FErase(cArqTRB+GetDBExtension())
+#IFNDEF TOP
+	FErase(cArqTRB+OrdBagExt())
+#ENDIF
+
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³MATR997R3 ºAutor  ³IvanPC              º Data ³  04/02/01   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Retenciones Analitica y Sintetica (Release 3)               º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ AP5 - Colombia                                             º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function Matr997R3()
+
+Local cMContab	:= Alltrim(GetNewPar("MV_MCONTAB","CTB"))
+
+Private cPerg   :="MTR997"
+PRIVATE tamanho :="M"
+Private limite  := 132
+Private titulo  := OemToAnsi(STR0001)   //"Informe Auxiliar "
+Private cDesc1  := OemToAnsi(STR0002)   //"Emision de Retenciones"
+Private cDesc2  :=""
+Private cDesc3  :=""
+Private nomeprog:="MATR997"
+Private lAnual, lEntrada, dDataDe, dDataAte, cNitCCde, cNitCCAte
+Private cContaDe, cContaAte, cDocDe, cDocAte
+Private nDecs 	:= MsDecimais(1)
+Private	M_PAG	:=	1
+Private wcbcont	:=	1
+Private cbTxt	:=	""
+Private cTrans  := ""
+Private cArqTRB
+Private aOrd :={	OemToAnsi(STR0003),;    //"NIT + CONTA + DOC"
+					OemToAnsi(STR0004)} //"CONTA + NIT + DOC"
+
+cNatureza       := ""
+aReturn         := {OemToAnsi(STR0005), 1,OemToAnsi(STR0006), 1, 2, 1,"",1 } //"Especial"###"Administracion"
+nLastKey        := 0
+lContinua       := .T.
+wnrel           := "MATR997"
+cString         :="SI2"
+cAlias			:=""
+
+Pergunte(cPerg,.F.)               
+
+wnrel := SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.F.,aOrd,,Tamanho)
+
+If ! nLastKey == 27
+	SetDefault(aReturn,cString)
+	If ! nLastKey == 27
+		SFB->(DbSetOrder(1))
+		SFB->(DbSeek(xFilial()+mv_par01))
+		Titulo 	:=	STR0001 + STR0007 + Alltrim(SFB->FB_DESCR) //"de "
+		nTipo       := If(aReturn[4]==1,15,18)
+		lEntrada    := mv_par02 == 1  // Retorna .t. se Entrada
+		If lEntrada
+			nImposto := Val(SFB->FB_CPOLVRO)
+			cTrans   := "C"
+			cAlias	 := "SD1"
+			SA2->(DbSetOrder(1))
+			SD1->(dbSetOrder(5))
+		Else
+			nImposto := Val(SFB->FB_CPOLVRO)
+			cTrans   := "V"
+			cAlias	 := "SD2"
+			SA1->(DbSetOrder(1))
+			SD2->(dbSetOrder(1))
+		EndIf
+		lSintetico  := mv_par03 == 1  // Retorna .t. se Sintetico
+		dDataDe     := mv_par04
+		dDataAte    := mv_par05
+		lNitCC      := mv_par06 == 1  // Retorna .t. se NIT
+		cNitCCDe    := mv_par07
+		cNitCCAte   := mv_par08
+		cContaDe	:= mv_par09
+		cContaAte	:= mv_par10
+		cDocDe		:= mv_par11
+		cDocAte		:= mv_par12
+		Private nOrdem:=aReturn[8]
+		&("Gera"+cMContab+"()")
+		RptStatus({|lEnd| Imprime(@lEnd, wnrel, cString)},Titulo)
+	Endif
+Endif
+
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³GeraCon   ºAutor  ³IvanPC              ºFecha ³  04/02/01   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Gera arquivo de trabalho. (SIGACON)                         º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³Colombia                                                    º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function GeraCon()
+Local aCampos, nPosBase, nPosAliq
+Local cCondicao := ""
+Local nIndex := 0
+Local cKey := "", cIndex := ""
+Local cIndexTRB 	:= ""
+Private aFiltro		:= {}
+
+lSintetico  := mv_par03 == 1  // Retorna .t. se Sintetico
+dDataDe     := mv_par04
+dDataAte    := mv_par05
+lNitCC      := mv_par06 == 1  // Retorna .t. se NIT
+cNitCCDe    := mv_par07
+cNitCCAte   := mv_par08
+cContaDe	:= mv_par09
+cContaAte	:= mv_par10
+cDocDe		:= mv_par11
+cDocAte		:= mv_par12
+
+IF ExistBlock("M997FILT")
+	EXECBLOCK("M997FILT",.f.,.f.)
+Endif
+
+If nOrdem==1
+	cIndexTRB	:=	"NIT+CONTA+DOC"
+ElseIf nOrdem==2
+	cIndexTRB	:=	"CONTA+NIT+DOC"
+Endif
+
+dbSelectArea("SI2") 
+SI2->(dbSetOrder(3))
+cKey := IndexKey()
+cIndex := CriaTrab(Nil,.F.)
+
+cCondicao := '((I2_CREDITO >= "' + cContaDe + '" .AND. I2_CREDITO <= "' + cContaAte + '") .OR. '
+cCondicao += '(I2_DEBITO >= "' + cContaDe + '" .AND. I2_DEBITO <= "' + cContaAte + '")) .AND. '
+cCondicao += 'I2_NIT >= "' + cNitCCDe + '" .AND. I2_NIT <= "' + cNitCCAte + '" .AND. '
+cCondicao += 'DTOS(I2_DATA) >= "' + DTOS(dDataDe) + '" .AND. DTOS(I2_DATA) <= "' + DTOS(dDataAte) + '" .AND.'
+cCondicao += 'SUBSTR(I2_ORIGEM,1,1) = "' + cTrans + '"'
+
+IndRegua("SI2",cIndex,cKey,,cCondicao)
+nIndex := RetIndex("SI2")
+dbSelectArea("SI2") 
+#IFNDEF TOP
+	dbSetIndex(cIndex+OrdBagExt())
+#ENDIF
+dbSetOrder(nIndex+1)
+
+aCampos:={	{"NOMECF"	,"C",40,0},;
+			{"NIT"		,"C",14,0},;
+			{"DOC"		,"C",TamSx3("D2_DOC")[1],0},;
+			{"EMISSAO"	,"D",08,0},;
+			{"ASIENTO"	,"C",06,0},;
+			{"DTVENC"	,"D",08,0},;
+			{"ALIQIMP"	,"N",06,2},;
+			{"BASIMP"	,"N",14,2},;
+			{"DC"		,"C",01,0},;
+			{"VALOR"	,"N",17,2},;
+			{"CONTA"	,"C",20,0},;
+			{"CIA"		,"C",02,0},;
+			{"DESCRCTA"	,"C",30,0}}
+
+cArqTRB := CriaTrab(aCampos)
+dbUseArea(.T.,, cArqTRB, "TRB", .F., .F. )
+
+IndRegua("TRB",cArqTRB,cIndexTRB,,, OemToAnsi(STR0008))  //"Selecionando Registros..."
+#IFNDEF TOP
+	dbSetIndex(cArqTRB+Ordbagext())
+#ENDIF
+                                                          
+If cAlias == "SD1"                                            
+	nPosBase := SD1->(FieldPos("D1_BASIMP"+STR(nImposto,1)))
+	nPosAliq := SD1->(FieldPos("D1_ALQIMP"+STR(nImposto,1)))
+Else
+	nPosBase := SD2->(FieldPos("D2_BASIMP"+STR(nImposto,1)))
+	nPosAliq := SD2->(FieldPos("D2_ALQIMP"+STR(nImposto,1)))
+EndIf
+
+SFB->(DbSeek(xFilial("SFB")+MV_PAR01))
+SI2->(DbGotop())
+While SI2->(!Eof())
+
+	If (cAlias)->(DbSeek(SI2->I2_FILORIG+SUBSTR(SI2->I2_ORIGEM,2,TamSX3("D1_COD")[1]))) .And. ;
+		If(cAlias = "SD1",	SD1->D1_DOC >= cDocDe .And. SD1->D1_DOC <= cDocAte, ;
+							SD2->D2_DOC >= cDocDe .And. SD2->D2_DOC <= cDocAte)
+    	cContaD := SI2->I2_DEBITO
+    	cContaC := SI2->I2_CREDITO
+    	lAchouD := (Ascan(aFiltro, cContaD) >0)
+    	lAchouC := (Ascan(aFiltro, cContaC) >0)
+    	
+		IF Empty(aFiltro) .Or. ! Empty(aFiltro) .And. (lAchouD .Or. lAchouC)
+
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³Nos casos de partida dobrada, uma das contas pode não       ³
+			//³fazer parte da faixa inicial solicitada, por isso esta nova ³
+			//³verificação.                                                ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    		lAchouD := (cContaD >= cContaDe .And. cContaD <= cContaAte)
+    		lAchouC := (cContaC >= cContaDe .And. cContaC <= cContaAte)
+
+			If cTrans == "V"
+				SA1->(DbSeek(xFilial("SA1")+SD2->D2_CLIENTE))
+			Else
+				SA2->(DbSeek(xFilial("SA2")+SD1->D1_FORNECE))
+			EndIf
+	        If SI2->I2_DC $ "DX" .And. lAchouD
+				SI1->( DbSeek( xFilial("SI1")+cContaD ) )
+				If (lSintetico) .and. (TRB->(DbSeek(SI2->I2_NIT+cContaD)) .or. TRB->(DbSeek(cContaD+SI2->I2_NIT)))
+					RecLock("TRB",.F.)
+					TRB->VALOR		+= SI2->I2_VALOR
+					MsUnLock()
+				Else
+					RecLock("TRB",.T.)
+					TRB->NOMECF		:= If(cTrans=="V",SA1->A1_NOME,SA2->A2_NOME)
+					TRB->NIT		:= SI2->I2_NIT
+					TRB->DOC		:= If(cAlias == "SD1",SD1->D1_DOC,SD2->D2_DOC)
+					TRB->EMISSAO	:= SI2->I2_DATA
+					TRB->ASIENTO	:= RIGHT(SI2->I2_ORIGEM,6)
+					TRB->DTVENC		:= SI2->I2_DTVENC
+					TRB->BASIMP		:= (cAlias)->(FieldGet(nPosBase))
+					TRB->ALIQIMP	:= (cAlias)->(FieldGet(nPosAliq))
+					TRB->DC			:= "D"
+					TRB->VALOR		:= SI2->I2_VALOR
+					TRB->CONTA		:= cContaD
+					TRB->DESCRCTA	:= SI1->I1_DESC
+					TRB->CIA		:= SI2->I2_FILORIG
+					MsUnLock()
+				EndIf
+			EndIf
+	        If SI2->I2_DC $ "CX" .And. lAchouC
+				SI1->( DbSeek( xFilial("SI1")+cContaC ) )
+				If (lSintetico) .and. (TRB->(DbSeek(SI2->I2_NIT+cContaC)) .or. TRB->(DbSeek(cContaC+SI2->I2_NIT)))
+					RecLock("TRB",.F.)
+					TRB->VALOR		+= SI2->I2_VALOR
+					MsUnLock()
+				Else
+					RecLock("TRB",.T.)
+					TRB->NOMECF		:= If(cTrans=="V",SA1->A1_NOME,SA2->A2_NOME)
+					TRB->NIT		:= SI2->I2_NIT
+					TRB->DOC		:= If(cAlias == "SD1",SD1->D1_DOC,SD2->D2_DOC)
+					TRB->EMISSAO	:= SI2->I2_DATA
+					TRB->ASIENTO	:= RIGHT(SI2->I2_ORIGEM,6)
+					TRB->DTVENC		:= SI2->I2_DTVENC
+					TRB->BASIMP		:= (cAlias)->(FieldGet(nPosBase))
+					TRB->ALIQIMP	:= (cAlias)->(FieldGet(nPosAliq))
+					TRB->DC			:= "C"
+					TRB->VALOR		:= SI2->I2_VALOR
+					TRB->CONTA		:= cContaC
+					TRB->DESCRCTA	:= SI1->I1_DESC
+					TRB->CIA		:= SI2->I2_FILORIG
+					MsUnLock()
+				EndIf
+			EndIf
+		Endif
+	EndIf
+	SI2->(DbSkip())
+Enddo
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³GeraCtb   ºAutor  ³Sergio S. Fuzinaka  º Data ³  27/06/07   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescricao ³Gera arquivo de trabalho.(SIGACTB)                          º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³Colombia                                                    º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function GeraCtb()
+
+Local cAliasCT2	:= "CT2"
+Local aCampos	:= {}
+Local nPosBase	:= 0
+Local nPosAliq	:= 0
+Local cCondicao := ""
+Local nIndex 	:= 0
+Local cIndex 	:= ""
+Local cIndexTRB := ""
+Local aFiltro	:= {}
+Local lQuery	:= .F.
+Local cDebug	:= ""
+Local cNIT		:= ""
+
+lSintetico  := mv_par03 == 1  // Retorna .t. se Sintetico
+dDataDe     := mv_par04
+dDataAte    := mv_par05
+lNitCC      := mv_par06 == 1  // Retorna .t. se NIT
+cNitCCDe    := mv_par07
+cNitCCAte   := mv_par08
+cContaDe	:= mv_par09
+cContaAte	:= mv_par10
+cDocDe		:= mv_par11
+cDocAte		:= mv_par12
+
+#IFDEF TOP
+    If TcSrvType() <> "AS/400"
+    	lQuery := .T.
+    Endif
+#ENDIF
+
+If ExistBlock("M997FILT")
+	ExecBlock("M997FILT",.F.,.F.)
+Endif
+
+If cAlias == "SD1"                                            
+	nPosBase := SD1->(FieldPos("D1_BASIMP"+STR(nImposto,1)))
+	nPosAliq := SD1->(FieldPos("D1_ALQIMP"+STR(nImposto,1)))
+Else
+	nPosBase := SD2->(FieldPos("D2_BASIMP"+STR(nImposto,1)))
+	nPosAliq := SD2->(FieldPos("D2_ALQIMP"+STR(nImposto,1)))
+EndIf
+
+If nOrdem == 1
+	cIndexTRB := "NIT+CONTA+DOC"
+ElseIf nOrdem == 2
+	cIndexTRB := "CONTA+NIT+DOC"
+Endif
+
+aCampos:={	{"NOMECF"	,"C",40,0},;
+			{"NIT"		,"C",14,0},;
+			{"DOC"		,"C",TamSx3("D2_DOC")[1],0},;
+			{"EMISSAO"	,"D",08,0},;
+			{"ASIENTO"	,"C",06,0},;
+			{"DTVENC"	,"D",08,0},;
+			{"ALIQIMP"	,"N",06,2},;
+			{"BASIMP"	,"N",14,2},;
+			{"DC"		,"C",01,0},;
+			{"VALOR"	,"N",17,2},;
+			{"CONTA"	,"C",20,0},;
+			{"CIA"		,"C",02,0},;
+			{"DESCRCTA"	,"C",30,0}}
+
+cArqTRB := CriaTrab(aCampos)
+dbUseArea(.T.,, cArqTRB, "TRB", .F., .F. )
+IndRegua("TRB",cArqTRB,cIndexTRB,,, OemToAnsi(STR0008))  //"Selecionando Registros..."
+
+If !lQuery
+	dbSetIndex(cArqTRB+Ordbagext())
+Endif
+
+dbSelectArea("CT2") 
+dbSetOrder(1)
+
+If lQuery
+	cCondicao := "%"
+	cCondicao += "((CT2_CREDIT >= '"+cContaDe+"' AND CT2_CREDIT <= '"+cContaAte+"') OR "
+	cCondicao += "(CT2_DEBITO >= '"+cContaDe+"' AND CT2_DEBITO <= '"+cContaAte+"')) AND "	
+	cCondicao += "SUBSTRING(CT2_ORIGEM,1,1) = '"+cTrans+"' AND "
+	cCondicao += "%"
+
+	cAliasCT2 := GetNextAlias()
+	BeginSql Alias cAliasCT2
+		Column CT2_DATA as Date
+		Column CT2_DTVENC as Date		
+		SELECT *
+		FROM %Table:CT2% CT2
+		WHERE CT2_FILIAL = %Exp:xFilial("CT2")% AND 
+			CT2_DATA >= %Exp:dDataDe% AND 
+			CT2_DATA <= %Exp:dDataAte% AND
+			%exp:cCondicao%
+			CT2.%NotDel% 
+		ORDER BY %Order:CT2%
+	EndSql 
+	cDebug := GetLastQuery()[2]		//Para debugar a query
+Else
+	cIndex	:= CriaTrab(Nil,.F.)
+	cFiltro	:= "CT2_FILIAL == '"+xFilial("CT2") + "' .And. "
+	cFiltro += "((CT2_CREDIT >= '"+cContaDe+"' .And. CT2_CREDIT <= '"+cContaAte+"') .Or. "
+	cFiltro	+= "(CT2_DEBITO >= '"+cContaDe+"' .And. CT2_DEBITO <= '"+cContaAte+"')) .And. "
+	cFiltro	+= "Dtos(CT2_DATA) >= '"+Dtos(dDataDe)+"' .And. Dtos(CT2_DATA) <= '"+Dtos(dDataAte)+"' .And. "
+	cFiltro += "Substr(CT2_ORIGEM,1,1) == '"+cTrans+"'"
+
+	IndRegua(cAliasCT2,cIndex,IndexKey(),,cFiltro,STR0008) //"Selecionando registros..."
+	nIndex := RetIndex("CT2")
+	dbSetIndex(cIndex+OrdBagExt())
+	dbSetOrder(nIndex+1)
+	dbGoTop()	
+Endif
+
+dbSelectArea(cAliasCT2)
+While !Eof()
+
+	If (cAlias)->(dbSeek((cAliasCT2)->CT2_FILORI+SUBSTR((cAliasCT2)->CT2_ORIGEM,2,TamSX3("D1_COD")[1]))) .And. ;
+		If(cAlias = "SD1",	SD1->D1_DOC >= cDocDe .And. SD1->D1_DOC <= cDocAte, ;
+							SD2->D2_DOC >= cDocDe .And. SD2->D2_DOC <= cDocAte)
+
+    	cContaD := (cAliasCT2)->CT2_DEBITO
+    	cContaC := (cAliasCT2)->CT2_CREDIT
+    	lAchouD := (Ascan(aFiltro, cContaD) > 0)
+    	lAchouC := (Ascan(aFiltro, cContaC) > 0)
+    	
+		If cTrans == "V"
+			SA1->(dbSeek(xFilial("SA1")+SD2->D2_CLIENTE))
+			cNIT := SA1->A1_CGC
+		Else
+			SA2->(dbSeek(xFilial("SA2")+SD1->D1_FORNECE))
+			cNIT := SA2->A2_CGC		
+		EndIf
+
+		If cNIT >= cNitCCDe .And. cNIT <= cNitCCAte
+			If Empty(aFiltro) .Or. ! Empty(aFiltro) .And. (lAchouD .Or. lAchouC)
+	
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Nos casos de partida dobrada, uma das contas pode não       ³
+				//³fazer parte da faixa inicial solicitada, por isso esta nova ³
+				//³verificação.                                                ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	    		lAchouD := (cContaD >= cContaDe .And. cContaD <= cContaAte)
+	    		lAchouC := (cContaC >= cContaDe .And. cContaC <= cContaAte)
+	
+		        If (cAliasCT2)->CT2_DC $ "DX" .And. lAchouD
+					CT1->( dbSeek( xFilial("CT1")+cContaD ) )
+					If (lSintetico .And. TRB->(dbSeek(cNIT+cContaD))) .Or. TRB->(dbSeek(cContaD+cNIT))
+						RecLock("TRB",.F.)
+						TRB->VALOR		+= (cAliasCT2)->CT2_VALOR
+						MsUnLock()
+					Else
+						RecLock("TRB",.T.)
+						TRB->NOMECF		:= If(cTrans == "V",SA1->A1_NOME,SA2->A2_NOME)
+						TRB->NIT		:= If(cTrans == "V",SA1->A1_CGC,SA2->A2_CGC)
+						TRB->DOC		:= If(cAlias == "SD1",SD1->D1_DOC,SD2->D2_DOC)
+						TRB->EMISSAO	:= (cAliasCT2)->CT2_DATA
+						TRB->ASIENTO	:= RIGHT((cAliasCT2)->CT2_ORIGEM,6)
+						TRB->DTVENC		:= (cAliasCT2)->CT2_DTVENC
+						TRB->BASIMP		:= (cAlias)->(FieldGet(nPosBase))
+						TRB->ALIQIMP	:= (cAlias)->(FieldGet(nPosAliq))
+						TRB->DC			:= "D"
+						TRB->VALOR		:= (cAliasCT2)->CT2_VALOR
+						TRB->CONTA		:= cContaD
+						TRB->DESCRCTA	:= CT1->CT1_DESC01
+						TRB->CIA		:= (cAliasCT2)->CT2_FILORI
+						MsUnLock()
+					EndIf
+				EndIf
+		        If (cAliasCT2)->CT2_DC $ "CX" .And. lAchouC
+					CT1->( dbSeek( xFilial("CT1")+cContaC ) )
+					If (lSintetico .And. TRB->(dbSeek(cNIT+cContaC))) .Or. TRB->(dbSeek(cContaC+cNIT))
+						RecLock("TRB",.F.)
+						TRB->VALOR		+= (cAliasCT2)->CT2_VALOR
+						MsUnLock()
+					Else
+						RecLock("TRB",.T.)
+						TRB->NOMECF		:= If(cTrans == "V",SA1->A1_NOME,SA2->A2_NOME)
+						TRB->NIT		:= If(cTrans == "V",SA1->A1_CGC,SA2->A2_CGC)
+						TRB->DOC		:= If(cAlias == "SD1",SD1->D1_DOC,SD2->D2_DOC)
+						TRB->EMISSAO	:= (cAliasCT2)->CT2_DATA
+						TRB->ASIENTO	:= RIGHT((cAliasCT2)->CT2_ORIGEM,6)
+						TRB->DTVENC		:= (cAliasCT2)->CT2_DTVENC
+						TRB->BASIMP		:= (cAlias)->(FieldGet(nPosBase))
+						TRB->ALIQIMP	:= (cAlias)->(FieldGet(nPosAliq))
+						TRB->DC			:= "C"
+						TRB->VALOR		:= (cAliasCT2)->CT2_VALOR
+						TRB->CONTA		:= cContaC
+						TRB->DESCRCTA	:= CT1->CT1_DESC01
+						TRB->CIA		:= (cAliasCT2)->CT2_FILORI
+						MsUnLock()
+					EndIf
+				EndIf
+			Endif
+		Endif
+	EndIf
+	dbSelectArea(cAliasCT2)
+	dbSkip()
+Enddo
+
+Return Nil
+ 
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³Imprime   ºAutor  ³IvanPC              º Data ³  04/02/00   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Impresion de la matriz con los datos del CertIficado       º±±
+±±º          ³                                                            º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function Imprime()
+Local Li  		:= 999
+Local cCabec1	:=Iif(lEntrada,OemToAnsi(STR0009),OemToAnsi(STR0010)) //"Compras"###"Vendas"
+Local cCabec2	:=""
+
+Local bIf1	:= Iif(nOrdem == 1, {|| TRB->NIT != cCpoAnt1}, {|| TRB->CONTA != cCpoAnt1})
+Local bIf2	:= Iif(nOrdem == 1, {|| TRB->CONTA != cCpoAnt2}, {|| TRB->NIT != cCpoAnt2})
+
+Local nTotMontBas 	:= 0
+Local nTotDebe		:= 0
+Local nTotHaber		:= 0
+Local nValor		:= 0
+
+dbSelectARea("TRB")
+SetRegua( RECCOUNT() )
+dbGotop()
+
+If nOrdem == 1
+	cCpoAnt1 := Space(Len(TRB->NIT))
+	cCpoAnt2 := Space(Len(TRB->CONTA))
+Else                       
+	cCpoAnt1 := Space(Len(TRB->CONTA))
+	cCpoAnt2 := Space(Len(TRB->NIT))
+EndIf
+
+nTotGerMBas := 0
+nTotGerD  	:= 0	 
+nTotGerH	:= 0	 
+
+While ! TRB->(EOF()) .And. ! lAbortPrint
+	IncRegua()
+	If Li  >  54
+		If li	<>	999
+			Roda( wcbCont, OemToAnsi(STR0011), Tamanho ) //" Continua..."
+		Endif
+		Li	:=	Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,15)
+	Endif
+	
+	If !lSintetico
+		If Eval(bIf1)
+			If Li  >  50
+				If li	<>	999
+					Roda( wcbCont, OemToAnsi(STR0011), Tamanho ) //" Continua..."
+				Endif
+				Li	:=	Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,15)
+			Endif
+			Li += 2
+			If nOrdem == 1
+				@ Li++,001 PSAY OemToAnsi(STR0012) + TRB->NOMECF + OemToAnsi(STR0013) + TRB->NIT //"Cliente : "###" Numero de Identification : "
+			Else
+				@ Li++,001 PSAY OemToAnsi(STR0014) + TRB->CONTA + "   " + TRB->DESCRCTA //"Cuenta Contable : "
+			EndIf                                   
+			@ Li++,001 PSAY Replicate("-",131)
+			@ Li++,001 PSAY OemToAnsi(	STR0015) //Documento          Fecha           Cia     Asiento Fecha           Tasa        Monto Base                Debe              Haber
+			@ Li++,020 PSAY OemToAnsi(	STR0016) //                                                   Documento                       Finalizacion      %
+			@ Li++,001 PSAY Replicate("-",131)
+		EndIf		
+		IF Eval(bIf2) .Or. Eval(bIf1)
+			If Li  >  50
+				If li	<>	999
+					Roda( wcbCont, OemToAnsi(STR0011), Tamanho ) //" Continua..."
+				Endif
+				Li	:=	Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,15)
+			Endif
+			If nOrdem == 1
+				@ Li++,001 PSAY OemToAnsi(STR0014) + TRB->CONTA + "   " + TRB->DESCRCTA				 //"Cuenta Contable : "
+			Else
+				@ Li++,001 PSAY OemToAnsi(STR0012) + TRB->NOMECF + OemToAnsi(STR0013) + TRB->NIT //"Cliente : "###" Numero de Identification : "
+			EndIf
+			nTotMontBas := 0
+			nTotDebe	:= 0
+			nTotHaber	:= 0
+		EndIf	
+		Li++
+		@ Li,001 PSAY TRB->DOC
+		@ Li,020 PSAY TRB->EMISSAO
+		@ Li,036 PSAY TRB->CIA
+		@ Li,044 PSAY TRB->ASIENTO
+		@ Li,052 PSAY TRB->DTVENC
+		@ Li ,066 PSAY TRB->ALIQIMP Picture Tm(TRB->ALIQIMP,6,nDecs)
+		@ Li,076 PSAY TRB->BASIMP  Picture Tm(TRB->BASIMP,14,nDecs)
+		If TRB->DC == "D"
+			@ Li,093 PSAY TRB->VALOR Picture Tm(TRB->VALOR,17,nDecs)
+			@ Li,112 PSAY nValor Picture Tm(nValor,17,nDecs)
+		Else
+			@ Li,093 PSAY nValor Picture Tm(nValor,17,nDecs)
+			@ Li,112 PSAY TRB->VALOR Picture Tm(TRB->VALOR,17,nDecs)
+		EndIf
+	Else
+		If Eval(bIf1)
+			If Li  >  50
+				If li	<>	999
+					Roda( wcbCont, OemToAnsi(STR0011), Tamanho ) //" Continua..."
+				Endif
+				Li	:=	Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,15)
+			Endif
+			Li += 2
+			If nOrdem == 1
+				@ Li++,001 PSAY OemToAnsi(STR0012) + TRB->NOMECF + OemToAnsi(STR0013) + TRB->NIT //"Cliente : "###" Numero de Identification : "
+				@ Li++,001 PSAY Replicate("-",131)			                         
+				@ Li++,001 PSAY OemToAnsi(	STR0017) //"Cuenta Contable                                                                Monto Base                Debe              Haber"
+				@ Li++,001 PSAY Replicate("-",131)			                                                         
+			Else
+				@ Li++,001 PSAY OemToAnsi(STR0014) + TRB->CONTA + "   " + TRB->DESCRCTA //"Cuenta Contable : "
+				@ Li++,001 PSAY Replicate("-",131)			                         
+				@ Li++,001 PSAY OemToAnsi( 	STR0018) //"Numero de Identificacion / Cliente                                             Monto Base                Debe              Haber"
+				@ Li++,001 PSAY Replicate("-",131)			                         
+			EndIf          
+		EndIf
+		IF Eval(bIf2).Or. Eval(bIf1)
+			If Li  >  50
+				If li	<>	999
+					Roda( wcbCont, OemToAnsi(STR0011), Tamanho ) //" Continua..."
+				Endif
+				Li	:=	Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,15)
+			Endif
+			If nOrdem == 1
+				@ Li++,001 PSAY TRB->CONTA + "   " + TRB->DESCRCTA				
+			Else
+				@ Li++,001 PSAY TRB->NIT + TRB->NOMECF 
+			EndIf
+			nTotMontBas := 0
+			nTotDebe	:= 0
+			nTotHaber	:= 0
+		EndIf
+	EndIf
+	
+	nTotMontBas += TRB->BASIMP
+	nTotGerMBas += TRB->BASIMP
+	If TRB->DC == "D"
+		nTotDebe  += TRB->VALOR
+		nTotGerD  += TRB->VALOR
+	Else
+		nTotHaber += TRB->VALOR
+		nTotGerH  += TRB->VALOR
+	EndIf
+
+	If nOrdem == 1
+		cCpoAnt1 := TRB->NIT
+		cCpoAnt2 := TRB->CONTA
+	Else                       
+		cCpoAnt1 := TRB->CONTA
+		cCpoAnt2 := TRB->NIT
+	EndIf
+	
+	TRB->(DbSkip())       
+	
+	If Li  >  54
+		If li	<>	999
+			Roda( wcbCont, OemToAnsi(STR0011), Tamanho ) //" Continua..."
+		Endif
+		Li	:=	Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,15)
+	Endif
+
+	If Eval(bIf2) .Or. Eval(bIf1)
+		If !lSintetico
+			Li++
+			@ Li,048 PSAY Replicate("-",83)
+			Li++
+			@ Li,049 PSAY OemToAnsi(STR0019) //"Totales Cuenta Contable"
+			@ Li,076 PSAY nTotMontBas 	Picture Tm(nTotMontBas,14,nDecs)
+			@ Li,093 PSAY nTotDebe		Picture Tm(nTotDebe,17,nDecs)
+			@ Li,112 PSAY nTotHaber		Picture Tm(nTotHaber,17,nDecs)
+			li++
+			@ Li++,048 PSAY Replicate("-",83)			
+		Else
+			@ Li++,047 PSAY Replicate("-",84)
+			@ Li,049 PSAY OemToAnsi(STR0019) //"Totales Cuenta Contable"
+			@ Li,076 PSAY nTotMontBas	Picture Tm(nTotMontBas,14,nDecs)
+			@ Li,093 PSAY nTotDebe		Picture Tm(nTotDebe,17,nDecs)
+			@ Li,112 PSAY nTotHaber		Picture Tm(nTotHaber,17,nDecs)
+			li++
+			@ Li++,047 PSAY Replicate("-",84)			
+		Endif
+	EndIf
+End
+
+If Li  >  54
+	If li	<>	999
+		Roda( wcbCont, OemToAnsi(STR0011), Tamanho ) //" Continua..."
+	Endif
+	Li	:=	Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,15)
+Endif              
+
+If !lSintetico          
+	li++
+	@ Li++,048 PSAY Replicate("-",83)
+	@ Li,049 PSAY OemToAnsi(STR0020) + mv_par01 + OemToAnsi(STR0021) + cCabec1  //"Totales "###" por "
+	@ Li,076 PSAY nTotGerMBas 	Picture Tm(nTotGerMBas,14,nDecs)
+	@ Li,093 PSAY nTotGerD		Picture Tm(nTotGerD,17,nDecs)
+	@ Li,112 PSAY nTotGerH		Picture Tm(nTotGerH,17,nDecs)
+	li++
+	@ Li++,048 PSAY Replicate("-",83)			
+Else
+	li++
+	@ Li++,047 PSAY Replicate("-",84)
+	@ Li,049 PSAY OemToAnsi(STR0020) + mv_par01 + OemToAnsi(STR0021) + cCabec1 //"Totales "###" por "
+	@ Li,076 PSAY nTotGerMBas	Picture Tm(nTotGerMBas,14,nDecs)
+	@ Li,093 PSAY nTotGerD		Picture Tm(nTotGerD,17,nDecs)
+	@ Li,112 PSAY nTotGerH		Picture Tm(nTotGerH,17,nDecs)
+	li++
+	@ Li++,047 PSAY Replicate("-",84)			
+Endif
+
+Roda( wcbCont, cbTxt, Tamanho )
+
+If aReturn[5] == 1
+	Set Printer TO
+	dbcommitAll()
+	ourspool(wnrel)
+Endif
+
+MS_FLUSH()
+TRB->(DbCloseArea())
+FErase(cArqTRB+GetDBExtension())
+#IFNDEF TOP
+	FErase(cArqTRB+OrdBagExt())
+#ENDIF
+
+Return

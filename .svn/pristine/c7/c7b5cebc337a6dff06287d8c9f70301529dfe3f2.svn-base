@@ -1,0 +1,1577 @@
+#INCLUDE "MATR755.CH" 
+#INCLUDE "FIVEWIN.CH"
+
+/*эээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээ
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+╠╠зддддддддддбддддддддддбдддддддбдддддддддддддддддддддддбддддддбдддддддддд©╠╠
+╠╠ЁPrograma  Ё MATR755  Ё Autor Ё Marco Bianchi         Ё Data Ё 12/07/06 Ё╠╠
+╠╠цддддддддддеддддддддддадддддддадддддддддддддддддддддддаддддддадддддддддд╢╠╠
+╠╠ЁDescri┤┘o Ё Relatorio de Curva ABC de Consumo de Vendas por Regiao.    Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠ЁUso       Ё SIGAFAT                                                    Ё╠╠
+╠╠юддддддддддадддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды╠╠
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+ъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъ*/
+Function MATR755()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And. TRepInUse()
+	//-- Interface de impressao
+	oReport := ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR755R3()
+EndIf
+
+
+Return
+
+/*эээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээ
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+╠╠зддддддддддбддддддддддбдддддддбдддддддддддддддддддддддбддддддбдддддддддд©╠╠
+╠╠ЁPrograma  ЁReportDef Ё Autor Ё Marco Bianchi         Ё Data Ё 12/07/06 Ё╠╠
+╠╠цддддддддддеддддддддддадддддддадддддддддддддддддддддддаддддддадддддддддд╢╠╠
+╠╠ЁDescri┤┘o ЁA funcao estatica ReportDef devera ser criada para todos os Ё╠╠
+╠╠Ё          Ёrelatorios que poderao ser agendados pelo usuario.          Ё╠╠
+╠╠Ё          Ё                                                            Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠ЁRetorno   ЁExpO1: Objeto do relatСrio                                  Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠ЁParametrosЁNenhum                                                      Ё╠╠
+╠╠Ё          Ё                                                            Ё╠╠
+╠╠цддддддддддедддддддддддддддбдддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠Ё   DATA   Ё Programador   ЁManutencao efetuada                         Ё╠╠
+╠╠цддддддддддедддддддддддддддедддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠Ё          Ё               Ё                                            Ё╠╠
+╠╠юддддддддддадддддддддддддддадддддддддддддддддддддддддддддддддддддддддддды╠╠
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+ъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъ
+/*/
+Static Function ReportDef()
+
+Local oReport
+Local oFilReg
+Local oProd
+Local oValores
+
+#IFDEF TOP
+	Local cAliasSJ3 := GetNextAlias()
+#ELSE	
+	Local cAliasSJ3 := "SJ3"
+#ENDIF	
+
+Local nPorcPrd   := 0
+Local nAcPorce  := 0
+
+Private aValores := {0,0,0,0,0,0,0,0,0,0,0,0}
+Private nG	  	 := 0
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Funcao utilizada para verificar a ultima versao dos fontes      Ё
+//Ё SIGACUS.PRW, SIGACUSA.PRX e SIGACUSB.PRX, aplicados no rpo do   |
+//| cliente, assim verificando a necessidade de uma atualizacao     |
+//| nestes fontes. NAO REMOVER !!!							        Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+If !(FindFunction("SIGACUS_V") .and. SIGACUS_V() >= 20050512)
+	Final("Atualizar patch do programa SIGACUS.PRW !!!")
+EndIf
+If !(FindFunction("SIGACUSA_V") .and. SIGACUSA_V() >= 20050512)
+	Final("Atencao","Atualizar patch do programa SIGACUSA.PRX !!!")
+EndIf
+If !(FindFunction("SIGACUSB_V") .and. SIGACUSB_V() >= 20060920)
+	Final("Atencao","Atualizar patch do programa SIGACUSB.PRX !!!")
+EndIf
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//ЁCriacao do componente de impressao                                      Ё
+//Ё                                                                        Ё
+//ЁTReport():New                                                           Ё
+//ЁExpC1 : Nome do relatorio                                               Ё
+//ЁExpC2 : Titulo                                                          Ё
+//ЁExpC3 : Pergunte                                                        Ё
+//ЁExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  Ё
+//ЁExpC5 : Descricao                                                       Ё
+//Ё                                                                        Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+oReport := TReport():New("MATR755",STR0045,"MTR755", {|oReport| ReportPrint(oReport,cAliasSJ3,oFilReg,oProd,oValores)},STR0034 + " " + STR0035 + " " + STR0036)	// "Curva ABC de Estoque"###"RelatСrio para mostrar as quantidades de vendas (consumos) de "###"produtos no estoque por regiao do cliente. "###"Este relatorio deverА ser impresso no formulАrio de 132 colunas."
+oReport:SetLandscape() 
+oReport:SetTotalInLine(.F.)
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Grupo de Perguntas                                                     Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+Pergunte(oReport:uParam,.F.)
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё                                                                        Ё
+//Ё                      Definicao das Secoes                              Ё
+//Ё                                                                        Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Section(1)                                                             Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+oFilReg := TRSection():New(oReport,STR0069,{"SJ3"},{STR0042,STR0043,STR0044},/*Campos do SX3*/,/*Campos do SIX*/)	// "Regiao"###"Por % de Participacao"###"Por Codigo (Numerica)"###"Por Regiao + %Participacao"
+oFilReg:SetTotalInLine(.F.)
+oReport:Section(1):SetHeaderSection(.F.)
+
+TRCell():New(oFilReg,"FILIAL"		,"TRB"	,RetTitle("J3_FILIAL"	)	,/*Picture*/,10,/*lPixel*/,{|| STR0066 + TRB->FILIAL 							})	// "Filial: "
+TRCell():New(oFilReg,"REGIAO"		,"TRB"	,RetTitle("J3_REGVEND"	)	,/*Picture*/,11,/*lPixel*/,{|| STR0067 + TRB->REGIAO 							})	// "Regiao: "
+TRCell():New(oFilReg,"X5_DESCRI"	,"SX5"	,STR0051				 			,			 	,50,/*lPixel*/,{|| AllTrim(SX5->X5_DESCRI)			 				})	// "Nome da Regiao"
+TRCell():New(oFilReg,"NPORCPRD"		,		,STR0052				 			,			 	,20,/*lPixel*/,{|| STR0068 + Transform(nPorcPrd,"@E 999.99") 	})	// "Percentual: "
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Section(1):Section(1)                                                  Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+oProd := TRSection():New(oFilReg,STR0070,{},/*{Array com as ordens do relatСrio}*/,/*Campos do SX3*/,/*Campos do SIX*/)	// "Produto"
+oProd:SetTotalInLine(.F.)
+oReport:Section(1):Section(1):SetHeaderPage()
+
+TRCell():New(oProd,"PRODUTO"	,"TRB",RetTitle("J3_PRODUTO"	)	,PesqPict("SJ3","J3_PRODUTO"	)	,TamSX3("J3_PRODUTO"	)[1]	,/*lPixel*/,{|| TRB->PRODUTO	})	// Codigo do Produto
+TRCell():New(oProd,"CLASSE"	,"TRB",STR0065				 			,PesqPict("SJ3","J3_FATVEN"	)	,TamSX3("J3_FATVEN"	)[1]	,/*lPixel*/,{|| TRB->CLASSE	})	// Classe
+TRCell():New(oProd,"B1_DESC"	,"SB1",RetTitle("B1_DESC"		)	,PesqPict("SB1","B1_DESC"		)	,TamSX3("B1_DESC"		)[1]	,/*lPixel*/,{|| SB1->B1_DESC 	})	// Descricao do Produto
+TRCell():New(oProd,"VAL_UNIT"	,"TRB",STR0037				 			,PesqPict("SJ3","J3_VALR01"	)	,TamSX3("J3_VALR01"	)[1]	,/*lPixel*/,{|| TRB->VAL_UNIT	})	// "Valor Unitario"
+TRCell():New(oProd,"PROCPROD"	,"TRB",STR0038				 			,"@E 999.99"			 		 		,06								,/*lPixel*/,{|| TRB->PORCPROD	})	// "% Part"
+TRCell():New(oProd,"NACPORCE"	,		,STR0039				 			,"@E 999.99"			 		 		,06								,/*lPixel*/,{|| nAcPorce 		})	// "% Acum"
+
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Section(1):Section(1):Section(1)                                       Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+oValores := TRSection():New(oProd,STR0071,{},/*{Array com as ordens do relatСrio}*/,/*Campos do SX3*/,/*Campos do SIX*/)	// "Valores"
+oValores:SetTotalInLine(.F.)
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Impressao do Cabecalho da Secao 3 no topo da pagina                    Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+oReport:Section(1):Section(1):Section(1):SetHeaderPage()
+oReport:Section(1):SetEditCell(.F.)
+oReport:Section(1):Section(1):SetEdit(.F.)
+oReport:Section(1):Section(1):Section(1):SetEdit(.F.)
+
+Return(oReport)
+
+/*/
+эээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээ
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+╠╠зддддддддддбддддддддддбдддддддбдддддддддддддддддддддддбддддддбдддддддддд©╠╠
+╠╠ЁPrograma  ЁReportPrinЁ Autor Ё Marco Bianchi         Ё Data Ё 12/07/06 Ё╠╠
+╠╠цддддддддддеддддддддддадддддддадддддддддддддддддддддддаддддддадддддддддд╢╠╠
+╠╠ЁDescri┤┘o ЁA funcao estatica ReportDef devera ser criada para todos os Ё╠╠
+╠╠Ё          Ёrelatorios que poderao ser agendados pelo usuario.          Ё╠╠
+╠╠Ё          Ё                                                            Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠ЁRetorno   ЁNenhum                                                      Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠ЁParametrosЁExpO1: Objeto Report do RelatСrio                           Ё╠╠
+╠╠Ё          Ё                                                            Ё╠╠
+╠╠цддддддддддедддддддддддддддбдддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠Ё   DATA   Ё Programador   ЁManutencao efetuada                         Ё╠╠
+╠╠цддддддддддедддддддддддддддедддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠Ё          Ё               Ё                                            Ё╠╠
+╠╠юддддддддддадддддддддддддддадддддддддддддддддддддддддддддддддддддддддддды╠╠
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+ъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъ
+/*/
+Static Function ReportPrint(oReport,cAliasSJ3,oFilReg,oProd,oValores)
+
+Local oBreak1
+Local oBreak2
+Local aNomeMes 	 := {STR0053,STR0054,STR0055,STR0056,STR0057,STR0058,STR0059,STR0060,STR0061,STR0062,STR0063,STR0064}		//"Jan"###"Fev"###"Mar"###"Abr"###"Mai"###"Jun"###"Jul"###"Ago"###"Set"###"Out"###"Nov"###"Dez"
+Local aCampos    := {}
+Local aRegQtde   := {}
+Local aTam       := {}
+Local cArqTrab   := ""
+Local cKey       := ""
+Local cProduto   := ""
+Local cRegiaoC   := ""
+Local cInd       := ""
+Local nI         := 0
+Local nTtGeral   := 0
+Local nDecQtde   := 0
+Local nElement   := 0
+Local nContaIt   := 0
+Local cQuebraReg := ""
+Local aCabec 	 := {"","","","","","","","","","","",""}
+#IFNDEF TOP
+	Local cCondicao := ""
+#ENDIF
+
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Calcula o mes/ano para o cabecalho.                                    Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+For nI := 11 To 0 Step -1
+	nMes := Val(StrZero(mv_par03,2)) - nI
+	If nMes < 1
+		nMes := 12 + nMes
+		cAno := Str(Val(StrZero(mv_par04,4))-1,4)
+	Else
+		cAno := StrZero(mv_par04,4)
+	Endif
+	aCabec[12-nI] := aNomeMes[nMes] + "/" + cAno
+Next
+
+oReport:Section(1):Cell("NPORCPRD"):SetBlock({|| STR0068 + Transform(nPorcPrd,"@E 999.99") })
+oReport:Section(1):Section(1):Cell("NACPORCE"):SetBlock({|| nAcPOrce })
+nPorcPrd   := 0
+nAcPorce 	 := 0
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё                                                                        Ё
+//Ё                     Definicao das Celulas                              Ё
+//Ё                                                                        Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Secao 03                                                               Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+TRCell():New(oValores,"NCOL01"		,	  ,aCabec[01]	,PesqPict("SJ3","J3_QUAR01"),TamSX3("J3_QUAR01")[1],/*lPixel*/,{|| aValores[01] 	})
+TRCell():New(oValores,"NCOL02"		,	  ,aCabec[02]	,PesqPict("SJ3","J3_QUAR01"),TamSX3("J3_QUAR01")[1],/*lPixel*/,{|| aValores[02] 	})
+TRCell():New(oValores,"NCOL03"		,	  ,aCabec[03]	,PesqPict("SJ3","J3_QUAR01"),TamSX3("J3_QUAR01")[1],/*lPixel*/,{|| aValores[03] 	})
+TRCell():New(oValores,"NCOL04"		,	  ,aCabec[04]	,PesqPict("SJ3","J3_QUAR01"),TamSX3("J3_QUAR01")[1],/*lPixel*/,{|| aValores[04] 	})
+TRCell():New(oValores,"NCOL05"		,	  ,aCabec[05]	,PesqPict("SJ3","J3_QUAR01"),TamSX3("J3_QUAR01")[1],/*lPixel*/,{|| aValores[05]		})
+TRCell():New(oValores,"NCOL06"		,	  ,aCabec[06]	,PesqPict("SJ3","J3_QUAR01"),TamSX3("J3_QUAR01")[1],/*lPixel*/,{|| aValores[06] 	})
+TRCell():New(oValores,"NCOL07"		,	  ,aCabec[07]	,PesqPict("SJ3","J3_QUAR01"),TamSX3("J3_QUAR01")[1],/*lPixel*/,{|| aValores[07] 	})
+TRCell():New(oValores,"NCOL08"		,	  ,aCabec[08]	,PesqPict("SJ3","J3_QUAR01"),TamSX3("J3_QUAR01")[1],/*lPixel*/,{|| aValores[08] 	})
+TRCell():New(oValores,"NCOL09"		,	  ,aCabec[09]	,PesqPict("SJ3","J3_QUAR01"),TamSX3("J3_QUAR01")[1],/*lPixel*/,{|| aValores[09] 	})
+TRCell():New(oValores,"NCOL10"		,	  ,aCabec[10]	,PesqPict("SJ3","J3_QUAR01"),TamSX3("J3_QUAR01")[1],/*lPixel*/,{|| aValores[10] 	})
+TRCell():New(oValores,"NCOL11"		,	  ,aCabec[11]	,PesqPict("SJ3","J3_QUAR01"),TamSX3("J3_QUAR01")[1],/*lPixel*/,{|| aValores[11] 	})
+TRCell():New(oValores,"NCOL12"		,	  ,aCabec[12]	,PesqPict("SJ3","J3_QUAR01"),TamSX3("J3_QUAR01")[1],/*lPixel*/,{|| aValores[12] 	})
+TRCell():New(oValores,"QTDECM"		,"TRB",STR0040		,PesqPict("SJ3","J3_QUAR01"),TamSX3("J3_QUAR01")[1],/*lPixel*/,{|| TRB->QTDECM 		})	// "C.M.M."
+TRCell():New(oValores,"NTOTACUM"	,	  ,STR0041		,PesqPict("SJ3","J3_QUAR01"),TamSX3("J3_QUAR01")[1],/*lPixel*/,{|| nTotAcum 				})	// "Tot.Cons."
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Definicao das Quebras: por Regiao e por Filial                         Ё
+//Ё As quebras sao definidas por celulas da Secao 1 e os campos que serao  Ё
+//Ё totalizados pertencem a secao 3.                                       Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+oBreak1 := TRBreak():New(oFilReg,oFilReg:Cell("REGIAO" ),"TOTAL DA REGIAO " ,.F.)
+oBreak2 := TRBreak():New(oFilReg,oFilReg:Cell("FILIAL" ),"TOTAL DA FILIAL " ,.F.)
+
+oTotal1 := TRFunction():New(oValores:Cell("NCOL01"		),/* cID */,"SUM",oBreak1,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal1 := TRFunction():New(oValores:Cell("NCOL02"		),/* cID */,"SUM",oBreak1,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal1 := TRFunction():New(oValores:Cell("NCOL03"		),/* cID */,"SUM",oBreak1,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal1 := TRFunction():New(oValores:Cell("NCOL04"		),/* cID */,"SUM",oBreak1,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal1 := TRFunction():New(oValores:Cell("NCOL05"		),/* cID */,"SUM",oBreak1,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal1 := TRFunction():New(oValores:Cell("NCOL06"		),/* cID */,"SUM",oBreak1,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal1 := TRFunction():New(oValores:Cell("NCOL07"		),/* cID */,"SUM",oBreak1,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal1 := TRFunction():New(oValores:Cell("NCOL08"		),/* cID */,"SUM",oBreak1,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal1 := TRFunction():New(oValores:Cell("NCOL09"		),/* cID */,"SUM",oBreak1,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal1 := TRFunction():New(oValores:Cell("NCOL10"		),/* cID */,"SUM",oBreak1,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal1 := TRFunction():New(oValores:Cell("NCOL11"		),/* cID */,"SUM",oBreak1,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal1 := TRFunction():New(oValores:Cell("NCOL12"		),/* cID */,"SUM",oBreak1,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal1 := TRFunction():New(oValores:Cell("QTDECM"		),/* cID */,"SUM",oBreak1,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+oTotal1 := TRFunction():New(oValores:Cell("NTOTACUM"	),/* cID */,"SUM",oBreak1,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+
+oTotal2 := TRFunction():New(oValores:Cell("NCOL01"		),/* cID */,"SUM",oBreak2,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.T./*lEndReport*/,.F./*lEndPage*/,oFilReg)
+oTotal2 := TRFunction():New(oValores:Cell("NCOL02"		),/* cID */,"SUM",oBreak2,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.T./*lEndReport*/,.F./*lEndPage*/,oFilReg)
+oTotal2 := TRFunction():New(oValores:Cell("NCOL03"		),/* cID */,"SUM",oBreak2,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.T./*lEndReport*/,.F./*lEndPage*/,oFilReg)
+oTotal2 := TRFunction():New(oValores:Cell("NCOL04"		),/* cID */,"SUM",oBreak2,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.T./*lEndReport*/,.F./*lEndPage*/,oFilReg)
+oTotal2 := TRFunction():New(oValores:Cell("NCOL05"		),/* cID */,"SUM",oBreak2,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.T./*lEndReport*/,.F./*lEndPage*/,oFilReg)
+oTotal2 := TRFunction():New(oValores:Cell("NCOL06"		),/* cID */,"SUM",oBreak2,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.T./*lEndReport*/,.F./*lEndPage*/,oFilReg)
+oTotal2 := TRFunction():New(oValores:Cell("NCOL07"		),/* cID */,"SUM",oBreak2,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.T./*lEndReport*/,.F./*lEndPage*/,oFilReg)
+oTotal2 := TRFunction():New(oValores:Cell("NCOL08"		),/* cID */,"SUM",oBreak2,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.T./*lEndReport*/,.F./*lEndPage*/,oFilReg)
+oTotal2 := TRFunction():New(oValores:Cell("NCOL09"		),/* cID */,"SUM",oBreak2,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.T./*lEndReport*/,.F./*lEndPage*/,oFilReg)
+oTotal2 := TRFunction():New(oValores:Cell("NCOL10"		),/* cID */,"SUM",oBreak2,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.T./*lEndReport*/,.F./*lEndPage*/,oFilReg)
+oTotal2 := TRFunction():New(oValores:Cell("NCOL11"		),/* cID */,"SUM",oBreak2,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.T./*lEndReport*/,.F./*lEndPage*/,oFilReg)
+oTotal2 := TRFunction():New(oValores:Cell("NCOL12"		),/* cID */,"SUM",oBreak2,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.T./*lEndReport*/,.F./*lEndPage*/,oFilReg)
+oTotal2 := TRFunction():New(oValores:Cell("QTDECM"		),/* cID */,"SUM",oBreak2,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.T./*lEndReport*/,.F./*lEndPage*/,oFilReg)
+oTotal2 := TRFunction():New(oValores:Cell("NTOTACUM"	),/* cID */,"SUM",oBreak2,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.T./*lEndReport*/,.F./*lEndPage*/,oFilReg)
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//ЁTransforma parametros Range em expressao SQL                            Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+MakeSqlExpr(oReport:uParam)
+
+
+If mv_par03 > 12 .Or. mv_par03 < 1
+	mv_par03 := 12
+Endif
+
+If mv_par08 == 2
+	cTipPrec := "S"      		// Preco Standard
+ElseIf mv_par08 == 3
+	cTipPrec := "C"      		// Preco de tabela informado no cad. de cliente
+ElseIf mv_par08 == 4
+	Pergunte("MR765B",.F.)    	// Preco de tabela informado pelo usuario
+	Pergunte("MR765B",.T.)
+	//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+	//Ё Variaveis utilizadas para parametros                         Ё
+	//Ё mv_par01 // Nro. Tabela                                      Ё
+	//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+	cTipPrec := mv_par01
+	Pergunte("MTR755",.F.)
+Else
+	cTipPrec := "M"      		// Preco Medio
+Endif
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Pesquisa o numero de casas decimais do valor e qtde.         Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+aTam:=TamSX3("J3_QUAR01")
+nDecQtde:=aTam[2]
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Define estrutura e gera o arquivo de trabalho                Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+aTam    := TamSX3("J3_REGVEND")
+aCampos := { { "REGIAO"  , "C",aTam[1],aTam[2]},;
+{ "FILIAL" 	, "C", FWGETTAMFILIAL, 0		},;
+{ "PRODUTO" , "C", 15, 0		},;
+{ "VALCHAV" , "C", 16, 0		},;
+{ "MESCONS" , "N", 02, 0		},;
+{ "CLASSE"  , "C", 01, 0		},;
+{ "PORCPROD", "N", 08, 4		},;
+{ "VAL_UNIT", "N", 16, 2		},;
+{ "VALCMED" , "N", 16, 2		},;
+{ "QTDE01"  , "N", 11, nDecQtde	},;
+{ "QTDE02"  , "N", 11, nDecQtde	},;
+{ "QTDE03"  , "N", 11, nDecQtde	},;
+{ "QTDE04"  , "N", 11, nDecQtde	},;
+{ "QTDE05"  , "N", 11, nDecQtde	},;
+{ "QTDE06"  , "N", 11, nDecQtde	},;
+{ "QTDE07"  , "N", 11, nDecQtde	},;
+{ "QTDE08"  , "N", 11, nDecQtde	},;
+{ "QTDE09"  , "N", 11, nDecQtde	},;
+{ "QTDE10"  , "N", 11, nDecQtde	},;
+{ "QTDE11"  , "N", 11, nDecQtde	},;
+{ "QTDE12"  , "N", 11, nDecQtde	},;
+{ "QTDECM"  , "N", 11, nDecQtde	},;
+{ "QTDECT"  , "N", 11, nDecQtde	} }
+
+cArqTrab := CriaTrab(aCampos,.T.)
+dbUseArea(.T.,,cArqTrab,"TRB",.T.,.F.)
+
+cKey := "FILIAL + REGIAO + PRODUTO"
+IndRegua("TRB",cArqTrab,cKey,,,STR0047)		//"Selecionando Registros..."
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Gera arquivo de trabalho com dados do SJ3 - acum. mensais.   Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+aRegQtde := MR755TraR4( cTipPrec,cAliasSJ3,oReport)
+nTtGeral	:= 0
+
+For nI :=1 To len(aRegQtde)
+	nTtGeral += aRegQtde[nI][2]
+Next
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё A classificacao ABC dos produtos sempre deve ser calculada   Ё
+//Ё sobre o % de participacao em ordem decrescente.              Ё
+//Ё Esta rotina calcula o % e a classe do produto.               Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+MR755Clas( aRegQtde,cArqTrab )
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Definicao dos cabecalhos e quebras                           Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+If oReport:Section(1):GetOrder() == 1				// por % de participacao
+	oReport:SetTitle(oReport:Title() + " - " + GetMv("MV_MOEDA" + STR(mv_par10,1)) + STR0046 )	// "Curva ABC de Estoque"###" - ORDEM DE % DE PARTICIPACAO"
+	dbSelectArea("TRB")
+	cKey := "FILIAL"
+	IndRegua("TRB",cArqTrab,cKey,,,STR0047)			// "Selecionando Registros..."
+ElseIf oReport:Section(1):GetOrder() == 2          // " Por codigo (numerico)"
+	oReport:SetTitle(STR0045+ " - " + GetMv("MV_MOEDA" + STR(mv_par10,1)) + STR0048 )	// "Curva ABC de Estoque"###" - ORDEM DE CODIGO (NUMERICA)"
+	dbSelectArea("TRB")
+	cKey := "FILIAL + REGIAO + PRODUTO"
+	IndRegua("TRB",cArqTrab,cKey,,,STR0047)			// "Selecionando Registros..."
+ElseIf oReport:Section(1):GetOrder() == 3			// "Por Regiao + %Participacao"
+	oReport:SetTitle(STR0045+ " - " + GetMv("MV_MOEDA" + STR(mv_par10,1)) + STR0049 )	// "Curva ABC de Estoque"###" - ORDEM DE REGIAO + PARTICIPACAO"
+	dbSelectArea("TRB")
+	cKey := "FILIAL + REGIAO + CLASSE + PRODUTO"
+	IndRegua("TRB",cArqTrab,cKey,,,STR0047)			// "Selecionando Registros..."
+Endif
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//ЁMetodo TrPosition()                                                     Ё
+//Ё                                                                        Ё
+//ЁPosiciona em um registro de uma outra tabela. O posicionamento serА     Ё
+//Ёrealizado antes da impressao de cada linha do relatСrio.                Ё
+//Ё                                                                        Ё
+//Ё                                                                        Ё
+//ЁExpO1 : Objeto Report da Secao                                          Ё
+//ЁExpC2 : Alias da Tabela                                                 Ё
+//ЁExpX3 : Ordem ou NickName de pesquisa                                   Ё
+//ЁExpX4 : String ou Bloco de cСdigo para pesquisa. A string serА macroexe-Ё
+//Ё        cutada.                                                         Ё
+//Ё                                                                        Ё				
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+TRPosition():New(oReport:Section(1):Section(1),"SB1",1,{|| TRB->FILIAL+TRB->PRODUTO })
+
+TRPosition():New(oReport:Section(1):Section(1),"SB1",1,{|| TRB->FILIAL+TRB->PRODUTO })
+TRPosition():New(oReport:Section(1),"SX5",1,{|| xFilial("SX5")+"61"+cRegiaoC })
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Impressao do relatorio.                                      Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+dbSelectArea("TRB")
+Set Order to 1
+oReport:SetMeter(RecCount())		// Total de Elementos da regua
+dbGoTop()
+
+cQuebraReg	:= ""
+oReport:Section(1):Init()
+oReport:Section(1):Section(1):Init()  
+oReport:Section(1):Section(1):Section(1):Init()  
+
+While !oReport:Cancel() .And. TRB->(!Eof())
+	
+	cFilia   := TRB->FILIAL	
+	cRegiaoC := TRB->REGIAO
+	nElement := AScan( aRegQtde, { | x | x[1] == cRegiaoC .And. x[3] == cFilia } )
+	nPorcPrd := IIF(nTtGeral == 0,100,(aRegQtde[nElement][2] / nTtGeral)*100)
+	nContaIt := 1
+
+	If cQuebraReg <> TRB->FILIAL+TRB->REGIAO
+		oReport:Section(1):PrintLine()
+		cQuebraReg := TRB->FILIAL+TRB->REGIAO      
+		nAcPorce := 0
+	EndIf	
+	
+	
+	If nContaIt <= mv_par09
+			
+		cProduto := TRB->PRODUTO
+		If TRB->PORCPROD >= 0
+			nAcPorce += TRB->PORCPROD
+		Endif
+		
+		nTotAcum := 0
+		aValores := {0,0,0,0,0,0,0,0,0,0,0,0}
+			
+		For ni = 1 To 12
+			cInd := "TRB->QTDE"+StrZero(ni,2)
+			nTotAcum += &cInd
+			aValores[ni] := &cInd
+			nG := ni
+		Next
+			
+		oReport:Section(1):Section(1):PrintLine()
+		oReport:Section(1):Section(1):Section(1):PrintLine()
+
+		//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+		//Ё Altera o Titulo dos Totalizadores                            Ё
+		//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+		oBreak1:SetTotalText("TOTAL DA REGIAO " + TRB->REGIAO)
+		oBreak2:SetTotalText("TOTAL DA FILIAL " + TRB->FILIAL)
+			
+			
+		nContaIt++
+		dbSelectArea("TRB")
+		dbSkip()
+		oReport:IncMeter()
+			
+	Else
+						
+		If cRegiaoC == TRB->REGIAO
+			dbSelectArea("TRB")
+			dbSkip()
+		Endif
+			
+	Endif
+		
+EndDo
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Finaliza Secoes                                              Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+oReport:Section(1):Section(1):Section(1):Finish()
+oReport:Section(1):Section(1):Finish()			
+oReport:Section(1):Finish()	
+
+dbSelectArea("TRB")
+dbCloseArea()
+
+
+Return
+
+
+
+/*/
+ъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъ
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+╠╠зддддддддддбддддддддддбдддддддбдддддддддддддддддддддддбддддддбдддддддддд©╠╠
+╠╠ЁFun┤└o    ЁMR755TraR4Ё Revis Ё Alexandre Inacio LemesЁ Data Ё 02/03/01 Ё╠╠
+╠╠цддддддддддеддддддддддадддддддадддддддддддддддддддддддаддддддадддддддддд╢╠╠
+╠╠ЁDescri┤└o Ё Gera arquivo de trabalho com dados do SJ3.                 Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠ЁSintaxe   Ё ExpA1 := MR755Trab( ExpC1,ExpC2,ExpC3,ExpC4,ExpC5,ExpN1)   Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠ЁParametrosЁ ExpA1 - array contendo as regioes e valores totais de con- Ё╠╠
+╠╠Ё          Ё         sumo da regiao                                     Ё╠╠
+╠╠Ё          Ё ExpC1 - regiao inicial                                     Ё╠╠
+╠╠Ё          Ё ExpC2 - regiao final                                       Ё╠╠
+╠╠Ё          Ё ExpC3 - mes final do relatorio                             Ё╠╠
+╠╠Ё          Ё ExpC4 - ano final do relatorio                             Ё╠╠
+╠╠Ё          Ё ExpC5 - tipo de preco selecionado pelo usuario             Ё╠╠
+╠╠Ё          Ё ExpN1 - numero de casas decimais do preco                  Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠Ё Uso      Ё MATR755                                                    Ё╠╠
+╠╠юддддддддддадддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды╠╠
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+ъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъ
+/*/
+
+Static Function MR755TraR4( cTipPrec,cAliasSJ3,oReport )
+
+Local aRegQtde := {}
+Local aColunas := {}
+Local cMesInic := ""
+Local cAnoAnte := ""
+Local cIndex   := ""
+Local cKey     := ""
+Local cCondicao:= ""
+Local nX       := 0
+Local nPrecoUn := 0
+Local nAno     := 0
+Local nNMesCons:= 0
+Local nValor   := 0
+Local nRegQtde := 0
+Local dIniCons := Ctod("")
+Local dFimCons := dIniCons
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Os 12 meses estao contidos em 1 ano ou 2 anos.               Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+If StrZero(mv_par03,2) == "12"
+	cAnoAnte := StrZero(mv_par04,4)
+	cMesInic := "01"
+Else
+	cAnoAnte := StrZero((Val(StrZero(mv_par04,4))-1),4)
+	cMesInic := StrZero((Val(StrZero(mv_par03,2))+1),2)
+EndIf
+nAno := Val(cAnoAnte)
+nMes := Val(cMesInic)
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Calcula o MES/ANO de cada coluna do relatorio                Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+For nX := 1 To 12
+	aadd(aColunas,{ StrZero(nAno,4) , StrZero(nMes,2) , StrZero(nX,2) } )
+	nMes++
+	If ( nMes > 12 )
+		nMes := 1
+		nAno++
+	EndIf
+	dFimCons := LastDay(Ctod("01/"+StrZero(nMes,2)+"/"+StrZero(nAno,4)))
+Next nX
+                          
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Verifica o Filtro                                            Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+dbSelectArea("SJ3")
+cKey   := "J3_FILIAL + J3_REGVEND + J3_PRODUTO + J3_ANO + J3_FATVEN"
+#IFDEF TOP
+	oReport:Section(1):BeginQuery()
+	BeginSql Alias cAliasSJ3
+	SELECT *
+	FROM %Table:SJ3% SJ3
+	WHERE J3_FILIAL >= %Exp:mv_par11%  AND
+	J3_FILIAL <= %Exp:mv_par12% AND
+	J3_REGVEND >= %Exp:mv_par01% AND
+	J3_REGVEND <= %Exp:mv_par02% AND
+	(J3_ANO = %Exp:StrZero(mv_par04,4)% OR J3_ANO = %Exp:cAnoAnte%) AND
+	SJ3.%notdel%
+	ORDER BY J3_FILIAL,J3_REGVEND,J3_PRODUTO,J3_ANO,J3_FATVEN
+	EndSql
+	oReport:Section(1):EndQuery()
+#ELSE
+	cIndex := CriaTrab(Nil,.F.)
+	cKey   := "J3_FILIAL + J3_REGVEND + J3_PRODUTO + J3_ANO + J3_FATVEN"
+	cCondicao :=" J3_FILIAL >= '"+ mv_par11 +"' .And. J3_FILIAL <= '"+ mv_par12+"' .And. "
+	cCondicao +=" J3_REGVEND >= '"+mv_par01+"' .And. J3_REGVEND <= '"+mv_par02+"' .And. "
+	cCondicao +=" 	(J3_ANO == '"+StrZero(mv_par04,4)+"' .Or. J3_ANO == '"+cAnoAnte	+"') "
+	oReport:Section(1):SetFilter(cCondicao,cKey)
+	dbGoTop()
+#ENDIF
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Grava TRB                                                    Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+dbSelectArea(cAliasSJ3)
+oReport:SetMeter(SJ3->(LastRec()))   // Total de Elementos da regua
+While !oReport:Cancel() .And. (cAliasSJ3)->(!Eof())  //IndRegua
+	
+	//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+	//Ё Pesquisa a Filial/Regiao                                     Ё
+	//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+	nRegQtde := Ascan(aRegQtde,{|x| x[1] == (cAliasSJ3)->J3_REGVEND .And. x[3]==(cAliasSJ3)->J3_FILIAL })
+	If ( nRegQtde == 0 )
+		aadd(aRegQtde,{(cAliasSJ3)->J3_REGVEND,0,(cAliasSJ3)->J3_FILIAL})
+		nRegQtde := Len(aRegQtde)
+	EndIf
+	
+	cProduto := (cAliasSJ3)->J3_PRODUTO
+	
+	dbSelectArea("TRB")
+	dbSetOrder(1)
+	If !dbSeek( (cAliasSJ3)->J3_FILIAL + (cAliasSJ3)->J3_REGVEND + (cAliasSJ3)->J3_PRODUTO )
+		
+		//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+		//Ё Calcula o Valor Unitario conforme os parametros              Ё
+		//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+		dbSelectArea("SB1")
+		dbSeek( xFilial("SB1") + (cAliasSJ3)->J3_PRODUTO )
+		
+		Do Case
+			Case cTipPrec == "S"
+				nPrecoUn := xMoeda( RetFldProd(SB1->B1_COD,"B1_CUSTD"),Val(RetFldProd(SB1->B1_COD,"B1_MCUSTD")),mv_par10,ddatabase)
+			Case cTipPrec == "M" .Or. cTipPrec == "1"
+				nPrecoUn := xMoeda(SB1->B1_PRV1,1,mv_par10,ddatabase)
+			Case cTipPrec == "C"
+				dbSelectArea("SA1")
+				dbSetOrder(1)
+				dbSeek( xFilial("SA1") + (cAliasSJ3)->J3_CLIENTE + (cAliasSJ3)->J3_LOJA )
+				If Empty(SA1->A1_TABELA) .Or. SA1->A1_TABELA == "1"
+					nPrecoUn := xMoeda(SB1->B1_PRV1,1,mv_par10,ddatabase)
+				Else
+					nPrecoUn := MaTabPrVen(SA1->A1_TABELA,cProduto,0,SA1->A1_COD,SA1->A1_LOJA,mv_par10,ddatabase)
+				EndIf
+			OtherWise
+				nPrecoUn := MaTabPrVen(cTipPrec,cProduto,0,SJ3->J3_CLIENTE,SJ3->J3_LOJA,mv_par10,ddatabase)
+		EndCase
+		
+		//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+		//Ё Calcula o numero de meses de consumo                         Ё
+		//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+		dIniCons := LastDay(RetFldProd(SB1->B1_COD,"B1_CONINI"))
+		nNmesCons := 0
+		While	dIniCons < dFimCons
+			nNmesCons++
+			dIniCons++
+			dIniCons := LastDay(dIniCons)
+			If nNMescons >= 12
+				Exit
+			EndIf
+		EndDo
+		//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+		//Ё Atualiza o arquivo temporario                                Ё
+		//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+		RecLock("TRB",.T.)
+		Replace FILIAL   With (cAliasSJ3)->J3_FILIAL
+		Replace REGIAO   With (cAliasSJ3)->J3_REGVEND
+		Replace PRODUTO  With (cAliasSJ3)->J3_PRODUTO
+		Replace VAL_UNIT With nPrecoUn
+		Replace MESCONS  With nNmesCons
+	Else
+		RecLock("TRB")
+	EndIf
+	
+	//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+	//Ё Estorna o valor acumulado por regiao                         Ё
+	//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+	aRegQtde[nRegQtde][2] -= TRB->VALCMED
+	//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+	//Ё Atualiza o consumo dos ultimos 12 meses                      Ё
+	//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+	For nX := 1 To Len(aColunas)
+		If ( aColunas[nX,1] == (cAliasSJ3)->J3_ANO )
+			nValor := (cAliasSJ3)->(FieldGet(FieldPos("J3_QUAR"+aColunas[nX,2])))
+			FieldPut(FieldPos("QTDE"+aColunas[nX,3]),nValor+FieldGet(FieldPos("QTDE"+aColunas[nX,3])))
+			Replace QTDECT With QTDECT + nValor
+		EndIf
+	Next nX
+	Replace QTDECM  With QTDECT/MESCONS
+	Replace VALCMED With QTDECM * nPrecoUn
+	Replace VALCHAV With Right(StrZero(10000000000000-Max(TRB->VALCMED,0.01),17,2),16)
+	
+	//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+	//Ё Soma o valor acumulado por regiao                            Ё
+	//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+	aRegQtde[nRegQtde][2] += TRB->VALCMED
+	
+	MsUnLock()
+	
+	dbSelectArea(cAliasSJ3)
+	dbSkip()
+	oReport:IncMeter()
+	
+EndDo
+
+Return aRegQtde
+
+/*/
+эээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээ
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+╠╠зддддддддддбддддддддддбдддддддбдддддддддддддддддддддддбддддддбдддддддддд©╠╠
+╠╠ЁFun┤└o    Ё MATR755R3Ё Revis Ё Alexandre Inacio LemesЁ Data Ё 02/03/01 Ё╠╠
+╠╠цддддддддддеддддддддддадддддддадддддддддддддддддддддддаддддддадддддддддд╢╠╠
+╠╠ЁDescri┤└o Ё Relatorio de Curva ABC de Consumo de Vendas por Regiao.    Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠ЁSintaxe   Ё MATR755(void)                                              Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠Ё Uso      Ё Generico                                                   Ё╠╠
+╠╠цддддддддддадддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠Ё ATUALIZACOES SOFRIDAS DESDE A CONSTRUCAO INICIAL.                     Ё╠╠
+╠╠цддддддддддддддбддддддддбддддддбдддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠Ё PROGRAMADOR  Ё DATA   Ё BOPS Ё  MOTIVO DA ALTERACAO                   Ё╠╠
+╠╠цддддддддддддддеддддддддеддддддедддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠Ё Viviani      Ё25/11/98ЁMelhorЁAcrescimo do xMoeda p/ conversao.       Ё╠╠
+╠╠Ё Aline C.Vale Ё14.04.99ЁProth ЁRetirada de macro utilizacao do ProtheusЁ╠╠
+╠╠Ё Aline C.Vale Ё17.06.99Ё19334 ЁAlter.na consistencia da data de proces.Ё╠╠
+╠╠юддддддддддддддаддддддддаддддддадддддддддддддддддддддддддддддддддддддддды╠╠
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+ъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъ
+/*/
+
+Function MATR755R3()
+
+LOCAL cDesc1 := OemToAnsi(STR0001)	//"Relat╒rio para mostrar as quantidades de vendas (consumos) de "
+LOCAL cDesc2 := OemToAnsi(STR0002)	//"produtos no estoque por regiao do cliente. "
+LOCAL cDesc3 := OemToAnsi(STR0003)	//"Este relatorio dever═ ser impresso no formul═rio de 132 colunas."
+LOCAL aOrd   := {STR0004, STR0005, STR0032} //"Por%de participacao"###" Por codigo (numerica)"###"Por Regiao + %de participacao"
+LOCAL cabec1 := ""
+LOCAL cabec2 := ""
+LOCAL wnrel  := ""
+LOCAL tamanho:= "G"
+LOCAL cString:= "SJ3"
+LOCAL limite := 220
+LOCAL nTipo  := 0
+LOCAL nOrdem := 0
+LOCAL ni     := 0
+
+PRIVATE aReturn := { STR0007, 1,STR0008, 1, 2, 1, "",1 }//"Zebrado"###"Administracao"
+PRIVATE nomeprog:= "MATR755"
+PRIVATE aLinha  := { }, nLastKey := 0
+PRIVATE cPerg   := "MTR755"
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Variaveis utilizadas para Impressao do Cabecalho e Rodape    Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+PRIVATE titulo  := OemToAnsi(STR0006)                           //"Curva ABC de Estoque"
+PRIVATE cbcont  := 0
+PRIVATE li      := 80
+PRIVATE m_pag   := 1
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Funcao utilizada para verificar a ultima versao dos fontes      Ё
+//Ё SIGACUS.PRW, SIGACUSA.PRX e SIGACUSB.PRX, aplicados no rpo do   |
+//| cliente, assim verificando a necessidade de uma atualizacao     |
+//| nestes fontes. NAO REMOVER !!!							        Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+If !(FindFunction("SIGACUS_V") .And. SIGACUS_V() >= 20050512)
+	Final("Atualizar patch do programa SIGACUS.PRW !!!")
+EndIf
+If !(FindFunction("SIGACUSA_V") .And. SIGACUSA_V() >= 20050512)
+	Final("Atualizar patch do programa SIGACUSA.PRX !!!")
+EndIf
+If !(FindFunction("SIGACUSB_V") .And. SIGACUSB_V() >= 20060920)
+	Final("Atualizar patch do programa SIGACUSB.PRX !!!")
+EndIf
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Verifica as perguntas selecionadas                           Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+pergunte("MTR755",.F.)
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Variaveis utilizadas para parametros                         Ё
+//Ё mv_par01 // Regiao de                                        Ё
+//Ё mv_par02 // Regiao ate                                       Ё
+//Ё mv_par03 // Mes                                              Ё
+//Ё mv_par04 // Ano                                              Ё
+//Ё mv_par05 // % Prod. A                                        Ё
+//Ё mv_par06 // % Prod. B                                        Ё
+//Ё mv_par07 // % Prod. C                                        Ё
+//Ё mv_par08 // Preco p/Calc.: Medio/Standard/Tab.Cliente/Tabela Ё
+//Ё mv_par09 // Qtde. de produtos impressos para cada regiao     Ё
+//Ё mv_par10 // Qual moeda                                       Ё
+//Ё mv_par11 // Filial de                                        Ё
+//Ё mv_par12 // Filial ate                                       Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Envia controle para a funcao SETPRINT                        Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+wnrel := "MATR755"           //Nome Default do relatorio em Disco
+
+wnrel := SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.F.,aOrd,.T.,Tamanho)
+
+If nLastKey == 27
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	dbClearFilter()
+	Return
+Endif
+
+RptStatus({|lEnd| C755Imp(@lEnd,wnRel,cString)},Titulo)
+
+Return
+/*/
+эээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээ
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+╠╠зддддддддддбддддддддддбдддддддбдддддддддддддддддддддддбддддддбдддддддддд©╠╠
+╠╠ЁFun┤┘o    Ё C755IMP  Ё REVIS Ё Alexandre Inacio LemesЁ Data Ё 13.03.01 Ё╠╠
+╠╠цддддддддддеддддддддддадддддддадддддддддддддддддддддддаддддддадддддддддд╢╠╠
+╠╠ЁDescri┤┘o Ё Chamada do Relatorio                                       Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠Ё Uso      Ё MATR755			                                          Ё╠╠
+╠╠юддддддддддадддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды╠╠
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+ъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъ
+/*/
+Static Function C755Imp(lEnd,WnRel,cString)
+
+LOCAL aCampos   := {}
+LOCAL aRegQtde  := {}
+LOCAL aTam      := {}
+LOCAL aTotRegi  := {} 
+LOCAL aTotfili  := {}
+LOCAL aTotEmpr  := {}
+LOCAL lContinua := .T.
+LOCAL cabec1    := ""
+LOCAL cabec2    := ""
+LOCAL tamanho   := "G"
+LOCAL cMesRela  := ""
+LOCAL cArqTrab  := ""
+LOCAL cKey      := ""
+LOCAL cIndex    := ""
+LOCAL cCondicao := ""
+LOCAL cProduto  := ""
+LOCAL cRegiaoC  := ""
+LOCAL cTabRegi  := "61"
+LOCAL cInd      := ""
+LOCAL CbCont    := 0
+LOCAL limite    := 220
+LOCAL nTipo     := 0
+LOCAL nOrdem    := 0
+LOCAL ni        := 0
+LOCAL nTtGeral  := 0
+LOCAL nDecQtde  := 0
+LOCAL nElement  := 0
+LOCAL nPorcPrd  := 0
+LOCAL nAcPorce  := 0
+LOCAL nColunas  := 0
+LOCAL nItemRel  := 0
+LOCAL nContaIt  := 0
+LOCAL nX        := 0
+
+If mv_par03 > 12 .Or. mv_par03 < 1
+	mv_par03 := 12
+Endif
+
+nOrdem   := aReturn[8]
+titulo   := OemToAnsi(STR0006)+ " - " + GetMv("MV_MOEDA" + STR(mv_par10,1))	//"Curva ABC de Estoque"
+nTipo    := 15
+cRegInic := mv_par01
+cRegiFim := mv_par02
+cFilInic := mv_par11
+cFilFim  := mv_par12
+cMesRela := StrZero(mv_par03,2)
+cAnoRela := StrZero(mv_par04,4)
+nItemRel := mv_par09
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Variaveis utilizadas para Impressao do Cabecalho e Rodape    Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+cbcont   := 0
+li       := 80
+m_pag    := 1
+
+If mv_par08 == 2
+	cTipPrec := "S"      // preco standard
+ElseIf mv_par08 == 3
+	cTipPrec := "C"      // preco de tabela informado no cad. de cliente
+ElseIf mv_par08 == 4
+	Pergunte("MR765B",.F.)    && preco de tabela informado pelo usuario
+	Pergunte("MR765B",.T.)
+	//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+	//Ё Variaveis utilizadas para parametros                         Ё
+	//Ё mv_par01 // Nro. Tabela                                      Ё
+	//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+	cTipPrec := mv_par01
+	Pergunte("MTR755",.F.)
+Else
+	cTipPrec := "M"      // preco medio
+Endif
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Pesquisa o numero de casas decimais do valor e qtde.         Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+aTam:=TamSX3("J3_QUAR01")
+nDecQtde:=aTam[2]
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Define estrutura e gera o arquivo de trabalho                Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+aTam    := TamSX3("J3_REGVEND")
+aCampos := { { "REGIAO"  , "C",aTam[1],aTam[2]},;
+{ "FILIAL" , "C", 2,0 },;
+{ "PRODUTO" , "C", 15, 0 },;
+{ "VALCHAV" , "C", 16, 0 },;
+{ "MESCONS" , "N", 02, 0 },;
+{ "CLASSE"  , "C", 01, 0 },;
+{ "PORCPROD", "N", 08, 4 },;
+{ "VAL_UNIT", "N", 16, 2 },;
+{ "VALCMED" , "N", 16, 2 },;
+{ "QTDE01"  , "N", 11, nDecQtde },;
+{ "QTDE02"  , "N", 11, nDecQtde },;
+{ "QTDE03"  , "N", 11, nDecQtde },;
+{ "QTDE04"  , "N", 11, nDecQtde },;
+{ "QTDE05"  , "N", 11, nDecQtde },;
+{ "QTDE06"  , "N", 11, nDecQtde },;
+{ "QTDE07"  , "N", 11, nDecQtde },;
+{ "QTDE08"  , "N", 11, nDecQtde },;
+{ "QTDE09"  , "N", 11, nDecQtde },;
+{ "QTDE10"  , "N", 11, nDecQtde },;
+{ "QTDE11"  , "N", 11, nDecQtde },;
+{ "QTDE12"  , "N", 11, nDecQtde },;
+{ "QTDECM"  , "N", 11, nDecQtde },;
+{ "QTDECT"  , "N", 11, nDecQtde } }
+
+cArqTrab := CriaTrab(aCampos,.T.)
+dbUseArea(.T.,,cArqTrab,"TRB",.T.,.F.)
+
+cKey := "FILIAL + REGIAO + PRODUTO"
+IndRegua("TRB",cArqTrab,cKey,,,STR0009)		//"Selecionando Registros..."
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Gera arquivo de trabalho com dados do SJ3 - acum. mensais.   Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+aRegQtde := MR755Trab( cRegInic,cRegiFim,cMesRela,cAnoRela,cTipPrec )
+
+nTtGeral	:= 0
+
+For nX :=1 To len(aRegQtde)
+	nTtGeral += aRegQtde[nX][2]
+Next
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё A classificacao ABC dos produtos sempre deve ser calculada   Ё
+//Ё sobre o % de participacao em ordem decrescente.              Ё
+//Ё Esta rotina calcula o % e a classe do produto.               Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+MR755Clas( aRegQtde,cArqTrab )
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Definicao dos cabecalhos                                     Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+If nOrdem == 1                   //         por % de participacao
+	Titulo += STR0010	            //" - ORDEM DE % DE PARTICIPACAO"
+	dbSelectArea("TRB")
+	cKey := "FILIAL"
+	IndRegua("TRB",cArqTrab,cKey,,,STR0009)  //  "Selecionando Registros..."
+ElseIf nOrdem == 2                            //                    por codigo
+	Titulo += STR0011	                       //" - ORDEM DE CODIGO (NUMERICA)"
+	dbSelectArea("TRB")
+	cKey := "FILIAL + REGIAO + PRODUTO"
+	IndRegua("TRB",cArqTrab,cKey,,,STR0009)		//"Selecionando Registros..."
+ElseIf nOrdem == 3                            //                    por codigo
+	Titulo += STR0033	                    //" - ORDEM DE REGIAO + PARTICIPACAO"
+	dbSelectArea("TRB")
+	cKey := "FILIAL + REGIAO + CLASSE + PRODUTO"
+	IndRegua("TRB",cArqTrab,cKey,,,STR0009)		//"Selecionando Registros..."
+Endif
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Gera cabecalho 1 conforme paramentros informados.            Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+cabec1 := STR0012	//"Numero da Peca  C Denominacao                      Valor Unitario % Part % Acum"
+cabec2 := Space(32)
+cabec2 := MR755Cab1( cabec2, cMesRela, cAnoRela )
+//         123456789012345 1 123456789012345678901234567890 9.999.999.999,99 999,99 999,99 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 99.999.999
+//         01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+//         0         1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16        17        18        19        20        21        22
+
+/*                                                                              |
+123456789012345 1 123456789012345678901234567890 9.999.999.999,99 999,99 999,99 
+                                9.999.999.99 9.999.999.99 9.999.999.99 9.999.999.99 9.999.999.99 9.999.999.99 9.999.999.99 9.999.999.999.99 9.999.999.999.99 9.999.999.99 9.999.999.99 9.999.999.99 9.999.999.99 9.999.999.99
+01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+0         1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16        17        18        19        20        21        22
+*/
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Impressao do relatorio.                                      Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+dbSelectArea("TRB")
+Set Order to 1
+SetRegua(RecCount())		// Total de Elementos da regua
+dbGoTop()
+
+aTotFili := { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} // TOTAL GERAL DA FILIAL
+aTotEmpr := { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} // TOTAL GERAL DA EMPRESA
+
+While TRB->(!Eof())
+	
+	If lEnd
+		@PROW()+1,001 Psay STR0013		//"CANCELADO PELO OPERADOR"
+		lContinua := .F.
+		Exit
+	Endif
+	
+	cFilia   := TRB->FILIAL
+	cRegiaoC := TRB->REGIAO
+	
+	nElement := AScan( aRegQtde, { | x | x[1] == cRegiaoC .And. x[3] == cFilia } )
+	
+	If nTtGeral == 0
+		nPorcPrd := 100
+	Else
+		nPorcPrd := (aRegQtde[nElement][2] / nTtGeral)*100
+	Endif
+	
+	If li > 56
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+	Endif
+	
+	//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+	//Ё Tabela 61 - nome da regiao.                                  Ё
+	//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+	cDescReg := AllTrim(Tabela(cTabRegi,cRegiaoC,.F.))
+	nColunas := 32 + Len(cDescReg)
+	@ li,00 Psay STR0028 + Substr(cFilia,1,FWGETTAMFILIAL) + " - " 	     	//"Filial : "
+	@ li,PCol() Psay STR0014 + Substr(cRegiaoC,1,4) + " - " 	//"Regiao : "
+	@ li,PCol() PSay cDescReg + " - "
+	@ li,PCol() Psay nPorcPrd Picture "@E 999.99"
+	@ li,PCol() Psay "%"
+	li+=2
+	
+	nAcPorce	:= 0
+	nContaIt := 1
+	aTotRegi := { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} // TOTAL GERAL DA REGIAO
+	
+	While TRB->FILIAL==cFilia .And. TRB->REGIAO==cRegiaoC .And. TRB->(!Eof()) .And. lContinua
+		
+		If lEnd
+			@PROW()+1,001 Psay STR0013		//"CANCELADO PELO OPERADOR"
+			lContinua := .F.
+			Exit
+		Endif
+		
+		If li > 56
+			
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+			
+			If nTtGeral == 0
+				nPorcPrd := 100
+			Else
+				nPorcPrd := (aRegQtde[nElement][2] / nTtGeral)*100
+			Endif
+			//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+			//Ё Tabela 61 - nome da regiao.                                  Ё
+			//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+			cDescReg := AllTrim(Tabela(cTabRegi,cRegiaoC,.F.))
+			nColunas := 32 + Len(cDescReg)
+			@ li,00 Psay STR0028 + Substr(cFilia,1,FWGETTAMFILIAL) + " - " 	     	//"Filial : "
+			@ li,14 Psay STR0014 + Substr(cRegiaoC,1,4) + " - " 		//"Regiao : "
+			@ li,30 Psay cDescReg + " - "
+			@ li,nColunas Psay nPorcPrd Picture "@E 999.99"
+			@ li,nColunas+7 Psay "%"
+			li+=2
+			
+		EndIf
+		
+		If nContaIt <= nItemRel
+			
+			cProduto := TRB->PRODUTO
+			SB1 -> ( dbSeek( xFilial("SB1") + cProduto ) )
+			
+			@ li, 00 Psay TRB->PRODUTO   Picture "@!S15"
+			@ li, 16 Psay TRB->CLASSE    Picture "!"
+			@ li, 18 Psay SB1->B1_DESC   Picture "@!S30"
+			@ li, 49 Psay xMoeda(TRB->VAL_UNIT,1,mv_par10,ddatabase)  Picture PesqPict("SJ3","J3_VALR01",16)
+			
+			If TRB->PORCPROD >= 0
+				nAcPorce += TRB->PORCPROD
+				@ li, 66 Psay TRB->PORCPROD  Picture "@E 999.99"
+				@ li, 73 Psay nAcPorce        Picture "@E 999.99"
+			Endif
+			
+			nTotAcum := 0
+			nColunas := 32
+			li++
+			
+			For ni = 1 To 12
+				cInd := "TRB->QTDE"+StrZero(ni,2)
+				nTotAcum += &cInd
+				@ li,nColunas Psay &cInd Picture PesqPict("SJ3","J3_QUAR01",12)
+				aTotFili[ni]+=&cInd
+				aTotRegi[ni] += &cInd
+				nColunas += 13
+			Next
+			@ li,nColunas Psay TRB->QTDECM  Picture PesqPict("SJ3","J3_QUAR01",12)
+			@ li,PCol() + 1 Psay nTotAcum     Picture PesqPict("SJ3","J3_QUAR01",12)
+			
+			aTotRegi[13]+=TRB->QTDECM
+			aTotRegi[14]+=nTotAcum
+			aTotFili[13]+=TRB->QTDECM
+			aTotFili[14]+=nTotAcum
+			
+			li += 2
+			nContaIt++
+			cbCont++	
+			IncRegua()
+			dbSelectArea("TRB")
+			dbSkip()
+			
+		Else
+						
+			If cRegiaoC == TRB->REGIAO
+				cbCont++	
+				dbSelectArea("TRB")
+				dbSkip()
+			Endif
+			
+		Endif
+		
+	EndDo
+	
+	If li > 56
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+	Endif
+	
+	@ li,00 Psay Alltrim(STR0029 + cRegiaoC)  // "Total Geral da Regiao : "
+	nColunas := 32
+	For ni = 1 To 13
+		@ li,nColunas Psay aTotRegi[ni] Picture PesqPict("SJ3","J3_QUAR01",12)
+		nColunas += 13
+	Next
+	@ li,nColunas Psay aTotRegi[14] Picture PesqPict("SJ3","J3_QUAR01",12)
+	li += 2
+	
+	If TRB->FILIAL # cFilia
+		@ li,00 Psay replicate("_",220)
+		li += 1
+		@ li,00 Psay Alltrim(STR0030 + cFIlia)  // "Total Geral da Filial : "
+		nColunas := 32
+		For ni = 1 To 13
+			@ li,nColunas Psay aTotFili[ni] Picture PesqPict("SJ3","J3_QUAR01",12)
+			aTotEmpr[ni] += aTotFili[ni]
+			nColunas += 13
+		Next
+		@ li,nColunas Psay aTotFili[14] Picture PesqPict("SJ3","J3_QUAR01",12)
+		aTotEmpr[14] += aTotFili[14]
+		li += 1
+		@ li,00 Psay replicate("_",220)
+		aTotFili := { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	Endif
+	
+	li += 1
+	
+EndDo
+
+If li > 56
+	cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+Endif
+
+@ li,00 Psay replicate("_",220)
+li += 1
+@ li,00 Psay Alltrim(STR0031) // "Total Geral da Empresa : "
+nColunas := 32
+For ni = 1 To 13
+	@ li,nColunas Psay aTotEmpr[ni] Picture PesqPict("SJ3","J3_QUAR01",12)
+	nColunas += 13
+Next
+@ li,nColunas Psay aTotEmpr[14] Picture PesqPict("SJ3","J3_QUAR01",12)
+li += 1
+
+If li != 80
+	Roda(CbCont," ",tamanho)
+Endif
+
+dbSelectArea("TRB")
+dbCloseArea()
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Deleta arquivo de trabalho.                       Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддды
+IF File(cArqTrab+GetDBExtension())
+	FErase(cArqTrab+GetDBExtension())
+Endif
+
+IF File(cArqTrab+OrdBagExt())
+	Ferase(cArqTrab+OrdBagExt())
+EndIf
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Se em disco, desvia para Spool                               Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+If aReturn[5] = 1    // Se Saida para disco, ativa SPOOL
+	Set Printer TO
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return
+
+/*/
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+╠╠зддддддддддбддддддддддбдддддддбдддддддддддддддддддддддбддддддбдддддддддд©╠╠
+╠╠ЁFun┤└o    Ё MR755Cab1Ё Revis Ё Alexandre Inacio LemesЁ Data Ё 02/03/01 Ё╠╠
+╠╠цддддддддддеддддддддддадддддддадддддддддддддддддддддддаддддддадддддддддд╢╠╠
+╠╠ЁDescri┤└o Ё Gera cabecalho 1 para o relatorio.                         Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠ЁSintaxe   Ё ExpC1 := MR755Cab1( ExpC1 )                                Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠ЁParametrosЁ ExpC1 - cabecalho 1                                        Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠Ё Uso      Ё MATR755                                                    Ё╠╠
+╠╠юддддддддддадддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды╠╠
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+ъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъ
+/*/
+Static Function MR755Cab1( cCabecal, cMesRela, cAnoRela )
+
+LOCAL nMes, cAno, n
+LOCAL aNomeMes := {STR0015,STR0016,STR0017,STR0018,STR0019,STR0020,STR0021,STR0022,STR0023,STR0024,STR0025,STR0026}		//"Jan"###"Fev"###"Mar"###"Abr"###"Mai"###"Jun"###"Jul"###"Ago"###"Set"###"Out"###"Nov"###"Dez"
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Calcula o mes/ano para o cabecalho.                          Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+For n := 11 To 0 Step -1
+	nMes := Val(cMesRela) - n
+	If nMes < 1
+		nMes := 12 + nMes
+		cAno := Str(Val(cAnoRela)-1,4)
+	Else
+		cAno := cAnoRela
+	Endif
+	cCabecal += PadC(aNomeMes[nMes] + "/" + cAno, 12 ) + " "
+Next
+
+cCabecal += PadL(STR0027,25)	//"    C.M.M.  Tot.Cons."
+
+//cabec1:="Numero da Peca  Clas. Denominacao                       Valor Unitario  % Part  % Acum      Mes 01    Mes 02    Mes 03    Mes 04    Mes 05    Mes 06    Mes 07    Mes 08    Mes 09    Mes 10    Mes 11    Mes 12      C.M.M."
+//         123456789012345   1   123456789012345678901234567890  9.999.999.999,99  999,99  999,99   9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999   9.999.999
+//cabec1:="Numero da Peca  C Denominacao                      Valor Unitario % Part % Acum    Mes 01    Mes 02    Mes 03    Mes 04    Mes 05    Mes 06    Mes 07    Mes 08    Mes 09    Mes 10    Mes 11    Mes 12    C.M.M.  Tot.Cons."
+//         123456789012345 1 123456789012345678901234567890 9.999.999.999,99 999,99 999,99 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 9.999.999 99.999.999
+//         01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+//         0         1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16        17        18        19        20        21        22
+
+Return cCabecal
+
+/*/
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+╠╠зддддддддддбддддддддддбдддддддбдддддддддддддддддддддддбддддддбдддддддддд©╠╠
+╠╠ЁFun┤└o    Ё MR755TrabЁ Revis Ё Alexandre Inacio LemesЁ Data Ё 02/03/01 Ё╠╠
+╠╠цддддддддддеддддддддддадддддддадддддддддддддддддддддддаддддддадддддддддд╢╠╠
+╠╠ЁDescri┤└o Ё Gera arquivo de trabalho com dados do SJ3.                 Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠ЁSintaxe   Ё ExpA1 := MR755Trab( ExpC1,ExpC2,ExpC3,ExpC4,ExpC5,ExpN1)   Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠ЁParametrosЁ ExpA1 - array contendo as regioes e valores totais de con- Ё╠╠
+╠╠Ё          Ё         sumo da regiao                                     Ё╠╠
+╠╠Ё          Ё ExpC1 - regiao inicial                                     Ё╠╠
+╠╠Ё          Ё ExpC2 - regiao final                                       Ё╠╠
+╠╠Ё          Ё ExpC3 - mes final do relatorio                             Ё╠╠
+╠╠Ё          Ё ExpC4 - ano final do relatorio                             Ё╠╠
+╠╠Ё          Ё ExpC5 - tipo de preco selecionado pelo usuario             Ё╠╠
+╠╠Ё          Ё ExpN1 - numero de casas decimais do preco                  Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠Ё Uso      Ё MATR755                                                    Ё╠╠
+╠╠юддддддддддадддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды╠╠
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+ъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъ
+/*/
+
+Static Function MR755Trab( cRegInic,cRegiFim,cMesRela,cAnoRela,cTipPrec )
+
+LOCAL aRegQtde := {}
+LOCAL aStruSJ3 := {}
+Local aColunas := {}
+LOCAL cAliasSJ3:= "SJ3"
+LOCAL cMesInic := ""
+LOCAL cAnoAnte := ""
+LOCAL cIndex   := ""
+LOCAL cKey     := ""
+LOCAL cCondicao:= ""
+LOCAL nX       := 0
+LOCAL nPrecoUn := 0
+LOCAL nAno     := 0
+LOCAL nNMesCons:= 0
+LOCAL nValor   := 0
+LOCAL nRegQtde := 0
+LOCAL dIniCons := Ctod("")
+LOCAL dFimCons := dIniCons
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Os 12 meses estao contidos em 1 ano ou 2 anos.               Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+If cMesRela == "12"
+	cAnoAnte := cAnoRela
+	cMesInic := "01"
+Else
+	cAnoAnte := StrZero((Val(cAnoRela)-1),4)
+	cMesInic := StrZero((Val(cMesRela)+1),2)
+EndIf
+nAno := Val(cAnoAnte)
+nMes := Val(cMesInic)
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Calcula o MES/ANO de cada coluna do relatorio                Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+For nX := 1 To 12
+	aadd(aColunas,{ StrZero(nAno,4) , StrZero(nMes,2) , StrZero(nX,2) } )
+	nMes++
+	If ( nMes > 12 )
+		nMes := 1
+		nAno++
+	EndIf
+	dFimCons := LastDay(Ctod("01/"+StrZero(nMes,2)+"/"+StrZero(nAno,4)))
+Next nX
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Verifica o Filtro                                            Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+dbSelectArea("SJ3")
+cKey   := "J3_FILIAL + J3_REGVEND + J3_PRODUTO + J3_ANO + J3_FATVEN"
+#IFDEF TOP
+	cAliasSJ3 := "MR755Trab"
+	aStruSJ3  := SJ3->(dbStruct())
+	cQuery := "SELECT * "
+	cQuery += "FROM "+RetSqlName("SJ3")+" "
+	cQuery += "WHERE J3_FILIAL >= '"+cFilInic+"' AND "
+	cQuery += "J3_FILIAL <= '"+cFilFim+"' AND "
+	cQuery += "J3_REGVEND >= '"+cRegInic+"' AND "
+	cQuery += "J3_REGVEND <= '"+cRegiFim+"' AND "
+	cQuery += "(J3_ANO = '"+cAnoRela+"' OR "
+	cQuery += "J3_ANO = '"+cAnoAnte	+"') AND "
+	cQuery += "D_E_L_E_T_ = ' ' "
+	cQuery += "ORDER BY "+SqlOrder(cKey)
+	
+	cQuery := ChangeQuery(cQuery)
+	
+	dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQuery),cAliasSJ3,.T.,.T.)
+	
+	For nX := 1 To Len(aStruSJ3)
+		If ( aStruSJ3[nX][2] <> "C" )
+			TcSetField(cAliasSJ3,aStruSJ3[nX][1],aStruSJ3[nX][2],aStruSJ3[nX][3],aStruSJ3[nX][4])
+		EndIf
+	Next nX
+#ELSE
+	cIndex := CriaTrab(Nil,.F.)
+	cKey   := "J3_FILIAL + J3_REGVEND + J3_PRODUTO + J3_ANO + J3_FATVEN"
+	cCondicao :=" J3_FILIAL >= '"+ cFilInic +"' .And. J3_FILIAL <= '"+ cFilFim+"' .And. "
+	cCondicao +=" J3_REGVEND >= '"+cRegInic+"' .And. J3_REGVEND <= '"+cRegiFim+"' .And. "
+	cCondicao +=" 	(J3_ANO == '"+cAnoRela+"' .Or. J3_ANO == '"+cAnoAnte	+"') "
+	IndRegua("SJ3",cIndex,cKey,,cCondicao,STR0009)
+	dbGoTop()
+#ENDIF
+
+dbSelectArea(cAliasSJ3)
+SetRegua(SJ3->(LastRec()))   // Total de Elementos da regua
+
+While (cAliasSJ3)->(!Eof())  //IndRegua
+	
+	If ( Empty(aReturn[7]) .Or. &(aReturn[7]) )
+		
+		//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+		//Ё Pesquisa a Filial/Regiao                                     Ё
+		//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+		nRegQtde := Ascan(aRegQtde,{|x| x[1] == (cAliasSJ3)->J3_REGVEND .And. x[3]==(cAliasSJ3)->J3_FILIAL })
+		If ( nRegQtde == 0 )
+			aadd(aRegQtde,{(cAliasSJ3)->J3_REGVEND,0,(cAliasSJ3)->J3_FILIAL})
+			nRegQtde := Len(aRegQtde)
+		EndIf
+		
+		cProduto := (cAliasSJ3)->J3_PRODUTO
+		
+		dbSelectArea("TRB")
+		dbSetOrder(1)
+		If !dbSeek( (cAliasSJ3)->J3_FILIAL + (cAliasSJ3)->J3_REGVEND + (cAliasSJ3)->J3_PRODUTO )
+			
+			//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+			//Ё Calcula o Valor Unitario conforme os parametros              Ё
+			//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+			
+			dbSelectArea("SB1")
+			dbSeek( xFilial("SB1") + (cAliasSJ3)->J3_PRODUTO )
+			
+			Do Case
+				Case cTipPrec == "S"
+					nPrecoUn := xMoeda( RetFldProd(SB1->B1_COD,"B1_CUSTD"),Val(RetFldProd(SB1->B1_COD,"B1_MCUSTD")),mv_par10,ddatabase)
+				Case cTipPrec == "M" .Or. cTipPrec == "1"
+					nPrecoUn := xMoeda(SB1->B1_PRV1,1,mv_par10,ddatabase)
+				Case cTipPrec == "C"
+					dbSelectArea("SA1")
+					dbSetOrder(1)
+					dbSeek( xFilial("SA1") + (cAliasSJ3)->J3_CLIENTE + (cAliasSJ3)->J3_LOJA )
+					If Empty(SA1->A1_TABELA) .Or. SA1->A1_TABELA == "1"
+						nPrecoUn := xMoeda(SB1->B1_PRV1,1,mv_par10,ddatabase)
+					Else
+						nPrecoUn := MaTabPrVen(SA1->A1_TABELA,cProduto,0,SA1->A1_COD,SA1->A1_LOJA,mv_par10,ddatabase)	
+					EndIf
+				OtherWise
+					nPrecoUn := MaTabPrVen(cTipPrec,cProduto,0,SJ3->J3_CLIENTE,SJ3->J3_LOJA,mv_par10,ddatabase)
+			EndCase
+			
+			//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+			//Ё Calcula o numero de meses de consumo                         Ё
+			//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+			dIniCons := LastDay(RetFldProd(SB1->B1_COD,"B1_CONINI"))
+			nNmesCons := 0
+			While	dIniCons < dFimCons
+				nNmesCons++
+				dIniCons++
+				dIniCons := LastDay(dIniCons)
+				If nNMescons >= 12
+					Exit
+				EndIf
+			EndDo
+			//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+			//Ё Atualiza o arquivo temporario                                Ё
+			//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+			RecLock("TRB",.T.)
+			Replace FILIAL   With (cAliasSJ3)->J3_FILIAL
+			Replace REGIAO   With (cAliasSJ3)->J3_REGVEND
+			Replace PRODUTO  With (cAliasSJ3)->J3_PRODUTO
+			Replace VAL_UNIT With nPrecoUn
+			Replace MESCONS  With nNmesCons
+		Else
+			RecLock("TRB")
+		EndIf
+		
+		//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+		//Ё Estorna o valor acumulado por regiao                         Ё
+		//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+		aRegQtde[nRegQtde][2] -= TRB->VALCMED
+		//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+		//Ё Atualiza o consumo dos ultimos 12 meses                      Ё
+		//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+		For nX := 1 To Len(aColunas)
+			If ( aColunas[nX,1] == (cAliasSJ3)->J3_ANO )
+				nValor := (cAliasSJ3)->(FieldGet(FieldPos("J3_QUAR"+aColunas[nX,2])))
+				FieldPut(FieldPos("QTDE"+aColunas[nX,3]),nValor+FieldGet(FieldPos("QTDE"+aColunas[nX,3])))
+				Replace QTDECT With QTDECT + nValor
+			EndIf
+		Next nX
+		Replace QTDECM  With QTDECT/MESCONS
+		Replace VALCMED With QTDECM * nPrecoUn
+		Replace VALCHAV With Right(StrZero(10000000000000-Max(TRB->VALCMED,0.01),17,2),16)
+
+		//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+		//Ё Soma o valor acumulado por regiao                            Ё
+		//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды		
+		aRegQtde[nRegQtde][2] += TRB->VALCMED
+		
+		MsUnLock()
+	EndIf
+	
+	dbSelectArea(cAliasSJ3)
+	dbSkip()
+	IncRegua()
+	
+EndDo
+
+#IFDEF TOP
+	dbSelectArea(cAliasSJ3)
+	dbCloseArea()
+	dbSelectArea("SJ3")
+#ELSE
+	dbSelectArea("SJ3")
+	RetIndex("SJ3")
+	Ferase(cIndex+OrdBagExt())
+#ENDIF
+Return aRegQtde
+
+/*/
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+╠╠зддддддддддбддддддддддбдддддддбдддддддддддддддддддддддбддддддбдддддддддд©╠╠
+╠╠ЁFun┤└o    Ё MR755ClasЁRev.   Ё Alexandre Inacio LemesЁ Data Ё 02/03/01 Ё╠╠
+╠╠цддддддддддеддддддддддадддддддадддддддддддддддддддддддаддддддадддддддддд╢╠╠
+╠╠ЁDescri┤└o Ё Calcula o % e a classe de cada produto dentro da regiao.   Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠ЁSintaxe   Ё Void := MR755Clas( ExpA1 )                                 Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠ЁParametrosЁ ExpA1 - array com regiao e valor total de consumo (regiao) Ё╠╠
+╠╠цддддддддддедддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢╠╠
+╠╠Ё Uso      Ё MATR755                                                    Ё╠╠
+╠╠юддддддддддадддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды╠╠
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+ъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъ
+/*/
+Static Function MR755Clas( aRegQtde,cArqTrab )
+
+LOCAL aElement := {}
+LOCAL cRegiaoC := ""
+LOCAL cClassif := ""
+LOCAL nPorcPrd := 0
+LOCAL nAcPorce := 0
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Variaveis para movimentacao do cursor.                       Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+dbSelectArea("TRB")
+//SetRegua(RecCount())
+dbClearFilter()
+
+#IFNDEF TOP
+	If File(cArqTrab+OrdBagExt())
+		dbClearInd()
+		RetIndex("SJ3")
+		dbSelectArea("TRB")
+		Ferase(cArqTrab+OrdBagExt())
+	Endif
+#ENDIF
+
+cKey := "FILIAL + REGIAO + VALCHAV"
+IndRegua("TRB",cArqTrab,cKey,,,STR0009)		//"Selecionando Registros..."
+
+dbSelectArea("TRB")
+dbGoTop()
+
+cFilia   := TRB->FILIAL
+cRegiaoC := TRB->REGIAO
+
+aElement := AScan( aRegQtde, { | x | x[1] == cRegiaoC .And. x[3] == cFilia } )
+nAcPorce := 0
+
+While TRB->(!Eof())
+	
+	If  TRB->FILIAL != cFilia .Or. TRB->REGIAO != cRegiaoC
+		
+		cFilia   := TRB->FILIAL
+		cRegiaoC := TRB->REGIAO
+		
+		aElement := AScan( aRegQtde, { | x | x[1] == cRegiaoC .And. x[3] == cFilia } )
+		nAcPorce := 0
+		
+	Endif
+	
+	If TRB->FILIAL == cFilia .Or. TRB->REGIAO == cRegiaoC //  .Or. TRB->(!Eof())
+		
+		//зддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+		//Ё Calcula classificacao ABC dos produtos.               Ё
+		//юддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+		
+		If nAcPorce <= mv_par05
+			cClassif := "A"
+		ElseIf nAcPorce <= (mv_par05 + mv_par06)
+			cClassif := "B"
+		Else
+			cClassif := "C"
+		Endif
+		
+		If aRegQtde[aElement][2] <= 0
+			nPorcPrd := 100
+		Else
+			nPorcPrd := Round(TRB->VALCMED / aRegQtde[aElement][2],4) * 100
+		Endif
+		
+		nAcPorce += nPorcPrd
+		
+		If nAcPorce > 100
+			nDiferen := nAcPorce - 100
+			nAcPorce := 100
+			nPorcPrd := Iif( nPorcPrd < nDiferen, 0, (nPorcPrd - nDiferen) )
+		Endif
+		
+		RecLock("TRB")
+		Replace CLASSE With cClassif, PORCPROD With nPorcPrd
+		MsUnLock()
+		
+		//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+		//Ё Movimentacao do cursor.                                      Ё
+		//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+//		IncRegua()
+		dbSelectArea("TRB")
+		dbSkip()
+		
+	Endif
+	
+EndDo
+
+Return .T.

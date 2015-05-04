@@ -1,0 +1,277 @@
+#INCLUDE "MATR775.CH"
+#IFDEF WINDOWS
+    #Include "FIVEWIN.Ch"
+#ENDIF
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR776  ³ Autor ³ Nereu Humberto Junior ³ Data ³ 09.09.03 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Pick-List (Expedicao) Identico ao MATR775 da versao 5.07   ³±±
+±±³          ³ compatibilizacao de versoes.                               ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ MATR776(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ ATUALIZACOES SOFRIDAS DESDE A CONSTRUCAO INICIAL.                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ PROGRAMADOR  ³ DATA   ³ BOPS ³  MOTIVO DA ALTERACAO                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³              ³        ³      ³                                        ³±± 
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function MATR776
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL wnrel
+LOCAL tamanho:="M"
+LOCAL titulo:=OemToAnsi(STR0001)	//"Pick-List  (Expedicao)"
+LOCAL cDesc1:=OemToAnsi(STR0002)	//"Emiss„o de produtos a serem separados pela expedicao, para"
+LOCAL cDesc2:=OemToAnsi(STR0003)	//"determinada faixa de notas fiscais."
+LOCAL cDesc3:=""
+LOCAL cbCont,cabec1,cabec2
+LOCAL cString:="SD2"
+LOCAL lContinua := .T.,	lFirst := .T.
+LOCAL cPedAnt:="   "
+cPerg  :="MTR776"
+
+PRIVATE aReturn := {STR0004, 1,STR0005, 2, 2, 1, "",0 }			//"Zebrado"###"Administracao"
+PRIVATE nomeprog:="MATR776",nLastKey := 0,nBegin:=0,aLinha:={ }
+PRIVATE li:=80,limite:=132,lRodape:=.F.
+PRIVATE nTotQtd:=nTotVal:=0
+wnrel    := "MATR776"
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para Impressao do Cabecalho e Rodape    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cbtxt    := SPACE(10)
+cbcont   := 0
+li       :=80
+m_pag    :=1
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Pergunte("MTR776",.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                      ³
+//³ mv_par01	     	  Da Nota                                
+//³ mv_par02	     	  Ate a Nota                             ³
+//³ mv_par03	     	  Serie	                                ³
+//³ mv_par04	     	  Mascara                                ³
+//³ mv_par05	     	  Aglutina itens grade                   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@Titulo,cDesc1,cDesc2,cDesc3,.F.,,,Tamanho,,.T.)
+
+If nLastKey == 27
+	Set Filter to
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	Set Filter to
+	Return
+Endif
+#IFDEF WINDOWS
+    RptStatus({|lEnd| C776Imp(@lEnd,wnRel,cString)},Titulo)
+#ELSE
+    C776Imp(.f.,Wnrel,cString)
+#ENDIF
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ C776IMP  ³ Autor ³ Rosane Luciane Chene  ³ Data ³ 09.11.95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Chamada do Relatorio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR776			                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function C776Imp(lEnd,WnRel,cString)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL tamanho:="M"
+LOCAL titulo:=OemToAnsi(STR0001)	//"Pick-list  (Expedicao)"
+LOCAL cDesc1:=OemToAnsi(STR0002)	//"Emiss„o de produtos a serem separados pela expedicao, para"
+LOCAL cDesc2:=OemToAnsi(STR0003)	//"determinada faixa de notas fiscais."
+LOCAL cDesc3:=""
+LOCAL cbCont,cabec1,cabec2
+LOCAL lContinua := .T.,	lFirst := .T.
+LOCAL cPedAnt:="   "
+LOCAL cKey,nIndex,cIndex,nI          && Variaveis para a criacao de Indices Temp.
+LOCAL aCampos := {}
+LOCAL aTam    := {}
+LOCAL cMascara :=GetMv("MV_MASCGRD")
+LOCAL nTamRef  :=Val(Substr(cMascara,1,2))    
+LOCAL lVer116   := (VAL(GetVersao(.F.)) == 11 .And. GetRpoRelease() >= "R6" .Or. VAL(GetVersao(.F.))  > 11)
+cPerg  :="MTR776"
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para Impressao do Cabecalho e Rodape    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cbtxt    := SPACE(10)
+cbcont   := 0
+li       :=80
+m_pag    :=1
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Definicao dos cabecalhos                                     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+titulo := OemToAnsi(STR0006)	// "PICK-LIST"
+cabec1 := OemToAnsi(STR0007)	//"Codigo          Desc. do Material              UM Quantidade  Alm Localizacao"
+//         								XXXXXXXXXXXXXXX X----------------------------X XX 999,999.99  99  XXXXXXXXXXXXXXX
+//          							0        1         2         3         4         5         6         7         8
+//         								012345678901234567890123456789012345678901234567890123456789012345678901234567890
+cabec2 := ""
+dbSelectArea("SD2")
+dbSetOrder(3)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cria array para gerar arquivo de trabalho                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+aTam:=TamSX3("D2_COD")
+AADD(aCampos,{ "D2_COD"    ,"C" ,aTam[1],aTam[2] } )
+aTam:=TamSX3("D2_QUANT")
+AADD(aCampos,{ "D2_QUANT"  ,"N" ,aTam[1],aTam[2] } )
+aTam:=TamSX3("D2_LOCAL")
+AADD(aCampos,{ "D2_LOCAL"  ,"C" ,aTam[1],aTam[2] } )
+aTam:=TamSX3("D2_GRADE")
+AADD(aCampos,{ "D2_GRADE"  ,"C" ,aTam[1],aTam[2] } )
+
+cTrab := CriaTrab(aCampos)
+cAlias1 := "TRB"
+Use &cTrab Alias TRB Exclusive NEW
+cKey   := "D2_LOCAL+D2_COD"
+
+IndRegua("TRB",cTrab,cKey,,,STR0008)		//"Selecionando Registros..."
+
+SD2 -> ( dbSeek(xFilial("SD2") + mv_par01,.t.) )
+
+While SD2 -> ( !Eof() ) .And. SD2->D2_DOC <= mv_par02 .and. xFilial("SD2") == SD2->D2_FILIAL
+
+	 IF SD2->D2_SERIE != mv_par03  .or. SD2->D2_QUANT == 0 
+		 SD2->(dbSkip())
+		 Loop
+	 Endif
+	//	ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//	³ Valida o produto conforme a mascara         ³
+	//	ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ		
+	lRet:=ValidMasc(SD2->D2_COD,MV_PAR04)
+		
+	If !lRet
+		SD2->(dbSkip())
+		Loop
+	Endif
+
+    TRB-> ( dbSeek(SD2->D2_LOCAL + SD2->D2_COD) )
+
+    IF TRB -> ( Found() )
+		RecLock(cAlias1,.F.)
+	Else
+		RecLock(cAlias1,.T.)
+        TRB -> D2_COD  := SD2->D2_COD
+        TRB -> D2_LOCAL:= SD2->D2_LOCAL
+		  TRB -> D2_GRADE:= SD2->D2_GRADE
+	Endif
+	
+	MsUnlock()
+		
+    TRB -> D2_QUANT += SD2->D2_QUANT
+
+	SD2 -> ( dbSkip() )
+
+End
+
+SetRegua(RecCount())		// Total de Elementos da regua
+
+
+TRB->(dbGoTop())
+While TRB -> ( !Eof() ) .And. lContinua
+
+	#IFNDEF WINDOWS
+		If LastKey() = 286    //ALT_A
+			lEnd := .t.
+		End
+	#ENDIF
+
+	IF lEnd
+     	@PROW()+1,001 Psay STR0009		//"CANCELADO PELO OPERADOR"
+		lContinua := .F.
+		Exit
+	Endif
+
+	IncRegua()
+
+	IF li > 55 .or. lFirst
+		lFirst := .f.
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,15)
+		lRodape := .T.
+	Endif
+
+    SB1 -> ( dbSeek(xFilial("SB1") + TRB->D2_COD) )
+    SB2 -> ( dbSeek(xFilial("SB2") + TRB->D2_COD + TRB->D2_LOCAL ) )
+	 IF TRB->D2_GRADE == "S" .And. MV_PAR05 == 1
+	 	cProdRef :=Substr(TRB->D2_COD,1,nTamRef)
+		nReg     :=0
+		nTotQuant:=0
+		While !Eof() .And. cProdRef == Substr(TRB->D2_COD,1,nTamRef) .And. TRB->D2_GRADE == "S"
+			nReg:=Recno()
+			nTotQuant+=TRB->D2_QUANT
+			dbSkip()
+		End
+		If nReg > 0
+			dbGoto(nReg)
+			nReg:=0
+		Endif
+	Endif
+	@ li, 00 Psay IIF(TRB->D2_GRADE=="S" .And. MV_PAR05 == 1,Substr(TRB->D2_COD,1,ntamref),TRB->D2_COD)  Picture "@!"
+	@ li, 16 Psay Subs(SB1->B1_DESC,1,30)	Picture "@!"
+	@ li, 47 Psay SB1->B1_UM			Picture "@!"
+	@ li, 50 Psay IIF(TRB->D2_GRADE=="S" .And. MV_PAR05 == 1,nTotQuant,TRB->D2_QUANT)      Picture "@E 999,999.99"
+	@ li, 62 Psay TRB->D2_LOCAL
+    If lVer116
+		@ li, 66 Psay Posicione("NNR",1,xFilial("NNR")+TRB->D2_LOCAL,"NNR_DESCRI")
+    Else
+		@ li, 66 Psay SB2->B2_LOCALIZ
+	EndIf
+	li++
+    TRB -> ( dbSkip() )
+
+End
+
+IF lRodape
+	roda(cbcont,cbtxt,"M")
+Endif
+
+dbCloseArea(cAlias1)
+dbSelectArea("SD2")
+Set Filter To
+dbSetOrder(1)
+IF File(cTrab+".DBF")
+	FErase(cTrab+".DBF")
+Endif
+cArqNtx := Trim(cTrab) + OrdBagExt()
+IF File(cArqNtx)
+	FErase(cArqNtx)
+EndIf
+Set device to Screen
+
+If aReturn[5] = 1
+	Set Printer TO 
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()

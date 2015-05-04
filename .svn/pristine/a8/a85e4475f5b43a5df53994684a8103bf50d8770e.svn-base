@@ -1,0 +1,301 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATR777.ch"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr777.prx"
+#line 1 ""
+#line 25 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr777.prx"
+Function MATR777
+Local wnrel   := "MATR777"
+Local tamanho := "M"
+Local titulo  := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Pick-list  (expedição)", "Pick-List  (Expedicao)" ))
+Local cDesc1  := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Emissão de artigos a separar pela expedição, para", "Emissao de produtos a serem separados pela expedicao, para" ))
+Local cDesc2  := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Determinada faixa de pedidos.", "determinada faixa de pedidos." ))
+Local cDesc3  := ""
+Local cString := "SC9"
+Local cPerg   := "MTR777"
+
+PRIVATE aReturn  := {If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ), 1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 2, 2, 1, "",0 }
+PRIVATE nomeprog := "MATR777"
+PRIVATE nLastKey := 0
+PRIVATE nBegin   := 0
+PRIVATE aLinha   := {}
+PRIVATE li       := 80
+PRIVATE limite   := 132
+PRIVATE lRodape  := .F. 
+PRIVATE m_pag    := 1
+
+
+
+
+AjustaSX1(cPerg)
+pergunte(cPerg, .F. )
+
+
+
+
+
+
+
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@Titulo,cDesc1,cDesc2,cDesc3, .F. ,, .F. ,Tamanho,, .T. )
+
+If nLastKey == 27
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	dbClearFilter()
+	Return
+Endif
+
+RptStatus({|lEnd| C777Imp(@lEnd,wnRel,cString,cPerg,tamanho,@titulo,@cDesc1,@cDesc2,@cDesc3)},Titulo)
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function C777Imp(lEnd,WnRel,cString,cPerg,tamanho,titulo,cDesc1,cDesc2,cDesc3)
+
+Local cFilterUser := aReturn[7]
+Local lUsaLocal  := (SuperGetMV("MV_LOCALIZ") == "S")
+Local cbtxt      := SPACE(10)
+Local cbcont	 := 0
+Local lQuery     := .F. 
+Local lRet       := .F. 
+Local cEndereco  := ""
+Local nQtde      := 0
+Local cAliasNew  := "SC9"
+
+	Local aStruSC9   := {}
+	Local cName      := ""
+	Local cQryAd     := ""
+	Local nX         := 0
+
+
+
+
+
+
+
+li := 80
+
+
+
+titulo := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Pick-list", "PICK-LIST" ))
+
+
+
+
+
+	cAliasNew:= GetNextAlias()
+	aStruSC9 := SC9->(dbStruct())
+	lQuery := .T. 
+	cQuery := "SELECT SC9.R_E_C_N_O_ SC9REC,"
+	cQuery += "SC9.C9_PEDIDO,SC9.C9_FILIAL,SC9.C9_QTDLIB,SC9.C9_PRODUTO, "
+	cQuery += "SC9.C9_LOCAL,SC9.C9_LOTECTL,SC9.C9_POTENCI,"
+	cQuery += "SC9.C9_NUMLOTE,SC9.C9_DTVALID,SC9.C9_NFISCAL"
+	If cPaisLOC <> "BRA"
+		cQuery += ",SC9.C9_REMITO "
+	EndIf
+
+	If lUsaLocal
+		cQuery += ",SDC.DC_LOCALIZ,SDC.DC_QUANT,SDC.DC_QTDORIG"
+	EndIf
+
+
+
+
+
+	If !Empty(aReturn[7])
+		For nX := 1 To SC9->(FCount())
+			cName := SC9->(FieldName(nX))
+			If AllTrim( cName ) $ aReturn[7]
+				If aStruSC9[nX,2] <> "M"
+					If !cName $ cQuery .And.  !cName $ cQryAd
+						cQryAd += ",SC9."+ cName
+					EndIf
+				EndIf
+			EndIf
+		next
+	EndIf
+
+	cQuery += cQryAd
+	cQuery += " FROM "
+	cQuery += RetSqlName("SC9") + " SC9 "
+	If lUsaLocal
+		cQuery += "LEFT JOIN "+RetSqlName("SDC") + " SDC "
+		cQuery += "ON SDC.DC_PEDIDO=SC9.C9_PEDIDO AND SDC.DC_ITEM=SC9.C9_ITEM AND SDC.DC_SEQ=SC9.C9_SEQUEN AND SDC.D_E_L_E_T_ = ' '"
+	EndIf
+	cQuery += "WHERE SC9.C9_FILIAL  = '"+xFilial("SC9")+"'"
+	cQuery += " AND  SC9.C9_PEDIDO >= '"+mv_par01+"'"
+	cQuery += " AND  SC9.C9_PEDIDO <= '"+mv_par02+"'"
+	If mv_par03 == 1 .Or.  mv_par03 == 3
+		cQuery += " AND SC9.C9_BLEST  = '  '"
+	EndIf
+	If mv_par03 == 2 .Or.  mv_par03 == 3
+		cQuery += " AND SC9.C9_BLCRED = '  '"
+	EndIf
+	If cPaisLOC <> "BRA"
+		cQuery += " AND SC9.C9_REMITO = '" +Space(Len(SC9->C9_REMITO))+"' "
+	EndIf
+	cQuery += " AND SC9.D_E_L_E_T_ = ' '"
+	cQuery += "ORDER BY SC9.C9_FILIAL,SC9.C9_PEDIDO,SC9.C9_CLIENTE,SC9.C9_LOJA,SC9.C9_PRODUTO,SC9.C9_LOTECTL,"
+	cQuery += "SC9.C9_NUMLOTE,SC9.C9_DTVALID"
+	cQuery := ChangeQuery(cQuery)
+	dbUseArea( .T. ,"TOPCONN",TcGenQry(,,cQuery),cAliasNew, .T. , .T. )
+	For nX := 1 To Len(aStruSC9)
+		If aStruSC9[nX][2] <> "C" .and.   FieldPos(aStruSC9[nX][1]) > 0
+			TcSetField(cAliasNew,aStruSC9[nX][1],aStruSC9[nX][2],aStruSC9[nX][3],aStruSC9[nX][4])
+		EndIf
+	next
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SetRegua(RecCount())
+(cAliasNew)->(dbGoTop())
+While (cAliasNew)->(!Eof())
+
+	If!Empty(cFilterUser) .AND.  !(&cFilterUser)
+		dbSelectArea(cAliasNew)
+		dbSkip()
+		Loop
+	EndIf
+
+
+	If lUsaLocal
+		cEndereco := (cAliasNew)->DC_LOCALIZ
+		nQtde     := Iif((cAliasNew)->DC_QUANT>0,(cAliasNew)->DC_QUANT,(cAliasNew)->C9_QTDLIB)
+	Else
+		cEndereco := ""
+		nQtde     := (cAliasNew)->C9_QTDLIB
+	EndIf
+	lRet := C777ImpDet(cAliasNew,lQuery,nQtde,cEndereco,@lEnd,titulo,cDesc1,cDesc2,cDesc3,tamanho)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	If !lRet
+		Exit
+	EndIf
+	(cAliasNew)->(dbSkip())
+EndDo
+
+If lRodape
+	roda(cbcont,cbtxt,"M")
+EndIf
+
+If lQuery
+	dbSelectArea(cAliasNew)
+	dbCloseArea()
+	dbSelectArea("SC9")
+Else
+	RetIndex("SC9")
+	Ferase(cIndexSC9+OrdBagExt())
+	dbSelectArea("SC9")
+	dbClearFilter()
+	dbSetOrder(1)
+	dbGotop()
+EndIf
+
+If aReturn[5] = 1
+	Set( 24, "" )
+	dbCommitAll()
+	OurSpool(wnrel)
+EndIf
+MS_FLUSH()
+Return NIL
+
+Static Function C777ImpDet(cAliasNew,lQuery,nQtde,cEndereco,lEnd,titulo,cDesc1,cDesc2,cDesc3,tamanho)
+Local cabec1 := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Código                         Desc. do Material        UM Quantidade  Amz Localiz.                    Lote      Sublote         Validade       Potência       Pedido", "Codigo                         Desc. do Material        UM Quantidade  Amz Endereco                    Lote      SubLote         Validade       Potencia       Pedido" ))
+Local cabec2 := ""
+Static lFirst := .T. 
+If lEnd
+	PrintOut(_PROW()+1,001,If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR"),,)
+	Return .F. 
+EndIf
+If !lQuery
+	IncRegua()
+EndIf
+If li > 55 .or.  lFirst
+	lFirst  := .F. 
+	cabec(titulo,cabec1,cabec2,nomeprog,tamanho,15)
+	lRodape := .T. 
+EndIf
+SB1->(dbSeek(xFilial("SB1")+(cAliasNew)->C9_PRODUTO))
+
+
+PrintOut(li,00,(cAliasNew)->C9_PRODUTO,"@!",)
+PrintOut(li,31,Subs(SB1->B1_DESC,1,30),"@!",)
+PrintOut(li,57,SB1->B1_UM,"@!",)
+PrintOut(li,60,nQtde,"@E 999,999.99",)
+PrintOut(li,73,(cAliasNew)->C9_LOCAL,,)
+PrintOut(li,77,cEndereco,,)
+PrintOut(li,115,(cAliasNew)->C9_LOTECTL,"@!",)
+PrintOut(li,120,(cAliasNew)->C9_NUMLOTE,"@!",)
+PrintOut(li,132,(cAliasNew)->C9_DTVALID,PesqPict("SC9","C9_DTVALID"),)
+PrintOut(li,145,(cAliasNew)->C9_POTENCI,PesqPict("SC9","C9_POTENCI"),)
+PrintOut(li,161,(cAliasNew)->C9_PEDIDO,"@!",)
+li++
+Return .T. 
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSX1(cPerg)
+Local aHelpPor01 := {"Informe o numero do pedido inicial a ser ",    "considerado na selecao."}
+Local aHelpEng01 := {"Enter the initial order number to be taken in","consideration."}
+Local aHelpSpa01 := {"Digite el numero del pedido inicial que debe ","considerarse en la seleccion."}
+Local aHelpPor02 := {"Informe o numero do pedido final a ser ",    "considerado na selecao."}
+Local aHelpEng02 := {"Enter the final order number to be taken in","consideration."}
+Local aHelpSpa02 := {"Digite el numero del pedido final que debe ","considerarse en la seleccion."}
+Local aHelpPor03 := {"Seleciona a condicao do pedido de compras a",    "ser impressa."}
+Local aHelpEng03 := {"Select the purchase order terms to print.",      ""}
+Local aHelpSpa03 := {"Elija la condicion del pedido de compras que se","debe imprimir."}
+PutSX1(cPerg,"01","De pedido ?",       "¿De pedido ?",       "From order ?","mv_ch1","C",6,0,0,"G","","","","","mv_par01","","","","",      "","","","","","","","","","","","",aHelpPor01,aHelpEng01,aHelpSpa01)
+PutSX1(cPerg,"02","Ate pedido ?",      "¿A pedido ?",        "To order ?",  "mv_ch2","C",6,0,0,"G","","","","","mv_par02","","","","zzzzzz","","","","","","","","","","","","",aHelpPor02,aHelpEng02,aHelpSpa02)
+PutSX1(cPerg,"03","Pedidos liberados?","¿Pedidos Aprobados?","orders ?",    "mv_ch3","N",1,0,3,"C","","","","","mv_par03","Estoque","Stock","Inventory","","Credito","Credito","Credit","Credito/Estoque","Credito/Stock","Credit/Invent.","","","","","","",aHelpPor03,aHelpEng03,aHelpSpa03)
+Return

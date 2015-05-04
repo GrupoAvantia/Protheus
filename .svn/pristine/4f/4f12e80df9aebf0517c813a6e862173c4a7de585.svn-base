@@ -1,0 +1,578 @@
+#INCLUDE "PROTHEUS.CH"
+#INCLUDE "MATR923.CH"   
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณMATR923   บAutor  ณMary C. Hergert     บ Data ณ  28/07/2004 บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณImpressao do relatorio de conferencia da GIM-DF             บฑฑ
+ฑฑบ          ณcom base no arquivo texto gerado pelo MATA950               บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณSigaFis                                                     บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Function MATR923()
+
+    AjustaSX1()
+
+	If pergunte("MTR923",.T.)
+		PrintGIMDF(AllTrim(MV_PAR02) + AllTrim(MV_PAR01))
+	Endif
+	
+	Return(Nil)
+	
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณPrintGIMDFบAutor  ณMary C. Hergert     บ Data ณ 27/07/2004  บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณGera Spool de Impressao do Relatorio de Conferencia da GIMDFบฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณSigaFis                                                     บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+Function PrintGIMDF(cTXT)
+	Local 		aArea		:=	GetArea ()
+	Local		lRet		:=	.T.
+	Local 		aTitulo  	:= 	STR0003
+	Local 		cDesc1  	:= 	STR0002
+	Local 		cDesc2  	:= 	""
+	Local 		cDesc3  	:= 	""
+	Local 		wnrel   	:= 	"MTR923"
+	Local 		NomeProg	:= 	"MTR923"	
+	Private 	Tamanho 	:= 	"M" 	// P/M/G
+	Private 	Limite  	:= 	132	    // 80/132/220
+	Private 	lEnd    	:= 	.F.		// Controle de cancelamento do relatorio
+	Private 	m_pag   	:= 	1  		// Contador de Paginas
+	Private		nLastKey	:= 	0  		// Controla o cancelamento da SetPrint e SetDefault
+	Private 	aReturn 	:= { STR0003, 1,STR0004, 1, 2, 1, "",1 } //"Zebrado"###"Administracao"
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณEnvia para a SetPrinter                                                 ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	wnrel	:=	SetPrint ("", NomeProg, "", @aTitulo, cDesc1, cDesc2, cDesc3, .F.,, .T., Tamanho,, .F.)
+
+	If (nLastKey==27)
+		Return (lRet)
+	Endif
+	//
+	SetDefault (aReturn, "")
+	//
+	If (nLastKey==27)
+		Return (lRet)
+	Endif
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณPreparacao do inicio de processamento do arquivo pre-formatado          ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	RptStatus({|lEnd|GeraRelGIMDF(cTXT)},aTitulo)
+	//
+	If (aReturn[5]==1)
+		Set Printer To 	
+	   	ourspool(wnrel)
+	Endif
+	MS_FLUSH()
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Restaura area ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	RestArea (aArea)
+Return (lRet)
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณGeraRelGIMDFบAutor  ณMary C. Hergert     บ Data ณ 27/07/2004  บฑฑ
+ฑฑฬออออออออออุออออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณLe arquivo txt informado pelo usuario, gerando o relatorio de บฑฑ
+ฑฑบ          ณconferencia.                                                  บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณSigaFis                                                       บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+Function GeraRelGIMDF(cTXT)
+	Local	nTamTxt		:= 0
+	Local	nReadTxt	:= 0
+	Local	nHandleTxt	:= 0
+    Local	aTitulo		:= array(350)
+    Local	nLoop		:= 0           
+    Local	nIndice 	:= 0 
+    Local	cTexto		:= ""  
+    Local	nValor		:= 0 
+    Local	cSubTitulo  := ""          
+    Local	nImprime	:= 0
+    
+    // Le o TXT gerado na instrucao normativa
+	If File(cTXT)
+		nHandleTxt		:=	FOpen (cTXT)
+		nTamTxt			:=	FSeek (nHandleTxt, 0, 2)
+		FSeek (nHandleTxt, 0, 0)
+		nReadTxt	 	:= 	FRead (nHandleTxt, @cTexto, nTamTxt)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณDeclara os titulos a serem impressos,        ณ
+		//ณbuscando no TXT gerado os respectivos valoresณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		
+        // Movimentos de Entrada Distrito Federal
+        aTitulo[012] := STR0008
+		aTitulo[013] := STR0009
+		aTitulo[014] := STR0010
+		aTitulo[015] := STR0011
+		aTitulo[016] := STR0012
+		aTitulo[017] := STR0013
+		aTitulo[018] := STR0014
+		aTitulo[019] := STR0015
+		aTitulo[020] := STR0016
+		aTitulo[021] := STR0017
+		aTitulo[022] := STR0018
+		aTitulo[023] := STR0019
+		aTitulo[024] := STR0020
+		aTitulo[025] := STR0021
+		aTitulo[026] := STR0022
+		aTitulo[027] := STR0023
+		aTitulo[028] := STR0024
+		aTitulo[029] := STR0025
+		aTitulo[030] := STR0026
+		aTitulo[031] := STR0027
+		aTitulo[032] := STR0028
+		aTitulo[033] := STR0029
+		aTitulo[034] := STR0030
+		aTitulo[035] := STR0031
+		aTitulo[036] := STR0032
+		aTitulo[037] := STR0033
+		aTitulo[038] := STR0034
+		aTitulo[039] := STR0035
+		aTitulo[040] := STR0036
+		aTitulo[041] := STR0037
+		aTitulo[042] := STR0038
+		aTitulo[043] := STR0039
+		aTitulo[044] := STR0040
+		aTitulo[045] := STR0041
+		aTitulo[046] := STR0042
+		aTitulo[047] := STR0043
+		aTitulo[048] := STR0044
+		aTitulo[049] := STR0045
+		aTitulo[050] := STR0046
+		aTitulo[051] := STR0047
+		aTitulo[052] := STR0048
+		aTitulo[053] := STR0049
+		aTitulo[054] := STR0050
+		aTitulo[055] := STR0051
+		aTitulo[056] := STR0052
+		aTitulo[057] := STR0053
+		aTitulo[058] := STR0054
+		aTitulo[059] := STR0055
+		aTitulo[060] := STR0056
+		aTitulo[061] := STR0057
+								
+        // Movimentos de Entrada de Outros Estados
+        aTitulo[062] := STR0008
+		aTitulo[063] := STR0009
+		aTitulo[064] := STR0010
+		aTitulo[065] := STR0011
+		aTitulo[066] := STR0012
+		aTitulo[067] := STR0013
+		aTitulo[068] := STR0014
+		aTitulo[069] := STR0015
+		aTitulo[070] := STR0016
+		aTitulo[071] := STR0017
+		aTitulo[072] := STR0018
+		aTitulo[073] := STR0019
+		aTitulo[074] := STR0020
+		aTitulo[075] := STR0021
+		aTitulo[076] := STR0022
+		aTitulo[077] := STR0023
+		aTitulo[078] := STR0024
+		aTitulo[079] := STR0025
+		aTitulo[080] := STR0026
+		aTitulo[081] := STR0027
+		aTitulo[082] := STR0028
+		aTitulo[083] := STR0029
+		aTitulo[084] := STR0030
+		aTitulo[085] := STR0031
+		aTitulo[086] := STR0032
+		aTitulo[087] := STR0058
+		aTitulo[088] := STR0059
+		aTitulo[089] := STR0060
+		aTitulo[090] := STR0061
+		aTitulo[091] := STR0062
+		aTitulo[092] := STR0033
+		aTitulo[093] := STR0034
+		aTitulo[094] := STR0035
+		aTitulo[095] := STR0036
+		aTitulo[096] := STR0037
+		aTitulo[097] := STR0038
+		aTitulo[098] := STR0039
+		aTitulo[099] := STR0040
+		aTitulo[100] := STR0041
+		aTitulo[101] := STR0042
+		aTitulo[102] := STR0043
+		aTitulo[103] := STR0044
+		aTitulo[104] := STR0045
+		aTitulo[105] := STR0046
+		aTitulo[106] := STR0047
+		aTitulo[107] := STR0048
+		aTitulo[108] := STR0049
+		aTitulo[109] := STR0050
+		aTitulo[110] := STR0051
+		aTitulo[111] := STR0052
+		aTitulo[112] := STR0063
+		aTitulo[113] := STR0064
+		aTitulo[114] := STR0065
+		aTitulo[115] := STR0066
+		aTitulo[116] := STR0067
+							
+        // Movimentos de Entrada do Exterior
+        aTitulo[117] := STR0008
+		aTitulo[118] := STR0008
+		aTitulo[119] := STR0010
+		aTitulo[120] := STR0011
+		aTitulo[121] := STR0012
+		aTitulo[122] := STR0018
+		aTitulo[123] := STR0019
+		aTitulo[124] := STR0020
+		aTitulo[125] := STR0021
+		aTitulo[126] := STR0022
+		aTitulo[127] := STR0028
+		aTitulo[128] := STR0029
+		aTitulo[129] := STR0030
+		aTitulo[130] := STR0031
+		aTitulo[131] := STR0032
+		aTitulo[132] := STR0033
+		aTitulo[133] := STR0034
+		aTitulo[134] := STR0035
+		aTitulo[135] := STR0036
+		aTitulo[136] := STR0037
+		aTitulo[137] := STR0038
+		aTitulo[138] := STR0039
+		aTitulo[139] := STR0040
+		aTitulo[140] := STR0041
+		aTitulo[141] := STR0042
+		aTitulo[142] := STR0048
+		aTitulo[143] := STR0049
+		aTitulo[144] := STR0050
+		aTitulo[145] := STR0051
+		aTitulo[146] := STR0052
+		aTitulo[147] := STR0068
+		aTitulo[148] := STR0069
+		aTitulo[149] := STR0070
+		aTitulo[150] := STR0071
+		aTitulo[151] := STR0072
+        
+        // Total dos Movimentos de Entrada
+		aTitulo[152] := STR0073
+		aTitulo[153] := STR0074
+		aTitulo[154] := STR0075
+		aTitulo[155] := STR0076
+		aTitulo[156] := STR0077
+								
+        // Movimentos de Saida Distrito Federal
+        aTitulo[157] := STR0078
+		aTitulo[158] := STR0079
+		aTitulo[159] := STR0080
+		aTitulo[160] := STR0081
+		aTitulo[161] := STR0082
+		aTitulo[162] := STR0013
+		aTitulo[163] := STR0014
+		aTitulo[164] := STR0083
+		aTitulo[165] := STR0016
+		aTitulo[166] := STR0017
+		aTitulo[167] := STR0018
+		aTitulo[168] := STR0019
+		aTitulo[169] := STR0084
+		aTitulo[170] := STR0021
+		aTitulo[171] := STR0022
+		aTitulo[172] := STR0023
+		aTitulo[173] := STR0024
+		aTitulo[174] := STR0085
+		aTitulo[175] := STR0026
+		aTitulo[176] := STR0027
+		aTitulo[177] := STR0028
+		aTitulo[178] := STR0029
+		aTitulo[179] := STR0086
+		aTitulo[180] := STR0031
+		aTitulo[181] := STR0032
+		aTitulo[182] := STR0033
+		aTitulo[183] := STR0034
+		aTitulo[184] := STR0087
+		aTitulo[185] := STR0036
+		aTitulo[186] := STR0037
+		aTitulo[187] := STR0107
+		aTitulo[188] := STR0108
+		aTitulo[189] := STR0109
+		aTitulo[190] := STR0110
+		aTitulo[191] := STR0111
+		aTitulo[192] := STR0048
+		aTitulo[193] := STR0049
+		aTitulo[194] := STR0088												
+		aTitulo[195] := STR0051
+		aTitulo[196] := STR0052
+		aTitulo[197] := STR0090
+		aTitulo[198] := STR0091
+		aTitulo[199] := STR0092
+		aTitulo[200] := STR0093
+		aTitulo[201] := STR0094
+
+        // Movimentos de Saida para os Estados
+        aTitulo[202] := STR0078
+		aTitulo[203] := STR0079
+		aTitulo[204] := STR0080
+		aTitulo[205] := STR0081
+		aTitulo[206] := STR0082
+		aTitulo[207] := STR0013
+		aTitulo[208] := STR0014
+		aTitulo[209] := STR0083
+		aTitulo[210] := STR0016
+		aTitulo[211] := STR0017
+		aTitulo[212] := STR0018
+		aTitulo[213] := STR0019
+		aTitulo[214] := STR0084
+		aTitulo[215] := STR0021
+		aTitulo[216] := STR0022
+		aTitulo[217] := STR0023
+		aTitulo[218] := STR0024
+		aTitulo[219] := STR0085
+		aTitulo[220] := STR0026
+		aTitulo[221] := STR0027
+		aTitulo[222] := STR0028
+		aTitulo[223] := STR0029
+		aTitulo[224] := STR0086
+		aTitulo[225] := STR0031
+		aTitulo[226] := STR0032
+		aTitulo[227] := STR0058
+		aTitulo[228] := STR0059
+		aTitulo[229] := STR0089
+		aTitulo[230] := STR0061
+		aTitulo[231] := STR0062
+		aTitulo[232] := STR0033
+		aTitulo[233] := STR0034
+		aTitulo[234] := STR0087
+		aTitulo[235] := STR0036
+		aTitulo[236] := STR0037
+		aTitulo[237] := STR0048
+		aTitulo[238] := STR0049
+		aTitulo[239] := STR0088												
+		aTitulo[240] := STR0051
+		aTitulo[241] := STR0052
+		aTitulo[242] := STR0096
+		aTitulo[243] := STR0097
+		aTitulo[244] := STR0098
+		aTitulo[245] := STR0099
+		aTitulo[246] := STR0100
+
+        // Movimentos de Saida para o Exterior
+        aTitulo[247] := STR0078
+		aTitulo[248] := STR0079
+		aTitulo[249] := STR0080
+		aTitulo[250] := STR0081
+		aTitulo[251] := STR0082
+		aTitulo[252] := STR0018
+		aTitulo[253] := STR0019
+		aTitulo[254] := STR0084
+		aTitulo[255] := STR0021
+		aTitulo[256] := STR0022
+		aTitulo[257] := STR0028
+		aTitulo[258] := STR0029
+		aTitulo[259] := STR0086
+		aTitulo[260] := STR0031
+		aTitulo[261] := STR0032
+		aTitulo[262] := STR0058
+		aTitulo[263] := STR0059
+		aTitulo[264] := STR0089
+		aTitulo[265] := STR0061
+		aTitulo[266] := STR0062
+		aTitulo[267] := STR0048
+		aTitulo[268] := STR0049
+		aTitulo[269] := STR0088												
+		aTitulo[270] := STR0051
+		aTitulo[271] := STR0052
+		aTitulo[272] := STR0101
+		aTitulo[273] := STR0102
+		aTitulo[274] := STR0103
+		aTitulo[275] := STR0104
+		aTitulo[276] := STR0105
+
+        // Totais Movimentos de Saida
+		aTitulo[277] := STR0073
+		aTitulo[278] := STR0074
+		aTitulo[279] := STR0075
+		aTitulo[280] := STR0076
+		aTitulo[281] := STR0077
+
+        // Apuracao do ICMS por ST   
+        aTitulo[282] := STR0112
+        aTitulo[283] := STR0113
+        aTitulo[284] := STR0114
+        aTitulo[285] := STR0115
+        aTitulo[286] := STR0112
+        aTitulo[287] := STR0113
+        aTitulo[288] := STR0114
+        aTitulo[289] := STR0115
+        
+        // Discriminacao
+        aTitulo[290] := STR0116
+        aTitulo[291] := STR0117
+        aTitulo[292] := STR0118
+        aTitulo[293] := STR0119
+        aTitulo[294] := STR0120
+        aTitulo[295] := STR0121
+        aTitulo[296] := STR0118
+        aTitulo[297] := STR0122
+        aTitulo[298] := STR0123
+        aTitulo[299] := STR0124
+        aTitulo[300] := STR0116
+        aTitulo[301] := STR0125
+        aTitulo[302] := STR0126
+        aTitulo[303] := STR0127
+        aTitulo[304] := STR0118
+        aTitulo[305] := STR0128
+        aTitulo[306] := STR0118
+                
+        // Apuracao do Imposto Proprio
+        aTitulo[307] := STR0129
+        aTitulo[308] := STR0130
+        aTitulo[309] := STR0131
+        aTitulo[310] := STR0132
+        aTitulo[311] := STR0133
+        aTitulo[312] := STR0134
+        aTitulo[313] := STR0135
+        aTitulo[314] := STR0136
+        aTitulo[315] := STR0137
+        aTitulo[316] := STR0138
+        aTitulo[317] := STR0139
+        aTitulo[318] := STR0140
+        aTitulo[319] := STR0141
+        aTitulo[320] := STR0142
+
+        // Informacoes Complementares                             
+        aTitulo[321] := STR0143
+        aTitulo[322] := STR0144
+        aTitulo[323] := STR0145
+        aTitulo[324] := STR0146
+                              
+        // Descricao de Outros
+        aTitulo[325] := STR0147
+        aTitulo[326] := STR0148
+        aTitulo[327] := STR0149
+        aTitulo[328] := STR0150
+
+        // Selecionando valores do TXT e imprimindo o relatorio
+        nIndice		:= 132
+        nLoop		:= 12
+        nImprime	:= Cabec(STR0001,"","","MATR923","M",18)
+
+		Do While nLoop <= 328
+
+        	// SubTitulo por Categoria
+            Do Case 
+		    Case nLoop == 12 
+		        cSubTitulo := STR0151
+		    Case nLoop == 62
+		    	cSubTitulo := STR0152
+		    Case nLoop == 117
+		    	cSubTitulo := STR0153
+		    Case nLoop == 157
+		    	cSubTitulo := STR0154
+		    Case nLoop == 202
+		    	cSubTitulo := STR0155
+		    Case nLoop == 247
+		    	cSubTitulo := STR0156
+		    Case nLoop == 282
+		    	cSubTitulo := STR0157
+		    Case nLoop == 290
+		    	cSubTitulo := STR0158
+		    Case nLoop == 307
+		    	cSubTitulo := STR0159
+		    Case nLoop == 321
+		    	cSubTitulo := STR0160
+		    Case nLoop == 325
+		    	cSubTitulo := STR0161
+		    OtherWise
+		    	cSubTitulo := ""	
+		    EndCase
+
+            If ! Empty(cSubTitulo)
+                nImprime += 1
+   		    	FmtLin({},Replicate("=",132),,,@nImprime)	
+		    	FmtLin({},AllTrim(cSubTitulo),,,@nImprime)
+		    	FmtLin({},Replicate("=",132),,,@nImprime)                    
+            Endif
+
+			nValor := Val(SubStr(cTexto,nIndice,11)) / 100
+		    aTitulo[nLoop] := Space(5) + StrZero(nLoop,3) + " - " + AllTrim(aTitulo[nLoop]) + Space(60-Len(AllTrim(aTitulo[nLoop]))) + Transform(nValor,"@E 999,999,999,999.99")
+			If nImprime > 60  
+			    nImprime += 1
+				FmtLin({},Replicate("-",132),,,@nImprime)                    
+				nImprime := Cabec(STR0001,"","","MATR923","M",18)   
+			Endif       
+			nImprime += 1
+			FmtLin ({},aTitulo[nLoop],,,@nImprime)
+			nLoop	+= 1
+			nIndice += 14               
+		Enddo								
+		FClose (nHandleTxt)
+	EndIf     
+	
+    // Linha que indica final de pagina
+	If nImprime < 60 .And. nImprime > 0 
+	    nImprime += 1
+		FmtLin({},Replicate("-",132),,,@nImprime)                    
+	Endif       
+
+	Return .T.
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณAjustaSX1 บAutor  ณMary C. Hergert     บ Data ณ 04/08/2004  บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณAjusta grupo de perguntas                                   บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       |MATR923                                                     บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+Static Function AjustaSX1()    
+
+	Local aHelpPor	:= {}
+	Local aHelpEng	:= {}                                 				
+	Local aHelpSpa	:= {}
+	
+	Aadd( aHelpPor, "Informe o nome do arquivo magnetico     " )
+	Aadd( aHelpPor, "gerado para impressao da conferencia    " )
+	
+	Aadd( aHelpEng, "Enter the name and magnetic media       " )
+	Aadd( aHelpEng, "generated for the checking printing     " )
+	
+	Aadd( aHelpSpa, "Informe el nombre del archivo magnetico " )
+	Aadd( aHelpSpa, "generado para imprimir la verificacion  " )
+	
+	PutSx1("MTR923","01","Arq.Gerado?","Generated File?","?Arch.Generado?","mv_ch1","C",40,0,0,"G","","","","","mv_par01","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+	
+	aHelpPor	:= {}
+	aHelpEng	:= {}                                 				
+	aHelpSpa	:= {}
+	
+	Aadd( aHelpPor, "Informe o diretorio onde encontra-se    " )
+	Aadd( aHelpPor, "o arquivo magnetico gerado              " )
+	
+	Aadd( aHelpEng, "Enter the directory where the magnetic  " )
+	Aadd( aHelpEng, "file is found                           " )
+	
+	Aadd( aHelpSpa, "Informe el directorio en el que se      " )
+	Aadd( aHelpSpa, "encuentra el archivo magnetico generado " )
+	
+	PutSx1("MTR923","02","Diretorio?","Directory?","Directorio?","mv_ch2","C",20,0,0,"G","","","","","mv_par02","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)

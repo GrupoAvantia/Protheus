@@ -1,0 +1,645 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Matr944.ch"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr944.prx"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MatR944
+
+
+
+
+
+
+
+
+
+LOCAL 	cSvAlias:=Alias(), wnrel:="MATR944", tamanho:="M", titulo:=If( cPaisLoc $ "ANG|PTG", "Registo de apuração de ipi", "Registro de Apuraçäo de IPI" ),cDesc1:=If( cPaisLoc $ "ANG|PTG", "Este programa irá imprimir o Livro de Registo de Apuro de IPI (modelo P8)", "Este programa irá imprimir o Livro de Registro de Apuraçäo de IPI (modelo P8)" ),cDesc2:="conforme parâmetros e período informados.",cDesc3:=""
+
+
+
+PRIVATE aReturn := { If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ), 1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administraçäo" ), 2, 2, 1, "",1 },nomeprog:="MATR944", cPerg   :="MTR944", cString:="SF3"
+
+
+
+pergunte(cPerg, .F. )
+
+
+
+nLastKey:=0
+wnrel:=SetPrint(cString,wnrel,cPerg,Titulo,cDesc1,cDesc2,cDesc3, .F. ,"", .F. ,Tamanho,, .F. )
+
+If nLastKey == 27
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	dbClearFilter()
+	Return
+Endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PRIVATE nMes		:=mv_par01, nAno		:=mv_par02, nApuracao	:=mv_par03, nPerApurado :=mv_par04, cNrLivro	:=mv_par05, nPagIni		:=IIf(mv_par06<=2,2,mv_par06), nQtFeixe	:=mv_par07, nImprime	:=mv_par08
+
+
+
+PRIVATE cPictVal:="@EZ) 999,999,999,999.99"
+
+
+
+aPeriodo:=R943DefPeriodo(nMes,nAno,nApuracao,nPerApurado)
+dDtIni:=aPeriodo[1]
+dDtFim:=aPeriodo[2]
+
+
+
+PRIVATE cImprimindo:="AP_ENT"
+
+
+
+RptStatus({|lEnd| R944Imp(@lEnd,wnRel,cString,Tamanho)},titulo)
+
+
+
+
+dbSelectArea(cSvAlias)
+dbClearFilter()
+
+
+
+
+If aReturn[5] = 1
+	Set( 24, "" )
+	ourspool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R944Imp(lEnd,WnRel,cString,Tamanho)
+
+LOCAL 	aDadosApur:=ResumeF3("IP",dDtIni,dDtFim,cNrLivro, .F. , .T. ,2,@lEnd)
+LOCAL   aEntradas:={}, aSaidas:={}, cCFO
+LOCAL 	nValIPI, nValBase, nValCont, nValIsen, nValOutr
+LOCAL 	cValIPI, cValBase, cValCont, cValIsen, cValOutr
+LOCAL 	i,j,cAliq,uValCont,uValBase,uValICMS
+LOCAL 	aL:=R944LayOut()
+LOCAL 	cLinha,cConteudo,cArqApur,aCampos,nArqIni,nArqFim
+LOCAL 	cValor,nValor,cTexto,bCabec
+LOCAL	aDriver
+
+
+
+
+
+LOCAL 	n001:=0,n002:=0,n003:=0,a004:={},a005:={},n006:=0, n007:=0,n008:=0,n009:=0,a010:={},n011:=0,a012:={}, n013:=0,n014:=0,n015:=0,n016:=0,n017:=0,aTit:={},aObs:={}
+
+PRIVATE	nLin:=80,nPagina:=nPagIni,cImp:="IP",nPeriodo
+
+
+
+If nImprime==2
+	aDriver:=ReadDriver()
+	XFIS_IMPTERM(GetMv("MV_LMOD8AB"),GetMv("MV_LMOD8EN"),cPerg,aDriver[4])
+	RETURN
+Endif
+
+
+
+
+
+
+For i:=1 to Len(aDadosApur)
+	cCfo:=Substr(aDadosApur[i,1],1,1)
+	If Val(cCfo)<5
+		AADD(aEntradas,aDadosApur[i])
+	Else
+		AADD(aSaidas,aDadosApur[i])
+	Endif
+Next
+
+
+
+aEntradas	:=Asort(aEntradas	,,,{|x,y|x[1]<y[1]})
+aSaidas		:=Asort(aSaidas		,,,{|x,y|x[1]<y[1]})
+
+
+
+If !Empty(aEntradas)
+	AADD(aEntradas,Aclone(aEntradas[1]))
+	aEntradas[Len(aEntradas),1]:="TOT"
+	Afill(aEntradas[Len(aEntradas)],0,2)
+Endif
+If !Empty(aSaidas)
+	AADD(aSaidas,Aclone(aSaidas[1]))
+	aSaidas[Len(aSaidas),1]:="TOT"
+	Afill(aSaidas[Len(aSaidas)],0,2)
+Endif
+
+
+
+If Len(aEntradas)>0
+	nValCont:=0
+	nValBase:=0
+	nValIPI:=0
+	nValIsen:=0
+	nValOutr:=0
+	aEval(aEntradas,{|x|nValCont+=x[11],nValBase+=x[3],nValIPI+=x[4],nValIsen+=x[5],nValOutr+=x[6]})
+	aEntradas[Len(aEntradas),11]:=nValCont
+	aEntradas[Len(aEntradas),3]:=nValBase
+	aEntradas[Len(aEntradas),4]:=nValIPI
+	aEntradas[Len(aEntradas),5]:=nValIsen
+	aEntradas[Len(aEntradas),6]:=nValOutr
+Endif
+
+
+
+If Len(aSaidas)>0
+	nValCont:=0
+	nValBase:=0
+	nValIPI:=0
+	nValIsen:=0
+	nValOutr:=0
+	aEval(aSaidas,{|x|nValCont+=x[11],nValBase+=x[3],nValIPI+=x[4],nValIsen+=x[5],nValOutr+=x[6]})
+	aSaidas[Len(aSaidas),11]:=nValCont
+	aSaidas[Len(aSaidas),3]:=nValBase
+	aSaidas[Len(aSaidas),4]:=nValIPI
+	aSaidas[Len(aSaidas),5]:=nValIsen
+	aSaidas[Len(aSaidas),6]:=nValOutr
+Endif
+
+
+
+
+
+
+For i:=1 to Len(aEntradas)
+	If Interrupcao(@lEnd)
+		Exit
+	Endif
+	If nLin>60
+		R944Cabec()
+	Endif
+	cCfo:=Substr(aEntradas[i,1],1,1)+"."+Substr(aEntradas[i,1],2)
+	cValCont:=Transform(aEntradas[i,11],cPictVal)
+	cValBase:=Transform(aEntradas[i,3],cPictVal)
+	cValIPI:=Transform(aEntradas[i,4],cPictVal)
+	cValIsen:=Transform(aEntradas[i,5],cPictVal)
+	cValOutr:=Transform(aEntradas[i,6],cPictVal)
+	If i<Len(aEntradas)
+		FmtLin({cCFO,cValCont,cValBase,cValIpi,cValIsen,cValOutr},aL[19],,,@nLin)
+	Else
+		FmtLin({cValCont,cValBase,cValIpi,cValIsen,cValOutr},aL[20],,,@nLin)
+	Endif
+next
+If Len(aEntradas)==0
+	R944Cabec()
+	FmtLin({"    ",If( cPaisLoc $ "ANG|PTG", "Sem Movimento", "SEM MOVIMENTO" ),,},aL[19],,,@nLin)
+Endif
+If lEnd
+	RETURN
+Endif
+
+
+
+cImprimindo:="AP_SAI"
+For i:=1 to Len(aSaidas)
+	If Interrupcao(@lEnd)
+		Exit
+	Endif
+	If nLin>60
+		R944Cabec()
+	Else
+		If i==1
+			FmtLin(,{aL[11],aL[13],aL[14],aL[15],aL[16],aL[17],aL[18]},,,@nLin)
+		EndIf
+	Endif
+	cCfo:=Substr(aSaidas[i,1],1,1)+"."+Substr(aSaidas[i,1],2)
+	cValCont:=Transform(aSaidas[i,11],cPictVal)
+	cValBase:=Transform(aSaidas[i,3],cPictVal)
+	cValIPI:=Transform(aSaidas[i,4],cPictVal)
+	cValIsen:=Transform(aSaidas[i,5],cPictVal)
+	cValOutr:=Transform(aSaidas[i,6],cPictVal)
+	If i<Len(aSaidas)
+		FmtLin({cCFO,cValCont,cValBase,cValIpi,cValIsen,cValOutr},aL[19],,,@nLin)
+	Else
+		FmtLin({cValCont,cValBase,cValIpi,cValIsen,cValOutr},aL[20],,,@nLin)
+		FmtLin(,aL[01],,,@nLin)
+	Endif
+next
+If Len(aSaidas)==0
+	FmtLin(,{aL[11],aL[13],aL[14],aL[15],aL[16],aL[17],aL[18]},,,@nLin)
+	FmtLin({"     ",If( cPaisLoc $ "ANG|PTG", "Sem Movimento", "SEM MOVIMENTO" ),,},aL[19],,,@nLin)
+	FmtLin(,aL[01],,,@nLin)
+	nLin:=80
+Endif
+If lEnd
+	RETURN
+Endif
+
+
+
+
+
+
+Do Case
+	Case nPerApurado==1
+		nArqIni:=nArqFim:=1
+	Case nPerApurado==2
+		nArqIni:=nArqFim:=2
+	Case nPerApurado==3
+		nArqIni:=nArqFim:=If(nApuracao==3,2,nPerApurado)
+	Case nPerApurado==4
+		nArqIni:=1
+		nArqFim:=3
+EndCase
+
+For i:=nArqIni to nArqFim
+	nPeriodo:=i
+	cArqApur:=NmArqApur()
+	If !File(cArqApur)
+		Loop
+	Endif
+	cConteudo:=MemoRead(cArqApur)
+	aCampos:={ .f. , .f. , .f. , .f. }
+	For j:=2 to MlCount(cConteudo,85)
+		cLinha:=MemoLine(cConteudo,85,j)
+		cCampo:=Substr(cLinha,1,3)
+
+
+
+		If IsDigit(Substr(cCampo,1,1)) .and. IsDigit(Substr(cCampo,3,1))
+			cValor:=Substr(cLinha,52,18)
+			cValor:=StrTran(cValor,".")
+			cValor:=StrTran(cValor,",",".")
+			nValor:=Val(cValor)
+			cTexto:=Substr(cLinha,5,50)
+		Else
+			nValor:=0
+			cTexto:=Substr(cLinha,5)
+		Endif
+		Do Case
+			Case cCampo=="001"
+				n001+=nValor
+			Case cCampo=="002"
+				n002+=nValor
+			Case cCampo=="003"
+				n003+=nValor
+			Case cCampo=="004"
+				If aCampos[1]
+					AADD(a004,{cTexto,nValor,0})
+				Else
+					aCampos[1]:= .t. 
+				Endif
+			Case cCampo=="005"
+				If aCampos[2]
+					AADD(a005,{cTexto,nValor,0})
+				Else
+					aCampos[2]:= .t. 
+				Endif
+			Case cCampo=="007" .and.  (nPerApurado<>4.or.(nPerApurado==4.and.i==1))
+				n007+=nValor
+			Case cCampo=="009"
+				n009+=nValor
+			Case cCampo=="010"
+				If aCampos[3]
+					AADD(a010,{cTexto,nValor,0})
+				Else
+					aCampos[3]:= .t. 
+				Endif
+			Case cCampo=="011"
+				n011+=nValor
+			Case cCampo=="012"
+				If aCampos[4]
+					AADD(a012,{cTexto,nValor,0})
+				Else
+					aCampos[4]:= .t. 
+				Endif
+			Case cCampo=="TIT"
+				AADD(aTit,cTexto)
+			Case cCampo=="OBS"
+				AADD(aObs,cTexto)
+		EndCase
+	next
+next
+
+
+
+
+
+
+n006+=n001+n002+n003
+For i:=1 to Len(a004)
+	a004[Len(a004),3]+=a004[i,2]
+	n006+=a004[i,2]
+Next
+For i:=1 to Len(a005)
+	a005[Len(a005),3]+=a005[i,2]
+	n006+=a005[i,2]
+Next
+n008+=n006+n007
+
+
+
+n013+=n009+n011
+For i:=1 to Len(a010)
+	a010[Len(a010),3]+=a010[i,2]
+	n013+=a010[i,2]
+Next
+For i:=1 to Len(a012)
+	a012[Len(a012),3]+=a012[i,2]
+	n013+=a012[i,2]
+Next
+
+
+
+n014:=n013
+n015:=n008
+If n014-n015>0
+	n016:=n014-n015
+Else
+	n017:=n015-n014
+Endif
+
+
+
+nLin:=80
+cImprimindo:="DEMO_CRED"
+While !lEnd
+	If Interrupcao(@lEnd)
+		Loop
+	EndIf
+
+
+
+	cImprimindo:="DEMO_CRED"
+	bCabec:={||R944Cabec()}
+	Eval(bCabec)
+	FmtLin({n001},aL[26],cPictVal,,@nLin,,bCabec,132)
+	FmtLin({n002},aL[27],cPictVal,,@nLin,,bCabec,132)
+	FmtLin({n003},aL[28],cPictVal,,@nLin,,bCabec,132)
+	FmtLin(,aL[29],,,@nLin,bCabec,132)
+	For i:=1 to Len(a004)
+		FmtLin({a004[i,1],a004[i,2],a004[i,3]},aL[30],cPictVal,,@nLin,bCabec,132)
+	next
+	FmtLin(,aL[31],,,@nLin,bCabec,132)
+	For i:=1 to Len(a005)
+		FmtLin({a005[i,1],a005[i,2],a005[i,3]},aL[32],cPictVal,,@nLin,bCabec,132)
+	next
+	FmtLin({n006},aL[33],cPictVal,,@nLin,bCabec,132)
+	FmtLin({n007},aL[34],cPictVal,,@nLin,bCabec,132)
+	FmtLin({n008},aL[35],cPictVal,,@nLin,bCabec,132)
+
+
+
+	If Interrupcao(@lEnd)
+		Loop
+	EndIf
+	cImprimindo:="DEMO_DEBI"
+	FmtLin(,{aL[36],aL[37],aL[38]},,,@nLin,,bCabec,132)
+	FmtLin({n009},aL[39],cPictVal,,@nLin,,bCabec,132)
+	FmtLin(,aL[40],,,@nLin,,bCabec,132)
+	For i:=1 to Len(a010)
+		FmtLin({a010[i,1],a010[i,2],a010[i,3]},aL[41],cPictVal,,@nLin,bCabec,132)
+	next
+	FmtLin({n011},aL[42],cPictVal,,@nLin,,bCabec,132)
+	FmtLin(,aL[43],,,@nLin,,bCabec,132)
+	For i:=1 to Len(a012)
+		FmtLin({a012[i,1],a012[i,2],a012[i,3]},aL[44],cPictVal,,@nLin,bCabec,132)
+	next
+	FmtLin({n013},aL[45],cPictval,,@nLin,,bCabec,132)
+
+
+
+	If Interrupcao(@lEnd)
+		Loop
+	EndIf
+	cImprimindo:="APUR_SALDO"
+	FmtLin(,{aL[46],aL[47],aL[48]},,,@nLin,,bCabec,132)
+	FmtLin({n014},aL[49],cPictVal,,@nLin,,bCabec,132)
+	FmtLin({n015},aL[50],cPictVal,,@nLin,,bCabec,132)
+	FmtLin({n016},aL[51],cPictVal,,@nLin,,bCabec,132)
+	FmtLin({n017},aL[52],cPictVal,,@nLin,,bCabec,132)
+
+
+
+	If Interrupcao(@lEnd)
+		Loop
+	EndIf
+	j:=0
+	cImprimindo:="INF_COMPL"
+	FmtLin(,{aL[53],aL[54],aL[55],aL[56],aL[57],aL[58]},,,@nLin,,bCabec,132)
+	For i:=1 to Len(aTit)
+		FmtLin({aTit[i]},aL[59],,,@nLin,,bCabec,132)
+	Next
+	FmtLin(,aL[60],,,@nLin,,bCabec,132)
+	For i:=1 to Len(aObs)
+		FmtLin({aObs[i]},aL[IIf(i==1,61,62)],,,@nLin,,bCabec,132)
+	Next
+	FmtLin(,aL[63],,,@nLin,,bCabec,132)
+	FmtLin(,aL[01],,,@nLin,,bCabec,132)
+	Exit
+End
+
+RETURN
+
+
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R944LayOut()
+
+Local aL:={}
+
+Aadd(aL,"+----------------------------------------------------------------------------------------------------------------------------------+")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "|                                                    registo de apuração do ipi                                                   |", "|                                                    REGISTRO DE APURACAO DO IPI                                                   |" ))
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "|                                                demonstrativo de apuração do imposto                                              |", "|                                                DEMONSTRATIVO DE APURACAO DO IMPOSTO                                              |" ))
+Aadd(aL,"|                                                                                                                                  |")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| firma: #########################################################                                                                 |", "| FIRMA: #########################################################                                                                 |" ))
+Aadd(aL,"|                                                                                                                                  |")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| insc.est.: ######################## c.n.p.j.: #################                                                                  |", "| INSC.EST.: ######################## C.N.P.J.: #################                                                                  |" ))
+Aadd(aL,"|                                                                                                                                  |")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| folha: ####     mês ou período/ano: #######                                                                                      |", "| FOLHA: ####     MES OU PERIODO/ANO: #######                                                                                      |" ))
+Aadd(aL,"|                                                                                                                                  |")
+Aadd(aL,"|==================================================================================================================================|")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "|                                                         e n t r a d a s                                                          |", "|                                                         E N T R A D A S                                                          |" ))
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "|                                                           s a i d a s                                                            |", "|                                                           S A I D A S                                                            |" ))
+Aadd(aL,"|==================================================================================================================================|")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| codificação  |                    |                                 ipi - valores fiscais                                        |", "| CODIFICACAO  |                    |                                 IPI - VALORES FISCAIS                                        |" ))
+Aadd(aL,"|--------------|                    |----------------------------------------------------------------------------------------------|")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "|    fiscal    |  valores contabeis |    base de cálculo   |  imposto creditado   | isentas ou não tributadas |      outras        |", "|    FISCAL    |  VALORES CONTABEIS |    BASE DE CALCULO   |  IMPOSTO CREDITADO   | ISENTAS OU NAO TRIBUTADAS |      OUTRAS        |" ))
+Aadd(aL,"|==============|====================|======================+======================+===========================+====================|")
+Aadd(aL,"|     ####     | ################## |  ##################  |  ##################  |    ##################     | ################## |")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "|    totais    | ################## |  ##################  |  ##################  |    ##################     | ################## |", "|    TOTAIS    | ################## |  ##################  |  ##################  |    ##################     | ################## |" ))
+Aadd(aL,"|==================================================================================================================================|")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| demonstrativo de créditos                                                              |                 valores                 |", "| DEMONSTRATIVO DE CREDITOS                                                              |                 VALORES                 |" ))
+Aadd(aL,"|----------------------------------------------------------------------------------------|-----------------------------------------|")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "|                                                                                        |   coluna auxiliar  |        soma        |", "|                                                                                        |   COLUNA AUXILIAR  |        SOMA        |" ))
+Aadd(aL,"|                                                                                        |--------------------+--------------------|")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 001 - por entradas do mercado nacional                                                 |                    | ################## |", "| 001 - POR ENTRADAS DO MERCADO NACIONAL                                                 |                    | ################## |" ))
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 002 - por entradas do mercado externo                                                  |                    | ################## |", "| 002 - POR ENTRADAS DO MERCADO EXTERNO                                                  |                    | ################## |" ))
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 003 - por saidas para o mercado externo                                                |                    | ################## |", "| 003 - POR SAIDAS PARA O MERCADO EXTERNO                                                |                    | ################## |" ))
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 004 - estorno de debitos (discriminar abaix0)                                          |                    |                    |", "| 004 - ESTORNO DE DEBITOS (DISCRIMINAR ABAIX0)                                          |                    |                    |" ))
+Aadd(aL,"|       ################################################################################ | ################## | ################## |")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 005 - outros créditos (discriminar abaixo)                                             |                    |                    |", "| 005 - OUTROS CREDITOS (DISCRIMINAR ABAIXO)                                             |                    |                    |" ))
+Aadd(aL,"|       ################################################################################ | ################## | ################## |")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 006 - subtotal                                                                         |                    | ################## |", "| 006 - SUBTOTAL                                                                         |                    | ################## |" ))
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 007 - saldo credor do período anterior                                                 |                    | ################## |", "| 007 - SALDO CREDOR DO PERIODO ANTERIOR                                                 |                    | ################## |" ))
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 008 - total                                                                            |                    | ################## |", "| 008 - TOTAL                                                                            |                    | ################## |" ))
+Aadd(aL,"|==================================================================================================================================|")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| demonstrativo de debitos                                                               |                    |                    |", "| DEMONSTRATIVO DE DEBITOS                                                               |                    |                    |" ))
+Aadd(aL,"|----------------------------------------------------------------------------------------|--------------------+--------------------|")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 009 - por saidas para o mercado nacional                                               |                    | ################## |", "| 009 - POR SAIDAS PARA O MERCADO NACIONAL                                               |                    | ################## |" ))
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 010 - estorno de créditos (discriminar abaixo)                                         |                    |                    |", "| 010 - ESTORNO DE CREDITOS (DISCRIMINAR ABAIXO)                                         |                    |                    |" ))
+Aadd(aL,"|       ################################################################################ | ################## | ################## |")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 011 - ressarcimento de créditos                                                        |                    | ################## |", "| 011 - RESSARCIMENTO DE CREDITOS                                                        |                    | ################## |" ))
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 012 - outros debitos (discriminar abaixo)                                              |                    |                    |", "| 012 - OUTROS DEBITOS (DISCRIMINAR ABAIXO)                                              |                    |                    |" ))
+Aadd(aL,"|       ################################################################################ | ################## | ################## |")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 013 - total                                                                            |                    | ################## |", "| 013 - TOTAL                                                                            |                    | ################## |" ))
+Aadd(aL,"|==================================================================================================================================|")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| apuração do saldo                                                                      |                    |                    |", "| APURACAO DO SALDO                                                                      |                    |                    |" ))
+Aadd(aL,"|----------------------------------------------------------------------------------------|--------------------+--------------------|")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 014 - debito total (=item 013)                                                         |                    | ################## |", "| 014 - DEBITO TOTAL (=ITEM 013)                                                         |                    | ################## |" ))
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 015 - crédito total (=item 008)                                                        |                    | ################## |", "| 015 - CREDITO TOTAL (=ITEM 008)                                                        |                    | ################## |" ))
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 016 - saldo devedor (item 014-item 015)                                                |                    | ################## |", "| 016 - SALDO DEVEDOR (ITEM 014-ITEM 015)                                                |                    | ################## |" ))
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| 017 - crédito total (item 015-item 014)                                                |                    | ################## |", "| 017 - CREDITO TOTAL (ITEM 015-ITEM 014)                                                |                    | ################## |" ))
+Aadd(aL,"|==================================================================================================================================|")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| informações complementares                                                                                                       |", "| INFORMACOES COMPLEMENTARES                                                                                                       |" ))
+Aadd(aL,"|----------------------------------------------------------------------------------------------------------------------------------|")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "|                         guias de recolhimento                                                                                    |", "|                         GUIAS DE RECOLHIMENTO                                                                                    |" ))
+Aadd(aL,"|                                                                                                                                  |")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| número   data         valor               orgao arrecadador                                                                      |", "| NUMERO   DATA         VALOR               ORGAO ARRECADADOR                                                                      |" ))
+Aadd(aL,"| ####################################################################                                                             |")
+Aadd(aL,"|                                                                                                                                  |")
+Aadd(aL,If( cPaisLoc $ "ANG|PTG", "| observacoes: ##################################################################################                                  |", "| OBSERVACOES: ##################################################################################                                  |" ))
+Aadd(aL,"|              ##################################################################################                                  |")
+Aadd(aL,"|                                                                                                                                  |")
+
+
+RETURN (aL)
+
+
+
+
+
+
+
+
+
+
+
+STATIC FUNCTION R944Cabec()
+
+
+
+
+LOCAL 	aL:=R944LayOut(),cNome,cInscr,cCGC,cPeriodo,cPagina,aImp
+
+__LogPages()
+
+cNome	:=SM0->M0_NOMECOM
+cInscr	:=InscrEst()
+cCGC	:=TRANSFORM(SM0->M0_CGC,"@R 99.999.999/9999-99")
+cPeriodo:=Mes(dDtIni)+" / "+StrZero(Year(dDtIni),4)
+cPagina :=StrZero(nPagina,4)
+
+
+
+If nLin<80
+	FMTLIN(,aL[1],,,@nLin)
+Endif
+nLin:=0
+PrintOut(nLin++,0,AvalImp(132),,)
+
+
+
+
+If cImprimindo$"AP_ENT,AP_SAI"
+	FMTLIN(,{aL[1],aL[2],aL[4]},,,@nLin)
+Else
+	FMTLIN(,{aL[1],aL[3],aL[4]},,,@nLin)
+EndIf
+FMTLIN({cNome},aL[5],,,@nLin)
+FMTLIN(,aL[6],,,@nLin)
+FMTLIN({cInscr,cCGC},aL[7],,,@nLin)
+FMTLIN(,aL[8],,,@nLin)
+FMTLIN({cPagina,cPeriodo},aL[9],,,@nLin)
+FMTLIN(,aL[10],,,@nLin)
+
+
+
+Do Case
+	Case cImprimindo=="AP_ENT"
+		FMTLIN(,{aL[11],aL[12],aL[14],aL[15],aL[16],aL[17],aL[18]},,,@nLin)
+	Case cImprimindo=="AP_SAI"
+		FMTLIN(,{aL[11],aL[13],aL[14],aL[15],aL[16],aL[17],aL[18]},,,@nLin)
+	Case cImprimindo=="DEMO_CRED"
+		FMTLIN(,{aL[21],aL[22],aL[23],aL[24],aL[25]},,,@nLin)
+	Case cImprimindo=="DEMO_DEBI"
+		FMTLIN(,{aL[36],aL[37],aL[38]},,,@nLin)
+	Case cImprimindo=="APUR_SALDO"
+		FMTLIN(,{aL[46],aL[47],aL[48]},,,@nLin)
+	Case cImprimindo=="INF_COMPL"
+		FMTLIN(,{aL[53],aL[54],aL[55]},,,@nLin)
+EndCase
+
+NovaPg(@nPagina,nQtFeixe)
+
+RETURN (NIL)

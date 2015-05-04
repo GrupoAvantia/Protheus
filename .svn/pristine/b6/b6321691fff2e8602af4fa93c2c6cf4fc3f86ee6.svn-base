@@ -1,0 +1,782 @@
+#INCLUDE "MATR805.ch"
+#INCLUDE "Protheus.ch"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³MATR805   º Autor ³ Fernando Machima   º Data ³  13/04/04   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescricao ³ Relatorio de Historico de Transacoes(Loc. Guatemala)       º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³Faturamento/Loja                                            º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function MATR805()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Declaracao de Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Local cDesc1  := STR0001 //"Este programa tem como objetivo imprimir relatorio "
+Local cDesc2  := STR0002 //"de acordo com os parametros informados pelo usuario."
+Local cDesc3  := STR0003 //"Relatorio historico de transacoes"
+Local cPict   := ""
+Local titulo  := STR0003 //"Relatorio historico de transacoes"
+Local nLin    := 80
+
+Local Cabec1  := ""
+Local Cabec2  := ""
+Local imprime := .T.
+Local aOrd    := {}
+
+Private lEnd         := .F.
+Private lAbortPrint  := .F.
+Private CbTxt        := ""
+Private limite       := 132
+Private tamanho      := "M"
+Private nomeprog     := "MATR805" // Coloque aqui o nome do programa para impressao no cabecalho
+Private cPerg        := "MTR805"
+Private nTipo        := 18
+Private aReturn      := { STR0004, 1, STR0005, 2, 2, 1, "", 1} //"Zebrado"###"Administracao"
+Private nLastKey     := 0
+Private cbcont     	 := 00
+Private CONTFL     	 := 01
+Private m_pag      	 := 01
+Private wnrel      	 := "MATR805" // Coloque aqui o nome do arquivo usado para impressao em disco
+
+Private cString := "SF2"
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Caso os registros contendo os parametros do relatorio nao existam no SX1, Cria-os³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AjustaSX1()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//| mv_par01  Filial de ?                      			        |
+//| mv_par02  Filial ate ?                                      |
+//| mv_par03  Numero Doc. de ?                                  |
+//| mv_par04  Numero Doc. ate ?                                 |
+//| mv_par05  Serie de ?                                        |
+//| mv_par06  Serie ate ?                                       |
+//| mv_par07  Data emissao de ?                                 |
+//| mv_par08  Data emissao ate ?                                |
+//| mv_par09  Tipo de Documento?                                |
+//| mv_par10  Estado do Documento?                              |
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Pergunte(cPerg,.F.)
+
+dbSelectArea("SF3")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Monta a interface padrao com o usuario...                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+wnrel := SetPrint(cString,NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.F.,,,Tamanho)
+          
+If nLastKey == 27
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	Return
+Endif
+
+nTipo := If(aReturn[4]==1,15,18)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Processamento. RPTSTATUS monta janela com a regua de processamento. ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+RptStatus({|| RunReport(Cabec1,Cabec2,Titulo,nLin) },Titulo)
+
+dbSelectArea("SF3")
+dbSetOrder(1)
+//SET(11,"ON")
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºFun‡„o    ³RUNREPORT º Autor ³ Fernando Machima   º Data ³  13/04/04   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescri‡„o ³ Funcao auxiliar chamada pela RPTSTATUS. A funcao RPTSTATUS º±±
+±±º          ³ monta a janela com a regua de processamento.               º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Programa principal                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
+
+Local cQuery  
+Local cArq    := ""
+Local cArquivo:= ""
+Local cFil    := ""
+Local cLinha  := ""
+Local cTipoDoc:= ""
+Local cTipoFiltro := ""
+Local dEmissao:= Ctod("")
+Local aArea   := GetArea()
+Local aSelecDocs  := {}
+Local lFiltro  := .T.
+
+Private cArqTmp
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Definicao do Cabecalho³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//                   1         2         3         4         5         6         7         8         9         100       110       120       130       140       150       160       170       180       190
+//         012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+Cabec1 := STR0028  
+        //"  Tipo Doc.    Num. Docto.  Serie        Valor   Data Trans.   Estado "                  
+cLinha := "-----------    -----------  -----  -----------   ------------  -------------------------"
+
+cQuery  := ""
+#IFNDEF TOP
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Varre o SF3 enquanto nao for fim de arquivo, listando os historicos³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	dbSelectArea("SF3")
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Imprimir todos os registros, mesmo os deletados					  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//	SET(11,"OFF")
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Ordena os registros por Data de Emissao + Filial			      ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    cChave   := "DTOS(F3_ENTRADA)+F3_FILIAL"
+    cArquivo := CriaTrab(NIL,.F.)           
+    IndRegua("SF3",cArquivo,cChave,,,,.F.) 
+    dbGoTop()
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Cria a area de trabalho                                             ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ    
+    Mtr805CriaTRB()
+
+    SF3->(dbSeek(DTOS(mv_par07)+mv_par01,.T.))
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ SETREGUA -> Indica quantos registros serao processados para a regua ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	SetRegua(RecCount())
+	
+	While SF3->(!EOF()) .And. SF3->F3_FILIAL  <= mv_par02 .And.;
+							   SF3->F3_ENTRADA <= mv_par08
+	
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Efetua o Filtro dos parametros³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If (SF3->F3_NFISCAL < mv_par03  .Or. SF3->F3_NFISCAL > mv_par04) .Or.;
+		   (SF3->F3_SERIE   < mv_par05  .Or. SF3->F3_SERIE   > mv_par06) .Or.;
+		   (SF3->F3_ENTRADA < mv_par07  .Or. SF3->F3_ENTRADA > mv_par08)		   
+		   
+			SF3->(dbSkip())
+	        Loop
+	    EndIf
+	    
+	    If mv_par09 != 4  //Tipo de Documento 4=Todos
+	       cTipoFiltro := IIf(mv_par09==2,"NCC",IIf(mv_par09==3,"NDC","NF"))	    
+	       lFiltro     := AllTrim(SF3->F3_ESPECIE) == cTipoFiltro 
+	       If !lFiltro  //Se nao satisfaz o filtro...
+			  SF3->(dbSkip())
+	          Loop	          
+	       EndIf
+	    EndIf
+	    
+	    //Filtrar movimentos de Compras
+	    If SF3->F3_TIPOMOV == "C"
+		   SF3->(dbSkip())
+	       Loop   
+	    EndIf
+
+	    //Filtrar registros de NFs manuais
+	    If SF3->F3_MANUAL == "S"
+		   SF3->(dbSkip())
+	       Loop   
+	    EndIf
+	    
+	    cArq := "SF3"					
+	    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	    //³ Grava os registros do Livro Fiscal na area de trabalho              ³
+	    //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ    	    
+		Mtr805GrvTRB(cArq,@aSelecDocs)
+		
+		SF3->(dbSkip())
+    End
+#ELSE
+
+    Mtr805CriaTRB()
+        
+    cQuery := " SELECT F3_FILIAL, F3_ENTRADA, F3_ESPECIE, F3_VALCONT, F3_NFISCAL, F3_SERIE, "
+    cQuery += " F3_CLIEFOR, F3_LOJA, F3_DTCANC, F3_TIPO "    
+    cQuery += " FROM " +RetSQLName("SF3")+" SF3 "
+	cQuery += " WHERE SF3.F3_FILIAL BETWEEN '" + mv_par01 + "' AND '" + mv_par02 + "' AND "    
+    cQuery += " SF3.F3_ENTRADA BETWEEN '" + DTOS(mv_par07) + "' AND '" + DTOS(mv_par08) + "' AND "
+	cQuery += " SF3.F3_NFISCAL BETWEEN '" + mv_par03 + "' AND '" + mv_par04 + "' AND "    
+	cQuery += " SF3.F3_SERIE   BETWEEN '" + mv_par05 + "' AND '" + mv_par06 + "' AND "    
+	cQuery += " SF3.F3_TIPOMOV <> 'C' AND "    	   	
+	cQuery += " SF3.F3_MANUAL <> 'S' "    	   		
+	If mv_par09 == 1  //Tipo de documento - NF
+	   cQuery += " AND SF3.F3_ESPECIE = 'NF   ' "    
+	ElseIf mv_par09 == 2  //Tipo de documento - NCC
+	   cQuery += " AND SF3.F3_ESPECIE = 'NCC  ' "    	   	   
+	ElseIf mv_par09 == 3  //Tipo de documento - NDC
+	   cQuery += " AND SF3.F3_ESPECIE = 'NDC  ' "    	   
+	EndIf				
+    cQuery += " ORDER BY F3_ENTRADA, F3_FILIAL"
+	
+	cQuery := ChangeQuery(cQuery)
+
+	dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery), 'TMP', .T., .F.)
+	
+	TCSetField( "TMP", "F3_ENTRADA" , "D", 8, 0 )
+	TCSetField( "TMP", "F3_VALCONT" , "N", 14, 2 )
+	
+	dbSelectArea("TMP")
+	
+	SetRegua(40)
+	
+	cArq := "TMP"
+	While (cArq)->(!EOF())
+	   Mtr805GrvTRB("TMP",@aSelecDocs)			
+	   
+	   (cArq)->(DbSkip())
+	End   
+	
+#ENDIF  
+
+dbSelectArea("TRB")
+DbGoTop()
+
+If Eof()
+    Aviso(STR0033,STR0034,{STR0035})  //"Atencao"###"Nao foram encontrados registros com os dados selecionados."###"Ok"      
+	dbSelectArea("TRB")
+	dbCloseArea()
+	FErase( cArqTmp + OrdBagExt() )
+	FErase( cArqTmp + GetDBExtension() )
+	#IFNDEF TOP
+		dbSelectArea("SF3")
+		RetIndex("SF3")
+		Set Filter To
+		FErase(cArquivo+OrdBagExt())
+	#ELSE
+		dbSelectArea("TMP")
+		dbCloseArea()
+	#ENDIF
+	
+	RestArea(aArea)
+	
+	Return NIL
+EndIf
+
+While !Eof()
+    
+	IncRegua()
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Verifica o cancelamento pelo usuario...                             ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If lAbortPrint
+		@nLin,00 PSAY STR0007 //"*** CANCELADO PELO OPERADOR ***"
+		Exit
+	Endif
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Impressao do cabecalho do relatorio. . .                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If nLin > 55 // Salto de Página. Neste caso o formulario tem 55 linhas...
+		Cabec(Titulo,"",Cabec2,NomeProg,Tamanho,nTipo)
+		nLin := 6
+	Endif
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Quebra por Filial ou Data de Emissao. ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If ( TRB->FILIAL <> cFil .Or. TRB->ENTRADA <> dEmissao )
+		If (!Empty(cFil), nLin+=2 ,)
+		If TRB->FILIAL <> cFil		
+		   cFil := TRB->FILIAL		
+		   @nLin,000 PSAY STR0020+" - "+cFil+" "+ Posicione("SM0",1,cEmpAnt+cFil,"M0_NOME")
+		   nLin += 2				   
+		   @nLin,000 PSAY cabec1
+		   nLin++
+	  	   @nLin,000 PSAY cLinha		   		   
+		   nLin++				   
+		EndIf   
+    Endif
+
+	dEmissao  := TRB->ENTRADA
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Com base na especie, retorna a descricao do documento               ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ    	
+	cTipoDoc  := Mtr805TpDoc(AllTrim(TRB->ESPECIE))
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Impressao dos dados do relatorio.³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ	
+	@nLin,000 PSAY cTipoDoc
+	@nLin,016 PSAY TRB->NFISCAL       PICTURE PesqPict("SF2","F2_DOC")
+	@nLin,029 PSAY TRB->SERIE
+	@nLin,031 PSAY Transform(TRB->VALOR, PesqPict("SF2","F2_VALBRUT"))
+	@nLin,049 PSAY TRB->ENTRADA
+	@nLin,062 PSAY TRB->ESTADO
+	
+	nLin ++ // Avanca a linha de impressao
+	
+	TRB->( dbSkip() ) // Avanca o ponteiro do registro no arquivo
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Total por Filial.			    ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If ( TRB->FILIAL <> cFil )
+		nLin ++
+		If nLin > 55
+			Cabec(Titulo,"",Cabec2,NomeProg,Tamanho,nTipo)
+			nLin := 6
+		Endif
+	Endif
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Total por Data de Emissao.		³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If ( TRB->ENTRADA <> dEmissao )
+		nLin ++
+		If nLin > 55
+			Cabec(Titulo,"",Cabec2,NomeProg,Tamanho,nTipo)
+			nLin := 6
+		Endif
+	Endif
+EndDo
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Impressao do cabecalho do relatorio. . .                            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If nLin > 55 // Salto de Página. Neste caso o formulario tem 55 linhas...
+    Roda(0,"",Tamanho)
+	Cabec(Titulo,"",Cabec2,NomeProg,Tamanho,nTipo)
+	nLin := 6
+Endif
+
+Roda(0,"",Tamanho)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Finaliza a execucao do relatorio...                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+SET DEVICE TO SCREEN
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Se impressao em disco, chama o gerenciador de impressao...          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If aReturn[5]==1
+	dbCommitAll()
+	SET PRINTER TO
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Apos a geracao do relatorio fecha a area de trabalho³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("TRB")
+dbCloseArea()	
+FErase( cArqTmp + OrdBagExt() )
+FErase( cArqTmp + GetDBExtension() )	
+#IFNDEF TOP	
+	dbSelectArea("SF3")
+	RetIndex("SF3")
+	Set Filter To
+	FErase(cArquivo+OrdBagExt())
+#ELSE
+   dbSelectArea("TMP")
+   dbCloseArea()	
+#ENDIF
+
+RestArea(aArea)
+
+Return 
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³AjustaSX1 ºAutor  ³Fernando Machima    º Data ³  13/04/2004 º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Cria as perguntas no SX1                                   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ MATR805                                                    º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function AjustaSX1()
+
+Local aHelpPor	:= {}
+Local aHelpEng	:= {}
+Local aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe a filial inicial   " )
+Aadd( aHelpEng, "Enter the initial branch   " )
+Aadd( aHelpSpa, "Indique la sucursal inicial" )
+
+PutSx1( cPerg, "01","Filial De          ?","De Sucursal        ?","From Branch        ?","mv_ch1","C",02,0,0,"G","","","","",; 
+"mv_par01","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+ 
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe a filial final    " )
+Aadd( aHelpEng, "Enter the final branch    " )
+Aadd( aHelpSpa, "Indique la sucursal final " )
+
+PutSx1( cPerg, "02","Filial Ate         ?","A Sucursal         ?","To Branch          ?","mv_ch2","C",02,0,0,"G","","","","",; 
+"mv_par02","","","","ZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe o numero do documento    " )
+Aadd( aHelpPor, "inicial                          " )
+Aadd( aHelpEng, "Enter the initial document number" )
+Aadd( aHelpSpa, "Indique el numero del documento  " )
+Aadd( aHelpSpa, "inicial                          " )
+
+PutSx1( cPerg, "03","Numero Doc. de     ?","De Numero Doc.     ?","From Document Numb.?","mv_ch3","C",TamSX3("F2_DOC")[1],0,0,"G","","","","",; 
+"mv_par03","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe o numero do documento  " )
+Aadd( aHelpPor, "final                          " )
+Aadd( aHelpEng, "Enter the final document number" )
+Aadd( aHelpSpa, "Indique el numero del documento" )
+Aadd( aHelpSpa, "final                          " )
+
+PutSx1( cPerg, "04","Numero Doc. ate    ?","A Numero Documento ?","To Document Number ?","mv_ch4","C",TamSX3("F2_DOC")[1],0,0,"G","","","","",; 
+"mv_par04","","","","ZZZZZZZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe a Serie inicial"  )
+Aadd( aHelpEng, "Enter the initial series" )
+Aadd( aHelpSpa, "Indique la Serie inicial" )
+
+PutSx1(cPerg, "05","Serie De           ?","¿De Serie          ?","From series?        ","mv_ch5","C",3,0,0,"G","","","","",;
+"mv_par05","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe a Serie final"  )
+Aadd( aHelpEng, "Enter the final series" )
+Aadd( aHelpSpa, "Indique la Serie final" )
+
+PutSx1(cPerg, "06","Serie Ate          ?","¿A Serie           ?" ,"To series?          ","mv_ch6","C",3,0,0,"G","","","","",;
+"mv_par06","","","","ZZZ","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe a data de emissao   " )
+Aadd( aHelpPor, "inicial                     " )
+Aadd( aHelpEng, "Enter the initial issue date" )
+Aadd( aHelpSpa, "Indique la fecha de emision " )
+Aadd( aHelpSpa, "inicial                     " )
+
+PutSx1( cPerg, "07","Data Emissao De    ?","De Fecha de Emision?","From Issue Date    ?","mv_ch7","D",8,0,0,"G","","","","",; 
+"mv_par07","","","","01/01/2004","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe a data de emissao  " )
+Aadd( aHelpPor, "final                      " )
+Aadd( aHelpEng, "Enter the final issue date " )
+Aadd( aHelpSpa, "Indique la fecha de emision" )
+Aadd( aHelpSpa, "final                      " )
+
+PutSx1( cPerg, "08","Data Emissao Ate   ?","A Fecha de Emision ?","To Issue Date      ?","mv_ch8","D",8,0,0,"G","","","","",; 
+"mv_par08","","","","31/12/2004","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe o Tipo de Documento"  )
+Aadd( aHelpEng, "Enter the document type    "  )
+Aadd( aHelpSpa, "Indique el Tipo de Documento" )
+
+PutSx1(cPerg, "09","Tipo de Documento  ?","¿Tipo de Documento?","Document type?      ","mv_ch9","C",1,0,1,"C","","","","",;
+"mv_par09","Nota Fiscal","Factura","Invoice","","Nota de Credito","Nota de Credito","Credit Note","Nota de Debito","Nota de Debito","Debit Note","Todos","Todos","All","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+Aadd( aHelpPor, "Informe o estado do Documento  " )
+Aadd( aHelpEng, "Enter the document status      " )
+Aadd( aHelpSpa, "Indique el Estado del Documento" )
+
+PutSx1(cPerg, "10","Estado do Documento?","¿Estado del Docum.?","Document status?    ","mv_cha","C",1,0,1,"C","","","","",;
+"mv_par10","Emitido","Emitido","Issued","","Cancelado","Anulado","Cancelled","Devolvido","Devuelto","Returned","Todos","Todos","All","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+Return(Nil)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºFun‡„o    ³Mtr805TpDoº Autor ³ Fernando Machima   º Data ³  13/04/04   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescri‡„o ³ Retornar a descricao do tipo do documento(Nota Fiscal, Notaº±±
+±±º          ³ de Credito/Debito)                                         º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ MATR805                                                    º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function Mtr805TpDoc(cEspecie)
+
+Local cTipo  := ""
+
+If cEspecie == "NCC"
+   cTipo  := STR0024  //"Nota de Credito"
+ElseIf cEspecie == "NDC"
+   cTipo  := STR0025  //"Nota de Debito"
+ElseIf cEspecie == "NF"
+   cTipo  := STR0026  //"Nota Fiscal"   
+EndIf   
+
+Return (cTipo)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºFun‡„o    ³Mtr805Criaº Autor ³ Fernando Machima   º Data ³  13/04/04   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescri‡„o ³Criar a area de trabalho                                    º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ MATR805                                                    º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function Mtr805CriaTRB()
+
+Local cChave             
+Local aCampos  := {}
+Local nTamDoc  := TamSX3("F3_NFISCAL")[1]
+
+aCampos :={	{ "FILIAL"		, "C", 02          , 0 },;  		// Filial
+			{ "ESPECIE"		, "C", 15          , 0 },;  		// Descricao do tipo de documento
+			{ "NFISCAL"		, "C", nTamDoc     , 0 },;  		// Numero do documento
+			{ "SERIE"		, "C", 03          , 0 },;  		// Serie do documento
+			{ "VALOR"       , "N", 17		   , 2 },;			// Valor do documento
+			{ "ENTRADA"		, "D", 10		   , 0 },;          // Data de emissao
+			{ "ESTADO"		, "C", 45		   , 0 }}           // Estado do documento
+
+cArqTmp := CriaTrab(aCampos, .T.)
+
+dbUseArea( .T.,, cArqTmp, "TRB", .F., .F. )
+
+cChave   := "DTOS(ENTRADA)+FILIAL"
+IndRegua("TRB",cArqTmp,cChave,,,STR0029)  //"Selecionando Registros..."
+dbSelectArea("TRB")
+#IFNDEF TOP
+   dbSetIndex(cArqTmp+OrdBagExt())
+#ENDIF   
+dbSetOrder(1)
+
+Return .T.
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºFun‡„o    ³Mtr805GrvTº Autor ³ Fernando Machima   º Data ³  13/04/04   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescri‡„o ³Gravar na area de trabalho                                  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ MATR805                                                    º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function Mtr805GrvTRB(cArq,aSelecDocs)
+
+Local cEstado     := ""
+Local cListDocs   := ""
+Local cTipoFiltro := ""
+Local nTotItDev   := 0
+Local nTotItem    := 0
+Local nX              
+Local nPosDoc     := 0
+Local aDadosDoc   := {}
+Local lFiltro     := .F.
+
+If !Empty((cArq)->F3_DTCANC)  //Anulado
+   Aadd(aDadosDoc,{(cArq)->F3_ESPECIE,(cArq)->F3_NFISCAL,(cArq)->F3_SERIE,(cArq)->F3_VALCONT,(cArq)->F3_ENTRADA,"A"})
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica se o status do documento eh Devolvido ou Emitido           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+ElseIf (cArq)->F3_TIPO != "D"   //Normal e Complemento(NDC)
+   //Verifica se o documento jah foi gravado na area de trabalho
+   nPosDoc  := Ascan(aSelecDocs,{|x| x[1]==(cArq)->F3_ESPECIE .And. x[2]==(cArq)->F3_NFISCAL .And.;
+                x[3]==(cArq)->F3_SERIE})
+   If nPosDoc  == 0
+      DbSelectArea("SD2")
+      DbSetOrder(3)
+      If dbSeek(xFilial("SD2")+(cArq)->F3_NFISCAL+(cArq)->F3_SERIE+(cArq)->F3_CLIEFOR+(cArq)->F3_LOJA)
+         While !Eof() .And. xFilial("SD2") == SD2->D2_FILIAL .And. (cArq)->F3_NFISCAL + ;
+	        (cArq)->F3_SERIE == SD2->D2_DOC + SD2->D2_SERIE .And. (cArq)->F3_CLIEFOR + (cArq)->F3_LOJA == ;
+		    SD2->D2_CLIENTE + SD2->D2_LOJA
+					 
+		    If AllTrim((cArq)->F3_ESPECIE) != AllTrim(SD2->D2_ESPECIE)
+		       DbSkip()
+			   Loop
+            EndIf
+			
+		    If SD2->D2_QTDEDEV > 0 .And. SD2->D2_VALDEV > 0  //Devolvido
+			   nTotItDev   := SD2->D2_VALDEV
+               nPosDoc     := Ascan(aDadosDoc,{|x| x[1]==(cArq)->F3_ESPECIE .And. x[2]==(cArq)->F3_NFISCAL .And.;
+                              x[3]==(cArq)->F3_SERIE .And. x[6] == "D"})
+			   If nPosDoc == 0
+			      Aadd(aDadosDoc,{(cArq)->F3_ESPECIE,(cArq)->F3_NFISCAL,(cArq)->F3_SERIE,nTotItDev,(cArq)->F3_ENTRADA,"D"})
+			   Else 
+			      aDadosDoc[nPosDoc][4] += nTotItDev
+			   EndIf   
+			   //Devolucao parcial do item
+			   If SD2->D2_TOTAL - SD2->D2_VALDEV > 0
+		          nTotItem    := SD2->D2_TOTAL - SD2->D2_VALDEV
+                  nPosDoc     := Ascan(aDadosDoc,{|x| x[1]==(cArq)->F3_ESPECIE .And. x[2]==(cArq)->F3_NFISCAL .And.;
+                              x[3]==(cArq)->F3_SERIE .And. x[6] == "E"})
+			      If nPosDoc == 0		       
+			         Aadd(aDadosDoc,{(cArq)->F3_ESPECIE,(cArq)->F3_NFISCAL,(cArq)->F3_SERIE,nTotItem,(cArq)->F3_ENTRADA,"E"})
+			      Else 
+			         //Se o documento jah estah no array, somente somar o total do item
+			         aDadosDoc[nPosDoc][4] += nTotItem
+			      EndIf   			      			   			            
+			   EndIf
+            Else  //Emitido
+		       nTotItem    := SD2->D2_TOTAL
+               nPosDoc     := Ascan(aDadosDoc,{|x| x[1]==(cArq)->F3_ESPECIE .And. x[2]==(cArq)->F3_NFISCAL .And.;
+                              x[3]==(cArq)->F3_SERIE .And. x[6] == "E"})
+			   If nPosDoc == 0		       
+			      Aadd(aDadosDoc,{(cArq)->F3_ESPECIE,(cArq)->F3_NFISCAL,(cArq)->F3_SERIE,nTotItem,(cArq)->F3_ENTRADA,"E"})
+			   Else 
+			      //Se o documento jah estah no array, somente somar o total do item
+			      aDadosDoc[nPosDoc][4] += nTotItem
+			   EndIf   			      
+            EndIf   
+		 
+		    DbSkip()
+         End
+         Aadd(aSelecDocs,{(cArq)->F3_ESPECIE,(cArq)->F3_NFISCAL,(cArq)->F3_SERIE})
+      EndIf   
+   EndIf
+Else  //Nota de Credito
+   nPosDoc  := Ascan(aSelecDocs,{|x| x[1]==(cArq)->F3_ESPECIE .And. x[2]==(cArq)->F3_NFISCAL .And.;
+                x[3]==(cArq)->F3_SERIE})
+   If nPosDoc  == 0
+      DbSelectArea("SD1")
+      DbSetOrder(1)
+      cListDocs  :=  ""      
+      If dbSeek(xFilial("SD1")+(cArq)->F3_NFISCAL+(cArq)->F3_SERIE+(cArq)->F3_CLIEFOR+(cArq)->F3_LOJA)
+         While !Eof() .And. xFilial("SD1") == SD1->D1_FILIAL .And. (cArq)->F3_NFISCAL + ;
+	        (cArq)->F3_SERIE == SD1->D1_DOC + SD1->D1_SERIE .And. (cArq)->F3_CLIEFOR + (cArq)->F3_LOJA == ;
+		    SD1->D1_FORNECE + SD1->D1_LOJA
+					 
+		    If AllTrim((cArq)->F3_ESPECIE) != AllTrim(SD1->D1_ESPECIE)
+		       DbSkip()
+			   Loop
+            EndIf   
+            
+            //Armazena o numero dos documentos originais
+            If !Empty(SD1->D1_NFORI)
+               If At(SD1->D1_NFORI,cListDocs) == 0
+                  cListDocs  += SD1->D1_SERIORI+"-"+SD1->D1_NFORI+"|"     
+               EndIf   
+            EndIf
+            
+            nTotItDev   += SD1->D1_TOTAL
+            
+            DbSkip()            
+         End
+      EndIf   
+      Aadd(aDadosDoc,{(cArq)->F3_ESPECIE,(cArq)->F3_NFISCAL,(cArq)->F3_SERIE,nTotItDev,(cArq)->F3_ENTRADA,"N"})      
+      Aadd(aSelecDocs,{(cArq)->F3_ESPECIE,(cArq)->F3_NFISCAL,(cArq)->F3_SERIE})   
+   EndIf   
+EndIf
+
+dbSelectArea("TRB")
+dbSetOrder(1)	
+For nX := 1 to Len(aDadosDoc)
+
+    If mv_par10 != 4  //Tipo de documento 4=Todos
+	   cTipoFiltro := IIf(mv_par10==2,"A",IIf(mv_par10==3,"DN","E"))	    
+	   lFiltro     := aDadosDoc[nX][6] $ cTipoFiltro 
+	   If !lFiltro  //Se nao satisfaz o filtro...
+	      Loop	          
+	   EndIf
+    EndIf
+    
+    If aDadosDoc[nX][6] == "A"
+       cEstado   := STR0030  //"Anulado"      
+    ElseIf aDadosDoc[nX][6] == "D"
+       cEstado   := STR0031  //"Devolvido"      
+    ElseIf aDadosDoc[nX][6] == "E"
+       cEstado  := STR0027  //"Emitido"
+    ElseIf aDadosDoc[nX][6] == "N"  //NCC gerada pela devolucao
+       If !Empty(cListDocs)
+          cListDocs  := Substr(cListDocs,1,len(cListDocs)-1)
+       EndIf
+       cEstado  := STR0032+cListDocs       //"Dev. doc(s) "      
+    EndIf   
+
+	RecLock("TRB",.T.)
+	Replace FILIAL		With xFilial("SF2")
+	Replace ESPECIE		With aDadosDoc[nX][1]
+	Replace NFISCAL     With aDadosDoc[nX][2]
+	Replace SERIE   	With aDadosDoc[nX][3]
+	Replace VALOR       With aDadosDoc[nX][4]
+	Replace ENTRADA     With aDadosDoc[nX][5]
+	Replace ESTADO		With cEstado
+	MsUnlock()
+Next nX
+
+Return .T.

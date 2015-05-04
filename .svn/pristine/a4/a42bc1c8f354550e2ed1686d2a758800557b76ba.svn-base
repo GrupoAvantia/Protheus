@@ -1,0 +1,480 @@
+#Include 'Protheus.ch'
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ PROGRAMA   ณ Recibo de Vale-Transporte  บ AUTOR ณ Carlos Beltrao    บ DATA ณ 05/02/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Programa tem o objetivo de gerar um recibo para o funcionario com o valor  บฑฑ
+ฑฑบ            ณ de compra do vale-transporte.                                              บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ ReciboVT()                                                                 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Pessoal                                                          บฑฑ
+ฑฑฬออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ                      ATUALIZACOES SOFRIDAS DESDE A CONTRUCAO INICIAL                    บฑฑ
+ฑฑวฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤถฑฑ
+ฑฑบ    PROGRAMADOR     ณ    DATA    ณ                  MOTIVO DA ALTERACAO                  บฑฑ
+ฑฑวฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤถฑฑ
+ฑฑบ                    ณ            ณ                                                       บฑฑ 
+ฑฑบ                    ณ            ณ                                                       บฑฑ
+ฑฑศออออออออออออออออออออฯออออออออออออฯอออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+User Function ReciboVT()
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Declaracao das variaveis.                                        ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	Local lOk := .F.
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Ajustar perguntas do SX1.                                        ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	ValidarPergutas("RECIBOVT")
+	Pergunte("RECIBOVT", .F.)
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Tela de configuracao do Relatorio.                               ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	DEFINE MSDIALOG oDlg FROM  96,9 TO 310,592 TITLE OemToAnsi("Recibo de Vale-Transporte") PIXEL
+	@ 18, 6 TO 66, 287 LABEL "" OF oDlg  PIXEL
+	@ 29, 15 SAY OemToAnsi("Este programa irแ gerar um recibo de Vale-Transporte") SIZE 268, 8 OF oDlg PIXEL
+	@ 38, 15 SAY OemToAnsi("com o valor de compra para os funcionแrios que tiverem") SIZE 268, 8 OF oDlg PIXEL
+	@ 48, 15 SAY OemToAnsi("o perfil pre-selecionados pelo usuแrio.") SIZE 268, 8 OF oDlg PIXEL
+	DEFINE SBUTTON FROM 80, 190 TYPE 5 ACTION Pergunte("RECIBOVT",.T.) ENABLE OF oDlg
+	DEFINE SBUTTON FROM 80, 223 TYPE 1 ACTION (oDlg:End(), lOk := .T.) ENABLE OF oDlg
+	DEFINE SBUTTON FROM 80, 255 TYPE 2 ACTION oDlg:End() ENABLE OF oDlg
+	ACTIVATE MSDIALOG oDlg CENTER
+
+	If(lOk)
+		Controller()
+	EndIf
+	
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Controlador do Relatorio.  บ AUTOR ณ Carlos Beltrao    บ DATA ณ 05/02/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Funcao tem o objetivo de controlar as reguas e enviar para impressao.      บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ Controller()                                                               บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Pessoal                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function Controller()
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Declaracao das variaveis.                                        ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	Local lEnd			:= .F.
+	Local aRelFunc 	:= {}
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Variavel do Objeto TMSPrinter.                                   ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	Local oPrint
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Inicializa Objeto TMSPrinter.                                    ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	oPrint := TMSPrinter():New(OemToAnsi("Recibo Vale-Transporte"))
+	oPrint:SetPortrait()	//-- Retrato //SetLandscape() //paisagem
+	oPrint:Setup() 		//-- Configurar Impressao
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Envia o Array para ser carregado com os devidos funcionarios.    ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	Processa({|lEnd| CarregarFuncionarios(@lEnd, aRelFunc)}, "Aguarde...", "Carregando os Funcionแrios...", .T.)
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Inicia a impressao dos recibos.                                  ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	Processa({|lEnd| Imprimir(@lEnd, aRelFunc, oPrint)}, "Aguarde...", "Imprimindo o Relat๓rio...", .T.)
+	
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Controlador do Relatorio   บ AUTOR ณ Carlos Beltrao    บ DATA ณ 05/02/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Funcao tem o objetivo de controlar as reguas e enviar para impressao.      บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ CarregarFuncionarios(lEnd, aRelFunc)                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Logic, Array                                                               บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Pessoal                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function CarregarFuncionarios(lEnd, aRelFunc)
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Declaracao das variaveis.                                        ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	Local cQuery := ""
+	Local cAliasTop := "XMA"
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Query do Contrato.                                               ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	/*
+		mv_par01 - Data de Referencia
+		mv_par02 - Da Filial
+		mv_par03 - Ate a Filial
+		mv_par04 - Do C. Custo 
+		mv_par05 - Ate o C. Custo
+		mv_par06 - De Matricula 
+		mv_par07 - Ate Matricula	
+		mv_par08 - De Nome
+		mv_par09 - Ate Nome 
+		mv_par10 - Situacoes
+		mv_par11 - De Tipo de Vale-Transporte
+		mv_par12 - Ate Tipo de Vale-Transporte
+	*/
+	cQuery := "SELECT RA_FILIAL 'FILIAL', RA_CC 'CC', CTT_DESC01 'DESC', RA_MAT 'MAT', RA_NOME 'NOME', RA_CIC 'CPF', SUM(RG2_VALCAL) 'VALOR' "
+	cQuery += "FROM " + RetSqlName("SRA") + " SRA "  
+	cQuery += "INNER JOIN " + RetSqlName("RG2") + " RG2 "
+	cQuery += "ON RA_FILIAL = RG2_FILIAL "
+	cQuery += "AND RA_MAT = RG2_MAT "
+	cQuery += "INNER JOIN " + RetSqlName("CTT") + " CTT "
+	cQuery += "ON CTT_CUSTO = RA_CC "
+	cQuery += "WHERE SRA.D_E_L_E_T_ <> '*' AND "
+	cQuery += "RG2.D_E_L_E_T_ <> '*' AND "
+	cQuery += "CTT.D_E_L_E_T_ <> '*' AND "
+	cQuery += "RG2_PERIOD = '" + AnoMes(mv_par01) + "' AND "
+	cQuery += "RA_FILIAL >= '" + mv_par02 + "' AND "
+	cQuery += "RA_FILIAL <= '" + mv_par03 + "' AND "
+	cQuery += "RA_CC >= '" + mv_par04 + "' AND "
+	cQuery += "RA_CC <= '" + mv_par05 + "' AND "
+	cQuery += "RA_MAT >= '" + mv_par06 + "' AND "
+	cQuery += "RA_MAT <= '" + mv_par07 + "' AND "
+	cQuery += "RA_NOME >= '" + mv_par08 + "' AND "
+	cQuery += "RA_NOME <= '" + mv_par09 + "' AND "
+	cQuery += "RA_SITFOLH LIKE '[" + mv_par10 + "]' AND "
+	cQuery += "RG2_CODIGO >= '" + mv_par11 + "' AND "
+	cQuery += "RG2_CODIGO <= '" + mv_par12 + "' AND "
+	cQuery += "RG2_VALCAL <> 0 AND "
+	cQuery += "RG2_TPVALE = 0 "
+	cQuery += "GROUP BY RA_FILIAL, RA_CC, CTT_DESC01, RA_MAT, RA_NOME, RA_CIC "
+	cQuery += "ORDER BY RA_NOME "
+	
+	cQuery := ChangeQuery(cQuery)
+	
+	MsAguarde({|lEnd| DbUseArea(.T., "TOPCONN", TCGenQry( , , cQuery), cAliasTop, .F., .T.)}, OemToAnsi("Processando..."))
+	
+	DbSelectArea(cAliasTop)
+	ProcRegua(RecCount())
+	(cAliasTop)->(dbGoTop())
+	
+	Do While (cAliasTop)->(!Eof())
+		IncProc()
+		IF(lEnd)
+			Alert("*** Cancelado pelo Usuแrio! ***")
+			Exit
+		EndIf
+		/*
+			aRelFunc[x][1] = Filial
+			aRelFunc[x][2] = Centro de Custo
+			aRelFunc[x][3] = Descricao
+			aRelFunc[x][4] = Matricula
+			aRelFunc[x][5] = Nome
+			aRelFunc[x][6] = CPF
+			aRelFunc[x][7] = Valor
+		*/
+		AADD(aRelFunc, {(cAliasTop)->FILIAL, (cAliasTop)->CC, (cAliasTop)->DESC, (cAliasTop)->MAT, (cAliasTop)->NOME, (cAliasTop)->CPF, (cAliasTop)->VALOR})
+		(cAliasTop)->(dbSkip())
+	EndDo
+
+	DbSelectArea(cAliasTop)
+	(cAliasTop)->(DbCloseArea())
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Imprime o Relatorio        บ AUTOR ณ Carlos Beltrao    บ DATA ณ 05/02/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Funcao que imprime os recibos dos funcionarios.                            บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ Imprimir(lEnd, aRelFunc)                                                   บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ Logic, Array                                                               บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Pessoal                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function Imprimir(lEnd, aRelFunc, oPrint)
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Variaveis Gerais                                                 ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	Local cFileLogo 	:= "lgrlPMS.BMP"
+	Local cTexto		:= ""
+	Local dDataPG		:= mv_par01 //MonthSum(mv_par01,1)
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Inicializa Fontes                                                ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	Local oFont06		:= TFont():New("Arial", 06, 06, , .F., , , , .T., .F.)
+	Local oFont08		:= TFont():New("Arial", 08, 08, , .F., , , , .T., .F.)
+	Local oFont08n	:= TFont():New("Courier New", 08, 08, , .T., , , , .T., .F.)
+	Local oFont12n	:= TFont():New("Courier New", 12, 12, , .T., , , , .T., .F.)
+	Local oFont12		:= TFont():New("Courier New", 12, 12, , .F., , , , .T., .F.)
+	Local oFont18n	:= TFont():New("Courier New", 18, 18, , .T., , , , .T., .F.)
+	
+	ProcRegua(Len(aRelFunc))
+	For c := 1 To Len(aRelFunc)
+		IncProc()
+		If(lEnd)
+			//OemToAnsi("CANCELADO PELO OPERADOR")
+			oPrint:Say(3200, 1200, "*** Cancelado pelo Usuแrio! ***", oFont12)
+			Exit
+		EndIf
+		oPrint:StartPage()
+		
+		oPrint:SayBitmap(200, 200, cFileLogo, 300, 300) //-- Logotipo
+		
+		oPrint:Say(700, 1250, "RECIBO", oFont18n)
+		
+		cTexto := "Recebi da AVANTIA TECNOLOGIA E ENGENHARIA S/A, a importโncia de R$ "
+		cTexto += AllTrim(Transform(aRelFunc[c][7],"@E 999,999.99"))
+		cTexto += " (" + AllTrim(Extenso(aRelFunc[c][7])) + ") "
+		cTexto += "para custear despesas com transporte que atendam ao meu deslocamento de casa para "
+		cTexto += "o trabalho e deste retornar เ minha resid๊ncia, pelo perํodo de "
+		cTexto += Dtoc(FirstDate(mv_par01)) + " เ " + Dtoc(LastDate(mv_par01)) + "."
+		
+		oPrint:Say(900, 300, SubString(cTexto, 1, 74), oFont12)
+		If(Len(cTexto) > 74)
+			oPrint:Say(950, 300, SubString(cTexto, 75, 74), oFont12)
+			If(Len(cTexto) > 148)
+				oPrint:Say(1000, 300, SubString(cTexto, 149, 74), oFont12)
+				If(Len(cTexto) > 222)
+					oPrint:Say(1050, 300, SubString(cTexto, 223, 74), oFont12)
+					If(Len(cTexto) > 296)
+						oPrint:Say(1100, 300, SubString(cTexto, 297, 74), oFont12)
+						If(Len(cTexto) > 370)
+							oPrint:Say(1150, 300, SubString(cTexto, 371, 74), oFont12)
+							If(Len(cTexto) > 444)
+								oPrint:Say(1200, 300, SubString(cTexto, 445, 74), oFont12)
+								If(Len(cTexto) > 518)
+									oPrint:Say(1200, 300, SubString(cTexto, 519, 74), oFont12)
+								EndIf
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+		
+		oPrint:Say(1400, 300, "Centro de Custo: " + aRelFunc[c][2] + " - " + SubString(aRelFunc[c][3],1,45), oFont12n) // Centro de Custo
+		
+		oPrint:Say(1900, 300, "Recife, 01 de " + MesExtenso(Month(dDataPG)) + " de " + cValToChar(Year(dDataPG)), oFont12)
+		
+		oPrint:Line(2200, 700, 2200, 1848)
+		oPrint:Say(2250, 1274, AllTrim(aRelFunc[c][5]), oFont12, , , , 2) // Nome
+		oPrint:Say(2300, 1274, "CPF: " + Transform(aRelFunc[c][6],"@R 999.999.999-99"), oFont12, , , , 2) // CPF
+		
+		oPrint:Say(2950, 800, "RECIFE | SEDE", oFont06, , CLR_GREEN, , , , CLR_GREEN)
+		oPrint:Say(2975, 800, "Av. Caxangแ, 104, Madalena", oFont06, , CLR_GREEN, , , , CLR_GREEN)
+		oPrint:Say(3000, 800, "50610-230, Recife – PE", oFont06, , CLR_GREEN, , , , CLR_GREEN)
+		oPrint:Say(3025, 800, "Tel: (81) 3797-9304  Fax: (81) 3797-9300", oFont06, , CLR_GREEN, , , , CLR_GREEN)
+		oPrint:Say(3050, 800, "CNPJ: 02.543.302/0001-31", oFont06, , CLR_GREEN, , , , CLR_GREEN)
+		
+		oPrint:Say(2950, 1450, "RECIFE | FILIAL", oFont06, , CLR_GREEN)
+		oPrint:Say(2975, 1450, "Rua Cais do Apolo, 222, Porto Digital", oFont06, , CLR_GREEN, , , , CLR_GREEN)
+		oPrint:Say(3000, 1450, "50030-905, Recife Antigo - Recife – PE", oFont06, , CLR_GREEN, , , , CLR_GREEN)
+		oPrint:Say(3025, 1450, "Tel: (81) 3797-9304  Fax: (81) 3797-9300", oFont06, , CLR_GREEN, , , , CLR_GREEN)
+		oPrint:Say(3050, 1450, "CNPJ: 02.543.302/0003-01", oFont06, , CLR_GREEN, , , , CLR_GREEN)
+		
+		oPrint:Say(3100, 1274, "www.grupoavantia.com.br", oFont08, , CLR_GREEN, , 2, , CLR_GREEN)
+		
+		oPrint:EndPage()
+	Next
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Visualiza antes de Imprimir.                                     ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	oPrint:Preview() 
+	
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออออัออออออออออออออออออออออออออออหอออออออัอออออออออออออออออออหออออออัออออออออออออปฑฑ
+ฑฑบ FUNCAO     ณ Validador das Perguntas    บ AUTOR ณ Carlos Beltrao    บ DATA ณ 05/02/2015 บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออสอออออออฯอออออออออออออออออออสออออออฯออออออออออออนฑฑ
+ฑฑบ DESCRICAO  ณ Cria as perguntas dos parametros.                                          บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ SINTAXE    ณ ValidarPergutas(cPerg)                                                     บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ PARAMETROS ณ String                                                                     บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ RETORNO    ณ Void                                                                       บฑฑ
+ฑฑฬออออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบ USO        ณ Gestao de Pessoal                                                          บฑฑ
+ฑฑศออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function ValidarPergutas(cPerg)
+
+	Local aAreaAnt := GetArea()
+	Local aHelpPor := {}
+	Local aHelpEng := {}
+	Local aHelpSpa := {}
+	
+	dbSelectArea("SX1")
+	dbSetOrder(1)
+	If !SX1->(dbSeek(cPerg)) 
+		
+		/*
+		mv_par01 - Data de Referencia
+		mv_par02 - Da Filial
+		mv_par03 - Ate a Filial
+		mv_par04 - Do C. Custo 
+		mv_par05 - Ate o C. Custo
+		mv_par06 - De Matricula 
+		mv_par07 - Ate Matricula	
+		mv_par08 - De Nome
+		mv_par09 - Ate Nome 
+		mv_par10 - Situacoes
+		mv_par11 - De Tipo de Vale-Transporte
+		mv_par12 - Ate Tipo de Vale-Transporte
+		*/
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR01                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"Data de Refer๊ncia."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "01", "Data de Refer๊ncia  ?", "", "", "mv_ch1", "D", 08, 0, 0, "G",          "",    "", "", "", "mv_par01", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR02                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"N๚mero inicial da filial."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "02", "Da Filial           ?", "", "", "mv_ch2", "C", 02, 0, 0, "G",          "", "XM0", "", "", "mv_par02", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR03                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"N๚mero final da filial."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "03", "Ate a Filial        ?", "", "", "mv_ch3", "C", 02, 0, 0, "G",  "naovazio", "XM0", "", "", "mv_par03", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR04                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"N๚mero inicial da centro de custo."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "04", "Do C. Custo         ?", "", "", "mv_ch4", "C", 09, 0, 0, "G",          "", "CTT", "", "", "mv_par04", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR05                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"N๚mero final da centro de custo."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "05", "Ate o C. Custo      ?", "", "", "mv_ch5", "C", 09, 0, 0, "G",  "naovazio", "CTT", "", "", "mv_par05", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR06                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"N๚mero inicial da matricula."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "06", "De Matricula        ?", "", "", "mv_ch6", "C", 06, 0, 0, "G",          "", "SRA", "", "", "mv_par06", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR07                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"N๚mero final da matricula."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "07", "Ate Matricula       ?", "", "", "mv_ch7", "C", 06, 0, 0, "G",  "naovazio", "SRA", "", "", "mv_par07", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR08                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"Letra/palavra inicial do nome."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "08", "De Nome             ?", "", "", "mv_ch8", "C", 30, 0, 0, "G",          "",    "", "", "", "mv_par08", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR09                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"Letra/palavra final do nome."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "09", "Ate Nome            ?", "", "", "mv_ch9", "C", 30, 0, 0, "G",  "naovazio",    "", "", "", "mv_par09", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR10                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"Situa็ใo atual do funcionแrio."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "10", "Situacoes           ?", "", "", "mv_chA", "C", 05, 0, 0, "G", "fSituacao",    "", "", "", "mv_par10", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR11                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"Tipo de Vale-Transporte Incial."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "11", "De Tipo V. Transp   ?", "", "", "mv_chB", "C", 02, 0, 0, "G",          "", "SRN", "", "", "mv_par11", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ                          MV_PAR12                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		aHelpPor := {"Tipo de Vale-Transporte Final."}
+		aHelpEng := {""}
+		aHelpSpa := {""}
+		PutSX1(cPerg, "12", "Ate Tipo V. Transp  ?", "", "", "mv_chC", "C", 02, 0, 0, "G",  "naovazio", "SRN", "", "", "mv_par12", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", aHelpPor, aHelpEng, aHelpSpa)
+		
+	EndIf	
+
+	RestArea(aAreaAnt)
+	
+Return	

@@ -1,0 +1,342 @@
+#INCLUDE "rwmake.ch"
+#include "topconn.ch"
+#include "Ap5Mail.ch"
+#include "tbiconn.ch"
+#Include "PROTHEUS.CH"
+           
+           
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//
+//    R  E  L  A  T  O  R  I  O
+//
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+User Function recpensao()   
+	
+	Local oReport
+	Local wArea	:= GetArea()
+	         
+	Private	oBrush		:= TBrush():New(,4)
+	Private	oPen		:= TPen():New(0,5,CLR_BLACK)
+	Private	cFileLogo	:= GetSrvProfString('Startpath','') + 'PRESERVE1' + '.BMP'
+	Private	oFont08t	:= TFont():New('Times New Roman',08,08,,.F.,,,,.T.,.F.)
+	
+	oReport := ReportDef()
+	oReport:PrintDialog()
+
+	RestArea(wArea)  
+	
+Return
+           
+
+Static Function ReportDef()
+
+Local oSection
+Local oBreak1
+Private oReport
+                        
+//##### TREPORT 	#####
+//TReport():New(p1,p2,p3,p4,p5)
+//
+wparam1 := "RECPENSAO"  // nome do relatório
+//wparam2 := "Titulos a Pagar Por Modalidade de Pagamento ( " + Capital(AllTrim(SM0->M0_CIDCOB))  +" ) "//titulo
+wparam2 := "      R E C I B O     P E N S A O     A L I M E N T Í C I A ."
+
+wparam3 := left(wparam1,5)+'2' //pergunta = NOME DO RELAROTIO + 'SEGUENCIA'
+setSX1(wparam3)
+
+wparam4 := {|oReport| reportPrint(oReport)}
+
+wparam5 := "Recibo para Pensionistas"  //descrição
+//######################
+                                                       
+
+//oReport := TReport():New(wparam1,OemToAnsi(wparam2),wparam3,wparam4,OemToAnsi(wparam5))
+oReport := TReport():New(wparam1,wparam2,wparam3,wparam4,OemToAnsi(wparam5))
+                         
+cformato:= 'retrato' //'paisagem'
+//u_setMSReport(@oReport) //,cformato) //seta as configurações do objeto
+              
+//##### TRSECTION ##########
+//TRSection():New(p1,p2,p3,p4,p5)
+//
+//yparam1 := oReport //> objeto TReport que a seção pertence
+yparam2 := "Recibo Pensionista"//> descrição
+// vetor com as tabelas utilizadas pela seção a primeira tabela será considerada como principal para a seção. 
+//As outras serão utilizadas como referência de quais tabelas o usuário poderá incluir os campos
+yparam3 := {"SRA","SRC" } 
+
+//yparam4 => carrega campos do SX3 como células
+//yparam5 => carrega ordem do SIX
+//#################################################
+
+
+oSection1 := TRSection():New(oReport,OemToAnsi(yparam2),yparam3)
+                       
+
+Return oReport
+                              
+
+Static Function reportPrint(oReport,p_cBordero)
+LOCAL cFiltro   := ""
+LOCAL cQuery    := ""   
+Local wAliasSec1  := getNextAlias()                               
+Local bPosition              
+Local oSection1 	:= oReport:Section(1) 
+
+
+//define as celulas
+//****************                                                                          
+cPictTit:= PesqPict("SE1","E1_VALOR")
+
+/*
+TRCell():New(oSection1,"F2_DOC"	  	,"SF2", "RPS"			,, TamSX3("F2_DOC")[1]+05   )     
+TRCell():New(oSection1,"F2_NFELETR" ,"SF2", "NFS-e"			,, TamSX3("F2_NFELETR")[1]+5 )     
+TRCell():New(oSection1,"A1_NOME" 	,"SA1", "Cliente"	 	,, 40 )     
+TRCell():New(oSection1,"C5_DATA1"	,"SC5", "Vencimento"	,, 	TamSX3("C5_DATA1")[1]+5 )
+//TRCell():New(oSection1,"CASSINATURA","", "Recebido"		,, 	space(20) )
+*/
+
+
+//****************
+
+//oSection1:Cell("E2_VALOR"):SetAlign("RIGHT")
+//oSection1:Cell("E2_VALOR"):SetHeaderAlign("RIGHT")           
+
+
+//TRFunction():New(oSection1:Cell("E2_VALOR")   ,,"SUM",,"Total",/*cPicture*/cPictTit,/*uFormula*/,/*secao*/.T.,/*report*/.F.,/*pagina*/.F.)
+//oSection1:SetTotalText("Total Geral-->")
+//oSection1:SetTotalInLine(.F.)                                     
+
+//setMSSection(oSection1,p_lTotalInLine,p_lHeaderBreak,p_lAutoSize,p_lHeaderSection)
+//u_setMSSection(@oSection1,nil,nil,.f.,nil)
+nlargura:= nil //3400
+//u_setMSPage(@oReport,nlargura)
+//u_setMSCabec(oReport) 
+//u_setMSFonte(@oReport,'Arial',12,.f.) 
+                 
+//complementa o titulo 
+//oReport:CTITLE+= "PROTOCOLO DE ENTREGA DE NOTAS - EM  - Nr.:  " + p_cBordero
+               
+//montagem do segundo titulo do relatorio     
+//oReport:cUserObs:= "Periodo: "+dtoc(mv_par01) +"  a  "+dtoc(mv_par02)
+
+#IFDEF TOP
+		                        
+		
+	pergunte(oReport:uparam,.f.)
+	
+	
+	If Empty(mv_par01) .or. Empty(mv_par04) 
+		alert('Erro nos parametros, revise-os !')
+	EndIf
+		
+	MakeSqlExpr(oReport:uparam)
+
+	cwhere:=""                                       
+    //cwhere+=" and rc_filial  = '"+xfilial('SRC')+"'" 
+    //cwhere+=" and rc_filial  = '"+xfilial('SRQ')+"'" 
+	cwhere+=" and RC_FILIAL  = RQ_FILIAL "
+	cwhere+=" and rc_mat = rq_mat "
+	cwhere+=" and rc_pd = rq_verbfol "
+	cwhere+=" and rc_data     = '"+dtos(mv_par01)+"'" 
+	cwhere+=" and rc_mat  between '"+mv_par02+"' and '"+mv_par03+"'"  
+   	cwhere:= "% "+cwhere+" %"
+
+	oReport:Section(1):BeginQuery()
+
+	If ! Empty(mv_par01)               
+
+		BeginSql alias wAliasSec1
+            
+			select * //rd_pd, rd_valor, rq_verbfol, rq_nome, *
+							
+			from %table:src% src ,%table:srq% srq 
+				where src.%notDel% and srq.%notDel% 
+				%Exp:cWhere%	
+
+      		order by rc_filial,  rc_mat , rc_pd
+		    
+		EndSql
+		
+	EndIf
+
+	oReport:Section(1):EndQuery()
+                            
+    If alltrim(substr(cusuario,7,15)) == 'Administrador'
+    	MemoWrite("\cprova\recpensao.SQL",oReport:Section(1):cQuery)
+    Endif	
+   
+    lTemDados:=Select(wAliasSec1) > 0
+    if lTemDados
+	   	 //TRPosition():New(oReport:Section(1),"SA2",1,{|| xFilial('SA2') + (oReport:Section(1):calias)->(e2_fornece+e2_loja) } )	
+	   	//TRPosition():New(oReport:Section(1),"SEA",1,{|| xFilial('SEA') + (wAliasSec1)->(EA_NUMBOR) } )	
+	   	//TRPosition():New(oReport:Section(1),"SEA",1,{|| xFilial('SEA') + (wAliasSec1)->(EA_NUMBOR) } )	
+		  //TRPosition():New(oReport:Section(1),"SE1",2,{|| xFilial('SE1') + (wAliasSec1)->(E5_CLIFOR+E5_LOJA+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO) } )
+		  //TRPosition():New(oReport:Section(1),"SE5",7,{|| xFilial('SE5') + (wAliasSec1)->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA) } )		
+		  //bPosition := {||  se5->(dbGoTo( (wAliasSec1)->recnum ) )  } // bloco de codigo para posicionamento ( independente da funcao TRReport )						
+    	//(wAliasSec1)->(dbGoTop())
+    	
+		processa({|| prnDados(oReport) }, "Imprimindo ..." )
+    	
+    endif
+
+#ELSE  
+/*
+se for dbf Disable 
+*/
+#ENDIF	
+
+return
+
+
+static function prnDados(oReport)
+
+	local wArea:=getArea()     
+	local nColIni 	:= 150 //usado para altear a coordenada da coluna onde será impressa a ceula	
+	local nLinPag 	:= 55
+	local oSection1 	:= oReport:Section(1)	
+	local nAlign 		:= 2
+	local nMoeda 		:= 1  
+	Local cNomeFun 	:= ""
+	Local cMatricula 	:= ""
+	Local cEmpresa	:= ""
+	Local cValor		:= ""
+	Local cPercen		:= ""
+	Local cTexto		:= ""
+	Local cBanco		:= ""
+	Local cAgencia	:= ""
+	Local cConta		:= ""
+	Local cData		:= ""
+	Local cLinha		:= ""
+	Local cNomeBen	:= ""
+	Local cCpfBen 	:= ""
+	Local oFont10		:= TFont():New("Courier",10,10,,.F.,,,,.T.,.F.)
+	Local oFont16		:= TFont():New("Courier",16,16,,.T.,,,,.T.,.F.)
+
+	oReport:SetMeter(RecCount())
+	oSection1:Init()
+	
+	cClilj:=''
+	llogo:=.f.             
+	
+	(oReport:Section(1):calias)->(dbgoTop())
+	
+	while !(oReport:Section(1):calias)->(eof())   
+			
+			If oReport:Cancel()
+				Exit
+			EndIf
+	                                 
+ 			//u_setMSCabec(oReport,lLogo) 
+
+			sra->(dbsetorder(1))	
+			sra->(dbseek((oReport:Section(1):calias)->rc_filial + (oReport:Section(1):calias)->rc_mat ))
+	
+	
+			//Carregando o texto a ser exibido
+			cExt 			:= ""
+			cExt 			:= Extenso( (oReport:Section(1):calias)->rc_valor ,.f.,nMoeda) 
+			cValor 		:= transform((oReport:Section(1):calias)->rc_valor ,"99,999.99")
+			cNomeFun 		:= alltrim(sra->ra_nome)
+			cMatricula 	:= sra->ra_mat  
+			cEmpresa 		:= alltrim(sm0->m0_nomecom) 
+			cPercen 		:= transform((oReport:Section(1):calias)->rq_percent  ,"99.99")+"%"
+			
+			cTexto := ""
+			cTexto += "Recebi da "+cEmpresa+", a importância de R$ "+cValor+" ("+cExt+" ), "
+			cTexto += "a título de pensão alimentícia, correspondente a "+cPercen+" mais 00 cota(s) do salario família, "
+			cTexto += "do funcionario "+cMatricula+" - "+cNomeFun+". Pelo qual dou plena quitação da quantia acima percebida."
+			
+			cBanco		:= "BANCO      : " + substr((oReport:Section(1):calias)->rq_bcdepbe,1,3)
+			cAgencia	:= "AGENCIA    : " + substr((oReport:Section(1):calias)->rq_bcdepbe,4,4)
+			cConta		:= "C.CORRENTE : " + (oReport:Section(1):calias)->rq_ctdepbe
+			
+			cData 		:= alltrim(SM0->M0_CIDCOB)+", "+StrZero(Day(mv_par04),2)+" de "+MesExtenso(Month(mv_par04))+" de "+Str(Year(mv_par04),4)
+			
+			cLinha 	:= "________________________________________"
+			cNomeBen 	:= "NOME : "+alltrim((oReport:Section(1):calias)->rq_nome)
+			cCpfBen 	:= "CPF  : "+transform( (oReport:Section(1):calias)->rq_cic ,"@R 999.999.999-99" )
+			
+			
+			//Exibindo texto no relatório
+			oReport:Say(300,1900,"R$ " + cValor,oFont16)
+			
+			oReport:Say(700,0175,SubStr(cTexto,001,115),oFont10)
+			oReport:Say(750,0175,SubStr(cTexto,116,115),oFont10)
+			oReport:Say(800,0175,SubStr(cTexto,231,115),oFont10)
+			oReport:Say(850,0175,SubStr(cTexto,346,115),oFont10)
+			
+			oReport:Say(1100,0175,cBanco,oFont10)
+			oReport:Say(1150,0175,cAgencia,oFont10)
+			oReport:Say(1200,0175,cConta,oFont10)
+			
+			oReport:Say(1450,0175,cData,oFont10)
+			
+			oReport:Say(1700,0175,cLinha,oFont10)
+			oReport:Say(1750,0175,cNomeBen,oFont10)
+			oReport:Say(1800,0175,cCpfBen,oFont10)
+			
+			
+			oReport:IncMeter()                  
+			(oReport:Section(1):calias)->(dbskip())
+	
+			oReport:EndPage()
+	
+	End
+
+	oSection1:Finish()                                              
+
+	restArea(wArea)
+	
+Return
+
+
+
+Static Function setSX1(cPerg)
+
+	Local _sAlias := Alias()
+	Local aRegs := {}
+	Local i,j
+	
+	dbSelectArea("SX1")
+	dbSetOrder(1)
+	
+	cperg:= PADR(cperg,10)
+	                                             
+	// Grupo/Ordem/Pergunta/Variavel/Tipo/Tamanho/Decimal/Presel/GSC/Valid/Var01/Def01/Cnt01/Var02/Def02/Cnt02/Var03/Def03/Cnt03/Var04/Def04/Cnt04/Var05/Def05/Cnt05
+	AADD(aRegs,{cPerg,"01","Data                ?","","","mv_ch1","D",08,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"02","Da Matricula        ?","","","mv_ch2","C",06,0,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"03","Ate Matricula       ?","","","mv_ch3","C",06,0,0,"G","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"04","Emissao             ?","","","mv_ch4","D",08,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	/*
+	AADD(aRegs,{cPerg,"04","Da Loja             ?","","","mv_ch4","C",02,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"05","Ate Loja            ?","","","mv_ch5","C",02,0,0,"G","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"06","Da Serie            ?","","","mv_ch6","C",03,0,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"07","Da Nota             ?","","","mv_ch7","C",09,0,0,"G","","mv_par07","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"08","Ate a Nota          ?","","","mv_ch8","C",09,0,0,"G","","mv_par08","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	*/
+
+	For i:=1 to Len(aRegs)
+	    If !dbSeek(cPerg+aRegs[i,2])
+	        RecLock("SX1",.T.)
+	        For j:=1 to FCount()
+	            If j <= Len(aRegs[i])
+	                FieldPut(j,aRegs[i,j]) 
+	                
+	                Do Case
+	                   Case aRegs[i,2]$'02/03' //CLIENTE
+	                        SX1->X1_F3 := 'SRA'
+	                EndCase 
+	                
+	            Endif
+	        Next
+	        MsUnlock()
+	    Endif
+	Next
+	
+	dbSelectArea(_sAlias)
+
+Return 

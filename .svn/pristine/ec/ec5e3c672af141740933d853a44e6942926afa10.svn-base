@@ -1,0 +1,1354 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\matr462.ch"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr462.prw"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "Protheus.Ch"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "Protheus.Ch"
+#line 3 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr462.prw"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MATR462()
+Local wnrel
+Local titulo	:=If( cPaisLoc $ "ANG|PTG", "Mapas De Artigos Controlados", "Mapas de Produtos Controlados" )
+Local cDesc1	:=If( cPaisLoc $ "ANG|PTG", "Emissão dos mapas civil de compra, venda e mapa do exército", "Emissão dos mapas civil de compra, venda e mapa do Exercito" )
+Local cDesc2	:=If( cPaisLoc $ "ANG|PTG", "De artigos controlados", "de produtos controlados" )
+Local cDesc3	:=""
+Local cString	:="SB1"
+Local cNomeProg	:="MATR462"
+Local Tamanho	:="G"
+Local cPerg		:="MTR462"
+Private aReturn	:={If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ),1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ),2,2,1,"",1}
+Private nLastKey:=0
+
+
+
+
+AjustaPerg(cPerg)
+
+
+
+
+wnrel:=SetPrint(cString,cNomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3, .F. ,, .T. ,Tamanho)
+
+If nLastKey==27
+	Return .T. 
+Endif
+SetDefault(aReturn,cString)
+If nLastKey==27
+	Return .T. 
+Endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pergunte(cPerg, .F. )
+
+If mv_par10 == 1 .Or.  mv_par11 == 1 .Or.  mv_par12 == 1
+	RptStatus({|lEnd| R462Imp(@lEnd,wnRel,cString,Tamanho)},titulo)
+Endif
+
+If aReturn[5]==1
+	Set( 24, "" )
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+MS_FLUSH()
+Return (NIL)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R462Imp(lEnd,wnRel,cString,Tamanho)
+Local aArqTemp	:={}
+Local aTam    	:={}
+Local cArqTemp1	:="",cIndTemp1:=""
+Local cArqTemp2	:="",cIndTemp2:="",cIndTemp3:=""
+Local cArqTemp3	:="",cIndTemp4:=""
+Local dDataIni	:=dDataBase
+Local dDataFim	:=dDataBase
+Local aMes		:={1,4,7,10}
+Local aMesOrd	:={If( cPaisLoc $ "ANG|PTG", "Primeiro", "PRIMEIRO" ),If( cPaisLoc $ "ANG|PTG", "Segundo", "SEGUNDO" ),If( cPaisLoc $ "ANG|PTG", "Terceiro", "TERCEIRO" ),If( cPaisLoc $ "ANG|PTG", "Quarto", "QUARTO" )}
+Local lFirst 	:= .T. 
+Local nLinMax	:=0
+Local aSaldo	:={}
+Local nSaldoIni	:=0
+Local nTamCPro	:=TamSX3("B1_COD")[1]
+Local nTamForn	:=TamSX3("D1_FORNECE")[1]
+
+
+dDataIni := CTOD("01/"+Str(aMes[mv_par09],2,0)+"/"+Str(Year(dDataBase),4,0),"ddmmyyyy")
+dDataFim := LastDay(CTOD("01/"+Str(aMes[mv_par09]+2,2,0)+"/"+Str(Year(dDataBase),4,0),"ddmmyyyy"))
+
+
+
+AADD(aArqTemp,{"PRODUTO"	,"C",nTamCPro,0})
+aTam:=TamSX3("B1_DESC")
+AADD(aArqTemp,{"DESCRIPRO"	,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("B2_QFIM")
+AADD(aArqTemp,{"SALDOANT"	,"N",16,aTam[2]})
+AADD(aArqTemp,{"COMPRAS"	,"N",16,aTam[2]})
+AADD(aArqTemp,{"VENDAS"  	,"N",16,aTam[2]})
+AADD(aArqTemp,{"CONSUMO" 	,"N",16,aTam[2]})
+AADD(aArqTemp,{"ESTOQFIM"	,"N",16,aTam[2]})
+aTam:=TamSX3("B1_UM")
+AADD(aArqTemp,{"UM"			,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("B1_SEGUM")
+AADD(aArqTemp,{"SEGUM" 		,"C",aTam[1],aTam[2]})
+cArqTemp1:=CriaTrab(aArqTemp)
+cIndTemp1:=Substr(CriaTrab(NIL, .F. ),1,7)+"1"
+dbUseArea( .T. ,nil,cArqTemp1,"TOTCOM", .T. , .F. )
+IndRegua("TOTCOM",cIndTemp1,"PRODUTO")
+SetCursor( if(Upper("OFF") == "ON", 1, 0) )
+DbClearIndex()
+DbSetIndex(cIndTemp1+OrdBagExt())
+
+
+aArqTemp :={}
+aTam:=TamSX3("B1_DESC")
+AADD(aArqTemp,{"DESCRIPRO"	,"C",aTam[1],aTam[2]})
+AADD(aArqTemp,{"DTDIGIT"	,"D",8,0})
+aTam:=TamSX3("D1_FORNECE")
+AADD(aArqTemp,{"FORNECEDOR"	,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("D1_LOJA")
+AADD(aArqTemp,{"LOJA"		,"C"  ,aTam[1],aTam[2]})
+aTam:=TamSX3("A2_NOME")
+AADD(aArqTemp,{"DESCRIFOR"	,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("A2_END")
+AADD(aArqTemp,{"ADRESS"  	,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("A2_CEP")
+AADD(aArqTemp,{"CEP"       	,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("A2_MUN")
+AADD(aArqTemp,{"MUNICIPIO" 	,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("A2_EST")
+AADD(aArqTemp,{"UF"			,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("D1_DOC")
+AADD(aArqTemp,{"DOCUMENTO" ,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("D1_QUANT")
+AADD(aArqTemp,{"QUANTIDADE","N",16,aTam[2]})
+aTam:=TamSX3("D1_COD")
+AADD(aArqTemp,{"PRODUTO"   ,"C",aTam[1],aTam[2]})
+AADD(aArqTemp,{"IDENTUF"   ,"C",1,0})
+cArqTemp2:=CriaTrab(aArqTemp)
+cIndTemp2:=Substr(CriaTrab(NIL, .F. ),1,7)+"1"
+cIndTemp3:=Substr(CriaTrab(NIL, .F. ),1,7)+"2"
+dbUseArea( .T. ,nil,cArqTemp2,"ITECOM", .T. , .F. )
+IndRegua("ITECOM",cIndTemp2,"PRODUTO+DTOS(DTDIGIT)+FORNECEDOR")
+IndRegua("ITECOM",cIndTemp3,"IDENTUF+PRODUTO+DTOS(DTDIGIT)+FORNECEDOR")
+SetCursor( if(Upper("OFF") == "ON", 1, 0) )
+DbClearIndex()
+DbSetIndex(cIndTemp2+OrdBagExt())
+DbSetIndex(cIndTemp3+OrdBagExt())
+
+
+aArqTemp :={}
+aTam:=TamSX3("B1_DESC")
+AADD(aArqTemp,{"DESCRIPRO"	,"C",aTam[1],aTam[2]})
+AADD(aArqTemp,{"EMISSAO"	,"D",8,0})
+aTam:=TamSX3("D2_CLIENTE")
+AADD(aArqTemp,{"CLIENTE"	,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("D2_LOJA")
+AADD(aArqTemp,{"LOJA"		,"C"  ,aTam[1],aTam[2]})
+aTam:=TamSX3("A1_NOME")
+AADD(aArqTemp,{"DESCRICLI"	,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("A1_END")
+AADD(aArqTemp,{"ADRESS"  	,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("A1_CEP")
+AADD(aArqTemp,{"CEP"		,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("A1_MUN")
+AADD(aArqTemp,{"MUNICIPIO"	,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("A1_EST")
+AADD(aArqTemp,{"UF"			,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("D2_DOC")
+AADD(aArqTemp,{"DOCUMENTO"	,"C",aTam[1],aTam[2]})
+aTam:=TamSX3("D2_QUANT")
+AADD(aArqTemp,{"QUANTIDADE"	,"N",16,aTam[2]})
+aTam:=TamSX3("D2_COD")
+AADD(aArqTemp,{"PRODUTO"	,"C",aTam[1],aTam[2]})
+cArqTemp3:=CriaTrab(aArqTemp)
+cIndTemp4:=Substr(CriaTrab(NIL, .F. ),1,7)+"1"
+dbUseArea( .T. ,nil,cArqTemp3,"ITEVEN", .T. , .F. )
+IndRegua("ITEVEN",cIndTemp4,"PRODUTO+DTOS(EMISSAO)+CLIENTE")
+SetCursor( if(Upper("OFF") == "ON", 1, 0) )
+DbClearIndex()
+DbSetIndex(cIndTemp4+OrdBagExt())
+
+
+dbSelectArea("SB1")
+dbSetOrder(1)
+dbSeek(xFilial("SB1")+mv_par01, .T. )
+SetRegua(LastRec())
+While !lEnd .and.  !eof() .And.  xFilial("SB1") == B1_FILIAL .And.  B1_COD <= mv_par02
+	IncRegua()
+
+	If B1_GRUPO < mv_par05 .Or.  B1_GRUPO > mv_par06
+		dbSkip()
+		Loop
+	EndIf
+
+	If B1_TIPO < mv_par07 .Or.  B1_TIPO > mv_par08
+		dbSkip()
+		Loop
+	EndIf
+	If Interrupcao(@lEnd)
+		Exit
+	Endif
+
+
+
+
+
+
+
+
+	If mv_par10 == 1 .Or.  mv_par12 == 1
+		dbSelectArea("TOTCOM")
+		If !dbSeek(SB1->B1_COD)
+	    	dbSelectArea("SB2")
+    		dbSetOrder(1)
+    		dbSeek(xFilial("SB2")+SB1->B1_COD)
+			nSaldoIni:=0
+	    	While !EOF() .And.  B2_FILIAL+B2_COD == xFilial("SB2")+SB1->B1_COD
+				aSaldo:=CalcEst(SB2->B2_COD,SB2->B2_LOCAL,dDataIni)
+    			nSaldoIni+=	aSaldo[1]
+				dbSkip()
+	    	End
+			Reclock("TOTCOM", .T. )
+			_FIELD->PRODUTO := SB1->B1_COD
+			_FIELD->DESCRIPRO := SB1->B1_DESC
+			_FIELD->UM := SB1->B1_UM
+			_FIELD->SEGUM := SB1->B1_SEGUM
+			_FIELD->SALDOANT := nSaldoIni
+			_FIELD->ESTOQFIM := nSaldoIni
+			MsUnlock()
+		EndIf
+	EndIf
+
+	If mv_par10 == 1 .Or.  mv_par12 == 1
+		dbSelectArea("SD1")
+		dbSetOrder(7)
+		dbSeek(xFilial("SD1")+SB1->B1_COD+mv_par03+DTOS(dDataIni), .T. )
+		While !Eof() .And.  D1_FILIAL+D1_COD == xFilial("SD1")+SB1->B1_COD .And.  D1_LOCAL <= mv_par04 .And.  DTOS(D1_DTDIGIT) <= DTOS(dDataFim)
+
+
+
+			If DTOS(D1_DTDIGIT) < DTOS(dDataIni)
+				dbSkip()
+				Loop
+			EndIf
+
+
+
+			dbSelectArea("SF4")
+			dbSeek(xFilial("SF4")+SD1->D1_TES)
+			dbSelectArea("SD1")
+			If SF4->F4_ESTOQUE <> "S"
+				dbSkip()
+				Loop
+			EndIf
+			A462GrTrb("SD1",D1_COD,D1_QUANT,D1_DTDIGIT,D1_FORNECE,D1_LOJA,D1_TIPO,D1_DOC,dDataIni,SB1->B1_DESC)
+			dbSelectArea("SD1")
+			dbSkip()
+		End
+		dbSelectArea("SD3")
+		dbSetOrder(7)
+		dbSeek(xFilial("SD3")+SB1->B1_COD+mv_par03+DTOS(dDataIni), .T. )
+		While !Eof() .And.  D3_FILIAL+D3_COD == xFilial("SD3")+SB1->B1_COD .And.  D3_LOCAL <= mv_par04 .And.  DTOS(D3_EMISSAO) <= DTOS(dDataFim)
+
+
+
+			If DTOS(D3_EMISSAO) < DTOS(dDataIni)
+				dbSkip()
+				Loop
+			EndIf
+			A462GrTrb("SD3",D3_COD,D3_QUANT*If(D3_TM <= "500",-1,1),D3_EMISSAO,NIL,NIL,NIL,D3_DOC,dDataIni,SB1->B1_DESC)
+			dbSelectArea("SD3")
+			dbSkip()
+		End
+	EndIf
+
+	If mv_par10 == 1 .Or.  mv_par11 == 1 .Or.  mv_par12 == 1
+		dbSelectArea("SD2")
+		dbSetOrder(6)
+		dbSeek(xFilial("SD2")+SB1->B1_COD+mv_par03+DTOS(dDataIni), .T. )
+		While !Eof() .And.  D2_FILIAL+D2_COD == xFilial("SD2")+SB1->B1_COD .And.  D2_LOCAL <= mv_par04 .And.  DTOS(D2_EMISSAO) <= DTOS(dDataFim)
+
+
+
+			If DTOS(D2_EMISSAO) < DTOS(dDataIni)
+				dbSkip()
+				Loop
+			EndIf
+
+
+
+			dbSelectArea("SF4")
+			dbSeek(xFilial("SF4")+SD2->D2_TES)
+			dbSelectArea("SD2")
+			If SF4->F4_ESTOQUE <> "S"
+				dbSkip()
+				Loop
+			EndIf
+			A462GrTrb("SD2",D2_COD,D2_QUANT,D2_EMISSAO,D2_CLIENTE,D2_LOJA,D2_TIPO,D2_DOC,dDataIni,SB1->B1_DESC)
+			dbSelectArea("SD2")
+			dbSkip()
+		End
+	EndIf
+	dbSelectArea("SB1")
+	dbSkip()
+End
+
+
+nLin   :=80
+nLinMax:=45
+If mv_par10 == 1
+
+	aL:=R462LCom()
+
+    dbSelectArea("TOTCOM")
+    dbGotop()
+    While !Eof()
+		If nLin > 60
+			R462Cabec(@nLin,1,aMesOrd,aL)
+		EndIf
+		FmtLin({PRODUTO,Substr(DESCRIPRO,1,29),SALDOANT,COMPRAS,VENDAS,CONSUMO,ESTOQFIM},aL[17],,,@nLin)
+		dbSkip()
+		If (Eof() .And.  nLin <= nLinMax) .Or.  nLin > nLinMax
+			While nLin <= nLinMax
+				FmtLin(,aL[18],,,@nLin)
+			End
+			R462Cabec(@nLin,2,aMesOrd,aL)
+		EndIf
+    End
+
+	nLinMax:=50
+    dbSelectArea("ITECOM")
+    dbSetOrder(1)
+    dbGotop()
+    While !Eof()
+		If nLin > 60
+			R462Cabec(@nLin,3,aMesOrd,aL)
+		EndIf
+		FmtLin({DTDIGIT,FORNECEDOR,LOJA,Substr(DESCRIFOR,1,If(nTamForn>8 .And.  nTamCPro >15, 17,28)),Substr(ADRESS,1,41),CEP,Substr(MUNICIPIO,1,15),UF,DOCUMENTO,QUANTIDADE,PRODUTO,Substr(DESCRIPRO,1,27)},aL[37],,,@nLin)
+		dbSkip()
+		If (Eof() .And.  nLin <= nLinMax) .Or.  nLin > nLinMax
+			While nLin <= nLinMax
+				FmtLin(,aL[39],,,@nLin)
+			End
+			R462Cabec(@nLin,4,aMesOrd,aL)
+		EndIf
+    End
+EndIf
+
+If mv_par11 == 1
+	nlinMax:=45
+
+	aL:=R462LVen()
+
+    dbSelectArea("ITEVEN")
+    dbGotop()
+    While !Eof()
+		If nLin > 60
+			R462Cabec(@nLin,If(lFirst,5,6),aMesOrd,aL)
+		EndIf
+		FmtLin({EMISSAO,CLIENTE,LOJA,Substr(DESCRICLI,1,If(nTamForn>8 .And.  nTamCPro >15, 17,28)),Substr(ADRESS,1,41),CEP,Substr(MUNICIPIO,1,15),UF,DOCUMENTO,QUANTIDADE,PRODUTO,Substr(DESCRIPRO,1,27)},aL[17],,,@nLin)
+		dbSkip()
+		If (Eof() .And.  nLin <= nLinMax) .Or.  nLin > nLinMax
+			While nLin <= 50
+				FmtLin(,aL[18],,,@nLin)
+			End
+			R462Cabec(@nLin,If(lFirst,7,8),aMesOrd,aL)
+			If lFirst
+				lFirst:= .F. 
+				nLinMax:=50
+			EndIf
+		EndIf
+    End
+EndIf
+
+If mv_par12 == 1
+	lFirst:= .T. 
+	nlinMax:=45
+
+	aL:=R462LExe()
+
+    dbSelectArea("TOTCOM")
+    dbGotop()
+    While !Eof()
+		If nLin > 60
+			R462Cabec(@nLin,If(lFirst,9,11),aMesOrd,aL)
+		EndIf
+		FmtLin({PRODUTO,Substr(DESCRIPRO,1,29),SALDOANT,COMPRAS,SALDOANT+COMPRAS,CONSUMO,VENDAS,ESTOQFIM,If(UM=="KG",ESTOQFIM,If(SEGUM=="KG",ConvUm(PRODUTO,ESTOQFIM,0,2),0))},aL[16],,,@nLin)
+		dbSkip()
+		If (Eof() .And.  nLin <= nLinMax) .Or.  nLin > nLinMax
+			While nLin <= nLinMax
+				FmtLin(,aL[17],,,@nLin)
+			End
+			If !Eof()
+				R462Cabec(@nLin,If(lFirst,10,11),aMesOrd,aL)
+			EndIf
+			If lFirst
+				lFirst:= .F. 
+				nLinMax:=55
+			EndIf
+		EndIf
+    End
+	nLinMax:=60
+
+	R462Cabec(@nLin,12,aMesOrd,aL)
+    dbSelectArea("ITECOM")
+    dbSetOrder(2)
+    dbSeek("1")
+    While !Eof() .And.  IDENTUF == "1"
+		If nLin > nLinMax
+			R462Cabec(@nLin,12,aMesOrd,aL)
+		EndIf
+		FmtLin({DTDIGIT,FORNECEDOR,LOJA,Substr(DESCRIFOR,1,If(nTamForn>8 .And.  nTamCPro >15, 17,28)),Substr(ADRESS,1,41),Substr(MUNICIPIO,1,15),UF,"",DOCUMENTO,QUANTIDADE,PRODUTO,Substr(DESCRIPRO,1,27)},aL[25],,,@nLin)
+		dbSkip()
+    End
+
+	R462Cabec(@nLin,13,aMesOrd,aL)
+    dbSelectArea("ITECOM")
+    dbSetOrder(2)
+    dbSeek("2")
+    While !Eof() .And.  IDENTUF == "2"
+		If nLin > nLinMax
+			R462Cabec(@nLin,14,aMesOrd,aL)
+		EndIf
+		FmtLin({DTDIGIT,FORNECEDOR,LOJA,Substr(DESCRIFOR,1,If(nTamForn>8 .And.  nTamCPro >15, 17,28)),Substr(ADRESS,1,41),Substr(MUNICIPIO,1,15),UF,"",DOCUMENTO,QUANTIDADE,PRODUTO,Substr(DESCRIPRO,1,27)},aL[25],,,@nLin)
+		dbSkip()
+    End
+	While nLin < nLinMax
+		FmtLin(,aL[39],,,@nLin)
+	End
+	FmtLin(,aL[20],,,@nLin)
+EndIf
+
+
+
+
+dbSelectArea("TOTCOM")
+dbCloseArea()
+Ferase(cArqTemp1+GetDBExtension())
+Ferase(cIndTemp1+OrdBagExt())
+dbSelectArea("ITECOM")
+dbCloseArea()
+Ferase(cArqTemp2+GetDBExtension())
+Ferase(cIndTemp2+OrdBagExt())
+Ferase(cIndTemp3+OrdBagExt())
+dbSelectArea("ITEVEN")
+dbCloseArea()
+Ferase(cArqTemp3+GetDBExtension())
+Ferase(cIndTemp4+OrdBagExt())
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function A462GrTrb(cAlias,cProduto,nQuant,dData,cCliFor,cLoja,cTipoDoc,cDoc,dDataIni,cDescri)
+LOCAL cEnder:=""
+LOCAL cCep:=""
+LOCAL cMun:=""
+LOCAL cUF:=""
+LOCAL cDescriCli:=""
+
+
+
+
+If Valtype(cCliFor) == "C" .And.  !Empty(cCliFor)
+	If (cTipoDoc$"DB" .And.  cAlias == "SD1") .Or.  (!(cTipoDoc$"DB") .And.  cAlias == "SD2")
+		dbSelectArea("SA1")
+		dbSetOrder(1)
+		If MsSeek(xFilial("SA1")+cCliFor+cLoja)
+			cEnder    :=SA1->A1_END
+			cCep      :=SA1->A1_CEP
+			cMun      :=SA1->A1_MUN
+			cUF       :=SA1->A1_EST
+			cDescriCli:=SA1->A1_NOME
+		EndIf
+	Else
+		dbSelectArea("SA2")
+		dbSetOrder(1)
+		If MsSeek(xFilial("SA2")+cCliFor+cLoja)
+			cEnder    :=SA2->A2_END
+			cCep      :=SA2->A2_CEP
+			cMun      :=SA2->A2_MUN
+			cUF       :=SA2->A2_EST
+			cDescriCli:=SA2->A2_NOME
+		EndIf
+	EndIf
+EndIf
+
+
+
+
+
+
+
+
+
+
+
+
+
+If (mv_par10 == 1 .Or.  mv_par12 == 1) .And.  cAlias $ "SD1/SD3"
+	If cAlias == "SD1"
+
+		Reclock("ITECOM", .T. )
+		_FIELD->DTDIGIT := dData
+		_FIELD->FORNECEDOR := cCliFor
+		_FIELD->LOJA := cLoja
+		_FIELD->DESCRIFOR := cDescriCli
+		_FIELD->ADRESS := Substr(cEnder,1,Len(ITECOM->ADRESS))
+		_FIELD->CEP := cCep
+		_FIELD->MUNICIPIO := Substr(cMun,1,Len(ITECOM->MUNICIPIO))
+		_FIELD->UF := cUF
+		_FIELD->DOCUMENTO := cDoc
+		_FIELD->QUANTIDADE := nQuant
+		_FIELD->PRODUTO := cProduto
+		_FIELD->DESCRIPRO := cDescri
+		_FIELD->IDENTUF := If(cUF=="SP","1","2")
+		MsUnlock()
+
+		Reclock("TOTCOM", .F. )
+		_FIELD->COMPRAS := COMPRAS+nQuant
+		_FIELD->ESTOQFIM := ESTOQFIM+nQuant
+		MsUnlock()
+	Else
+
+		Reclock("TOTCOM", .F. )
+		_FIELD->CONSUMO := CONSUMO+nQuant
+		_FIELD->ESTOQFIM := ESTOQFIM+(nQuant*-1)
+		MsUnlock()
+	EndIf
+EndIf
+
+
+
+
+
+
+
+
+
+
+
+
+
+If (mv_par10 ==1 .Or.  mv_par11 == 1 .Or.  mv_par12 == 1) .And.  cAlias == "SD2"
+
+	Reclock("ITEVEN", .T. )
+	_FIELD->EMISSAO := dData
+	_FIELD->CLIENTE := cCliFor
+	_FIELD->LOJA := cLoja
+	_FIELD->DESCRICLI := cDescriCli
+	_FIELD->ADRESS := Substr(cEnder,1,Len(ITEVEN->ADRESS))
+	_FIELD->CEP := cCep
+	_FIELD->MUNICIPIO := Substr(cMun,1,Len(ITEVEN->MUNICIPIO))
+	_FIELD->UF := cUF
+	_FIELD->DOCUMENTO := cDoc
+	_FIELD->QUANTIDADE := nQuant
+	_FIELD->PRODUTO := cProduto
+	_FIELD->DESCRIPRO := cDescri
+	MsUnlock()
+	If mv_par10 == 1 .Or.  mv_par12 == 1
+
+		Reclock("TOTCOM", .F. )
+		_FIELD->VENDAS := VENDAS+nQuant
+		_FIELD->ESTOQFIM := ESTOQFIM-nQuant
+		MsUnlock()
+	EndIf
+EndIf
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaPerg(cPerg)
+Local aHelpPor
+Local aHelpEng
+Local aHelpSpa
+Local aArea	:=GetArea()
+Local nTamSX1
+
+PutSx1(cPerg,"01","De  Produto"      ,"De Producto"      ,"From Product"     ,"mv_ch1","C",15,0,0,"G","","SB1","","","mv_par01","","","","","","","","","","","","","","","","")
+PutSx1(cPerg,"02","At‚ Produto"      ,"A  Producto"      ,"To Product"       ,"mv_ch2","C",15,0,0,"G","","SB1","","","mv_par02","","","","ZZZZZZZZZZZZZZZ","","","","","","","","","","","","")
+PutSx1(cPerg,"03","De  Armazem"      ,"De Deposito"      ,"From Warehouse"   ,"mv_ch3","C",02,0,0,"G","","","","","mv_par03","","","","","","","","","","","","","","","","")
+PutSx1(cPerg,"04","At‚ Armazem"      ,"A  Deposito"      ,"To Warehouse"     ,"mv_ch4","C",02,0,0,"G","","","","","mv_par04","","","","ZZ","","","","","","","","","","","","")
+PutSx1(cPerg,"05","De  Grupo"        ,"De Grupo"         ,"From Group"       ,"mv_ch5","C",04,0,0,"G","","SBM","","","mv_par05","","","","","","","","","","","","","","","","")
+PutSx1(cPerg,"06","At‚ Grupo"        ,"A  Grupo"         ,"To Group"         ,"mv_ch6","C",04,0,0,"G","","SBM","","","mv_par06","","","","ZZZZ","","","","","","","","","","","","")
+PutSx1(cPerg,"07","De  Tipo"         ,"De Tipo"          ,"From Type"        ,"mv_ch7","C",02,0,0,"G","","02 ","","","mv_par07","","","","","","","","","","","","","","","","")
+PutSx1(cPerg,"08","At‚ Tipo"         ,"A  Tipo"          ,"To Type"          ,"mv_ch8","C",02,0,0,"G","","02 ","","","mv_par08","","","","ZZ","","","","","","","","","","","","")
+PutSx1(cPerg,"09","Trimestre"        ,"Trimestre"    	 ,"Quarter"          ,"mv_ch9","N",01,0,0,"G","(mv_par09 >= 1 .and. mv_par09 <= 4)","","","","mv_par09","","","","1","","","","","","","","","","","","")
+PutSx1(cPerg,"10","Mapa Civil Compra","Mapa Civil Compra","Purchase civilian map?","mv_cha","N",01,0,1,"C","","","","","mv_par10","Sim","Si","Yes","","Nao","No","No")
+PutSx1(cPerg,"11","Mapa Civil Venda" ,"Mapa Civil Venta" ,"Sales civilian map?"   ,"mv_chb","N",01,0,1,"C","","","","","mv_par11","Sim","Si","Yes","","Nao","No","No")
+PutSx1(cPerg,"12","Mapa Exercito"    ,"Mapa Ejercito"    ,"Army civilian map?"    ,"mv_chc","N",01,0,1,"C","","","","","mv_par12","Sim","Si","Yes","","Nao","No","No")
+PutSx1(cPerg,"13","Informe a RM"	 ,"Informe RM" 		 ,"Enter MR"	 ,"mv_chd","N",02,0,0,"G","(mv_par13>0)"					   ,"","","","mv_par13","","","","","","","","","","","","","","","","")
+PutSx1(cPerg,"14","Informe o CR"	 ,"Informe CR"		 ,"Enter RC"	 ,"mv_che","C",20,0,0,"G","","","","","mv_par14","","","","","","","","","","","","","","","","")
+PutSx1(cPerg,"15","CR Valido até ?"	 ,"A CR Valido?"	 ,"To valid RC?" ,"mv_chf","D",08,0,0,"G","","","","","mv_par15","","","","","","","","","","","","","","","","")
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+
+Aadd (aHelpPor, "Produto inicial a ser considerado na    ")
+Aadd (aHelpPor, "filtragem do cadastro de produtos (SB1).")
+
+Aadd (aHelpEng, "Initial product to be considered when   ")
+Aadd (aHelpEng, "filtering products file (SB1).          ")
+
+Aadd (aHelpSpa, "Producto inicial que se considerara en  ")
+Aadd (aHelpSpa, "el filtro del archivo de productos(SB1).")
+PutSX1Help("P.MTR46201.",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd (aHelpPor, "Produto final a ser considerado na      ")
+Aadd (aHelpPor, "filtragem do cadastro de produtos (SB1).")
+
+Aadd (aHelpEng, "Final product to be considered when     ")
+Aadd (aHelpEng, "filtering products file (SB1).                ")
+
+Aadd (aHelpSpa, "Producto final que se considerara en el ")
+Aadd (aHelpSpa, "filtro del archivo de productos (SB1).  ")
+PutSX1Help("P.MTR46202.",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd (aHelpPor, "Armazém inicial a ser considerado na    ")
+Aadd (aHelpPor, "filtragem dos arquivos: itens de NF de  ")
+Aadd (aHelpPor, "Entrada (SD1), itens do pedido de venda ")
+Aadd (aHelpPor, "(SD2) e movimentos internos (SD3).      ")
+
+Aadd (aHelpEng, "Initial wharehouse to be considered when")
+Aadd (aHelpEng, " filtering the files: Inflow Invoice    ")
+Aadd (aHelpEng, "Items (SD1), sales order items (SD2) and")
+Aadd (aHelpEng, "internal transactions (SD3).            ")
+
+Aadd (aHelpSpa, "Almacen inicial que se considerara en el")
+Aadd (aHelpSpa, "filtro del archivo: items de Fac.Entrada")
+Aadd (aHelpSpa, "(SD1), items del pedido de venta (SD2)  ")
+Aadd (aHelpSpa, "y movimientos internos (SD3).           ")
+PutSX1Help("P.MTR46203.",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd (aHelpPor, "Armazém final a ser considerado na      ")
+Aadd (aHelpPor, "filtragem dos arquivos: itens de NF de  ")
+Aadd (aHelpPor, "Entrada(SD1), itens do pedido de venda  ")
+Aadd (aHelpPor, "(SD2) e movimentos internos (SD3).      ")
+
+Aadd (aHelpEng, "Final wharehouse to be considered when  ")
+Aadd (aHelpEng, "filtering the files: Inflow Invoice     ")
+Aadd (aHelpEng, "Items (SD1), sales order items (SD2) and")
+Aadd (aHelpEng, "internal transactions (SD3).            ")
+
+Aadd (aHelpSpa, "Almacen final que se considerara en el  ")
+Aadd (aHelpSpa, "filtro del archivo: items de Fac.Entrada")
+Aadd (aHelpSpa, "(SD1), items del pedido de venta (SD2)  ")
+Aadd (aHelpSpa, "y movimientos internos (SD3).           ")
+PutSX1Help("P.MTR46204.",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd (aHelpPor, "Grupo inicial a ser considerado na      ")
+Aadd (aHelpPor, "filtragem do cadastro de produtos (SB1).")
+
+Aadd (aHelpEng, "Initial group to be considered when     ")
+Aadd (aHelpEng, "filtering products file (SB1).          ")
+
+Aadd (aHelpSpa, "Grupo inicial por considerarse en el    ")
+Aadd (aHelpSpa, "filtro del archivo de productos (SB1).  ")
+PutSX1Help("P.MTR46205.",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd (aHelpPor, "Grupo final a ser considerado na        ")
+Aadd (aHelpPor, "filtragem do cadastro de produtos (SB1).")
+
+Aadd (aHelpEng, "Final group to be considered when       ")
+Aadd (aHelpEng, "filtering products file (SB1).          ")
+
+Aadd (aHelpSpa, "Grupo final por considerarse en el      ")
+Aadd (aHelpSpa, "filtro del archivo de productos (SB1).  ")
+PutSX1Help("P.MTR46206.",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd (aHelpPor, "Tipo inicial a ser considerado na       ")
+Aadd (aHelpPor, "filtragem do cadastro de produtos (SB1).")
+
+Aadd (aHelpEng, "Initial type to be considered when      ")
+Aadd (aHelpEng, "filtering products file (SB1).          ")
+
+Aadd (aHelpSpa, "Tipo inicial por considerarse en el     ")
+Aadd (aHelpSpa, "filtro del archivo de productos (SB1).  ")
+PutSX1Help("P.MTR46207.",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd (aHelpPor, "Tipo final a ser considerado na         ")
+Aadd (aHelpPor, "filtragem do cadastro de produtos (SB1).")
+
+Aadd (aHelpEng, "Final type to be considered when        ")
+Aadd (aHelpEng, "filtering products file (SB1).          ")
+
+Aadd (aHelpSpa, "Tipo final por considerarse en el filtro")
+Aadd (aHelpSpa, " del archivo de productos (SB1).        ")
+PutSX1Help("P.MTR46208.",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd (aHelpPor, "Entre com o Trimestre a ser considerado ")
+Aadd (aHelpPor, "para o relatório.                       ")
+
+Aadd (aHelpEng, "Enter the Quarter to be considered for  ")
+Aadd (aHelpEng, "the report.                             ")
+
+Aadd (aHelpSpa, "Ingrese el trimestre que se considerara ")
+Aadd (aHelpSpa, " en el informe.                         ")
+PutSX1Help("P.MTR46209.",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd (aHelpPor, "Informe se o relatório irá imprimir o   ")
+Aadd (aHelpPor, "Mapa Civil de Compra.                   ")
+
+Aadd (aHelpEng, "Enter whether the report prints the     ")
+Aadd (aHelpEng, "Civil Map of Purchase.                  ")
+
+Aadd (aHelpSpa, "Informe si el informe imprimira el mapa ")
+Aadd (aHelpSpa, "civil de compra.                        ")
+PutSX1Help("P.MTR46210.",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd (aHelpPor, "Informe se o relatório irá imprimir o   ")
+Aadd (aHelpPor, "Mapa Civil de Venda.                    ")
+
+Aadd (aHelpEng, "Enter whether the report prints the     ")
+Aadd (aHelpEng, "Civil Map of Sales.                     ")
+
+Aadd (aHelpSpa, "Informe si el informe imprimira el mapa ")
+Aadd (aHelpSpa, "civil de venta.                         ")
+PutSX1Help("P.MTR46211.",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd (aHelpPor, "Informe se o relatório irá imprimir o   ")
+Aadd (aHelpPor, "Mapa do Exército.                       ")
+
+Aadd (aHelpEng, "Enter whether the report prints the     ")
+Aadd (aHelpEng, "Army Map.                               ")
+
+Aadd (aHelpSpa, "Informe si el informe imprimira el mapa ")
+Aadd (aHelpSpa, "del ejercito.                           ")
+PutSX1Help("P.MTR46212.",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd (aHelpPor, "Informe a RM - Regiao Militar.          ")
+Aadd (aHelpEng, "Enter RM - Military Region.             ")
+Aadd (aHelpSpa, "Informe la RM - Region Militar.         ")
+PutSX1Help("P.MTR46213.",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd (aHelpPor, "Informe o CR - Certificado de Registro. ")
+Aadd (aHelpEng, "Enter CR - Certificate of Registration. ")
+Aadd (aHelpSpa, "Informe el CR - Certificado de Registro.")
+PutSX1Help("P.MTR46214.",aHelpPor,aHelpEng,aHelpSpa)
+
+
+aHelpPor :={}
+aHelpEng :={}
+aHelpSpa :={}
+Aadd (aHelpPor, "Informe a Validade do CR - Certificado  ")
+Aadd (aHelpPor, "de Registro.                            ")
+
+Aadd (aHelpEng, "Enter the CR Maturity - Certificate of  ")
+Aadd (aHelpEng, "Record.                                 ")
+
+Aadd (aHelpSpa, "Informe la validez del CR - Certificado ")
+Aadd (aHelpSpa, "de Registro.                            ")
+PutSX1Help("P.MTR46215.",aHelpPor,aHelpEng,aHelpSpa)
+
+dbSelectArea("SX1")
+dbSetOrder(1)
+nTamSX1 := Len(SX1->X1_GRUPO)
+
+If dbSeek(PADR("MTR462",nTamSX1)+"09", .F. )
+
+	If Val(X1_CNT01)<1 .Or.  Val(X1_CNT01)>4
+		RecLock("SX1", .F. )
+		_FIELD->X1_CNT01 := "1"
+		MsUnlock()
+	EndIf
+EndIf
+
+RestArea(aArea)
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R462LCom()
+Local aL		:= Array(44)
+Local nTamCPro	:= TamSX3("B1_COD")[1]
+Local nTamForn  := TamSX3("D1_FORNECE")[1]
+
+aL[01]:="|-----------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------|"
+aL[02]:=If( cPaisLoc $ "ANG|PTG", "| mapa trimestral                                                                                           |                                       mapa trimestral de entrada, de stock e                              |", "| MAPA TRIMESTRAL                                                                                           |                                       MAPA TRIMESTRAL DE ENTRADA, DE ESTOQUE E                              |" )
+aL[03]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                           |                                           compras de artigos controlados                                   |", "|                                                                                                           |                                           COMPRAS DE PRODUTOS CONTROLADOS                                   |" )
+aL[04]:="|                                                                                                           |                                                                                                             |"
+aL[05]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                           |                                                                 referente ao ############ trimestre de #### |", "|                                                                                                           |                                                                 REFERENTE AO ############ TRIMESTRE DE #### |" )
+aL[06]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+aL[07]:=If( cPaisLoc $ "ANG|PTG", "| firma:    ##########################################################################                                                                                        insc.est.: ################                 |", "| FIRMA:    ##########################################################################                                                                                        INSC.EST.: ################                 |" )
+aL[08]:=If( cPaisLoc $ "ANG|PTG", "| morada: ##########################################################################                                                                                        nr. contrib. (mf): ################################ |", "| ENDERECO: ##########################################################################                                                                                        CNPJ (MF): ################################ |" )
+aL[09]:=If( cPaisLoc $ "ANG|PTG", "| concelho:   ###########################################################  código postal #########                                                                                                                                    |", "| CIDADE:   ###########################################################  CEP #########                                                                                                                                    |" )
+aL[10]:=If( cPaisLoc $ "ANG|PTG", "| telefones:##########################################################################                                                                                                                                    |", "| TELEFONES:##########################################################################                                                                                                                                    |" )
+aL[11]:=If( cPaisLoc $ "ANG|PTG", "| mapa trimestral demonstrativo do stock, de compras venda e consumo                                                                                                                                                    |", "| MAPA TRIMESTRAL DEMONSTRATIVO DO ESTOQUE, DE COMPRAS VENDA E CONSUMO                                                                                                                                                    |" )
+aL[12]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+If nTamCPro > 15
+	aL[13]:="|                                                               |     SALDO DO     |                  |                  |                  |                                                                             |"
+	aL[14]:=If( cPaisLoc $ "ANG|PTG", "|                         ARTIGOS                              |     TRIMESTRE    |      COMPRAS     |      VENDAS      |     CONSUMO      |            ESTOQUE   QUE   PASSA   PARA   O   TRIMESTRE   SEGUINTE          |", "|                         PRODUTOS                              |     TRIMESTRE    |      COMPRAS     |      VENDAS      |     CONSUMO      |            ESTOQUE   QUE   PASSA   PARA   O   TRIMESTRE   SEGUINTE          |" )
+	aL[15]:="|                                                               |     ANTERIOR     |                  |                  |                  |                                                                             |"
+	aL[16]:="|---------------------------------------------------------------+------------------+------------------+------------------+------------------+-----------------------------------------------------------------------------|"
+	aL[17]:="| ############################## ############################## | ################ | ################ | ################ | ################ | ################                                                            |"
+	aL[18]:="|                                                               |                  |                  |                  |                  |                                                                             |"
+	aL[19]:="|---------------------------------------------------------------+------------------+------------------+------------------+------------------+-----------------------------------------------------------------------------|"
+Else
+	aL[13]:=If( cPaisLoc $ "ANG|PTG", "|                                               |     saldo do     |                  |                  |                  |                                                                                             |", "|                                               |     SALDO DO     |                  |                  |                  |                                                                                             |" )
+	aL[14]:=If( cPaisLoc $ "ANG|PTG", "|                  artigos                     |     trimestre    |      compras     |      vendas      |     consumo      |     s t o c k    q u e   p a s s a   p a r a   o   t r i m e s t r e   s e g u i n t e    |", "|                  PRODUTOS                     |     TRIMESTRE    |      COMPRAS     |      VENDAS      |     CONSUMO      |    E S T O Q U E   Q U E   P A S S A   P A R A   O   T R I M E S T R E   S E G U I N T E    |" )
+	aL[15]:=If( cPaisLoc $ "ANG|PTG", "|                                               |     anterior     |                  |                  |                  |                                                                                             |", "|                                               |     ANTERIOR     |                  |                  |                  |                                                                                             |" )
+	aL[16]:="|-----------------------------------------------+------------------+------------------+------------------+------------------+---------------------------------------------------------------------------------------------|"
+	aL[17]:="| ############### ############################# | ################ | ################ | ################ | ################ | ################                                                                            |"
+	aL[18]:="|                                               |                  |                  |                  |                  |                                                                                             |"
+	aL[19]:="|-----------------------------------------------+------------------+------------------+------------------+------------------+---------------------------------------------------------------------------------------------|"
+EndIf
+aL[20]:=If( cPaisLoc $ "ANG|PTG", "|  observações : fazer em (3) três vias.                                                                                                                                                                                  |", "|  OBSERVACOES : FAZER EM (3) TRES VIAS.                                                                                                                                                                                  |" )
+aL[21]:=If( cPaisLoc $ "ANG|PTG", "|                este mapa é apresentado trimestralmente (até ao dia 5),                                                                                                                                                   |", "|                ESTE MAPA E APRESENTADO TRIMESTRALMENTE (ATE O DIA 5),                                                                                                                                                   |" )
+aL[22]:=If( cPaisLoc $ "ANG|PTG", "|                com o saldo do trimestre anterior.                                                                                               ######################### ## de ############# de ####                   |", "|                COM O SALDO DO TRIMESTRE ANTERIOR.                                                                                               ######################### ## DE ############# DE ####                   |" )
+aL[23]:=If( cPaisLoc $ "ANG|PTG", "|                relação de compras no verso.                                                                                                                                                                             |", "|                RELACAO DE COMPRAS NO VERSO.                                                                                                                                                                             |" )
+aL[24]:="|                                                                                                                                                                                                                         |"
+aL[25]:="|                                                                                                                                                  ________________________________________________________               |"
+aL[26]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                                                                     a s s i n a t u r a   d o   r e s p o n s á v e l                   |", "|                                                                                                                                                     A S S I N A T U R A   D O   R E S P O N S A V E L                   |" )
+aL[27]:="|                                                                                                                                                                                                                         |"
+aL[28]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                                                                 n o m e ________________________________________________                |", "|                                                                                                                                                 N O M E ________________________________________________                |" )
+aL[29]:="|                                                                                                                                                                                                                         |"
+aL[30]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+aL[31]:=If( cPaisLoc $ "ANG|PTG", "| relação das compras durante o trimestre                                                                                                                                                                                 |", "| RELACAO DAS COMPRAS DURANTE O TRIMESTRE                                                                                                                                                                                 |" )
+aL[32]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+If nTamCPro > 15
+	aL[33]:=If( cPaisLoc $ "ANG|PTG", "|          |                  FIRMA                    |                            M O R A D A                           |    FACTURA     |                 |                                                           |", "|          |                  FIRMA                    |                            E N D E R E C O                           |    NOTA     |                 |                                                           |" )
+	aL[34]:=If( cPaisLoc $ "ANG|PTG", "|  DATA    |                VENDEDORA                  |----------------------------------------------------------------------|             |    QUANTIDADE   |           A R T I G O S     C O M P R A D O S           |", "|  DATA    |                VENDEDORA                  |----------------------------------------------------------------------|             |    QUANTIDADE   |           P R O D U T O S     C O M P R A D O S           |" )
+	aL[35]:=If( cPaisLoc $ "ANG|PTG", "|          |                                           |             RUA E NÚMERO                |   CÓD.POST.   |    CONCELHO     |DT|   FISCAL    |                 |                                                           |", "|          |                                           |             RUA E NUMERO                |   CEP   |    CIDADE     |UF|   FISCAL    |                 |                                                           |" )
+	aL[36]:="|----------+-------------------------------------------+-----------------------------------------+---------+---------------+--+-------------+-----------------+-----------------------------------------------------------|"
+	aL[37]:="|##########|#################### #### #################|#########################################|#########|###############|##|############ |################ | ############################## ###########################|"
+	aL[38]:="|----------+-------------------------------------------+-----------------------------------------+---------+---------------+--+-------------+-----------------+-----------------------------------------------------------|"
+	aL[39]:="|          |                                           |                                         |         |               |  |             |                 |                                                           |"
+Else
+	aL[33]:=If( cPaisLoc $ "ANG|PTG", "|            |                    firma                    |                                    m o r a d a                           |     nota     |                  |                                             |", "|            |                    FIRMA                    |                                    E N D E R E C O                           |     NOTA     |                  |                                             |" )
+	aL[34]:=If( cPaisLoc $ "ANG|PTG", "|    data    |                  vendedora                  |------------------------------------------------------------------------------|              |    quantidade    |       a r t i g o s     c o m p r a d o s  |", "|    DATA    |                  VENDEDORA                  |------------------------------------------------------------------------------|              |    QUANTIDADE    |       P R O D U T O S    C O M P R A D O S  |" )
+	aL[35]:=If( cPaisLoc $ "ANG|PTG", "|            |                                             |               rua e número                |    código postal    |     concelho      | distrito |    fiscal    |                  |                                             |", "|            |                                             |               RUA E NUMERO                |    CEP    |     CIDADE      | UF |    FISCAL    |                  |                                             |" )
+	aL[36]:="|------------+---------------------------------------------+-------------------------------------------+-----------+-----------------+----+--------------+------------------+---------------------------------------------|"
+	aL[37]:="| ########## | #################### #### ################# | ######################################### | ######### | ############### | ## | ############ | ################ | ############### ########################### |"
+	aL[38]:="|------------+---------------------------------------------+-------------------------------------------+-----------+-----------------+----+--------------+------------------+---------------------------------------------|"
+	aL[39]:="|            |                                             |                                           |           |                 |    |              |                  |                                             |"
+EndIf
+If nTamForn <= 8 .And.  nTamCPro <= 15
+	aL[37]:="| ########## | ######## #### ############################# | ######################################### | ######### | ############### | ## | ############ | ################ | ############### ########################### |"
+EndIf
+aL[40]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+aL[41]:=If( cPaisLoc $ "ANG|PTG", "|                                          licenças de ácidos , transporte , explosivos , corrosivos                                                                                                                      |", "|                                          LICENCAS DE ACIDOS , TRANSPORTE , EXPLOSIVOS , CORROSIVOS                                                                                                                      |" )
+aL[42]:=If( cPaisLoc $ "ANG|PTG", "|                                          sfpc/2 - exército brasileiro                                                                                                                                                   |", "|                                          SFPC/2 - EXERCITO BRASILEIRO                                                                                                                                                   |" )
+aL[43]:=If( cPaisLoc $ "ANG|PTG", "|                                          dird     - divisão de artigos controlados                                                                                                                                     |", "|                                          DIRD     - DIVISAO DE PRODUTOS CONTROLADOS                                                                                                                                     |" )
+aL[44]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+
+
+Return (aL)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R462LVen()
+Local aL		:= Array(34)
+Local nTamCPro	:= TamSX3("B1_COD")[1]
+Local nTamCli	:= TamSX3("D2_CLIENTE")[1]
+
+aL[01]:="|----------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------|"
+aL[02]:=If( cPaisLoc $ "ANG|PTG", "| mapa trimestral                                                                                          |                                        mapa trimestral de vendas de                                          |", "| MAPA TRIMESTRAL                                                                                          |                                        MAPA TRIMESTRAL DE VENDAS DE                                          |" )
+aL[03]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                          |                                            artigos controlados                                              |", "|                                                                                                          |                                            PRODUTOS CONTROLADOS                                              |" )
+aL[04]:="|                                                                                                          |                                                                                                              |"
+aL[05]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                          |                                                                  referente ao ############ trimestre de #### |", "|                                                                                                          |                                                                  REFERENTE AO ############ TRIMESTRE DE #### |" )
+aL[06]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+aL[07]:=If( cPaisLoc $ "ANG|PTG", "| firma:    ##########################################################################                                                                                        insc.est.: ################                 |", "| FIRMA:    ##########################################################################                                                                                        INSC.EST.: ################                 |" )
+aL[08]:=If( cPaisLoc $ "ANG|PTG", "| morada: ##########################################################################                                                                                        nr. contrib. (mf): ################################ |", "| ENDERECO: ##########################################################################                                                                                        CNPJ (MF): ################################ |" )
+aL[09]:=If( cPaisLoc $ "ANG|PTG", "| concelho:   ###########################################################  código postal #########                                                                                                                                    |", "| CIDADE:   ###########################################################  CEP #########                                                                                                                                    |" )
+aL[10]:=If( cPaisLoc $ "ANG|PTG", "| telefones:##########################################################################                                                                                                                                    |", "| TELEFONES:##########################################################################                                                                                                                                    |" )
+aL[11]:=If( cPaisLoc $ "ANG|PTG", "| relação das vendas durante o trimestre                                                                                                                                                                                  |", "| RELACAO DAS VENDAS DURANTE O TRIMESTRE                                                                                                                                                                                  |" )
+aL[12]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+If nTamCPro > 15
+	aL[13]:=If( cPaisLoc $ "ANG|PTG", "|          |                  FIRMA                    |                            M O R A D A                           |    FACTURA     |                 |                                                           |", "|          |                  FIRMA                    |                            E N D E R E C O                           |    NOTA     |                 |                                                           |" )
+	aL[14]:=If( cPaisLoc $ "ANG|PTG", "|  DATA    |                COMPRADORA                 |----------------------------------------------------------------------|             |    QUANTIDADE   |           A R T I G O S      V E N D I D O S            |", "|  DATA    |                COMPRADORA                 |----------------------------------------------------------------------|             |    QUANTIDADE   |           P R O D U T O S      V E N D I D O S            |" )
+	aL[15]:=If( cPaisLoc $ "ANG|PTG", "|          |                                           |             RUA E NÚMERO                |   CÓD.POST.   |    CONCELHO     |DT|   FISCAL    |                 |                                                           |", "|          |                                           |             RUA E NUMERO                |   CEP   |    CIDADE     |UF|   FISCAL    |                 |                                                           |" )
+	aL[16]:="|----------+-------------------------------------------+-----------------------------------------+---------+---------------+--+-------------+-----------------+-----------------------------------------------------------|"
+	aL[17]:="|##########|#################### #### #################|#########################################|#########|###############|##|############ |################ | ############################## ###########################|"
+	aL[18]:="|          |                                           |                                         |         |               |  |             |                 |                                                           |"
+	aL[19]:="|----------+-------------------------------------------+-----------------------------------------+---------+---------------+--+-------------+-----------------+-----------------------------------------------------------|"
+Else
+	aL[13]:=If( cPaisLoc $ "ANG|PTG", "|            |                    firma                    |                                    m o r a d a                           |     nota     |                  |                                             |", "|            |                    FIRMA                    |                                    E N D E R E C O                           |     NOTA     |                  |                                             |" )
+	aL[14]:=If( cPaisLoc $ "ANG|PTG", "|    data    |                  compradora                 |------------------------------------------------------------------------------|              |    quantidade    |      a r t i g o s    v e n d i d o s     |", "|    DATA    |                  COMPRADORA                 |------------------------------------------------------------------------------|              |    QUANTIDADE    |      P R O D U T O S    V E N D I D O S     |" )
+	aL[15]:=If( cPaisLoc $ "ANG|PTG", "|            |                                             |               rua e número                |    código postal    |     concelho      | distrito |    fiscal    |                  |                                             |", "|            |                                             |               RUA E NUMERO                |    CEP    |     CIDADE      | UF |    FISCAL    |                  |                                             |" )
+	aL[16]:="|------------+---------------------------------------------+-------------------------------------------+-----------+-----------------+----+--------------+------------------+---------------------------------------------|"
+	aL[17]:="| ########## | #################### #### ################# | ######################################### | ######### | ############### | ## | ############ | ################ | ############### ########################### |"
+	aL[18]:="|            |                                             |                                           |           |                 |    |              |                  |                                             |"
+	aL[19]:="|------------+---------------------------------------------+-------------------------------------------+-----------+-----------------+----+--------------+------------------+---------------------------------------------|"
+EndIf
+If nTamCli <= 8 .And.  nTamcPro <= 15
+	aL[17]:="| ########## | ######## #### ############################# | ######################################### | ######### | ############### | ## | ############ | ################ | ############### ########################### |"
+EndIf
+aL[20]:=If( cPaisLoc $ "ANG|PTG", "|  observações : fazer em (3) três vias.                                                                                                                                                                                  |", "|  OBSERVACOES : FAZER EM (3) TRES VIAS.                                                                                                                                                                                  |" )
+aL[21]:=If( cPaisLoc $ "ANG|PTG", "|                este mapa é apresentado trimestralmente (até ao dia 5),                                                                                                                                                   |", "|                ESTE MAPA E APRESENTADO TRIMESTRALMENTE (ATE O DIA 5),                                                                                                                                                   |" )
+aL[22]:=If( cPaisLoc $ "ANG|PTG", "|                com o saldo do trimestre anterior.                                                                                               ######################### ## de ############# de ####                   |", "|                COM O SALDO DO TRIMESTRE ANTERIOR.                                                                                               ######################### ## DE ############# DE ####                   |" )
+aL[23]:=If( cPaisLoc $ "ANG|PTG", "|                relação de compras no verso.                                                                                                                                                                             |", "|                RELACAO DE COMPRAS NO VERSO.                                                                                                                                                                             |" )
+aL[24]:="|                                                                                                                                                                                                                         |"
+aL[25]:="|                                                                                                                                                  ________________________________________________________               |"
+aL[26]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                                                                     a s s i n a t u r a   d o   r e s p o n s á v e l                   |", "|                                                                                                                                                     A S S I N A T U R A   D O   R E S P O N S A V E L                   |" )
+aL[27]:="|                                                                                                                                                                                                                         |"
+aL[28]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                                                                 n o m e ________________________________________________                |", "|                                                                                                                                                 N O M E ________________________________________________                |" )
+aL[29]:="|                                                                                                                                                                                                                         |"
+aL[30]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+aL[31]:=If( cPaisLoc $ "ANG|PTG", "|                                          licenças de ácidos , transporte , explosivos , corrosivos                                                                                                                      |", "|                                          LICENCAS DE ACIDOS , TRANSPORTE , EXPLOSIVOS , CORROSIVOS                                                                                                                      |" )
+aL[32]:=If( cPaisLoc $ "ANG|PTG", "|                                          sfpc/2 - exército brasileiro                                                                                                                                                   |", "|                                          SFPC/2 - EXERCITO BRASILEIRO                                                                                                                                                   |" )
+aL[33]:=If( cPaisLoc $ "ANG|PTG", "|                                          dird     - divisão de artigos controlados                                                                                                                                     |", "|                                          DIRD     - DIVISAO DE PRODUTOS CONTROLADOS                                                                                                                                     |" )
+aL[34]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+
+
+Return (aL)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R462LExe()
+Local aL		:= Array(39)
+Local nTamCPro	:= TamSX3("B1_COD")[1]
+Local nTamForn	:= TamSX3("D1_FORNECE")[1]
+
+aL[01]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+aL[02]:=If( cPaisLoc $ "ANG|PTG", "| exmo. sr.                                                                                                                                                                                                               |", "| EXMO. SR.                                                                                                                                                                                                               |" )
+aL[03]:=If( cPaisLoc $ "ANG|PTG", "| general comandante da ##a. região militar - sfpc/2 - são paulo                                                                                                                                                          |", "| GENERAL COMANDANTE DA ##a. REGIAO MILITAR - SFPC/2 - SAO PAULO                                                                                                                                                          |" )
+aL[04]:="|                                                                                                                                                                                                                         |"
+aL[05]:=If( cPaisLoc $ "ANG|PTG", "| a firma  ################################################################# estabelecida a ############################################################### código postal  ########                                                 |", "| A firma  ################################################################# estabelecida a ############################################################### CEP  ########                                                 |" )
+aL[06]:=If( cPaisLoc $ "ANG|PTG", "| telefone #################### fax ################### localidade ############################# concelho ############################ portadora do certificado de registo nr. #################### , válido até ##########     ,  |", "| Fone #################### Fax ################### Bairro ############################# Cidade ############################ portadora do Certificado de Registro No. #################### , valido ate ##########     ,  |" )
+aL[07]:=If( cPaisLoc $ "ANG|PTG", "| pelo seu responsável que abaixo assina, apresenta a v. exa., os mapas de movimento de artigos controlados referente ao ############ trimestre de #### , de acordo com o regulamento autorizado pelo decreto nr. 3665, de  |", "| por seu responsavel que abaixo assina, apresenta a V. Exa., os Mapas do Movimento de produtos controlados referente ao ############ trimestre de #### , de acordo com o regulamento aprovado pelo Decreto No. 3665, de  |" )
+aL[08]:="| 20 de novembro de 2000.                                                                                                                                                                                                 |"
+aL[09]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+aL[10]:=If( cPaisLoc $ "ANG|PTG", "| a) movimento crial                                                                                                                                                                                                      |", "| a) Movimento Geral                                                                                                                                                                                                      |" )
+aL[11]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+If nTamCPro > 15
+	aL[12]:="|                                                              |     SALDO DO     |                  |                  |                  |  VENDAS , PERDAS   |  SALDO QUE PASSA PARA O |  UNIDADES DE                  |"
+	aL[13]:=If( cPaisLoc $ "ANG|PTG", "|                         ARTIGOS                             |     TRIMESTRE    |      COMPRAS     |      SOMA        |     CONSUMO      |  OU TRANSFERENCIAS |    TRIMESTRE SEGUINTE   |  MEDIDAS EM KGS               |", "|                         PRODUTOS                             |     TRIMESTRE    |      COMPRAS     |      SOMA        |     CONSUMO      |  OU TRANSFERENCIAS |    TRIMESTRE SEGUINTE   |  MEDIDAS EM KGS               |" )
+	aL[14]:="|                                                              |     ANTERIOR     |                  |                  |                  |                    |                         |                               |"
+	aL[15]:="|--------------------------------------------------------------+------------------+------------------+------------------+------------------+--------------------+-------------------------+-------------------------------|"
+	aL[16]:="| ############################## ##############################| ################ | ################ | ################ | ################ | ################   |    ################     |  ################             |"
+	aL[17]:="|                                                              |                  |                  |                  |                  |                    |                         |                               |"
+	aL[18]:="|--------------------------------------------------------------+------------------+------------------+------------------+------------------+--------------------+-------------------------+-------------------------------|"
+Else
+	aL[12]:=If( cPaisLoc $ "ANG|PTG", "|                                               |     saldo do     |                  |                  |                  |  vendas , perdas   |  saldo que passa para o | unidades de                                  |", "|                                               |     SALDO DO     |                  |                  |                  |  VENDAS , PERDAS   |  SALDO QUE PASSA PARA O | UNIDADES DE                                  |" )
+	aL[13]:=If( cPaisLoc $ "ANG|PTG", "|                  artigos                     |     trimestre    |      compras     |      soma        |     consumo      |  ou transferências |    trimestre seguinte   | medidas em kgs                               |", "|                  PRODUTOS                     |     TRIMESTRE    |      COMPRAS     |      SOMA        |     CONSUMO      |  OU TRANSFERENCIAS |    TRIMESTRE SEGUINTE   | MEDIDAS EM KGS                               |" )
+	aL[14]:=If( cPaisLoc $ "ANG|PTG", "|                                               |     anterior     |                  |                  |                  |                    |                         |                                              |", "|                                               |     ANTERIOR     |                  |                  |                  |                    |                         |                                              |" )
+	aL[15]:="|-----------------------------------------------+------------------+------------------+------------------+------------------+--------------------+-------------------------+----------------------------------------------|"
+	aL[16]:="| ############### ############################# | ################ | ################ | ################ | ################ | ################   |    ################     |  ################                            |"
+	aL[17]:="|                                               |                  |                  |                  |                  |                    |                         |                                              |"
+	aL[18]:="|-----------------------------------------------+------------------+------------------+------------------+------------------+--------------------+-------------------------+----------------------------------------------|"
+EndIf
+aL[19] :=	If( cPaisLoc $ "ANG|PTG", "| b) relação das compras efectuadas no estado de são paulo                                                                                                                                                                 |", "| b) Relacao das compras efetuadas no estado de Sao Paulo                                                                                                                                                                 |" )
+aL[20] :=	"|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+If nTamCPro > 15
+	aL[21]:=If( cPaisLoc $ "ANG|PTG", "|          |                   FIRMA                   |    M O R A D A    D A   F I R M A   V E N D E D O R A   | GUIA DE  |    FACTURA    |                 |                                                           |", "|          |                   FIRMA                   |    E N D E R E C O   D A   F I R M A   V E N D E D O R A   | GUIA DE  |    NOTA    |                 |                                                           |" )
+	aL[22]:=If( cPaisLoc $ "ANG|PTG", "|   DATA   |                 VENDEDORA                 |------------------------------------------------------------| TRÁFEGO  |            |   QUANTIDADE    |          A R T I G O S     C O M P R A D O S            |", "|   DATA   |                 VENDEDORA                 |------------------------------------------------------------| TRAFEGO  |            |   QUANTIDADE    |          P R O D U T O S     C O M P R A D O S            |" )
+	aL[23]:=If( cPaisLoc $ "ANG|PTG", "|          |                                           |        RUA , NÚMERO E FREGUESIA            |    CONCELHO     |DST| NÚMERO   |   FISCAL   |                 |                                                           |", "|          |                                           |        RUA , NUMERO E BAIRRO            |    CIDADE     |UF| NUMERO   |   FISCAL   |                 |                                                           |" )
+	aL[24]:="|----------+-------------------------------------------+-----------------------------------------+---------------+--+----------+------------+-----------------+-----------------------------------------------------------|"
+	aL[25]:="|##########|#################### #### #################|#########################################|###############|##|##########|############|################ | ############################## ###########################|"
+	aL[39]:="|          |                                           |                                         |               |  |          |            |                 |                                                           |"
+Else
+	aL[21]:=If( cPaisLoc $ "ANG|PTG", "|            |                    firma                    |      m o r a d a   d a   f i r m a   v e n d e d o r a       |   guia de  |     nota     |                  |                                            |", "|            |                    FIRMA                    |      E N D E R E C O   D A   F I R M A   V E N D E D O R A       |   GUIA DE  |     NOTA     |                  |                                            |" )
+	aL[22]:=If( cPaisLoc $ "ANG|PTG", "|    data    |                  vendedora                  |------------------------------------------------------------------|   tráfego  |              |    quantidade    |    a r t i g o s    c o m p r a d o s    |", "|    DATA    |                  VENDEDORA                  |------------------------------------------------------------------|   TRAFEGO  |              |    QUANTIDADE    |    P R O D U T O S    C O M P R A D O S    |" )
+	aL[23]:=If( cPaisLoc $ "ANG|PTG", "|            |                                             |          rua , número e localidade            |     concelho      | distrito |   número   |    fiscal    |                  |                                            |", "|            |                                             |          RUA , NUMERO E BAIRRO            |     CIDADE      | UF |   NUMERO   |    FISCAL    |                  |                                            |" )
+	aL[24]:="|------------+---------------------------------------------+-------------------------------------------+-----------------+----+------------+--------------+------------------+--------------------------------------------|"
+	aL[25]:="| ########## | #################### #### ################# | ######################################### | ############### | ## | ########## | ############ | ################ | ############### ###########################|"
+	aL[39]:="|            |                                             |                                           |                 |    |            |              |                  |                                            |"
+EndIf
+If nTamForn <= 8 .And.  nTamCPro <= 15
+	aL[25]:="| ########## | ######## #### ############################# | ######################################### | ############### | ## | ########## | ############ | ################ | ############### ###########################|"
+EndIf
+aL[26]:=If( cPaisLoc $ "ANG|PTG", "| c) relação das compras efectuadas noutros distritos                                                                                                                                                                      |", "| c) Relacao das compras efetuadas em outros estados                                                                                                                                                                      |" )
+aL[27]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+aL[28]:=If( cPaisLoc $ "ANG|PTG", "| atenção: prazo improrrogável para entrega até ao                                                                                                                                                                         |", "| ATENCAO: Prazo improrrogavel para entrega ate o                                                                                                                                                                         |" )
+aL[29]:=If( cPaisLoc $ "ANG|PTG", "|          dia 5 após o vencimento do trimestre.                                                                                                                                                                          |", "|          dia 5 apos o vencimento do trimestre.                                                                                                                                                                          |" )
+aL[30]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                                                                 ######################### ## de ############# de ####                   |", "|                                                                                                                                                 ######################### ## DE ############# DE ####                   |" )
+aL[31]:="|                                                                                                                                                                                                                         |"
+aL[32]:="|                                                                                                                                                                                                                         |"
+aL[33]:="|                                                                                                                                                  ________________________________________________________               |"
+aL[34]:=If( cPaisLoc $ "ANG|PTG", "|                                                                                                                                                     a s s i n a t u r a   d o   r e s p o n s á v e l                   |", "|                                                                                                                                                     A S S I N A T U R A   D O   R E S P O N S A V E L                   |" )
+aL[35]:="|                                                                                                                                                                                                                         |"
+aL[36]:=If( cPaisLoc $ "ANG|PTG", "| obs: fazer em 4 vias                                                                                                                            n o m e ________________________________________________                |", "| Obs: Fazer em 4 vias                                                                                                                            N O M E ________________________________________________                |" )
+aL[37]:="|                                                                                                                                                                                                                         |"
+aL[38]:="|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|"
+Return (aL)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R462Cabec(nLin,nTipo,aMesOrd,aL)
+Local cPicCgc
+If  cPaisLoc=="ARG"
+	cPicCgc	:="@R 99-99.999.999-9"
+ElseIf cPaisLoc == "CHI"
+	cPicCgc	:="@R XX.999.999-X"
+ElseIf cPaisLoc $ "POR|EUA"
+	cPicCgc	:=PesqPict("SA2","A2_CGC")
+Else
+	cPicCgc	:="@R 99.999.999/9999-99"
+EndIf
+
+
+If nTipo == 1 .Or.  nTipo == 5 .Or.  nTipo == 6
+	nLin:=1
+	PrintOut(00,00,AvalImp(220),,)
+	If nTipo == 1 .Or.  nTipo == 5
+		FmtLin(,aL[01],,,@nLin)
+		FmtLin(,aL[02],,,@nLin)
+		FmtLin(,aL[03],,,@nLin)
+		FmtLin(,aL[04],,,@nLin)
+		FmtLin({aMesOrd[mv_par09],Str(Year(dDataBase),4,0)},aL[05],,,@nLin)
+		FmtLin(,aL[06],,,@nLin)
+		FmtLin({SM0->M0_NOMECOM,InscrEst()},aL[07],,,@nLin)
+		FmtLin({SM0->M0_ENDCOB,Transform(SM0->M0_CGC,cPicCgc)},aL[08],,,@nLin)
+		FmtLin({SM0->M0_CIDCOB,SM0->M0_CEPCOB},aL[09],,,@nLin)
+		FmtLin({SM0->M0_TEL},aL[10],,,@nLin)
+		FmtLin(,aL[11],,,@nLin)
+	EndIf
+	FmtLin(,aL[12],,,@nLin)
+	FmtLin(,aL[13],,,@nLin)
+	FmtLin(,aL[14],,,@nLin)
+	FmtLin(,aL[15],,,@nLin)
+	FmtLin(,aL[16],,,@nLin)
+
+ElseIf nTipo == 2 .Or.  nTipo == 7
+	FmtLin(,aL[19],,,@nLin)
+	FmtLin(,aL[20],,,@nLin)
+	FmtLin(,aL[21],,,@nLin)
+	FmtLin({SM0->M0_CIDCOB,StrZero(Day(dDataBase),2,0),MesExtenso(Month(dDataBase)),Str(Year(dDataBase),4,0)},aL[22],,,@nLin)
+	FmtLin(,aL[23],,,@nLin)
+	FmtLin(,aL[24],,,@nLin)
+	FmtLin(,aL[25],,,@nLin)
+	FmtLin(,aL[26],,,@nLin)
+	FmtLin(,aL[27],,,@nLin)
+	FmtLin(,aL[28],,,@nLin)
+	FmtLin(,aL[29],,,@nLin)
+	FmtLin(,aL[30],,,@nLin)
+	nLin:=80
+
+ElseIf nTipo == 3
+	nLin:=1
+	PrintOut(00,00,AvalImp(220),,)
+	FmtLin(,aL[30],,,@nLin)
+	FmtLin(,aL[31],,,@nLin)
+	FmtLin(,aL[32],,,@nLin)
+	FmtLin(,aL[33],,,@nLin)
+	FmtLin(,aL[34],,,@nLin)
+	FmtLin(,aL[35],,,@nLin)
+	FmtLin(,aL[36],,,@nLin)
+
+ElseIf nTipo == 4
+	FmtLin(,aL[40],,,@nLin)
+	FmtLin(,aL[41],,,@nLin)
+	FmtLin(,aL[42],,,@nLin)
+	FmtLin(,aL[43],,,@nLin)
+	FmtLin(,aL[44],,,@nLin)
+	nLin:=80
+
+ElseIf nTipo == 8
+	FmtLin(,aL[30],,,@nLin)
+	FmtLin(,aL[31],,,@nLin)
+	FmtLin(,aL[32],,,@nLin)
+	FmtLin(,aL[33],,,@nLin)
+	FmtLin(,aL[34],,,@nLin)
+	nLin:=80
+
+ElseIf nTipo == 9 .Or.  nTipo == 11
+	nLin:=1
+	PrintOut(00,00,AvalImp(220),,)
+	If nTipo == 9
+		FmtLin(,aL[01],,,@nLin)
+		FmtLin(,aL[02],,,@nLin)
+		FmtLin({Str(mv_par13,2)},aL[03],,,@nLin)
+		FmtLin(,aL[04],,,@nLin)
+		FmtLin({SM0->M0_NOMECOM,SM0->M0_ENDCOB,SM0->M0_CEPCOB},aL[05],,,@nLin)
+		FmtLin({SM0->M0_TEL,SM0->M0_FAX,SM0->M0_BAIRCOB,SM0->M0_CIDCOB,mv_par14,DTOC(mv_par15)},aL[06],,,@nLin)
+		FmtLin({aMesOrd[mv_par09],Str(Year(dDataBase),4,0)},aL[07],,,@nLin)
+		FmtLin(,aL[08],,,@nLin)
+	EndIf
+	FmtLin(,aL[09],,,@nLin)
+	FmtLin(,aL[10],,,@nLin)
+	FmtLin(,aL[11],,,@nLin)
+	FmtLin(,aL[12],,,@nLin)
+	FmtLin(,aL[13],,,@nLin)
+	FmtLin(,aL[14],,,@nLin)
+	FmtLin(,aL[15],,,@nLin)
+
+ElseIf	nTipo == 10
+	FmtLin(,aL[27],,,@nLin)
+	FmtLin(,aL[28],,,@nLin)
+	FmtLin(,aL[29],,,@nLin)
+	FmtLin({SM0->M0_CIDCOB,StrZero(Day(dDataBase),2,0),MesExtenso(Month(dDataBase)),Str(Year(dDataBase),4,0)},aL[30],,,@nLin)
+	FmtLin(,aL[31],,,@nLin)
+	FmtLin(,aL[32],,,@nLin)
+	FmtLin(,aL[33],,,@nLin)
+	FmtLin(,aL[34],,,@nLin)
+	FmtLin(,aL[35],,,@nLin)
+	FmtLin(,aL[36],,,@nLin)
+	FmtLin(,aL[37],,,@nLin)
+	FmtLin(,aL[38],,,@nLin)
+	nLin:=80
+ElseIf nTipo == 12
+	nLin:=1
+	PrintOut(00,00,AvalImp(220),,)
+	FmtLin(,aL[20],,,@nLin)
+	FmtLin(,aL[19],,,@nLin)
+	FmtLin(,aL[20],,,@nLin)
+	FmtLin(,aL[21],,,@nLin)
+	FmtLin(,aL[22],,,@nLin)
+	FmtLin(,aL[23],,,@nLin)
+	FmtLin(,aL[24],,,@nLin)
+ElseIf nTipo == 13 .Or.  nTipo == 14
+	If nTipo == 14
+		nLin:=1
+		PrintOut(00,00,AvalImp(220),,)
+	EndIf
+	FmtLin(,aL[20],,,@nLin)
+	FmtLin(,aL[26],,,@nLin)
+	FmtLin(,aL[27],,,@nLin)
+	FmtLin(,aL[21],,,@nLin)
+	FmtLin(,aL[22],,,@nLin)
+	FmtLin(,aL[23],,,@nLin)
+	FmtLin(,aL[24],,,@nLin)
+EndIf
+Return (NIL)

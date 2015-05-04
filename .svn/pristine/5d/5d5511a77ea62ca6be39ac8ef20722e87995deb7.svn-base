@@ -1,0 +1,1585 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FATR010.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\fatr010.prx"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "PROTHEUS.CH"
+#line 3 "d:\totvs 11\microsiga\protheus\my projects\materiais\fatr010.prx"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function FATR010()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And.  TRepInUse()
+
+
+
+	oReport := ReportDef()
+	oReport:PrintDialog()
+Else
+	FATR010R3()
+EndIf
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportDef()
+
+Local oReport
+Local oOportunidade
+Local oConcorrentes
+Local oParceiros
+Local oTime
+Local oContatos
+Local oEvolucaoVenda
+Local nTamProd  := TamSX3("AD1_CODPRO")[1]
+
+
+
+
+
+
+
+
+
+
+
+
+oReport := TReport():New("FATR010",If( cPaisLoc $ "ANG|PTG", "Relação De Oportunidades", "Relacao de Oportunidades" ),"FTR010", {|oReport| ReportPrint(oReport)},If( cPaisLoc $ "ANG|PTG", "Este relatório irá imprimir a relação de oportunidades de venda conforme os parâmetros pedidos", "Este relatorio ira imprimir a relacao de oportunidades de venda conforme os parametros solicitados" ))
+oReport:SetLandscape()
+oReport:SetTotalInLine( .T. )
+Pergunte(oReport:uParam, .F. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+If ( AliasInDic("AIJ") .AND.  AIJ->(FieldPos("AIJ_NROPOR")) > 0 )
+	oOportunidade := TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Oportunidade De Venda", "Oportunidade de Venda" ),{"AD1","SA3","SUS","AC1","AC2","AIJ"},{"Oportunidades","Prospects",If( cPaisLoc $ "ANG|PTG", "Artigos", "Produtos" ),"Representantes",If( cPaisLoc $ "ANG|PTG", "Processo De Venda", "Processo de Venda" ),If( cPaisLoc $ "ANG|PTG", "Evolução da venda", "Evolução da Venda" )},,,,,,,,,,,, .T. )
+Else
+	oOportunidade := TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Oportunidade De Venda", "Oportunidade de Venda" ),{"AD1","SA3","SUS","AC1","AC2"},{"Oportunidades","Prospects",If( cPaisLoc $ "ANG|PTG", "Artigos", "Produtos" ),"Representantes",If( cPaisLoc $ "ANG|PTG", "Processo De Venda", "Processo de Venda" )},,,,,,,,,,,, .T. )
+EndIf
+
+
+oOportunidade:SetTotalInLine( .F. )
+
+TRCell():New(oOportunidade,"AD1_NROPOR","AD1",If( cPaisLoc $ "ANG|PTG", "Código", "Codigo" )	   ,,			,,)
+TRCell():New(oOportunidade,"AD1_REVISA","AD1",If( cPaisLoc $ "ANG|PTG", "Rev.", "Rev" )	   ,,			,,)
+TRCell():New(oOportunidade,"AD1_DESCRI","AD1",,,20		,,)
+TRCell():New(oOportunidade,"AD1_VEND"  ,"AD1",,,			,,)
+TRCell():New(oOportunidade,"A3_NOME"   ,"SA3",,,20		,,)
+TRCell():New(oOportunidade,"US_COD"    ,"SUS",,,			,,)
+TRCell():New(oOportunidade,"US_LOJA"   ,"SUS",,,			,,)
+TRCell():New(oOportunidade,"US_NOME"   ,"SUS",,,			,,)
+TRCell():New(oOportunidade,"AD1_PROVEN","AD1",,,			,,)
+TRCell():New(oOportunidade,"AC1_DESCRI","AC1",,,15			,,)
+TRCell():New(oOportunidade,"AD1_STAGE" ,"AD1",,,			,,)
+TRCell():New(oOportunidade,"AC2_DESCRI","AC2",,, 			,,)
+TRCell():New(oOportunidade,"AD1_VERBA" ,"AD1",,,  			,,)
+TRCell():New(oOportunidade,"AD1_MOEDA" ,"AD1",,, 			,,)
+TRCell():New(oOportunidade,"AD1_CODPRO","AD1",,,TamSx3("AD1_CODPRO")[1]	,,)
+TRCell():New(oOportunidade,"AD1_STATUS","AD1",,,  			,,)
+
+
+TRFunction():New(oOportunidade:Cell("AD1_VERBA"),,"SUM",,"Total / Verba",,, .F. ,,)
+TRFunction():New(oOportunidade:Cell("AD1_NROPOR"),,"COUNT",,"Total / Oportunidade",,, .F. , .T. ,)
+
+oConcorrentes := TRSection():New(oOportunidade,"Concorrentes",{"AD3","AC3"},,,)
+oConcorrentes:SetTotalInLine( .F. )
+TRCell():New(oConcorrentes,"AD3_CODCON","AD3",,,,,)
+TRCell():New(oConcorrentes,"AC3_NOME"  ,"AC3",,,,,)
+
+oParceiros := TRSection():New(oOportunidade,"Parceiros",{"AD4","AC4"},,,)
+oParceiros:SetTotalInLine( .F. )
+TRCell():New(oParceiros,"AD4_PARTNE","AD4",,,,,)
+TRCell():New(oParceiros,"AC4_NOME"  ,"AC4",,,,,)
+
+oTime := TRSection():New(oOportunidade,If( cPaisLoc $ "ANG|PTG", "Time De Vendas", "Time de Vendas" ),{"AD2","SA3"},,,)
+oTime:SetTotalInLine( .F. )
+TRCell():New(oTime,"AD2_VEND" ,"AD2",,,,,)
+TRCell():New(oTime,"A3_NOME"  ,"SA3",,,,,)
+
+oContatos := TRSection():New(oOportunidade,If( cPaisLoc $ "ANG|PTG", "Contactos", "Contatos" ),{"AD9","SU5"},,,)
+oContatos:SetTotalInLine( .F. )
+TRCell():New(oContatos,"AD9_CODCON" ,"AD9",,,,,)
+TRCell():New(oContatos,"U5_CONTAT"  ,"SU5",,,,,)
+
+If ( AliasInDic("AIJ") .AND.  AIJ->(FieldPos("AIJ_NROPOR")) > 0 )
+	oEvolucaoVenda := TRSection():New(oOportunidade,If( cPaisLoc $ "ANG|PTG", "Evolução da venda", "Evolução da Venda" ),{"AIJ"},,,)
+	oEvolucaoVenda:SetTotalInLine( .F. )
+	TRCell():New(oEvolucaoVenda,"AIJ_PROVEN","AIJ",,,,,)
+	TRCell():New(oEvolucaoVenda,"AIJ_STAGE","AIJ",,,,,)
+	TRCell():New(oEvolucaoVenda,"AIJ_DTINIC","AIJ",,,,,)
+	TRCell():New(oEvolucaoVenda,"AIJ_HRINIC","AIJ",,,,,)
+	TRCell():New(oEvolucaoVenda,"AIJ_DTLIMI","AIJ",,,,,)
+	TRCell():New(oEvolucaoVenda,"AIJ_HRLIMI","AIJ",,,,,)
+	TRCell():New(oEvolucaoVenda,"AIJ_DTENCE","AIJ",,,,,)
+	TRCell():New(oEvolucaoVenda,"AIJ_HRENCE","AIJ",,,,,)
+
+	TRCell():New(oEvolucaoVenda,"AIJ_DUREST","AIJ",,,,, {|| TKCalcPer(AIJ_DTINIC,AIJ_HRINIC,IIF(!Empty(AIJ_DTENCE),AIJ_DTENCE,dDataBase),IIF(!Empty(AIJ_HRENCE),AIJ_HRENCE,SubStr(Time(),1,5))) })
+	TRCell():New(oEvolucaoVenda,"AIJ_STATUS","AIJ",,,,,{|| FTR10AIJSt(AIJ_PROVEN, AIJ_STAGE, AIJ_DTINIC, AIJ_HRINIC, AIJ_STATUS)  })
+EndIf
+
+
+
+
+If ( AliasInDic("AIJ") .AND.  AIJ->(FieldPos("AIJ_NROPOR")) > 0 )
+	oTotMoeda := TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Oportunidade De Venda", "Oportunidade de Venda" ),{"AD1","SA3","SUS","AC1","AC2","AIJ"},{"Oportunidades","Prospects",If( cPaisLoc $ "ANG|PTG", "Artigos", "Produtos" ),"Representantes",If( cPaisLoc $ "ANG|PTG", "Processo De Venda", "Processo de Venda" ),If( cPaisLoc $ "ANG|PTG", "Evolução da venda", "Evolução da Venda" )},,,,,,,,,,,, .T. )
+Else
+	oTotMoeda := TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Oportunidade De Venda", "Oportunidade de Venda" ),{"AD1","SA3","SUS","AC1","AC2"},{"Oportunidades","Prospects",If( cPaisLoc $ "ANG|PTG", "Artigos", "Produtos" ),"Representantes",If( cPaisLoc $ "ANG|PTG", "Processo De Venda", "Processo de Venda" )},,,,,,,,,,,, .T. )
+EndIf
+
+TRCell():New(oTotMoeda,"AD1_MOEDA" ,"AD1",,,,,)
+TRCell():New(oTotMoeda,"AD1_VERBA" ,"AD1","Total / Verba",,,,)
+
+oTotMoeda:SetLineStyle( .T. )
+oTotMoeda:SetEdit( .F. )
+If nTamProd >=25
+	oOportunidade:SetLineBreak( .T. )
+EndIf
+
+Return(oReport)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportPrint(oReport)
+
+Local cAliasAD1M 	:= "AD1"
+Local cAliasAD1  	:= "AD1"
+Local cAliasAD2  	:= "AD2"
+Local cAliasAD3  	:= "AD3"
+Local cAliasAD4 	:= "AD4"
+Local cAliasAD9 	:= "AD9"
+Local cAliasAIJ  	:= "AIJ"
+Local cWhereA    	:= ""
+Local cWhereB    	:= ""
+Local cWhere    	:= ""
+Local lQuery    	:= .F. 
+Local aIndexKey 	:= {}
+Local bMais     	:= { || .T.  }
+Local bMenos     	:= { || .T.  }
+Local aMoeda 	 	:= {0,0,0,0,0}
+Local nI		  	:= 0
+Local cNomeMoeda	:= ""
+Local cIndice		:= ""
+
+
+
+
+
+AAdd( aIndexKey, "AD1_NROPOR" )
+AAdd( aIndexKey, "AD1_PROSPE,AD1_LOJPRO" )
+AAdd( aIndexKey, "AD1_CODPRO" )
+AAdd( aIndexKey, "AD1_VEND" )
+AAdd( aIndexKey, "AD1_PROVEN,AD1_STAGE" )
+
+
+
+
+MakeSqlExpr(oReport:uParam)
+
+
+
+If MV_PAR19 == 1
+	bMais    := { || .T.  }
+	cWhereA  += ""
+Else
+	If MV_PAR19 <> 5
+		bMais    := { || AD1->AD1_STATUS == Str( MV_PAR19 - 1, 1 ) }
+		cWhereA := "AD1_STATUS='" + Str( MV_PAR19 - 1, 1 ) + "' AND "
+	Else
+		cWhereA := "AD1_STATUS='9' AND "
+	EndIf
+EndIf
+
+If MV_PAR20 == 1
+	bMenos  := { || .T.  }
+	cWhereB := ""
+Else
+	If MV_PAR20 <> 5
+		bMenos    := { || AD1->AD1_STATUS<>Str( MV_PAR20 - 1, 1 ) }
+		cWhereB   := "AD1_STATUS<>'" + Str( MV_PAR20 - 1, 1 ) + "' AND "
+	Else
+		bMenos    := { || AD1->AD1_STATUS<>"9" }
+		cWhereB   := "AD1_STATUS<>'9' AND "
+	EndIf
+EndIf
+cWhere := "%"+cWhereA+cWhereB+"%"
+
+
+
+
+
+
+	cIndice := (aIndexKey[oReport:Section(1):nOrder])
+	cIndice := "%"+ cIndice + "%"
+
+	lQuery := .T. 
+	cAliasAD1 := GetNextAlias()
+	oReport:Section(1):BeginQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasAD1," SELECT AD1.* FROM  "+RetSqlName('AD1')+" AD1 WHERE AD1_FILIAL= '" +xFilial('AD1')+"'  AND AD1_PROSPE>= "+___SQLGetValue(MV_PAR01)+" AND AD1_PROSPE<= "+___SQLGetValue(MV_PAR03)+" AND AD1_LOJPRO>= "+___SQLGetValue(MV_PAR02)+" AND AD1_LOJPRO<= "+___SQLGetValue(MV_PAR04)+" AND AD1_VEND >= "+___SQLGetValue(MV_PAR05)+" AND AD1_VEND <= "+___SQLGetValue(MV_PAR06)+" AND AD1_DTINI >= "+___SQLGetValue(DTOS(MV_PAR07))+" AND AD1_DTFIM <= "+___SQLGetValue(DTOS(MV_PAR08))+" AND AD1_PROVEN>= "+___SQLGetValue(MV_PAR09)+" AND AD1_PROVEN<= "+___SQLGetValue(MV_PAR11)+" AND AD1_STAGE >= "+___SQLGetValue(MV_PAR10)+" AND AD1_STAGE <= "+___SQLGetValue(MV_PAR12)+" AND AD1_CODPRO>= "+___SQLGetValue(MV_PAR13)+" AND AD1_CODPRO<= "+___SQLGetValue(MV_PAR14)+" AND AD1.D_E_L_E_T_= ' ' AND  "+___SQLGetValue(CWHERE)+" ( AD1_CODPRO= "+___SQLGetValue(SPACE( LEN( AD1->AD1_CODPRO ) ))+" OR EXISTS ( SELECT B1_COD FROM  "+RetSqlName('SB1')+" SB1 WHERE B1_FILIAL= '" +xFilial('SB1')+"'  AND B1_COD=AD1_CODPRO AND B1_TIPO>= "+___SQLGetValue(MV_PAR15)+" AND B1_TIPO<= "+___SQLGetValue(MV_PAR16)+" AND B1_GRUPO>= "+___SQLGetValue(MV_PAR17)+" AND B1_GRUPO<= "+___SQLGetValue(MV_PAR18)+" AND SB1.D_E_L_E_T_= ' ' ) ) ORDER BY  "+___SQLGetValue(CINDICE),{},.F.)
+
+
+
+
+
+
+
+
+
+	oReport:Section(1):EndQuery()
+
+
+
+	lQuery := .T. 
+	cAliasAD3 := GetNextAlias()
+	AD3->(dbSetOrder(1))
+	oReport:Section(1):Section(1):BeginQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasAD3," SELECT AD3_CODCON, AC3_NOME FROM  "+RetSqlName('AD3')+" AD3, "+RetSqlName('AC3')+" AC3 WHERE AD3_FILIAL= '" +xFilial('AD3')+"'  AND AD3_NROPOR=%report_param: (cAliasAD1)->AD1_NROPOR% AND AD3_REVISA=%report_param: (cAliasAD1)->AD1_REVISA% AND AD3.D_E_L_E_T_= ' ' AND AC3_FILIAL= '" +xFilial('AC3')+"'  AND AD3_CODCON=AC3_CODCON AND AC3.D_E_L_E_T_= ' ' ORDER BY  "+ SqlOrder(AD3->(IndexKey())),{},.F.)
+	oReport:Section(1):Section(1):EndQuery(); If oReport:Section(1):Section(1):bCompQuery <> NIL; oReport:Section(1):Section(1):bRealQuery := {|__section| __runcb(__section:bCompQuery, .T. )}; EndIf
+
+
+
+	lQuery := .T. 
+	cAliasAD4 := GetNextAlias()
+	AD4->(dbSetOrder(1))
+	oReport:Section(1):Section(2):BeginQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasAD4," SELECT AD4_PARTNE, AC4_NOME FROM  "+RetSqlName('AD4')+" AD4,  "+RetSqlName('AC4')+" AC4 WHERE AD4_FILIAL= '" +xFilial('AD4')+"'  AND AD4_NROPOR=%report_param: (cAliasAD1)->AD1_NROPOR% AND AD4_REVISA=%report_param: (cAliasAD1)->AD1_REVISA% AND AD4.D_E_L_E_T_= ' ' AND AC4_FILIAL= '" +xFilial('AC4')+"'  AND AD4_PARTNE=AC4_PARTNE AND AC4.D_E_L_E_T_= ' ' ORDER BY  "+ SqlOrder(AD4->(IndexKey())),{},.F.)
+	oReport:Section(1):Section(2):EndQuery(); If oReport:Section(1):Section(2):bCompQuery <> NIL; oReport:Section(1):Section(2):bRealQuery := {|__section| __runcb(__section:bCompQuery, .T. )}; EndIf
+
+
+
+	lQuery := .T. 
+	cAliasAD2 := GetNextAlias()
+	AD2->(dbSetOrder(1))
+	oReport:Section(1):Section(3):BeginQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasAD2," SELECT AD2_VEND, A3_NOME FROM  "+RetSqlName('AD2')+" AD2,  "+RetSqlName('SA3')+" SA3 WHERE AD2_FILIAL= '" +xFilial('AD2')+"'  AND AD2_NROPOR=%report_param: (cAliasAD1)->AD1_NROPOR% AND AD2_REVISA=%report_param: (cAliasAD1)->AD1_REVISA% AND AD2.D_E_L_E_T_= ' ' AND A3_FILIAL= '" +xFilial('SA3')+"'  AND AD2_VEND=A3_COD AND SA3.D_E_L_E_T_= ' ' ORDER BY  "+ SqlOrder(AD2->(IndexKey())),{},.F.)
+	oReport:Section(1):Section(3):EndQuery(); If oReport:Section(1):Section(3):bCompQuery <> NIL; oReport:Section(1):Section(3):bRealQuery := {|__section| __runcb(__section:bCompQuery, .T. )}; EndIf
+
+
+
+	lQuery := .T. 
+	cAliasAD9 := GetNextAlias()
+	AD9->(dbSetOrder(1))
+	oReport:Section(1):Section(4):BeginQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasAD9," SELECT AD9_CODCON, U5_CONTAT FROM  "+RetSqlName('AD9')+" AD9,  "+RetSqlName('SU5')+" SU5 WHERE AD9_FILIAL= '" +xFilial('AD9')+"'  AND AD9_NROPOR=%report_param: (cAliasAD1)->AD1_NROPOR% AND AD9_REVISA=%report_param: (cAliasAD1)->AD1_REVISA% AND AD9.D_E_L_E_T_= ' ' AND U5_FILIAL= '" +xFilial('SU5')+"'  AND AD9_CODCON=U5_CODCONT AND SU5.D_E_L_E_T_= ' ' ORDER BY  "+ SqlOrder(AD9->(IndexKey())),{},.F.)
+	oReport:Section(1):Section(4):EndQuery(); If oReport:Section(1):Section(4):bCompQuery <> NIL; oReport:Section(1):Section(4):bRealQuery := {|__section| __runcb(__section:bCompQuery, .T. )}; EndIf
+
+	If ( AliasInDic("AIJ") .AND.  AIJ->(FieldPos("AIJ_NROPOR")) > 0 )
+
+
+
+		lQuery := .T. 
+		cAliasAIJ := GetNextAlias()
+		AIJ->(dbSetOrder(1))
+		oReport:Section(1):Section(5):BeginQuery()
+
+
+
+
+
+
+
+
+
+__execSql(cAliasAIJ," SELECT AIJ.* FROM  "+RetSqlName('AIJ')+" AIJ WHERE AIJ_FILIAL=%report_param:(cAliasAD1)->AD1_FILIAL% AND AIJ_NROPOR=%report_param:(cAliasAD1)->AD1_NROPOR% AND AIJ_REVISA=%report_param:(cAliasAD1)->AD1_REVISA% AND AIJ.D_E_L_E_T_= ' ' ORDER BY  "+ SqlOrder(AIJ->(IndexKey())),{},.F.)
+		oReport:Section(1):Section(5):EndQuery(); If oReport:Section(1):Section(5):bCompQuery <> NIL; oReport:Section(1):Section(5):bRealQuery := {|__section| __runcb(__section:bCompQuery, .T. )}; EndIf
+	EndIf
+
+
+
+
+
+	lQuery := .T. 
+	cAliasAD1M := GetNextAlias()
+	oReport:Section(2):BeginQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__execSql(cAliasAD1M," SELECT AD1_MOEDA, SUM(AD1_VERBA) AD1_VERBA FROM  "+RetSqlName('AD1')+" AD1 WHERE AD1_FILIAL= '" +xFilial('AD1')+"'  AND AD1_PROSPE>= "+___SQLGetValue(MV_PAR01)+" AND AD1_PROSPE<= "+___SQLGetValue(MV_PAR03)+" AND AD1_LOJPRO>= "+___SQLGetValue(MV_PAR02)+" AND AD1_LOJPRO<= "+___SQLGetValue(MV_PAR04)+" AND AD1_VEND >= "+___SQLGetValue(MV_PAR05)+" AND AD1_VEND <= "+___SQLGetValue(MV_PAR06)+" AND AD1_DTINI >= "+___SQLGetValue(DTOS(MV_PAR07))+" AND AD1_DTFIM <= "+___SQLGetValue(DTOS(MV_PAR08))+" AND AD1_PROVEN>= "+___SQLGetValue(MV_PAR09)+" AND AD1_PROVEN<= "+___SQLGetValue(MV_PAR11)+" AND AD1_STAGE >= "+___SQLGetValue(MV_PAR10)+" AND AD1_STAGE <= "+___SQLGetValue(MV_PAR12)+" AND AD1_CODPRO>= "+___SQLGetValue(MV_PAR13)+" AND AD1_CODPRO<= "+___SQLGetValue(MV_PAR14)+" AND AD1.D_E_L_E_T_= ' ' AND  "+___SQLGetValue(CWHERE)+" ( AD1_CODPRO= "+___SQLGetValue(SPACE( LEN( AD1->AD1_CODPRO ) ))+" OR EXISTS ( SELECT B1_COD FROM  "+RetSqlName('SB1')+" SB1 WHERE B1_FILIAL= '" +xFilial('SB1')+"'  AND B1_COD=AD1_CODPRO AND B1_TIPO>= "+___SQLGetValue(MV_PAR15)+" AND B1_TIPO<= "+___SQLGetValue(MV_PAR16)+" AND B1_GRUPO>= "+___SQLGetValue(MV_PAR17)+" AND B1_GRUPO<= "+___SQLGetValue(MV_PAR18)+" AND SB1.D_E_L_E_T_= ' ' ) ) GROUP BY AD1_MOEDA",{},.F.)
+
+
+
+
+
+
+
+
+	oReport:Section(2):EndQuery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TRPosition():New(oReport:Section(1),"SA3",1,{|| xFilial( "SA3" ) + ( cAliasAD1 )->AD1_VEND })
+TRPosition():New(oReport:Section(1),"SUS",1,{|| xFilial( "SUS" ) + ( cAliasAD1 )->AD1_PROSPE })
+TRPosition():New(oReport:Section(1),"AC1",1,{|| xFilial( "AC1" ) + ( cAliasAD1 )->AD1_PROVEN })
+TRPosition():New(oReport:Section(1),"AC2",1,{|| xFilial( "AC2" ) + ( cAliasAD1 )->AD1_PROVEN + ( cAliasAD1 )->AD1_STAGE })
+oReport:Section(1):Cell("AD1_VERBA" ):SetBlock({|| xMoeda( (cAliasAD1)->AD1_VERBA, (cAliasAD1)->AD1_MOEDA, MV_PAR22, dDataBase ) })
+
+
+
+
+If MV_PAR21 <> 1
+	oReport:Section(1):Section(1):Hide()
+	oReport:Section(1):Section(2):Hide()
+	oReport:Section(1):Section(3):Hide()
+	oReport:Section(1):Section(4):Hide()
+	If ( AliasInDic("AIJ") .AND.  AIJ->(FieldPos("AIJ_NROPOR")) > 0 )
+		oReport:Section(1):Section(5):Hide()
+	EndIf
+EndIf
+oReport:SetMeter((cAliasAD1)->(LastRec()))
+
+oReport:Section(1):Print()
+
+
+	oReport:Section(2):Print()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function FATR010R3()
+
+
+
+Local Titulo  := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Relação De Oportunidades", "Relacao de Oportunidades" ))
+Local cDesc1  := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Este relatório irá imprimir a relação de oportunidades", "Este relatorio ira imprimir a relacao de oportunidades" ) )
+Local cDesc2  := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "De venda de acordo com os parâmetros solicitados", "de venda conforme os parametros solicitados" ) )
+Local cDesc3  := OemToAnsi("")
+
+Local cString    := "AD1"
+Local lDic       := .F. 
+Local lComp      := .T. 
+Local lFiltro    := .T. 
+Local wnrel      := "FATR010"
+Local nomeprog   := "FATR010"
+Local aOrderKey  := {}
+
+Private Tamanho  := "G"
+Private Limite   := 220
+Private aOrdem   := { "Oportunidades", "Prospects", If( cPaisLoc $ "ANG|PTG", "Artigos", "Produtos" ), "Representantes", If( cPaisLoc $ "ANG|PTG", "Processo De Venda", "Processo de Venda" ) }
+Private cPerg    := "FTR010"
+Private aReturn  := { If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ), 1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 1, 2, 1, "",1 }
+
+
+
+
+
+
+
+
+
+
+Private lEnd     := .F. 
+Private m_pag    := 1
+Private nLastKey := 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pergunte(cPerg, .F. )
+
+
+
+
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3,lDic,aOrdem,lComp,Tamanho,lFiltro)
+If ( nLastKey==27 )
+	dbSelectArea(cString)
+	dbSetOrder(1)
+	dbClearFilter()
+	Return
+Endif
+SetDefault(aReturn,cString)
+If ( nLastKey==27 )
+	dbSelectArea(cString)
+	dbSetOrder(1)
+	dbClearFilter()
+	Return
+Endif
+
+RptStatus({|lEnd| ImpDet(@lEnd,wnRel,cString,nomeprog,Titulo)},Titulo)
+
+Return( .T. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ImpDet(lEnd,wnrel,cString,nomeprog,Titulo)
+
+Local aStruct
+Local aIndexKey := {}
+Local aTotVerba := {}
+
+Local bCondFil  := { || .T.  }
+Local bWhile    := { || .T.  }
+Local bSkip     := { || .T.  }
+Local bCondAD1  := { || .T.  }
+
+
+
+
+
+
+Local cCabec1    := If( cPaisLoc $ "ANG|PTG", "Código  Rev. Descrição                      Representante               Prospect                    Processo de Venda           Estágio                          Verba  Verba Md.Base Artigo                   Situação  ", "Codigo  Rev  Descricao                      Representante               Prospect                    Processo de Venda           Estagio                          Verba  Verba Md.Base Produto                   Situacao  " )
+Local cCabec2    := ""
+
+Local cTit1      := ""
+Local cTit2      := ""
+Local cTitulo1   := ""
+Local cTitulo2   := ""
+
+Local cbCont     := 0
+Local cbText     := ""
+
+Local cSeekABD   := ""
+Local cArqInd    := ""
+Local cIndexKey  := ""
+Local cArqTrab   := ""
+Local cIndTrab   := ""
+Local cMemo      := ""
+Local cQuery     := ""
+Local cCond      := ""
+Local cQryMais   := ""
+Local cQryMenos  := ""
+Local bMais      := { || .T.  }
+Local bMenos     := { || .T.  }
+Local cNomeMoeda := ""
+Local cRevisa    := ""
+
+Local dDataAnt   := CtoD("")
+
+Local lImp       := .F. 
+Local lQuery     := .F. 
+
+
+
+
+
+
+
+
+Local nColCCl    := 0
+Local nColNCl    := 0
+Local nColFab    := 0
+Local nColCPr    := 0
+Local nColNpr    := 0
+Local nColLoj    := 0
+Local nVerbaBase := 0
+Local nColDat    := 0
+Local nColDbx    := 0
+Local nOrdem     := aReturn[ 8 ]
+Local nMemCount  := 0
+Local nLoop      := 0
+Local nTotVerba  := 0
+Local nTotOpor   := 0
+Local nColDes    := 0
+
+aIndexKey := {}
+
+AAdd( aIndexKey, "AD1_NROPOR" )
+AAdd( aIndexKey, "AD1_PROSPE+AD1_LOJPRO" )
+AAdd( aIndexKey, "AD1_CODPRO" )
+AAdd( aIndexKey, "AD1_VEND" )
+AAdd( aIndexKey, "AD1_PROVEN+AD1_STAGE" )
+
+Li := 100
+
+dbSelectArea(cString)
+SetRegua(LastRec())
+dbSetOrder(1)
+dbSeek(xFilial())
+
+aStruct := {}
+AAdd( aStruct, { "STATUS" , "C",  1, 0 } )
+
+If MV_PAR19 == 1
+	bMais    := { || .T.  }
+	cQryMais := ""
+Else
+	If MV_PAR19 <> 5
+		bMais    := { || AD1->AD1_STATUS == Str( MV_PAR19 - 1, 1 ) }
+		cQryMais := "AD1_STATUS='" + Str( MV_PAR19 - 1, 1 ) + "' AND "
+	Else
+		cQryMais := "AD1_STATUS='9' AND "
+	EndIf
+EndIf
+
+If MV_PAR20 == 1
+	bMenos    := { || .T.  }
+	cQryMenos := ""
+Else
+	If MV_PAR20 <> 5
+		bMenos    := { || AD1->AD1_STATUS<>Str( MV_PAR19 - 1, 1 ) }
+		cQryMenos := "AD1_STATUS<>'" + Str( MV_PAR19 - 1, 1 ) + "' AND "
+	Else
+		bMenos    := { || AD1->AD1_STATUS<>"9" }
+		cQryMenos := "AD1_STATUS<>'9' AND "
+	EndIf
+EndIf
+
+
+
+	If (TcSrvType()#"AS/400")
+
+
+
+
+		cAliasQry := GetNextAlias()
+
+		cQuery := ""
+
+		cQuery += "SELECT * FROM " + RetSqlName( "AD1" ) + " AD1 "
+
+		cQuery += " WHERE "
+
+		cQuery += "AD1_FILIAL='"              + xFilial( "AD1" )     + "' AND "
+		cQuery += "AD1_PROSPE>='"+MV_PAR01+"' AND "
+		cQuery += "AD1_PROSPE<='"+MV_PAR03+"' AND "
+		cQuery += "AD1_LOJPRO>='"+MV_PAR02+"' AND "
+		cQuery += "AD1_LOJPRO<='"+MV_PAR04+"' AND "
+		cQuery += "AD1_VEND>='"               + MV_PAR05             + "' AND "
+		cQuery += "AD1_VEND<='"               + MV_PAR06             + "' AND "
+		cQuery += "AD1_DTINI>='"              + DToS( MV_PAR07 )     + "' AND "
+		cQuery += "AD1_DTFIM<='"              + DToS( MV_PAR08 )     + "' AND "
+		cQuery += "AD1_PROVEN>='"+MV_PAR09+"' AND "
+		cQuery += "AD1_PROVEN<='"+MV_PAR11+"' AND "
+		cQuery += "AD1_STAGE>='"+MV_PAR10+"' AND "
+		cQuery += "AD1_STAGE<='"+MV_PAR12+"' AND "
+		cQuery += "AD1_CODPRO>='"             + MV_PAR13             + "' AND "
+		cQuery += "AD1_CODPRO<='"             + MV_PAR14             + "' AND "
+
+		cQuery += "AD1.D_E_L_E_T_<>'*' AND "
+
+		cQuery += cQryMais
+		cQuery += cQryMenos
+
+		cQuery += "( AD1_CODPRO='" + Space( Len( AD1->AD1_CODPRO ) ) + "' OR "
+		cQuery += "EXISTS ( SELECT B1_COD FROM " + RetSqlName( "SB1" ) + " SB1 "
+		cQuery += "WHERE "
+
+      cQuery += "B1_COD=AD1_CODPRO AND "
+		cQuery += "B1_FILIAL='"             + xFilial( "SB1" )     + "' AND "
+		cQuery += "B1_TIPO>='"              + MV_PAR15             + "' AND "
+		cQuery += "B1_TIPO<='"              + MV_PAR16             + "' AND "
+		cQuery += "B1_GRUPO>='"             + MV_PAR17             + "' AND "
+		cQuery += "B1_GRUPO<='"             + MV_PAR18             + "' AND "
+
+		cQuery += "SB1.D_E_L_E_T_<>'*' ) )"
+
+		cQuery += "ORDER BY " + SqlOrder( aIndexKey[ nOrdem ] )
+
+		cQuery := ChangeQuery(cQuery)
+
+		dbUseArea( .T. , "TOPCONN", TCGENQRY(,,cQuery), cAliasQry, .F. , .T.  )
+
+		aStruAD1 := AD1->( dbStruct() )
+
+		For nLoop := 1 To Len( aStruAD1 )
+			If aStruAD1[ nLoop, 2 ] <> "C"
+				TcSetField( cAliasQry,AllTrim(aStruAD1[nLoop,1]),aStruAD1[nLoop,2],aStruAD1[nLoop,3],aStruAD1[nLoop,4])
+			EndIf
+		next
+
+		lQuery := .T. 
+
+		bWhile   := { || !( cAliasQry )->( Eof() ) }
+		bSkip    := { || ( cAliasQry )->( dbSkip() ) }
+		bCondAD1 := { || .T.  }
+
+		cAliasOpor := cAliasQry
+
+	Else
+
+
+
+		cArqInd   := GetNextAlias()
+		cIndexKey := aIndexKey[ nOrdem ]
+
+
+
+
+		cCond   := ""
+
+		cCond += "AD1_FILIAL=='"             + xFilial( "AD1" )      + "'.And."
+		cCond += "AD1_PROSPE>='"  + MV_PAR01 + "'.And."
+		cCond += "AD1_PROSPE<='"  + MV_PAR03 + "'.And."
+		cCond += "AD1_LOJPRO>='"  + MV_PAR02 + "'.And."
+		cCond += "AD1_LOJPRO<='"  + MV_PAR04 + "'.And."
+		cCond += "DToS(AD1_DTINI)>='"        + DToS( MV_PAR07 )      + "'.And."
+		cCond += "DToS(AD1_DTFIM)<='"        + DToS( MV_PAR08 )      + "'.And."
+		cCond += "AD1_CODPRO>='"             + MV_PAR13              + "' .And."
+		cCond += "AD1_CODPRO<='"             + MV_PAR14              + "'"
+
+
+
+		bCondAD1 := { || AD1->AD1_VEND >= MV_PAR05 .And.  AD1->AD1_VEND <= MV_PAR06 .And.  AD1->AD1_PROVEN + AD1->AD1_STAGE >= MV_PAR09 + MV_PAR10 .And.  AD1->AD1_PROVEN + AD1->AD1_STAGE <= MV_PAR11 + MV_PAR12 }
+
+		bWhile   := { || !AD1->( Eof() ) }
+		bSkip    := { || AD1->( dbSkip() ) }
+
+		IndRegua( "AD1", cArqInd, cIndexKey, , cCond )
+
+		nIndice := RetIndex( "AD1" ) + 1
+
+		dbSelectArea( "AD1" )
+		AD1->( dbSetIndex( cArqInd + OrdBagExt() ) )
+
+		AD1->( dbSetOrder(nIndice) )
+		AD1->( dbGotop() )
+
+
+		cAliasOpor := "AD1"
+
+
+		EndIf
+
+
+DbSelectArea("AD1")
+
+
+
+
+
+bIf       := { || .T.  }
+
+
+
+
+
+If !Empty( aReturn[7] )
+	cBlockFil := "{ || " + aReturn[ 7 ] + " }"
+	bCondFil  := &cBlockFil
+EndIf
+
+While Eval( bWhile )
+
+	If ( Li > 60 )
+		li:=0
+		cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,If(aReturn[4]==1,15,18))
+		li++
+	Endif
+
+
+		bCondSB1 := { || .T.  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	cCondFil := aReturn[7]
+
+	dbSelectArea( cAliasOpor )
+
+	If Eval( bCondSB1 ) .And.  Eval( bCondAD1 ) .And.  Eval( bCondFil ) .And.  Eval( bMais ) .And.  Eval( bMenos )
+
+		nMoedaOpor := ( cAliasOpor )->AD1_MOEDA
+
+		nVerbaBase := xMoeda( ( cAliasOpor )->AD1_VERBA, nMoedaOpor, MV_PAR22, dDataBase )
+		nTotVerba += nVerbaBase
+
+		If Empty( nScan := AScan( aTotVerba, { |x| x[1] == nMoedaOpor } ) )
+			AAdd( aTotVerba , { nMoedaOpor, ( cAliasOpor )->AD1_VERBA } )
+		Else
+			aTotVerba[ nScan, 2 ] += ( cAliasOpor )->AD1_VERBA
+		EndIf
+
+		nTotOpor++
+
+		cOpor   := ( cAliasOpor )->AD1_NROPOR
+		cRevisa := ( cAliasOpor )->AD1_REVISA
+
+
+
+
+
+
+		PrintOut(li,00,cOpor,,)
+		PrintOut(li,08,cRevisa,,)
+		PrintOut(li,13,Left((cAliasOpor)->AD1_DESCRI,30),,)
+
+		SA3->( dbSetOrder( 1 ) )
+		If SA3->( dbSeek( xFilial( "SA3" ) + ( cAliasOpor )->AD1_VEND ) )
+			PrintOut(li,44,Left(AllTrim(SA3->A3_COD)+"-"+SA3->A3_NOME,27),,)
+		EndIf
+
+		SUS->( dbSetOrder( 1 ) )
+		If SUS->( dbSeek( xFilial( "SUS" ) + ( cAliasOpor )->AD1_PROSPE ) )
+			PrintOut(li,72,Left(AllTrim(SUS->US_COD)+SUS->US_LOJA+"-"+SUS->US_NOME,27),,)
+		EndIf
+
+		AC1->( dbSetOrder( 1 ) )
+		If AC1->( dbSeek( xFilial( "AC1" ) + ( cAliasOpor )->AD1_PROVEN ) )
+			PrintOut(li,100,Left(AllTrim(AC1->AC1_PROVEN)+"-"+AC1->AC1_DESCRI,25),,)
+		EndIf
+
+		AC2->( dbSetOrder( 1 ) )
+		If AC2->( dbSeek( xFilial( "AC2" ) + ( cAliasOpor )->AD1_PROVEN + ( cAliasOpor )->AD1_STAGE ) )
+			PrintOut(li,127,Left(AllTrim(AC2->AC2_STAGE)+"-"+AC2->AC2_DESCRI,25),,)
+		EndIf
+
+		PrintOut(li,152,(cAliasOpor)->AD1_VERBA,PesqPict("AD1","AD1_VERBA",,MV_PAR22)+"("+AllTrim(Str((cAliasOpor)->AD1_MOEDA))+")",)
+
+		PrintOut(li,165,nVerbaBase,PesqPict("AD1","AD1_VERBA",,MV_PAR22),)
+
+		PrintOut(li,183,(cAliasOpor)->AD1_CODPRO,,)
+		PrintOut(li,209,X3Combo("AD1_STATUS",(cAliasOpor)->AD1_STATUS),,)
+
+		If MV_PAR21 == 1
+
+
+
+
+			cMemo     := MSMM(( cAliasOpor )->AD1_CODMEM)
+			nMemCount := MlCount( cMemo, 80 )
+
+			If !Empty( nMemCount )
+				Li+=2
+				PrintOut(Li,nColDes,"Notas:",,)
+				Li++
+				PrintOut(Li,nColDes,Replicate("-",Len("Notas:")),,)
+				Li++
+				For nLoop := 1 To nMemCount
+					cLinha := MemoLine( cMemo, 80, nLoop )
+					PrintOut(Li,nColDes,cLinha,,)
+					Li++
+					If ( Li > 60 )
+						li:=0
+						cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,If(aReturn[4]==1,15,18))
+						li++
+					Endif
+				next
+
+			EndIf
+
+
+
+
+
+			aDadosAD3 := {}
+
+
+
+				If TcSrvType() <> "AS/400"
+
+					cTrabAD3 := GetNextAlias()
+
+					cQuery := ""
+
+					cQuery += "SELECT AD3_CODCON, AC3_NOME FROM " + RetSqlName( "AD3" ) + " AD3, "
+					cQuery += RetSqlName( "AC3" ) + " AC3 "
+					cQuery += "WHERE "
+					cQuery += "AD3_FILIAL='" + xFilial( "AD3" ) + "' AND "
+					cQuery += "AD3_NROPOR='" + cOpor            + "' AND "
+					cQuery += "AD3_REVISA='" + cRevisa          + "' AND "
+					cQuery += "AD3_CODCON=AC3_CODCON AND "
+					cQuery += "AD3.D_E_L_E_T_<>'*' AND "
+
+					cQuery += "AC3_FILIAL='" + xFilial( "AC3" ) + "' AND "
+					cQuery += "AC3.D_E_L_E_T_<>'*' ORDER BY " + SqlOrder( AD3->( IndexKey() ) )
+
+					cQuery := ChangeQuery( cQuery )
+
+					dbUseArea( .T. , "TOPCONN", TcGenQry( ,,cQuery ), cTrabAD3, .F. , .T.  )
+
+					If Alias() == cTrabAD3
+
+						While !Eof()
+							AAdd( aDadosAD3, { AD3_CODCON, AC3_NOME } )
+							dbSkip()
+						EndDo
+
+						dbCloseArea()
+						dbSelectArea( "AD3" )
+
+					EndIf
+				Else
+
+
+
+					AD3->( dbSetOrder( 1 ) )
+
+					cSeekAD3 := xFilial( "AD3" ) + cOpor + cRevisa
+					If AD3->( dbSeek( cSeekAD3 ) )
+ 						While !AD3->( Eof() ) .And.  cSeekAD3 == AD3->AD3_FILIAL + AD3->AD3_NROPOR + AD3->AD3_REVISA
+
+ 						 	AC3->( dbSetOrder( 1 ) )
+ 						    If AC3->( dbSeek( xFilial( "AC3" ) + AD3->AD3_CODCON ) )
+								AAdd( aDadosAD3, { AD3->AD3_CODCON, AC3->AC3_NOME } )
+							EndIf
+
+							AD3->( dbSkip() )
+						EndDo
+			        EndIf
+
+				EndIf
+
+
+            If !Empty( aDadosAD3 )
+
+    			Li+=2
+				PrintOut(Li,nColDes,"Concorrentes:",,)
+				Li++
+				PrintOut(Li,nColDes,Replicate("-",Len("Concorrentes:")),,)
+
+                For nLoop := 1 To Len( aDadosAD3 )
+                  	li++
+               		If ( Li > 60 )
+						li:=0
+						cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,If(aReturn[4]==1,15,18))
+						li++
+					Endif
+					PrintOut(li,00,aDadosAD3[nLoop,1]+" - "+aDadosAD3[nLoop,2],,)
+            	next
+				Li++
+			EndIf
+
+
+
+
+
+
+			aDadosAD4 := {}
+
+
+
+				If TcSrvType() <> "AS/400"
+
+					cTrabAD4 := GetNextAlias()
+
+					cQuery := ""
+
+					cQuery += "SELECT AD4_PARTNE, AC4_NOME FROM " + RetSqlName( "AD4" ) + " AD4, "
+					cQuery += RetSqlName( "AC4" ) + " AC4 "
+					cQuery += "WHERE "
+					cQuery += "AD4_FILIAL='" + xFilial( "AD4" ) + "' AND "
+					cQuery += "AD4_NROPOR='" + cOpor            + "' AND "
+					cQuery += "AD4_REVISA='" + cRevisa          + "' AND "
+					cQuery += "AD4.D_E_L_E_T_<>'*' AND "
+
+					cQuery += "AD4_PARTNE=AC4_PARTNE AND "
+
+					cQuery += "AC4_FILIAL='" + xFilial( "AC4" ) + "' AND "
+					cQuery += "AC4.D_E_L_E_T_<>'*' ORDER BY " + SqlOrder( AD4->( IndexKey() ) )
+
+					cQuery := ChangeQuery( cQuery )
+
+					dbUseArea( .T. , "TOPCONN", TcGenQry( ,,cQuery ), cTrabAD4, .F. , .T.  )
+
+					If Alias() == cTrabAD4
+
+						While !Eof()
+							AAdd( aDadosAD4, { AD4_PARTNE, AC4_NOME } )
+							dbSkip()
+						EndDo
+
+						dbCloseArea()
+						dbSelectArea( "AD4" )
+
+					EndIf
+				Else
+
+
+
+					AD4->( dbSetOrder( 1 ) )
+
+					cSeekAD4 := xFilial( "AD4" ) + cOpor + cRevisa
+					If AD4->( dbSeek( cSeekAD4 ) )
+ 						While !AD4->( Eof() ) .And.  cSeekAD4 == AD4->AD4_FILIAL + AD4->AD4_NROPOR + AD4->AD4_REVISA
+
+ 							AC4->( dbSetOrder( 1 ) )
+							If AC4->( dbSeek( xFilial( "AC4" ) + AD4->AD4_PARTNE ) )
+								AAdd( aDadosAD4, { AD4->AD4_PARTNE, AC4->AC4_NOME } )
+							EndIf
+							AD4->( dbSkip() )
+						EndDo
+			        EndIf
+
+				EndIf
+
+
+            If !Empty( aDadosAD4 )
+
+    			Li++
+				PrintOut(Li,nColDes,"Parceiros:",,)
+				Li++
+				PrintOut(Li,nColDes,Replicate("-",Len("Parceiros:")),,)
+
+                For nLoop := 1 To Len( aDadosAD4 )
+                  	li++
+               		If ( Li > 60 )
+						li:=0
+						cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,If(aReturn[4]==1,15,18))
+						li++
+					Endif
+					PrintOut(li,00,aDadosAD4[nLoop,1]+" - "+aDadosAD4[nLoop,2],,)
+            	next
+			EndIf
+
+
+
+
+
+			aDadosAD2 := {}
+
+
+
+				If TcSrvType() <> "AS/400"
+
+					cTrabAD2 := GetNextAlias()
+
+					cQuery := ""
+
+					cQuery += "SELECT AD2_VEND, A3_NOME FROM " + RetSqlName( "AD2" ) + " AD2, "
+					cQuery += RetSqlName( "SA3" ) + " SA3 "
+					cQuery += "WHERE "
+					cQuery += "AD2_FILIAL='" + xFilial( "AD2" ) + "' AND "
+					cQuery += "AD2_NROPOR='" + cOpor            + "' AND "
+					cQuery += "AD2_REVISA='" + cRevisa          + "' AND "
+					cQuery += "AD2.D_E_L_E_T_<>'*' AND "
+
+					cQuery += "AD2_VEND=A3_COD AND "
+
+					cQuery += "A3_FILIAL='" + xFilial( "SA3" ) + "' AND "
+					cQuery += "SA3.D_E_L_E_T_<>'*' ORDER BY " + SqlOrder( AD2->( IndexKey() ) )
+
+					cQuery := ChangeQuery( cQuery )
+
+					dbUseArea( .T. , "TOPCONN", TcGenQry( ,,cQuery ), cTrabAD2, .F. , .T.  )
+
+					If Alias() == cTrabAD2
+						While !Eof()
+							AAdd( aDadosAD2, { AD2_VEND, A3_NOME } )
+							dbSkip()
+						EndDo
+
+						dbCloseArea()
+						dbSelectArea( "AD2" )
+
+					EndIf
+				Else
+
+
+
+					AD2->( dbSetOrder( 1 ) )
+
+					cSeekAD2 := xFilial( "AD2" ) + cOpor + cRevisa
+					If AD2->( dbSeek( cSeekAD2 ) )
+ 						While !AD2->( Eof() ) .And.  cSeekAD2 == AD2->AD2_FILIAL + AD2->AD2_NROPOR + AD2->AD2_REVISA
+
+ 							SA3->( dbSetOrder( 1 ) )
+ 							If SA3->( dbSeek( xFilial( "SA3" ) + AD2->AD2_VEND ) )
+								AAdd( aDadosAD2, { AD2->AD2_VEND, SA3->A3_NOME } )
+							EndIf
+							AD2->( dbSkip() )
+						EndDo
+			        EndIf
+
+				EndIf
+
+
+            If !Empty( aDadosAD2 )
+
+    			Li+=2
+				PrintOut(Li,nColDes,"Representantes:",,)
+				Li++
+				PrintOut(Li,nColDes,Replicate("-",Len("Representantes:")),,)
+
+                For nLoop := 1 To Len( aDadosAD2 )
+                  	li++
+               		If ( Li > 60 )
+						li:=0
+						cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,If(aReturn[4]==1,15,18))
+						li++
+					Endif
+					PrintOut(li,00,aDadosAD2[nLoop,1]+" - "+aDadosAD2[nLoop,2],,)
+				next
+
+			EndIf
+
+
+
+
+
+			aDadosAD9 := {}
+
+
+
+				If TcSrvType() <> "AS/400"
+
+					cTrabAD9 := GetNextAlias()
+
+					cQuery := ""
+
+					cQuery += "SELECT AD9_CODCON, U5_CONTAT FROM " + RetSqlName( "AD9" ) + " AD9, "
+					cQuery += RetSqlName( "SU5" ) + " SU5 "
+					cQuery += "WHERE "
+					cQuery += "AD9_FILIAL='" + xFilial( "AD9" ) + "' AND "
+					cQuery += "AD9_NROPOR='" + cOpor            + "' AND "
+					cQuery += "AD9_REVISA='" + cRevisa          + "' AND "
+					cQuery += "AD9.D_E_L_E_T_<>'*' AND "
+
+					cQuery += "AD9_CODCON=U5_CODCONT AND "
+
+					cQuery += "U5_FILIAL='" + xFilial( "SU5" ) + "' AND "
+					cQuery += "SU5.D_E_L_E_T_<>'*' "
+
+					cQuery += "ORDER BY " + SqlOrder( AD9->( IndexKey() ) )
+
+					cQuery := ChangeQuery( cQuery )
+
+					dbUseArea( .T. , "TOPCONN", TcGenQry( ,,cQuery ), cTrabAD9, .F. , .T.  )
+
+					If Alias() == cTrabAD9
+						While !Eof()
+							AAdd( aDadosAD9, { AD9_CODCON, U5_CONTAT } )
+							dbSkip()
+						EndDo
+
+						dbCloseArea()
+						dbSelectArea( "AD9" )
+
+					EndIf
+				Else
+
+
+
+					AD9->( dbSetOrder( 1 ) )
+
+					cSeekAD9 := xFilial( "AD9" ) + cOpor + cRevisa
+					If AD9->( dbSeek( cSeekAD9 ) )
+ 						While !AD9->( Eof() ) .And.  cSeekAD9 == AD9->AD9_FILIAL + AD9->AD9_NROPOR + AD9->AD9_REVISA
+
+ 							SU5->( dbSetOrder( 1 ) )
+
+ 							If SU5->( dbSeek( xFilial( "SU5" ) + AD9->AD9_CODCON ) )
+								AAdd( aDadosAD9, { AD9->AD9_CODCON, SU5->U5_CONTAT } )
+							EndIf
+							AD9->( dbSkip() )
+						EndDo
+			        EndIf
+
+
+				EndIf
+
+
+            If !Empty( aDadosAD9 )
+
+    			Li+=2
+				PrintOut(Li,nColDes,If(cPaisLoc$"ANG|PTG","Contactos:","Contatos:"),,)
+				Li++
+				PrintOut(Li,nColDes,Replicate("-",Len(If(cPaisLoc$"ANG|PTG","Contactos:","Contatos:"))),,)
+
+                For nLoop := 1 To Len( aDadosAD9 )
+                  	li++
+               		If ( Li > 60 )
+						li:=0
+						cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,If(aReturn[4]==1,15,18))
+						li++
+					Endif
+					PrintOut(li,00,aDadosAD9[nLoop,1]+" - "+aDadosAD9[nLoop,2],,)
+            	next
+			EndIf
+
+		EndIf
+
+		Li++
+		PrintOut(Li,00,Replicate("-",Limite),,)
+		Li++
+
+	EndIf
+
+	Eval( bSkip )
+
+Enddo
+
+Li+=2
+
+PrintOut(li,00,If(cPaisLoc$"ANG|PTG","Total / oportunidades : ","Total / Oportunidades : ")+AllTrim(Str(nTotOpor)),,)
+Li++
+PrintOut(li,00,If(cPaisLoc$"ANG|PTG","Total / valor ( moeda ","Total / Verba ( moeda ")+Str(MV_PAR22,2)+" ): "+TransForm(nTotVerba,PesqPict("AD1","AD1_VERBA",,MV_PAR22)),,)
+
+li++
+
+
+
+
+
+If !Empty( aTotVerba )
+
+	li++
+	PrintOut(li,00,"Totais por moeda:",,)
+	li++
+
+	ASort( aTotVerba, , , { |x,y| y[1] > x[1] } )
+
+	For nLoop := 1 To Len( aTotVerba )
+		li++
+
+		cNomeMoeda := Capital( AllTrim( GetMV( "MV_MOEDA" + AllTrim( Str( aTotVerba[ nLoop, 1 ] ) ) ) ) )
+
+
+		PrintOut(li,00,If(cPaisLoc$"ANG|PTG","Total / valor ( moeda ","Total / Verba ( moeda ")+Str(aTotVerba[nLoop,1],2)+"-"+cNomeMoeda+" ): "+Transform(aTotVerba[nLoop,2],PesqPict("AD1","AD1_VERBA",,aTotVerba[nLoop,1])),,)
+	next
+EndIf
+
+If ( lImp )
+	Roda(cbCont,cbText,Tamanho)
+EndIf
+
+Set( 20, "SCREEN" )
+Set( 24, "" )
+If ( aReturn[5] = 1 )
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+MS_FLUSH()
+
+
+
+
+
+
+
+
+
+dbSelectArea( "AD1" )
+RetIndex("AD1")
+
+Return( .T. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function FTR10AIJSt(cProVen, cStage, cDtIni, cHrIni, cStatus)
+
+Local aArea 		:= GetArea()
+Local nDtHrLimit	:= 0
+Local nDtHrBase		:= 0
+Local dDtNotif		:= cTod("//")
+Local cHrNotif		:= ""
+Local nDtHrNotif	:= 0
+Local dDtLimit		:= cTod("//")
+Local cHrLimit		:= ""
+Local nHrsInt		:= 0
+Local cRetorno		:= "Em dia"
+
+DbSelectArea("AC2")
+DbSetOrder(1)
+
+If Empty(cStatus)
+
+	If AC2->(DbSeek(xFilial("AC2")+cProVen+cStage))
+
+
+		Ft300LtEst(cDtIni, cHrIni, @dDtLimit,@cHrLimit)
+
+		If ( AC2->AC2_DNOTIF <> 0 .OR.  ( !Empty(AC2->AC2_HNOTIF) .AND.  AC2->AC2_HNOTIF <> "00:00" ) )
+
+			dDtNotif := dDtLimit - AC2->AC2_DNOTIF
+			cHrNotif :=	cHrLimit
+			nHrsInt  := HoraToInt(AC2->AC2_HNOTIF)
+
+			SubtDiaHor(@dDtNotif,@cHrNotif,nHrsInt)
+
+			nDtHrNotif	:= Val(DtoS(dDtNotif)+StrTran(cHrNotif,":",""))
+
+		EndIf
+
+		nDtHrLimit	:= Val(DtoS(dDtLimit)+StrTran(cHrLimit,":",""))
+		nDtHrBase	:= Val(DtoS(dDataBase)+StrTran(SubStr(Time(),1,5),":",""))
+
+
+		If nDtHrLimit <> 0
+			If ( nDtHrNotif <> 0 .AND.  nDtHrBase >=  nDtHrNotif .AND.  nDtHrNotif <= nDtHrLimit .AND.  nDtHrLimit > nDtHrBase  )
+				cRetorno := "Em alerta"
+			ElseIf nDtHrBase > nDtHrLimit
+				cRetorno := "Em atraso"
+			EndIf
+		Else
+			cRetorno := "Em dia"
+		EndIf
+
+	EndIf
+Else
+	cRetorno := X3Combo("AIJ_STATUS",cStatus)
+EndIf
+
+RestArea(aArea)
+
+Return( cRetorno )

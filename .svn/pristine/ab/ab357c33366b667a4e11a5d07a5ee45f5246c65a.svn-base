@@ -1,0 +1,81 @@
+#INCLUDE "RWMAKE.CH"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³PMS103ALT ºAutor  ³Grayson B.Tavares   º Data ³  12/09/09   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Ponto de entrada para alterao dos precos totais de custo e º±±
+±±º          ³de venda                                                    º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Gesto de Projetos                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±D±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+User Function PMA103FI //ALT
+
+cOrc := AF1->AF1_ORCAME
+
+nGTot:=0
+nGCus:=0
+
+dbSelectArea("AF2")
+dbSetorder(1)
+
+AF2->(dbSeek(xFilial("AF2")+cOrc))
+
+While AF2->(!EOF()) .And. AF2->AF2_ORCAME == cOrc
+    
+	RecLock("AF2",.f.)
+	Replace AF2->AF2_TOTCUS With AF2->AF2_CUSTO * AF2->AF2_QUANT
+	Replace AF2->AF2_TOTVEN With AF2->AF2_TOTAL * AF2->AF2_QUANT
+	MsUnlock()
+
+	AF2->(dbSkip())
+EndDo 
+	
+dbSelectArea("AF5")
+dbSetorder(1)
+
+AF5->(dbSeek(xFilial("AF5")+cOrc))
+
+While AF5->(!EOF()) .And. AF5->AF5_ORCAME == cOrc
+
+	nTotAf5 := 0
+	nCusAf5 := 0
+	
+	dbSelectArea("AF2")
+	dbSetOrder(2)
+	AF2->(dbSeek(xFilial("AF2")+AF5->AF5_ORCAME+AF5->AF5_EDT))
+	
+	While AF2->(!EOF()) .And. AF2->AF2_ORCAME == AF5->AF5_ORCAME .And. AF2->AF2_EDTPAI == AF5->AF5_EDT
+		nTotAf5+=AF2->AF2_TOTAL * AF2->AF2_QUANT
+		nCusAf5+=AF2->AF2_CUSTO * AF2->AF2_QUANT
+		AF2->(dbSkip())
+	EndDo
+	
+	Reclock("AF5",.F.)
+	Replace AF5->AF5_TOTCUS With nCusAf5
+	Replace AF5->AF5_TOTVEN With nTotAf5
+	MsUnlock()
+	
+	nGTot+=nTotAf5
+	nGCus+=nCusAf5
+
+	AF5->(dbSkip())
+EndDo
+
+dbSelectArea("AF5")
+dbSetOrder(1)
+If AF5->(dbSeek(xFilial("AF5")+AF1->AF1_ORCAME))
+	Reclock("AF5",.F.)
+	Replace AF5->AF5_TOTCUS With nGCus
+	Replace AF5->AF5_TOTVEN With nGTot
+	MsUnlock()
+EndIF
+
+
+Return .t.

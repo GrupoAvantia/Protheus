@@ -1,0 +1,303 @@
+#INCLUDE "PROTHEUS.CH"
+#include "RWMAKE.ch"
+#include "Colors.ch"
+#include "Font.ch"
+#Include "HBUTTON.CH"
+#include "Topconn.ch"
+#INCLUDE "AP5MAIL.CH"
+#INCLUDE "MSOLE.CH"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³ Funcao    ³ ConvRep ³ Autor ³ Carlos Beltrão     ³ Data ³ 01.04.14    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Descricao ³ Programa para converter layout de arquivos REP para AFD.  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso       ³ Ponto Eletronico                                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+User Function ConvRep()
+Local aArea := GetArea()
+Local oDlg
+Local aArqLidos := {}
+Local aIndSF2   := {}
+Local cCondicao := ""
+Local aCores 		:= {	{	'!Empty(CAD->Arq_OK)', "BR_VERDE"},;
+{ 	'Empty(CAD->Arq_OK)', "BR_VERMELHO"	}}
+Private cDiretorio := SuperGetMV("MV_DIRIMPD",.F.,Space(30))
+Private	Inclui   := .t.
+Private _cExtens   := "Arquivo Texto ( *.TXT ) |*.TXT|"
+Private aRotina  := MenuCRep()
+
+_cRet := cGetFile( _cExtens, "Selecione o Diretorio",,/*'SERVIDOR\'+cDiretorio*/, .F., GETF_NETWORKDRIVE + GETF_LOCALFLOPPY + GETF_LOCALHARD + GETF_RETDIRECTORY )
+_cRet := ALLTRIM( _cRet )
+
+If AllTrim(_cRet) == '\'
+	Return
+Endif
+
+cDiretorio := AllTrim(_cRet)
+If Right(cDiretorio,1) <> '\'
+	cDiretorio += '\'
+Endif
+
+PutMV("MV_DIRIMPD",'SERVIDOR\'+cDiretorio)
+// Pesquisa por Arquivos a serem importados já filtrando empresa
+
+//ADir(cDiretorio+"*.TXT",aArqLidos)
+aArqLidos := Directory(cDiretorio+"*.TXT",'D')
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cria arquivo com ultima posicao do dicionario de contrato.   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+aStruDic := {}
+Aadd(aStruDic,{"Arq_OK"    ,"C",02,0})
+Aadd(aStruDic,{"Arquivos"  ,"C",200,0})
+Aadd(aStruDic,{"Tamanho"   ,"C",30,0})
+Aadd(aStruDic,{"DtArq"     ,"C",30,0})
+Aadd(aStruDic,{"Hora"      ,"C",30,0})
+
+If File("Arqs.DBF")
+	FErase("Arqs.DBF")
+EndIf
+
+dbCreate("Arqs",aStruDic)
+dbUseArea( .T.,,"Arqs","CAD",.F.,.F.)
+
+aSort(aArqLidos)
+
+dbSelectArea("CAD")
+For nI := 1 To Len(aArqLidos)
+	If RecLock("CAD",.t.)
+		CAD->Arquivos := aArqLidos[nI,1]
+		CAD->DtArq 	:= DtoC(aArqLidos[nI,3])
+		CAD->Hora 		:= aArqLidos[nI,4]
+		CAD->Tamanho 	:= AllTrim(Str(aArqLidos[nI,2]))
+		MsUnlock()
+	Endif
+Next
+
+//bFiltraBrw := {|| FilBrowse("TMP",@aIndSF2,@cCondicao) }
+//Eval(bFiltraBrw)
+
+cCadastro := 'Selecionar Arquivo(s) para Conversão.'
+
+/*_cIndex:=Criatrab(Nil,.F.)
+_cChave:="Arquivos"
+Indregua("CAD",_cIndex,_cChave,,,"Ordenando registros selecionados...")
+DbSetIndex(_cIndex+ordbagext()) */
+dbSelectArea("CAD")
+dbGoTop()
+
+aCpos := {}
+AADD(aCpos,{ "Arq_OK"    , "","Marca" })
+AADD(aCpos,{ "Arquivos"   , "", OemToAnsi(cDiretorio/*'Arquivo Para Conversão'*/) }) //"Ord. de Pago"
+//AADD(aCpos,{ "DtArq"   , "", 'Data' }) //"Ord. de Pago"
+//AADD(aCpos,{ "Hora"   , "", 'Hora' }) //"Ord. de Pago"
+//AADD(aCpos,{ "Tamanho"   , "", 'Tamanho' }) //"Ord. de Pago"
+
+MarkBrow("CAD", "Arq_OK",,aCpos,  , GetMark(,"CAD","Arq_OK"),,,,,,,,,aCores)
+
+//	Mbrowse(6,1,22,75,"SF2",,,,,,aCores)
+CAD->(dbCloseArea())
+Ferase("Arqs.DBF")
+
+RestArea(aArea)
+Return
+
+User Function ConvR2()
+
+	local cEOL := chr(13) + chr(10)
+	Local oDlgPedidos
+	Local aArea := GetArea()
+	local cArqSaida
+	local nRecLote
+	local nLenLote
+	local cLin
+	local nContador
+	local cModRelogio
+	local nTotalizador
+	Private aArqLido := {}
+	Private nHdl
+	Private oNF
+	Private oNFChv
+	Private oEmitente
+	Private oIdent
+	Private oDestino
+	Private oTotal
+	Private oTransp
+	Private oDet
+	Private cChvNfe
+	Private oICM
+	Private oIPI
+	Private oFatura
+	Private cEdit1
+	Private _DESCdigit
+	Private _NCMdigit
+	
+	xFilAnt := cFilAnt
+	xEmpAnt	:= cEmpAnt
+	nRecSm0 := SM0->(Recno())
+	
+	dbSelectArea("CAD")
+	Count To nRecs
+	CAD->(dbGoTop())
+	
+	nRecs := CAD->(RecCount())
+	
+	ProcRegua(nRecs)
+	
+	// Loop de Filiais da Empresa
+	CAD->(dbGoTop())
+	While CAD->(!Eof())
+		xEmpAnt := cEmpAnt
+		xFilAnt := cFilAnt
+		If !Empty(CAD->Arq_OK)
+		
+			// ===============================		Verifica se a Nomenclatura do Arquivo Está Correta		========================================
+			If ((Len(Alltrim(CAD->Arquivos)) == 25) .And. (SUBSTR(CAD->Arquivos, 1, 4) == "REP_")) 
+				cModRelogio := SUBSTR(CAD->Arquivos, 5) 	// Carregando o modelo do relogio
+			Else
+				msgAlert("O arquivo selecionado não está com a nomenclatura correta."+chr(13)+Alltrim(CAD->Arquivos), "Atenção.")
+				return
+			EndIf
+		
+			// ===============================		Carregando o Arquivo de Entrada		========================================
+			cFile	:= AllTrim(cDiretorio+CAD->Arquivos) // Arquivo XML da Nota Fiscal Eletronica Marcado
+			nHdl := FT_FUSE(cFile) // Abrir Arquivo 
+			If nHdl == -1
+				MsgAlert("O arquivo de nome "+Alltrim(CAD->Arquivos)+" não pode ser aberto! Verifique os parametros.","Atenção!")
+				CAD->(dbSkip(1));Loop
+			Endif
+			FT_FGOTOP() // INICIO DO BANCO
+			ProcRegua(FT_FLASTREC()) // Quantidade de registro no arquivo
+			aArqLido := {}
+			While ! FT_FEOF()
+				IncProc("Lendo o Arquivo "+Alltrim(CAD->Arquivos))
+				cBuffer := FT_FREADLN()
+				aAdd(aArqLido, cBuffer)
+				FT_FSKIP()
+			EndDo
+			FT_FUSE() // Fechando o Arquivo de Entrada
+			// ==============================		Carregando o Arquivo de Saída		========================================
+			
+			cArqSaida := "C:\Prisma\Ponto\"+cModRelogio
+			nHdl := fCreate(cArqSaida)
+			if nHdl == -1
+				msgAlert("Não foi possível criar o arquivo de saída."+chr(13)+"Favor verificar parâmetros.", "Atenção.")
+			EndIf
+			
+			// ==============================	Primeira Linha do Arquivo			========================================
+			cLin := "0000000001102543302000131            AVANTIA TECNOLOGIA E "
+			cLin += "ENGENHARIA S/A                                            "
+			cLin += "                                                          "
+			cLin += "             "+SUBSTR(cModRelogio,1,17)+"1401201306032014060320141251" + cEOL
+			if fWrite(nHdl, cLin, len(cLin)) != len(cLin)
+				if ! msgAlert("Ocorreu um erro na gravacao da primeira linha no arquivo. Continua?","Atenção.")
+					Return()
+				EndIf
+			EndIf
+			
+			// ==============================	Dados das Batidas			========================================
+			procRegua(Len(aArqLido))
+			nTotalizador := 0
+			nRecLote := 0
+			For nContador:=1 To Len(aArqLido)
+				IncProc("Criando Arquivo "+cModRelogio)
+				cLin := aArqLido[nContador] + cEOL
+				if fWrite(nHdl, cLin, len(cLin)) != len(cLin)
+					if ! msgAlert("Ocorreu um erro na gravacao do arquivo. Continua?","Atenção.")
+						Return()				
+					EndIf
+				EndIf
+				If SUBSTR(cLin, 10, 1) == "3"
+					nTotalizador++
+				EndIf
+				nRecLote++
+			Next
+			
+			// ==============================	Ultima Linha do Arquivo			========================================
+			cLin := "999999999000000001"+PADL(Alltrim(Transform(nTotalizador,"@E 999999999")),9,"0")+"0000000240000000000"
+			if fWrite(nHdl, cLin, len(cLin)) != len(cLin)
+				if ! msgAlert("Ocorreu um erro na gravação da ultima linha no arquivo. Continua?","Atenção.")
+					Return()				
+				EndIf
+			EndIf
+			
+			fClose(nHdl) // Fechando Arquivo de Saída
+		Endif
+		CAD->(dbSkip(1))
+	Enddo
+	CAD->(dbGoTop())
+	cFilAnt := xFilAnt
+	cEmpAnt	:= xEmpAnt
+	RestArea(aArea)
+
+	MsgAlert("Gerado com sucesso","A T E N Ç Ã O !!!")
+
+Return
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³MenuCRep   ³ Autor ³ Ana Paula N. Silva     ³ Data ³08/12/06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Utilizacao de menu Funcional                               ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Array com opcoes da rotina.                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Parametros do array a Rotina:                               ³±±
+±±³          ³1. Nome a aparecer no cabecalho                             ³±±
+±±³          ³2. Nome da Rotina associada                                 ³±±
+±±³          ³3. Reservado                                                ³±±
+±±³          ³4. Tipo de Transa‡„o a ser efetuada:                        ³±±
+±±³          ³		1 - Pesquisa e Posiciona em um Banco de Dados        ³±±
+±±³          ³    2 - Simplesmente Mostra os Campos                       ³±±
+±±³          ³    3 - Inclui registros no Bancos de Dados                 ³±±
+±±³          ³    4 - Altera o registro corrente                          ³±±
+±±³          ³    5 - Remove o registro corrente do Banco de Dados        ³±±
+±±³          ³5. Nivel de acesso                                          ³±±
+±±³          ³6. Habilita Menu Funcional                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Static Function MenuCRep()
+Local aRotina := 	{{ 	"Processa", 	"Processa({|| U_ConvR2() })", 	0, 2, ,.F.},; 	//"Pesquisar"
+					{ 	"Legenda",  	"U_LegConvRep", 					0, 3, ,.F.} } 	// "Legenda"
+
+//					{ "Visualizar", "AxVisual", 0, 2},;      //"Visualizar"
+Return(aRotina)
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³F100LegCx()  ºAutor  Ewerton Tomaz      º Data ³ 16/04/10   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Legenda Tela Caixa º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Vanguarda
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+User Function LegConvRep()
+Local aLegenda := { 	{"BR_VERDE"		, 'Documentos Marcado' },;
+{"BR_VERMELHO"	, 'Documentos Desmarcado' }}
+
+BrwLegenda('Importacao Pedidos de Vendas', 'Legenda', aLegenda) // "Legenda"
+
+Return .T.

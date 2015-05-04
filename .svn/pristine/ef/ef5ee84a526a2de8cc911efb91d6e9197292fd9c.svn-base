@@ -1,0 +1,616 @@
+#INCLUDE "rwmake.ch"
+#INCLUDE "topconn.ch"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ARGR001   º Autor ³ Grayson B.Tavares  º Data ³  16/03/09   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescricao ³ Relatorio de composicoes do projeto                        º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Gestão de Projetos                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+User Function ARGR001
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Declaracao de Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Local cDesc1         := "Este programa tem como objetivo imprimir relatorio "
+Local cDesc2         := "de acordo com os parametros informados pelo usuario."
+Local cDesc3         := "Relação de Composição de Custo"
+Local cPict          := ""
+Local titulo         := "Relação de Composição de Custo"
+Local nLin           := 80
+Local Cabec1         := "Codigo             Descrição                                        Un      Quantidade          Preço          Valor   Perc Data"
+                       //XX 999999999999999 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XX 9999,999.999999 999,999,999.99 999,999,999.99 999.99 99/99/99
+                       //1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+                       //         10        20        30        40        50        60        70        80        90       100       110       120       130
+Local Cabec2         := ""
+Local imprime        := .T.
+Local aOrd           := {}
+Private lEnd         := .F.
+Private lAbortPrint  := .F.
+Private CbTxt        := ""
+Private limite       := 132
+Private tamanho      := "M"
+Private nomeprog     := "ARGR001" // Coloque aqui o nome do programa para impressao no cabecalho
+Private nTipo        := 15
+Private aReturn      := {"Zebrado",1,"Administracao",1,2,1,"",1}
+Private nLastKey     := 0
+Private cPerg        := "ARGR01"
+Private cbtxt        := Space(10)
+Private cbcont       := 00
+Private CONTFL       := 01
+Private m_pag        := 01
+Private wnrel        := "ARGR001"
+
+Private cString      := "AF9"
+
+dbSelectArea("AF9")
+dbSetOrder(1)
+
+ValidPerg(cPerg)
+pergunte(cPerg,.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Monta a interface padrao com o usuario...                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+wnrel := SetPrint(cString,NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.F.,aOrd,.F.,Tamanho,,.F.)
+
+If nLastKey == 27
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+   Return
+Endif
+
+nTipo := If(aReturn[4]==1,15,18)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Processamento. RPTSTATUS monta janela com a regua de processamento. ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+RptStatus({|| RunReport(Cabec1,Cabec2,Titulo,nLin) },Titulo)
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºFun‡„o    ³RUNREPORT º Autor ³ AP6 IDE            º Data ³  16/03/09   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescri‡„o ³ Funcao auxiliar chamada pela RPTSTATUS. A funcao RPTSTATUS º±±
+±±º          ³ monta a janela com a regua de processamento.               º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Programa principal                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
+
+Local nOrdem
+nSltLin := 40
+
+cQuery:="SELECT AF9_FILIAL,AF9_PROJET,AF9_REVISA,AF9_TAREFA,AF8_DESCRI,AF9_DESCRI,AF9_UM,AF9_QUANT, AF9_START,AF9_VATU1,AF9_CUSTO,AF9_BDI,AF9_VALBDI,AF9_TOTAL,AF8_CLIENT,AF8_LOJA "
+cQuery+="FROM "+RetSqlName("AF9")+" AF9, "+RetSqlName("AF8")+" AF8 "
+cQuery+="WHERE AF9.D_E_L_E_T_ <> '*' " 
+cQuery+="AND AF8.D_E_L_E_T_ <> '*' "
+cQuery+="AND AF9_FILIAL = AF8_FILIAL "
+cQuery+="AND AF9_PROJET = AF8_PROJET "
+cQuery+="AND AF9_REVISA = AF8_REVISA "
+cQuery+="AND AF9_PROJET BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' "
+cQuery+="ORDER BY AF9_FILIAL,AF9_PROJET,AF9_REVISA,AF9_TAREFA "
+
+MemoWrite("AGRR001.SQL",cQuery)
+
+TCQuery cQuery NEW ALIAS "XAF9"
+
+dbSelectArea("XAF9")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ SETREGUA -> Indica quantos registros serao processados para a regua ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+SetRegua(RecCount())
+
+_cProjeto := "XXXXXXXXXXXXX"
+_ctarefa  := "XXXXXXXXXXXXX"
+
+XAF9->(dbGoTop())
+
+If mv_par07 == 2
+	nHeight    := 10
+	lBold      := .F.
+	lItalic    := .F.
+	lUnderLine := .F.
+	lPixel     := .T.
+	lPrint     := .F.
+	nLin       := 80
+	nPag       := 0
+	
+	nTamPag    := 2300
+	
+	oFont1  := TFont():New("Arial",,12,,.t.,,,,,.f.)       //Arial/16/Negrito/Italico
+	oFont2  := TFont():New("Arial",,12,,.f.,,,,,.f.)       //Arial/16/Negrito/Italico
+	oFont3  := TFont():New("Courier New",,10,,.t.,,,,,lUnderLine)
+	oFont4  := TFont():New("Arial",,10,,.t.,,,,,.f.)       //Arial/16/Negrito/Italico
+	oFont5  := TFont():New("Arial",,10,,.f.,,,,,.f.)       //Arial/16/Negrito/Italico
+	
+	oPrn:=TMSPrinter():New()
+	oPrn:SetPortrait()
+EndIf
+
+While XAF9->(!EOF())
+
+   //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   //³ Verifica o cancelamento pelo usuario...                             ³
+   //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   If lAbortPrint
+      @nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
+      Exit
+   Endif   
+   
+   If _cProjeto # XAF9->AF9_PROJET
+    	If mv_par07 == 1
+	    	Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+	      	nLin := 8
+	    	
+	    	_cProjeto := XAF9->AF9_PROJET
+	    	_ctarefa  := "XXXXXXXXXXXXX"
+	   	    
+	   		@nLin,00 PSAY "Obra: "+XAF9->AF9_PROJET+"-"+XAF9->AF8_DESCRI
+	   		nLin := nLin+1
+	   		@nLin,00 PSAY "Cliente: "+Posicione("SA1",1,xFilial("AF8")+XAF9->AF8_CLIENT+XAF9->AF8_LOJA,"A1_NOME")
+	   		nLin := nLin+1
+	   		@ nLin,000 PSay __PrtThinLine()
+	   		nLin := nLin+1
+	   	Else
+	   		oPrn:EndPage()     // Finaliza a página		
+			oPrn:StartPage()     // Finaliza a página				   		
+			
+			nLin := 500
+			
+			_cProjeto := XAF9->AF9_PROJET
+	    	_ctarefa  := "XXXXXXXXXXXXX"
+			
+			ImpCab()						
+	   	EndIf	
+   EndIf 
+   
+   //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   //³ Impressao do cabecalho do relatorio. . .                            ³
+   //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   If mv_par07 == 1
+	   If nLin > 55
+	      Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+	      nLin := 8
+	   Endif
+   Else
+   	   If nLin > nTamPag
+		  oPrn:EndPage()     // Finaliza a página		
+		  oPrn:StartPage()     // Finaliza a página				   		
+		  
+		  nLin := 500
+		  
+		  ImpCab()
+       EndIf		
+   EndIf	   
+
+   //Codigo       Descrição                                              
+   //XXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX BDI: 999999.9999 UNIDADE: XX
+   //01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+   //         10        20        30        40        50        60        70        80        90       100       110       120       130
+       
+   If _cTarefa # XAF9->AF9_TAREFA
+   		_cTarefa := XAF9->AF9_TAREFA
+        
+   		dbSelectArea("AFA")
+   		dbSetOrder(1)
+   		If !AFA->(dbSeek(xFilial("AFA")+XAF9->AF9_PROJET+XAF9->AF9_REVISA+XAF9->AF9_TAREFA))
+   			XAF9->(dbSkip())
+   			Loop
+   		EndIf
+   
+   		nBDI := IIf(XAF9->AF9_BDI>0,XAF9->AF9_BDI,mv_par05)
+   		    	
+   		If mv_par07 == 1
+	   		@nLin,00 PSAY XAF9->AF9_TAREFA
+	   		@nLin,19 PSAY Substr(XAF9->AF9_DESCRI,1,45)
+	   		@nLin,68 PSAY "BDI:"+Transform(nBDI,"@E 999999.9999")
+	   		@nLin,85 PSAY "UNIDADE: "+XAF9->AF9_UM
+	   		
+	   		nLin := nLin + 1
+	   		
+	   		If len(alltrim(XAF9->AF9_DESCRI)) > 45   			
+	   			@nLin,19 PSAY Substr(XAF9->AF9_DESCRI,46,45)
+	   			nLin := nLin + 1   		
+	   		EndIf
+	   		
+	   		If len(alltrim(XAF9->AF9_DESCRI)) > 90
+	   			@nLin,19 PSAY Substr(XAF9->AF9_DESCRI,91,45)
+	   			nLin := nLin + 1   		
+	   		EndIf	
+	   		
+	   		nLin := nLin + 1
+	   	Else
+	   		oPrn:Say(nLin,0110,XAF9->AF9_TAREFA,oFont4)
+	   		oPrn:Say(nLin,0360,Substr(XAF9->AF9_DESCRI,1,45),oFont4)
+	   		oPrn:Say(nLin,1400,"BDI:"+Transform(nBDI,"@E 999999.9999"),oFont5)
+	   		oPrn:Say(nLin,1750,"UNIDADE: "+XAF9->AF9_UM,oFont5)
+	   		
+	   		nLin := nLin + nSltLin
+	   		
+	   		If len(alltrim(XAF9->AF9_DESCRI)) > 45   			
+	   			oPrn:Say(nLin,0360,Substr(XAF9->AF9_DESCRI,46,45),oFont4)
+	   			nLin := nLin + nSltLin  		
+	   		EndIf
+	   		
+	   		If len(alltrim(XAF9->AF9_DESCRI)) > 90
+	   			oPrn:Say(nLin,0360,Substr(XAF9->AF9_DESCRI,91,45),oFont4)
+	   			nLin := nLin + nSltLin  		
+	   		EndIf	
+	   		
+	   		nLin := nLin + nSltLin
+	   	EndIf	
+   EndIf
+   
+   cQuery:="SELECT AFA_ITEM,AFA_PRODUT,AFA_QUANT,AFA_CUSTD,AFA_DATPRF,AFA_RECURS,AFA_ENCARG,AFA_CUSTHR "
+   cQuery+="FROM "+RetSqlName("AFA")+" AFA "
+   cQuery+="WHERE AFA.D_E_L_E_T_ <> '*' "   
+   cQuery+="AND AFA_FILIAL = '"+xFilial("AFA")+"' "
+   cQuery+="AND AFA_PROJET = '"+XAF9->AF9_PROJET+"' "
+   cQuery+="AND AFA_REVISA = '"+XAF9->AF9_REVISA+"' "
+   cQuery+="AND AFA_TAREFA = '"+XAF9->AF9_TAREFA+"' "
+   cQuery+="AND AFA_PRODUT <> '' "   
+   cQuery+="ORDER BY AFA_ITEM,AFA_PRODUT"
+
+   MemoWrite("AGRR001_PROD.SQL",cQuery)
+
+   TCQuery cQuery NEW ALIAS "PROD"
+   
+   dbSelectArea("PROD")
+   
+   //Codigo Descrição                                                    Un      Quantidade          Preço          Valor   Perc Data"
+   //XX 999999999999999 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX    XX 9999,999.999999 999,999,999.99 999,999,999.99 999.99 99/99/99
+   //01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+   //         10        20        30        40        50        60        70        80        90       100       110       120       130
+   
+   //                                                      LEIS SOCIAIS ->"
+   //                                                      SUB-TOTAL    ->"
+   //                                                      TOTAL        ->"
+   //                                                      TOTAL COM BDI->"
+   //                                                                       9999,999.999999 999,999,999.99 999,999,999.99 999.99 99/99/99
+   //01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+   //         10        20        30        40        50        60        70        80        90       100       110       120       130
+      
+   nTotPro := 0
+   
+   While PROD->(!EOF())   		
+		
+		nQuant := PROD->AFA_QUANT + ((PROD->AFA_QUANT*mv_par03)/100)
+		
+		If mv_par07 == 1
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		    //³ Impressao do cabecalho do relatorio. . .                            ³
+		    //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		
+		    If nLin > 55
+		       Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+		       nLin := 8
+		    Endif
+	   		   		   		
+	   		@nLin,000 PSAY "MA"   		
+	   		@nLin,003 PSAY PROD->AFA_PRODUT
+	   		@nLin,019 PSAY Substr(Posicione("SB1",1,xFilial("SB1")+PROD->AFA_PRODUT,"B1_DESC"),1,45)
+	   		@nLin,068 PSAY Posicione("SB1",1,xFilial("SB1")+PROD->AFA_PRODUT,"B1_UM")
+	   		@nLin,071 PSAY Transform(nQuant,"@E 9999,999.999999")
+	   		@nLin,087 PSAY Transform(PROD->AFA_CUSTD,"@E 999,999,999.99")
+	   		@nLin,102 PSAY Transform(nQuant*PROD->AFA_CUSTD,"@E 999,999,999.99")
+	   		@nLin,117 PSAY Transform(((nQuant*PROD->AFA_CUSTD)/XAF9->AF9_CUSTO)*100,"@E 999.99")
+	   		@nLin,124 PSAY stod(PROD->AFA_DATPRF)
+   		
+   			nLin := nLin + 1
+   		Else
+	   		If nLin > nTamPag
+			   oPrn:EndPage()     // Finaliza a página		
+			   oPrn:StartPage()     // Finaliza a página				   		
+			   
+			   nLin := 500
+			   
+			   ImpCab()
+	        EndIf
+	        
+	        oPrn:Say(nLin,0110,"MA",oFont5)
+	        oPrn:Say(nLin,0180,PROD->AFA_PRODUT,oFont5)
+	        oPrn:Say(nLin,0360,Substr(Posicione("SB1",1,xFilial("SB1")+PROD->AFA_PRODUT,"B1_DESC"),1,45),oFont5)
+	        oPrn:Say(nLin,1300,Posicione("SB1",1,xFilial("SB1")+PROD->AFA_PRODUT,"B1_UM"),oFont5)
+	        oPrn:Say(nLin,1350,Transform(nQuant,"@E 9999,999.999999"),oFont3)
+	        oPrn:Say(nLin,1600,Transform(PROD->AFA_CUSTD,"@E 999,999,999.99"),oFont3)
+	        oPrn:Say(nLin,1850,Transform(nQuant*PROD->AFA_CUSTD,"@E 999,999,999.99"),oFont3)
+	        oPrn:Say(nLin,2200,Transform(((nQuant*PROD->AFA_CUSTD)/XAF9->AF9_CUSTO)*100,"@E 999.99"),oFont3)
+	        oPrn:Say(nLin,2350,DTOC(stod(PROD->AFA_DATPRF)),oFont5)
+	        
+	        nLin := nLin + nSltLin
+   		EndIf
+   			
+   		nTotPro+=nQuant*PROD->AFA_CUSTD
+   		   		   		   		
+   		PROD->(dbSkip())
+   EndDo
+   
+   If nTotPro > 0
+   		If mv_par07 == 1
+	   		@nLin,050 PSAY "SUB-TOTAL    ->"
+	   		@nLin,102 PSAY Transform(nTotPro,"@E 999,999,999.99")
+	   		@nLin,117 PSAY Transform((nTotPro/XAF9->AF9_CUSTO)*100,"@E 999.99")
+	   		
+	   		nLin := nLin + 1
+	   	Else
+	   		oPrn:Say(nLin,0950,"SUB-TOTAL    ->",oFont5)
+	   		oPrn:Say(nLin,1850,Transform(nTotPro,"@E 999,999,999.99"),oFont3)
+	   		oPrn:Say(nLin,2200,Transform((nTotPro/XAF9->AF9_CUSTO)*100,"@E 999.99"),oFont3)
+	   		
+	   		nLin := nLin + nSltLin
+	   	EndIf	
+   EndIf		
+   
+   dbSelectArea("PROD")
+   dbCloseArea()
+      
+   cQuery:="SELECT AFA_ITEM,AFA_PRODUT,AFA_QUANT,AFA_CUSTD,AFA_DATPRF,AFA_RECURS,AFA_ENCARG,AFA_CUSTHR "
+   cQuery+="FROM "+RetSqlName("AFA")+" AFA "
+   cQuery+="WHERE AFA.D_E_L_E_T_ <> '*' "   
+   cQuery+="AND AFA_FILIAL = '"+xFilial("AFA")+"' "
+   cQuery+="AND AFA_PROJET = '"+XAF9->AF9_PROJET+"' "
+   cQuery+="AND AFA_REVISA = '"+XAF9->AF9_REVISA+"' "
+   cQuery+="AND AFA_TAREFA = '"+XAF9->AF9_TAREFA+"' "
+   cQuery+="AND AFA_RECURS <> '' "   
+   cQuery+="ORDER BY AFA_ITEM,AFA_RECURS"
+
+   MemoWrite("AGRR001_REC.SQL",cQuery)
+
+   TCQuery cQuery NEW ALIAS "REC"
+   
+   nTotRec := 0
+   nTotEnc := 0
+   
+   While REC->(!EOF())
+    	
+    	nQuant  := REC->AFA_QUANT + ((REC->AFA_QUANT*mv_par04)/100)
+	   	nEncarg := IIf(mv_par06>0,mv_par06,REC->AFA_ENCARG)
+    	
+    	If mv_par07 == 1
+	    	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		    //³ Impressao do cabecalho do relatorio. . .                            ³
+		    //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		
+		    If nLin > 55
+		       Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+		       nLin := 8
+		    Endif	   		
+	   		
+	   		@nLin,000 PSAY "MO"
+	   		@nLin,003 PSAY REC->AFA_RECURS
+	   		@nLin,019 PSAY Substr(Posicione("AE8",1,xFilial("AE8")+REC->AFA_RECURS,"AE8_DESCRI"),1,45)
+	   		@nLin,068 PSAY "h"
+	   		@nLin,071 PSAY Transform(nQuant,"@E 9999,999.999999")
+	   		@nLin,087 PSAY Transform(REC->AFA_CUSTD,"@E 999,999,999.99")
+	   		@nLin,102 PSAY Transform(nQuant*REC->AFA_CUSTD,"@E 999,999,999.99")
+	   		@nLin,117 PSAY Transform(((nQuant*REC->AFA_CUSTD)/XAF9->AF9_CUSTO)*100,"@E 999.99")
+	   		@nLin,124 PSAY stod(REC->AFA_DATPRF)	   			   			   			   		
+	   		
+	   		nLin := nLin + 1
+   		Else
+   			If nLin > nTamPag
+			   oPrn:EndPage()     // Finaliza a página		
+			   oPrn:StartPage()     // Finaliza a página				   		
+			   
+			   nLin := 500
+			   
+			   ImpCab()
+	        EndIf
+	        
+	        oPrn:Say(nLin,0110,"MO",oFont5)
+	        oPrn:Say(nLin,0180,REC->AFA_RECURS,oFont5)
+	        oPrn:Say(nLin,0360,Substr(Posicione("AE8",1,xFilial("AE8")+REC->AFA_RECURS,"AE8_DESCRI"),1,45),oFont5)
+	        oPrn:Say(nLin,1300,"h",oFont5)
+	        oPrn:Say(nLin,1350,Transform(nQuant,"@E 9999,999.999999"),oFont3)
+	        oPrn:Say(nLin,1600,Transform(REC->AFA_CUSTD,"@E 999,999,999.99"),oFont3)
+	        oPrn:Say(nLin,1850,Transform(nQuant*REC->AFA_CUSTD,"@E 999,999,999.99"),oFont3)
+	        oPrn:Say(nLin,2200,Transform(((nQuant*REC->AFA_CUSTD)/XAF9->AF9_CUSTO)*100,"@E 999.99"),oFont3)
+	        oPrn:Say(nLin,2350,DTOC(stod(REC->AFA_DATPRF)),oFont5)
+	        
+	        nLin := nLin + nSltLin   		
+   		EndIf
+   		
+   		nTotRec+=nQuant*REC->AFA_CUSTD
+	   	nTotEnc+=nQuant*(nEncarg*AFA_CUSTHR/100)
+   		
+   		REC->(dbSkip())
+   EndDo
+   
+   dbSelectArea("REC")
+   dbCloseArea()
+   
+   If nTotRec > 0  
+	   If mv_par07 == 1
+		   @nLin,050 PSAY "LEIS SOCIAIS ->"
+		   @nLin,102 PSAY Transform(nTotEnc,"@E 999,999,999.99")
+		   @nLin,117 PSAY Transform((nTotEnc/XAF9->AF9_CUSTO)*100,"@E 999.99")
+		   
+		   nLin := nLin + 1
+		   
+		   @nLin,050 PSAY "SUB-TOTAL    ->"
+		   @nLin,102 PSAY Transform(nTotRec,"@E 999,999,999.99")
+		   @nLin,117 PSAY Transform((nTotRec/XAF9->AF9_CUSTO)*100,"@E 999.99")
+		   
+		   nLin := nLin + 1
+       Else
+           oPrn:Say(nLin,0950,"LEIS SOCIAIS ->",oFont5)
+           oPrn:Say(nLin,1850,Transform(nTotEnc,"@E 999,999,999.99"),oFont3)
+           oPrn:Say(nLin,2200,Transform((nTotEnc/XAF9->AF9_CUSTO)*100,"@E 999.99"),oFont3)
+           
+           nLin := nLin + nSltLin
+           
+           oPrn:Say(nLin,0950,"SUB-TOTAL    ->",oFont5)
+           oPrn:Say(nLin,1850,Transform(nTotRec,"@E 999,999,999.99"),oFont3)
+           oPrn:Say(nLin,2200,Transform((nTotRec/XAF9->AF9_CUSTO)*100,"@E 999.99"),oFont3)
+           
+           nLin := nLin + nSltLin
+	   EndIf	   
+   EndIf
+   
+   If mv_par07 == 1
+	   nLin := nLin + 1
+	   
+	   @nLin,050 PSAY "TOTAL        ->"
+	   @nLin,102 PSAY Transform(nTotPro+nTotRec,"@E 999,999,999.99")
+	   @nLin,117 PSAY Transform(((nTotPro+nTotRec)/XAF9->AF9_CUSTO)*100,"@E 999.99")
+	   
+	   nLin := nLin + 1
+	   
+	   @nLin,050 PSAY "TOTAL COM BDI->"
+	   @nLin,072 PSAY Transform(nBDI,"@E 999.99")+"%"
+	   @nLin,102 PSAY Transform((nTotPro+nTotRec)+(((nTotPro+nTotRec)*nBDI)/100),"@E 999,999,999.99")
+	   
+	   nLin := nLin + 1
+	
+	   @ nLin,000 PSay __PrtThinLine()
+	   
+	   nLin := nLin + 1
+   Else
+       nLin := nLin + nSltLin
+       
+       oPrn:Say(nLin,0950,"TOTAL        ->",oFont5)
+       oPrn:Say(nLin,1850,Transform(nTotPro+nTotRec,"@E 999,999,999.99"),oFont3)
+       oPrn:Say(nLin,2200,Transform(((nTotPro+nTotRec)/XAF9->AF9_CUSTO)*100,"@E 999.99"),oFont3)
+       
+       nLin := nLin + nSltLin
+       
+       oPrn:Say(nLin,0950,"TOTAL COM BDI->",oFont5)
+       oPrn:Say(nLin,1200,Transform(nBDI,"@E 999.99")+"%",oFont3)
+       oPrn:Say(nLin,1850,Transform((nTotPro+nTotRec)+(((nTotPro+nTotRec)*nBDI)/100),"@E 999,999,999.99"),oFont3)
+                     
+       nLin := nLin + nSltLin
+       
+       oPrn:Say(nLin,0110,Repl("-",180),oFont2)
+       
+       nLin := nLin + nSltLin
+   EndIf
+   
+   XAF9->(dbSkip())
+EndDo
+
+dbSelectArea("XAF9")
+dbCloseArea()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Finaliza a execucao do relatorio...                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+If mv_par07 == 1
+	SET DEVICE TO SCREEN
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Se impressao em disco, chama o gerenciador de impressao...          ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	
+	If aReturn[5]==1
+	   dbCommitAll()
+	   SET PRINTER TO
+	   OurSpool(wnrel)
+	Endif
+	
+	MS_FLUSH()
+Else
+	oPrn:Setup() // para configurar impressora
+	If aReturn[5]==1
+		oPrn:Preview()
+	Else
+		oPrn:Print()
+	EndIf	
+EndIf
+
+Return
+
+
+
+
+Static Function ImpCab()
+	oPrn:Box(0100,0100,0360,2500)
+	
+	oPrn:Say(0110,0110,"Relação de Composição de Custo",oFont1)
+	
+	oPrn:Say(0160,0110,"Aragão Engenharia & Network",oFont1)
+	
+	oPrn:Say(0210,0110,"Obra:",oFont2)
+	oPrn:Say(0210,1900,"Pagina:",oFont2)
+	
+	oPrn:Say(0260,0110,"Cliente:",oFont2)
+	oPrn:Say(0260,1900,"Data:",oFont2)
+	
+	oPrn:Say(0310,0110,"Local Obra:",oFont2)
+	
+	oPrn:Box(0370,0100,0460,2500)
+	
+	//oPrn:Say(0390,0110,"Código         Descrição                                                                     Unid.  Quantidade      Preço     Valor     Perc.    Data",oFont1)	
+	oPrn:Say(0390,0110,"Código",oFont1)
+	oPrn:Say(0390,0360,"Descrição",oFont1)
+	oPrn:Say(0390,1300,"Unid",oFont1)
+	oPrn:Say(0390,1550,"Quant",oFont1)
+	oPrn:Say(0390,1800,"Preço",oFont1)
+	oPrn:Say(0390,2050,"Valor",oFont1)
+	oPrn:Say(0390,2240,"Perc",oFont1)
+	oPrn:Say(0390,2350,"Data",oFont1)
+	       	
+Return
+
+
+
+//Cria as perguntas
+Static Function ValidPerg(cPerg)
+	_sAlias := Alias()
+	dbSelectArea("SX1")
+	dbSetOrder(1)
+	cPerg := padr(cPerg,10)
+	aRegs:={}
+	// Grupo/Ordem/Pergunta/Variavel/Tipo/Tamanho/Decimal/Presel/GSC/Valid/Var01/Def01/Cnt01/Var02/Def02/Cnt02/Var03/Def03/Cnt03/Var04/Def04/Cnt04/Var05/Def05/Cnt05
+	
+    aAdd(aRegs,{cPerg,'01' ,'Do Projeto         ?',''				 ,''			 ,'mv_ch1','C'  ,10     ,0      ,0     ,'G','                                ','mv_par01','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'              ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''       ,'AF8',''	,'' ,'','',''	})
+    aAdd(aRegs,{cPerg,'02' ,'Ate o Projeto      ?',''				 ,''			 ,'mv_ch2','C'  ,10     ,0      ,0     ,'G','                                ','mv_par02','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'              ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''       ,'AF8',''	,'' ,'','',''	})
+    aAdd(aRegs,{cPerg,'03' ,'% MA               ?',''				 ,''			 ,'mv_ch3','N'  ,06     ,2      ,0     ,'G','                                ','mv_par03','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'              ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''       ,'   ',''	,'' ,'','',''	})
+    aAdd(aRegs,{cPerg,'04' ,'% MO               ?',''				 ,''			 ,'mv_ch4','N'  ,06     ,2      ,0     ,'G','                                ','mv_par04','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'              ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''       ,'   ',''	,'' ,'','',''	})
+    aAdd(aRegs,{cPerg,'05' ,'% BDI              ?',''				 ,''			 ,'mv_ch5','N'  ,06     ,2      ,0     ,'G','                                ','mv_par05','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'              ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''       ,'   ',''	,'' ,'','',''	})
+    aAdd(aRegs,{cPerg,'06' ,'% Encargo          ?',''				 ,''			 ,'mv_ch6','N'  ,06     ,2      ,0     ,'G','                                ','mv_par06','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'              ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''       ,'   ',''	,'' ,'','',''	})
+    aAdd(aRegs,{cPerg,'07' ,'Modelo             ?',''				 ,''			 ,'mv_ch7','N'  ,01     ,0      ,0     ,'C','                                ','mv_par07','Padrao     ',''		 ,''	 ,'               ',''   , 'Grafico        ',''		 ,''	 , ''    ,''    ,'              ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''    ,'   ',''	,'' ,'','',''	})
+    
+    
+	For i:=1 to Len(aRegs)
+	    If !dbSeek(cPerg+aRegs[i,2])
+			RecLock("SX1",.T.)
+			For j:=1 to FCount()
+				FieldPut(j,aRegs[i,j])    	
+			Next
+			MsUnlock()
+	        dbCommit()
+		Endif
+	Next
+	
+	dbSelectArea(_sAlias)
+Return

@@ -1,0 +1,366 @@
+#include "protheus.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ARGA003   ºAutor  ³Grayson B.Tavares   º Data ³  06/11/09   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Rotina para manutenção dos produtos por composição          º±±
+±±º          ³Ativado a partir do ENTER no campo composição               º±±
+±±º          ³Necessario criar gatilho no campo AF3_COMP                  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³Gestão de Projetos                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+User Function ARGA003()
+
+// Variaveis deste Form                                                                                                         
+Local oCompos
+Local nX			:= 0                                                                                                              
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis da MsNewGetDados()      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+// Vetor responsavel pela montagem da aHeader
+Local aCpoGDa       	:= {""}                                                                                                 
+// Vetor com os campos que poderao ser alterados                                                                                
+Local aAlter       	:= {""}
+Local nSuperior    	:= C(032)           // Distancia entre a MsNewGetDados e o extremidade superior do objeto que a contem
+Local nEsquerda    	:= C(005)           // Distancia entre a MsNewGetDados e o extremidade esquerda do objeto que a contem
+Local nInferior    	:= C(178)           // Distancia entre a MsNewGetDados e o extremidade inferior do objeto que a contem
+Local nDireita     	:= C(311)           // Distancia entre a MsNewGetDados e o extremidade direita  do objeto que a contem
+// Posicao do elemento do vetor aRotina que a MsNewGetDados usara como referencia  
+Local nOpc         	:= GD_INSERT+GD_DELETE+GD_UPDATE                                                                            
+Local cLinhaOk     	:= "AllwaysTrue"    // Funcao executada para validar o contexto da linha atual do aCols                  
+Local cTudoOk      	:= "AllwaysTrue"    // Funcao executada para validar o contexto geral da MsNewGetDados (todo aCols)      
+Local cIniCpos     	:= ""               // Nome dos campos do tipo caracter que utilizarao incremento automatico.            
+                                         // Este parametro deve ser no formato "+<nome do primeiro campo>+<nome do            
+                                         // segundo campo>+..."                                                               
+Local nFreeze      	:= 000              // Campos estaticos na GetDados.                                                               
+Local nMax         	:= 999              // Numero maximo de linhas permitidas. Valor padrao 99                           
+Local cCampoOk     	:= "AllwaysTrue"    // Funcao executada na validacao do campo                                           
+Local cSuperApagar 	:= ""               // Funcao executada quando pressionada as teclas <Ctrl>+<Delete>                    
+Local cApagaOk     	:= "AllwaysTrue"    // Funcao executada para validar a exclusao de uma linha do aCols                   
+// Objeto no qual a MsNewGetDados sera criada                                      
+
+Local _aCol         	:= {}               // Array a ser tratado internamente na MsNewGetDados como aCols                      
+Local _aHead        	:= {}               // Array a ser tratado internamente na MsNewGetDados como aHeader                    
+
+// Variaveis Private da Funcao
+Private _oDlg				// Dialog Principal
+// Variaveis que definem a Acao do Formulario
+Private VISUAL := .F.                        
+Private INCLUI := .F.                        
+Private ALTERA := .F.                        
+Private DELETA := .F.                        
+// Privates das NewGetDados
+Private oGetDados1
+Private nopca
+Private cCompos	 := Space(9)
+
+//lNewComp := MsgYesNo("Cria nova composição?","Atenção")
+
+lNewComp := .f.
+
+nPosComp := ASCAN(aHeader,{|x|x[2] = "AF3_COMP"})
+nPosProd := ASCAN(aHeader,{|x|x[2] = "AF3_PRODUT"})
+nPosRec  := ASCAN(aHeader,{|x|x[2] = "AF3_RECURS"})
+nPDscCmp := ASCAN(aHeader,{|x|x[2] = "AF3_DSCCMP"})
+
+nSeq:=0
+/*
+_cComp:="######"
+For _ny:=1 To Len(aCols)
+	If Substr(aCols[_ny,nPosComp],1,4)=="AUTO"
+		If _cComp # aCols[_ny,nPosComp]
+			_cComp := aCols[_ny,nPosComp]
+			nSeq++
+		EndIf
+	EndIf	
+Next
+*/
+
+//If nSeq == 0
+//	nSeq++
+//EndIf
+
+//If !lNewComp .And. !Empty(aCols[n,nPosComp])
+	cCompos := aCols[n,nPosComp]
+	cDscCmp := Posicione("AE1",1,xFilial("AE1")+M->AF3_COMP,"AE1_DESCRI")
+	cUM     := Posicione("AE1",1,xFilial("AE1")+M->AF3_COMP,"AE1_UM")
+//Else
+//	cCompos := "AUTO"+strzero(nSeq+1,3)
+//	cDscCmp:= space(90)
+//EndIf
+
+If !Empty(aCols[n,nPDscCmp])
+	cDscCmp := aCols[n,nPDscCmp]
+EndIf
+
+If OFOLDER:NOPTION==1	
+	lProdut := .t.
+Else
+	lProdut := .f.
+EndIf
+
+aColAnt := aClone(aCols)
+
+// estes campos devem ser apresentados no browse
+aTmpSV5	:= {"AF3_ITEM"   ,"AF3_RECURS" ,"AF3_QUANT" ,"AF3_PRODUT" ,"AF3_DESCRI" ;
+           ,"AF3_MOEDA"	 ,"AF3_SIMBMO" ,"AF3_CUSTD" ,"AF3_SEGUM"	 ,"AF3_QTSEGU" ; 
+           ,"AF3_ACUMUL" }
+
+// estes campos devem não devem ser apresentados no browse
+aTmp2SV5 := {"AF3_AQUISI", "AF3_CAPM3", "AF3_COEFMA", "AF3_COMBUS", "AF3_COMPOS", "AF3_CSTUNI",;
+             "AF3_DEPREC", "AF3_DMTX"  , "AF3_EMPOLA", "AF3_FILIAL", ;
+             "AF3_HORANO", "AF3_JUROS" , "AF3_MANUT" , "AF3_MATERI", "AF3_MDO"   ,;
+             "AF3_MT"    , "AF3_ORCAME",  "AF3_PHM3"  , "AF3_POTENC", ;
+             "AF3_RECPAI", "AF3_RESIDU", "AF3_TAREFA", "AF3_TCDM"  , "AF3_TPERC" , "AF3_TPTOT" ,;
+             "AF3_UM"    , "AF3_VALCOM", "AF3_VELO"  , "AF3_VIDAUT"}
+                                                                                                                                
+// Carrega aHead                                                                                                                
+If lProdut
+	DbSelectArea("SX3")                                                                                                             
+	SX3->(DbSetOrder(1)) // Campo
+	dbSeek("AF3")
+	While SX3->(!EOF()) .And. X3_ARQUIVO == "AF3"
+		If X3Uso(SX3->X3_USADO) .AND. (cNivel >= SX3->X3_NIVEL)			
+				If Alltrim(SX3->X3_CAMPO) # "AF3_RECURS"
+					Aadd(_aHead,{ AllTrim(X3Titulo()),;                                                                                         
+						SX3->X3_CAMPO	,;                                                                                                       
+						SX3->X3_PICTURE,;                                                                                                       
+						SX3->X3_TAMANHO,;                                                                                                       
+						SX3->X3_DECIMAL,;                                                                                                       
+						SX3->X3_VALID	,;                                                                                                       
+						SX3->X3_USADO	,;                                                                                                       
+						SX3->X3_TIPO	,;                                                                                                       
+						SX3->X3_F3 		,;                                                                                                       
+						SX3->X3_CONTEXT,;                                                                                                       
+						SX3->X3_CBOX	,;                                                                                                       
+						SX3->X3_RELACAO})
+				EndIf
+		Endif                                                                                                                         
+	
+		SX3->(dbSkip())
+	EndDo
+Else			
+	For nx := 1 to Len(aTmpSV5)
+		DbSelectArea("SX3")
+		SX3->(dbSetOrder(2))
+		If SX3->(dbSeek(aTmpSV5[nx]))
+			Aadd(_aHead,{ AllTrim(X3Titulo()),;                                                                                         
+						SX3->X3_CAMPO	,;                                                                                                       
+						SX3->X3_PICTURE,;                                                                                                       
+						SX3->X3_TAMANHO,;                                                                                                       
+						SX3->X3_DECIMAL,;                                                                                                       
+						SX3->X3_VALID	,;                                                                                                       
+						SX3->X3_USADO	,;                                                                                                       
+						SX3->X3_TIPO	,;                                                                                                       
+						SX3->X3_F3 		,;                                                                                                       
+						SX3->X3_CONTEXT,;                                                                                                       
+						SX3->X3_CBOX	,;                                                                                                       
+						SX3->X3_RELACAO})
+		EndIf				
+	Next
+	
+	DbSelectArea("SX3")
+	dbSetOrder(1)
+	dbSeek("AF3")
+	While !EOF() .And. (x3_arquivo == "AF3")
+		IF X3USO(x3_usado) .AND. cNivel >= x3_nivel .And. ;
+			AScan(aTmp2SV5, { |x| Upper(AllTrim(x)) == Upper(AllTrim(X3_CAMPO))}) == 0 .And. ;
+			AScan(aTmpSV5,  { |x| Upper(AllTrim(x)) == Upper(AllTrim(X3_CAMPO))}) == 0
+			Aadd(_aHead,{ AllTrim(X3Titulo()),;                                                                                         
+					SX3->X3_CAMPO	,;                                                                                                       
+					SX3->X3_PICTURE,;                                                                                                       
+					SX3->X3_TAMANHO,;                                                                                                       
+					SX3->X3_DECIMAL,;                                                                                                       
+					SX3->X3_VALID	,;                                                                                                       
+					SX3->X3_USADO	,;                                                                                                       
+					SX3->X3_TIPO	,;                                                                                                       
+					SX3->X3_F3 		,;                                                                                                       
+					SX3->X3_CONTEXT,;                                                                                                       
+					SX3->X3_CBOX	,;                                                                                                       
+					SX3->X3_RELACAO})
+		Endif
+		SX3->(dbSkip())
+	EndDo   
+EndIf	
+
+// Carregue aqui a Montagem da sua aCol                                                                                         
+aAux := {}                                                                                                                      
+lCompos := IIf(Empty(aCols[n,nPosComp]),.f.,.t.)
+
+If lCompos
+	For _ny:=1 To len(aColAnt)
+		If aColAnt[_ny,nPosComp] == cCompos			
+			//If !Empty(aColAnt[_ny,nPDscCmp] )
+			//	cDescri := aColAnt[_ny,nPDscCmp] 
+			//EndIf
+			
+			aAux:={}
+			For _nx:=1 To len(_aHead)
+				aadd(aAux,aColAnt[_ny,_nx])
+			Next						
+			
+			Aadd(aAux,.F.)                                                                                                                  
+			Aadd(_aCol,aAux) 
+		EndIf		 
+	Next
+	
+	//nMax := len(_aCol)
+Else
+	DbSelectArea("SX3")                                                                                                             
+	SX3->(DbSetOrder(2)) // Campo
+
+	For _ny := 1 to len(_aHead)
+		If SX3->(DbSeek(_aHead[_ny,2]))
+			Aadd(aAux,CriaVar(SX3->X3_CAMPO))                                                                                          
+		Endif                                                                                                                         
+	Next nX                                                                                                                         
+	
+	Aadd(aAux,.F.)                                                                                                                  
+	Aadd(_aCol,aAux) 
+EndIf
+
+If !lNewComp .And. Empty(aCols[n,nPosComp])
+	Alert("Não é possivel agrupar itens sem composição")
+	Return (M->AF3_COMP)
+EndIf	
+
+oFONTE1:=TFONT():NEW("MONO AS REGULAR",,12,,.T.,,,,.F.,.F.)
+oFONTE2:=TFONT():NEW("MONO AS REGULAR",,16,,.T.,,,,.F.,.F.)
+
+DEFINE MSDIALOG _oDlg TITLE "Manutenção Sub-Composição" FROM C(178),C(181) TO C(544),C(810) PIXEL
+
+	// Cria Componentes Padroes do Sistema
+	@ C(018),C(007) Say "Composição" Size C(050),C(008) COLOR CLR_BLUE PIXEL OF _oDlg FONT oFONTE2
+	If !Empty(cDscCmp)//!lNewComp .And. !Empty(aCols[n,nPosComp])
+		@ C(018),C(040) Say cCompos      Size C(050),C(008) COLOR CLR_BLUE  PIXEL OF _oDlg FONT oFONTE2
+		@ C(018),C(073) Say cDscCmp+"-UM "+cUM      Size C(200),C(008) COLOR CLR_RED  PIXEL OF _oDlg FONT oFONTE2
+	Else
+		cDscCmp := SPACE(90)
+		@ C(018),C(040) Say cCompos      Size C(050),C(008) COLOR CLR_RED PIXEL  OF _oDlg FONT oFONTE2
+		@ C(017),C(085) MsGet oDscComp Var cDscCmp Size C(150),C(009) COLOR CLR_BLACK PIXEL Valid NaoVazio() OF _oDlg FONT oFONTE2
+	EndIf	
+
+	oGetDados1:= MsNewGetDados():New(nSuperior,nEsquerda,nInferior,nDireita,nOpc,cLinhaOk,cTudoOk,cIniCpos,;                               
+                             ,nFreeze,nMax,cCampoOk,cSuperApagar,cApagaOk,_oDlg,_aHead,_aCol)
+
+ACTIVATE MSDIALOG _oDlg CENTERED ON INIT ENCHOICEBAR(_ODLG,{||nopca:=1,_oDlg:End()},{||nopca:=0,_odlg:end()},,)
+
+If nopca == 1
+	_aCol := aClone(oGetDados1:aCols)
+
+	If lCompos
+		For _wi:=1 To Len(_aCol)
+			
+			lExist := .f.
+			
+			For _wj:=1 To Len(aCols)				
+				If (_aCol[_wi,1]+_aCol[_wi,2])==(aCols[_wj,1]+aCols[_wj,2])
+					For _wk:=1 To len(_aHead)
+						aCols[_wj,_wk]:=_aCol[_wi,_wk]
+					Next
+					lExist := .t.			
+				EndIf								
+			Next
+			
+			If !lExist
+			
+				nSeq:=len(aCols)
+			
+				_aAux := {}
+				For _wk:=1 To len(_aHead)
+					If _wk == 1
+						nSeq++
+						aadd(_aAux,StrZero(nSeq,2))
+					ElseIf _wk == nPosComp
+						aadd(_aAux,cCompos)
+					ElseIf _wk == nPDscCmp
+						//If lNewComp
+							aadd(_aAux,cDscCmp)
+						//Else
+						//	aadd(_aAux,_aCol[_wi,_wk])
+						//EndIf
+					Else     	
+						aadd(_aAux,_aCol[_wi,_wk])
+					EndIf	
+				Next
+				aadd(_aAux,.F.)
+				aadd(aCols,_aAux)
+				
+				GetDRefresh()				
+			Else
+				aCols[n,nPDscCmp] := cDscCmp
+			EndIf	
+		Next
+	Else
+		nSeq:=len(aCols)
+				
+		For _wj:=1 To Len(_aCol)
+			_aAux := {}
+			For _wk:=1 To len(_aHead)
+				If _wk == 1
+					nSeq++
+					aadd(_aAux,StrZero(nSeq,2))
+				ElseIf _wk == nPosComp
+					aadd(_aAux,cCompos)
+				ElseIf _wk == nPDscCmp
+					//If lNewComp
+						aadd(_aAux,cDscCmp)
+					//Else
+					//	aadd(_aAux,_aCol[_wj,_wk])
+					//EndIf		
+				Else     	
+					aadd(_aAux,_aCol[_wj,_wk])
+				EndIf	
+			Next
+			aadd(_aAux,.F.)
+			aadd(aCols,_aAux)
+			
+		Next
+		
+		//aCols[n,nPDscCmp] := cDscCmp
+				
+		GetDRefresh()
+	EndIf
+	
+	//aCols[n,nPosComp]:= ""
+	//M->AF3_COMP    := ""
+EndIf
+
+Return(M->AF3_COMP)
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa   ³   C()   ³ Autores ³ Norbert/Ernani/Mansano ³ Data ³10/05/2005³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao  ³ Funcao responsavel por manter o Layout independente da       ³±±
+±±³           ³ resolucao horizontal do Monitor do Usuario.                  ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function C(nTam)                                                         
+Local nHRes	:=	oMainWnd:nClientWidth	// Resolucao horizontal do monitor     
+	If nHRes == 640	// Resolucao 640x480 (soh o Ocean e o Classic aceitam 640)  
+		nTam *= 0.8                                                                
+	ElseIf (nHRes == 798).Or.(nHRes == 800)	// Resolucao 800x600                
+		nTam *= 1                                                                  
+	Else	// Resolucao 1024x768 e acima                                           
+		nTam *= 1.28                                                               
+	EndIf                                                                         
+                                                                                
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿                                               
+	//³Tratamento para tema "Flat"³                                               
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ                                               
+	If "MP8" $ oApp:cVersion                                                      
+		If (Alltrim(GetTheme()) == "FLAT") .Or. SetMdiChild()                      
+			nTam *= 0.90                                                            
+		EndIf                                                                      
+	EndIf                                                                         
+Return Int(nTam)                                                                

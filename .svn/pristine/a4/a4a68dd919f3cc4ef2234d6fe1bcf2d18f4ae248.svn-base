@@ -1,0 +1,379 @@
+#INCLUDE "MATR272.CH"
+#INCLUDE "PROTHEUS.CH"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ MATR272  ³ Autor ³ Nereu Humberto Junior ³ Data ³ 30.03.05 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Relatorio de Lotes de Etiquetas para Inventairo             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Function MATR272( cAlias, nReg )
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Define Variaveis                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local Titulo  := STR0001 // "Lote X Etiquetas de Inventario"
+Local cDesc1  := STR0002 // "Emite um relatorio comparativo entre os valores"
+Local cDesc2  := STR0003 // "totais do lote x etiquetas" 
+Local cDesc3  := ""
+Local cString := "SCC"  
+Local lDic    := .F. 
+Local lComp   := .T. 
+Local lFiltro := .T. 
+Local wnrel   := "MATR272"  
+Local nomeprog:= "MATR272"  
+
+Private Tamanho := "M" 
+Private Limite  := 132 
+Private cPerg   := "MTR272"  
+Private aReturn := { STR0004, 1,STR0005, 1, 2, 1, "",1 } //"Zebrado"###"Administracao"
+
+Private lEnd    := .F.
+Private m_pag   := 1  
+Private nLastKey:= 0 
+Private lAuto	:= (nReg!=Nil) 
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Verifica as Perguntas Seleciondas                                       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AjustaSx1()
+Pergunte(cPerg,.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Envia para a SetPrinter                                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+wnrel:=SetPrint(cString,wnrel,If(lAuto,Nil,cPerg),@titulo,cDesc1,cDesc2,cDesc3,lDic,,lComp,Tamanho,,!lAuto)
+
+If ( nLastKey==27 )
+	dbSelectArea(cString)
+	dbSetOrder(1)
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If ( nLastKey==27 )
+	dbSelectArea(cString)
+	dbSetOrder(1)
+	dbClearFilter()
+	Return
+Endif
+
+RptStatus({|lEnd| R272Imp(@lEnd,wnRel,cString,nomeprog,Titulo,nReg)},Titulo)
+
+Return(.T.)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Program   ³ R272Imp  ³ Autor ³ Nereu Humberto Junior ³ Data ³30.11.2005³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Impressao dos Lotes X Etiquetas.                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Static Function R272Imp(lEnd,wnrel,cString,nomeprog,Titulo,nReg)
+
+Local li       := 100 
+Local cbCont   := 0   
+Local cbtxt    := ""
+Local cCabec1  := ""
+Local cCabec2  := ""
+Local lQuery   := .F.
+Local cCondicao:= ""
+Local cAliasSCC:= "SCC"
+Local cQuebra  := ""
+Local cChave   := ""
+Local nTotQtde := 0 
+Local nTotEtq  := 0 
+Local cPicLote := PesqPict("SCC","CC_LOTETIQ")
+Local cPicEtqF := PesqPict("SCC","CC_ETIQFIM")
+Local cPicQtde := PesqPict("SCC","CC_QUANT")
+#IFDEF TOP
+	Local cQuery  := ""
+	Local nX := 1
+#ENDIF	
+
+cCabec1:= STR0007 //"No.Lote    Dt.Lote   Etq.Ini.   Etq.Fin.    Qtde. do Lote    Qtde. Lancada   Etiquetas do Lote   Etiquetas Lancadas   Status"
+                  // 999999    99/99/99     999999     999999     999999999.99     999999999.99              999999               999999   XXXXXXXXX
+                  // 0        10        20        30        40        50        60        70        80        90       100       110       120       130       140       150       160       170       180       190       200       210       220
+                  // 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890	
+
+If lAuto
+	dbSelectArea("SCC")
+	dbGoto(nReg)
+	
+	mv_par01 := SCC->CC_DATA   
+	mv_par02 := SCC->CC_DATA   
+	mv_par03 := SCC->CC_LOTETIQ  
+	mv_par04 := SCC->CC_LOTETIQ  
+	mv_par05 := 1                
+Endif
+
+If mv_par05 == 1
+	Titulo := Alltrim(Titulo)+STR0008 //" - Todos"
+ElseIf mv_par05 == 2
+	Titulo := Alltrim(Titulo)+STR0009 //" - Pendentes"
+ElseIf mv_par05 == 3
+	Titulo := Alltrim(Titulo)+STR0010 //" - Abertos"
+Else
+	Titulo := Alltrim(Titulo)+STR0011 //" - Encerrados"
+Endif
+
+dbSelectArea("SCC")
+dbSetOrder(1)
+SetRegua(SCC->(LastRec()))
+
+#IFDEF TOP
+    If TcSrvType()<>"AS/400"
+	    lQuery := .T.
+		cAliasSCC := "QRYSCC"
+		aStruSCC  := SCC->(dbStruct())
+		cQuery := "SELECT * "
+		cQuery += "FROM "+RetSqlName("SCC")+" "
+		cQuery += "WHERE CC_FILIAL='"+xFilial("SCC")+"' AND "
+		cQuery += "CC_DATA>='"+Dtos(mv_par01)+"' AND "
+		cQuery += "CC_DATA<='"+Dtos(mv_par02)+"' AND "	
+		cQuery += "CC_LOTETIQ>='"+mv_par03+"' AND "
+		cQuery += "CC_LOTETIQ<='"+mv_par04+"' AND "	
+		If mv_par05 == 2 
+			cQuery += "CC_STATUS = 1 AND "	
+		ElseIf mv_par05 == 3
+			cQuery += "CC_STATUS = 2 AND "	
+		ElseIf mv_par05 == 4
+			cQuery += "CC_STATUS = 3 AND "	
+		Endif
+		cQuery += "D_E_L_E_T_ = ' ' "
+		cQuery += "ORDER BY "+SqlOrder(SCC->(IndexKey()))
+	
+		cQuery := ChangeQuery(cQuery)
+		dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQuery),cAliasSCC)
+	
+		For nX := 1 To len(aStruSCC)
+			If aStruSCC[nX][2] <> "C" .And. FieldPos(aStruSCC[nX][1])<>0
+				TcSetField(cAliasSCC,aStruSCC[nX][1],aStruSCC[nX][2],aStruSCC[nX][3],aStruSCC[nX][4])
+			EndIf
+		Next nX
+		dbSelectArea(cAliasSCC)	
+	Else
+#ENDIF
+	    cIndex    := CriaTrab(NIL,.F.)
+	    cCondicao := 'CC_FILIAL=="'+xFilial("SCC")+'".And.'
+	   	cCondicao += 'DTOS(CC_DATA)>="'+DTOS(mv_par01)+'".And.DTOS(CC_DATA)<="'+DTOS(mv_par02)+'" '
+	   	cCondicao += '.And.CC_LOTETIQ>="'+mv_par03+'".And.CC_LOTETIQ<="'+mv_par04+'" '
+		If mv_par05 == 2 
+			cCondicao += '.And.CC_STATUS==1 '	
+		ElseIf mv_par05 == 3
+			cCondicao += '.And.CC_STATUS==2 '	
+		ElseIf mv_par05 == 4
+			cCondicao += '.And.CC_STATUS==3 '	
+		Endif
+	   	
+	    IndRegua(cAliasSCC,cIndex,SCC->(IndexKey()),,cCondicao)
+	    nIndex := RetIndex("SCC")
+		#IFNDEF TOP
+			dbSetIndex(cIndex+OrdBagExt())
+		#ENDIF
+		dbSelectArea("SCC")
+	    dbSetOrder(nIndex+1)
+	
+	    dbSelectArea(cAliasSCC)
+	    ProcRegua(LastRec())
+	    dbGoTop()
+#IFDEF TOP
+	Endif    
+#ENDIF
+
+dbSelectArea(cAliasSCC)
+While !Eof() 
+
+	IncRegua()
+	
+   	nTotQtde := 0
+	nTotEtq  := 0
+	
+	If !Empty(aReturn[7]) .And. !&(aReturn[7]) //Filtro do Usuario
+		(cAliasSCC)->(dbSkip())
+		Loop
+	EndIf
+	
+	If lEnd
+		@ Prow()+1,001 PSAY STR0006 //"CANCELADO PELO OPERADOR"
+		Exit
+	EndIf
+	
+	If ( li > 58 )
+		li := cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,15)
+		li++
+	Endif
+    
+    dbSelectArea("SCD")
+    dbSetOrder(1)
+    If dbSeek(xFilial("SCD")+(cAliasSCC)->CC_LOTETIQ+Dtos((cAliasSCC)->CC_DATA))
+    	While (cAliasSCC)->CC_LOTETIQ+Dtos((cAliasSCC)->CC_DATA) == SCD->CD_LOTETIQ+Dtos(SCD->CD_DATA) .And. !Eof()
+	    	nTotQtde += SCD->CD_QUANT 
+			nTotEtq ++ 
+			dbSelectArea("SCD")
+			dbSkip()
+		EndDo	
+	Endif
+	
+	@Li, 001 PSAY (cAliasSCC)->CC_LOTETIQ Picture cPicLote
+	@Li, 010 PSAY (cAliasSCC)->CC_DATA   
+	@Li, 023 PSAY (cAliasSCC)->CC_ETIQINI Picture cPicEtqF
+	@Li, 034 PSAY (cAliasSCC)->CC_ETIQFIM Picture cPicEtqF
+	@Li, 045 PSAY (cAliasSCC)->CC_QUANT Picture cPicQtde
+	@Li, 062 PSAY nTotQtde Picture cPicQtde
+	@Li, 088 PSAY (cAliasSCC)->CC_ETIQFIM Picture cPicEtqF
+	@Li, 109 PSAY nTotEtq Picture cPicEtqF
+	@Li, 118 PSAY IIF((cAliasSCC)->CC_STATUS==1,STR0012,IIF((cAliasSCC)->CC_STATUS==2,STR0013,STR0014)) //"Pendente"##"Em Aberto"##"Encerrado"
+	li++
+                                                  	
+	dbSelectArea(cAliasSCC)
+	dbSkip()
+	cbCont++
+EndDo
+
+Roda(cbcont,cbtxt,tamanho)
+
+If lQuery
+	dbSelectArea(cAliasSCC)
+	dbCloseArea()
+Else
+  	dbSelectArea("SCC")
+	RetIndex("SCC")
+	dbClearFilter()
+	Ferase(cIndex+OrdBagExt())
+EndIf
+
+Set Device To Screen
+Set Printer To
+If ( aReturn[5] = 1 )
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+MS_FLUSH()
+
+Return(.T.)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³AjustaSX1 ³ Autor ³ Nereu Humberto Jr     ³ Data ³30.03.2005³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Cria as perguntas necesarias para o programa                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao Efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function AjustaSX1()
+
+Local aHelpPor :={} 
+Local aHelpEng :={} 
+Local aHelpSpa :={} 
+
+/*-----------------------MV_PAR01--------------------------*/
+Aadd( aHelpPor, "Informe a Data Inicial do Lote para a   " )
+Aadd( aHelpPor, "geracao do relatorio                    " )
+
+Aadd( aHelpEng, "                                        " )
+Aadd( aHelpEng, "                                        " )
+
+Aadd( aHelpSpa, "                                        " ) 
+Aadd( aHelpSpa, "                                        " ) 
+
+PutSx1( "MTR272","01","Data do Lote De ?","Data do Lote De ?","Data do Lote De ?","mv_ch1",;
+"D",8,0,0,"G","","","","","mv_par01","","","","","","","","","","","","","","","","",;
+aHelpPor,aHelpEng,aHelpSpa)
+aHelpPor :={} 
+aHelpEng :={} 
+aHelpSpa :={} 
+/*-----------------------MV_PAR02--------------------------*/
+Aadd( aHelpPor, "Informe a Data Final do Lote para a     " )
+Aadd( aHelpPor, "geracao do relatorio                    " )
+
+Aadd( aHelpEng, "                                        " )
+Aadd( aHelpEng, "                                        " )
+
+Aadd( aHelpSpa, "                                        " ) 
+Aadd( aHelpSpa, "                                        " ) 
+
+PutSx1( "MTR272","02","Data do Lote Ate ?","Data do Lote Ate ?","Data do Lote Ate ?","mv_ch2",;
+"D",8,0,0,"G","","","","","mv_par02","","","","","","","","","","","","","","","","",;
+aHelpPor,aHelpEng,aHelpSpa)
+aHelpPor :={} 
+aHelpEng :={} 
+aHelpSpa :={} 
+/*-----------------------MV_PAR03--------------------------*/
+Aadd( aHelpPor, "Informe o numero do Lote Inicial.       " )
+Aadd( aHelpEng, "                                        " )
+Aadd( aHelpSpa, "                                        " ) 
+
+PutSx1( "MTR272","03","Lote De ?","Lote De ?","Lote De ?","mv_ch3",;
+"C",6,0,0,"G","","","","","mv_par03","","","","","","","","","","","","","","","","",;
+aHelpPor,aHelpEng,aHelpSpa)
+aHelpPor :={} 
+aHelpEng :={} 
+aHelpSpa :={} 
+/*-----------------------MV_PAR04--------------------------*/
+Aadd( aHelpPor, "Informe o numero do Lote Final.         " )
+Aadd( aHelpEng, "                                        " )
+Aadd( aHelpSpa, "                                        " ) 
+
+PutSx1( "MTR272","04","Lote Ate ?","Lote Ate ?","Lote Ate ?","mv_ch4",;
+"C",6,0,0,"G","","","","","mv_par04","","","","","","","","","","","","","","","","",;
+aHelpPor,aHelpEng,aHelpSpa)
+aHelpPor :={} 
+aHelpEng :={} 
+aHelpSpa :={} 
+/*-----------------------MV_PAR05--------------------------*/
+Aadd( aHelpPor, "Informe o status para filtragem do lote " )
+Aadd( aHelpEng, "                                        " )
+Aadd( aHelpSpa, "                                        " ) 
+
+PutSx1( "MTR272","05","Imprime Lotes ?","Imprime Lotes ?","Imprime Lotes ?","mv_ch5",;
+"N",1,0,1,"C","","","","","mv_par05","Todos","Todos","Todos","",;
+"Pendentes","Pendentes","Pendentes","Abertos","Abertos","Abertos","Encerrados","Encerrados","Encerrados","","","",;
+aHelpPor,aHelpEng,aHelpSpa)
+aHelpPor :={} 
+aHelpEng :={} 
+aHelpSpa :={}
+
+Return

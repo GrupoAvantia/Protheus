@@ -1,0 +1,183 @@
+#INCLUDE "RWMAKE.CH"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³PMS103FI  ºAutor  ³Grayson B.Tavares   º Data ³  12/09/09   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Ponto de entrada para alterao dos precos totais de custo e º±±
+±±º          ³de venda                                                    º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Gesto de Projetos                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±D±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+User Function PMA103FI //ALT
+
+cOrc := AF1->AF1_ORCAME
+
+nGTot:=0
+nGCus:=0
+nGValBdi:=0
+nGTotal :=0
+nGTCusb :=0
+nGTTveb :=0
+	
+
+dbSelectArea("AF2")
+dbSetorder(1)
+
+AF2->(dbSeek(xFilial("AF2")+cOrc))
+
+While AF2->(!EOF()) .And. AF2->AF2_ORCAME == cOrc        
+    
+    //nQtdAf2 := NoRound(AF2->AF2_QUANT,2)
+    nQtdAf2 := AF2->AF2_QUANT
+    //Verifica se usa o BDI global
+	nBDI := IIf(AF2->AF2_BDI>0,AF2->AF2_BDI,AF1->AF1_BDI)
+    
+    If AF2->AF2_UTIBDI == "2" 
+    	nBDI := 0
+    EndIf
+    
+    nTotEnc := 0
+    nCusto  := 0
+    nTCusto := 0
+    
+    dbSelectArea("AF3")
+	dbSetOrder(1)
+	AF3->(dbSeek(xFilial("AF3")+AF2->AF2_ORCAME+AF2->AF2_TAREFA))
+	While AF3->AF3_FILIAL == xFilial("AF3") .And. AF3->AF3_ORCAME == AF2->AF2_ORCAME .And. AF3->AF3_TAREFA == AF2->AF2_TAREFA
+		//nQtdAf3 := NoRound(AF3->AF3_QUANT,2)
+		nQtdAf3 := AF3->AF3_QUANT
+		
+		nCusto +=NoRound(AF3->AF3_CUSTD * nQtdAf3,2)
+		
+		If !Empty(AF3->AF3_RECURS)
+			nTotEnc  += (NoRound((NoRound(AF3->AF3_CUSTD,2) * nQtdAf3),2)-NoRound((NoRound(AF3->AF3_CUSTHR,2) * nQtdAf3),2))
+		EndIf
+		
+		AF3->(dbSkip())
+	EndDo
+                
+    dbSelectArea("AF4")
+	dbSetOrder(1)
+	AF4->(dbSeek(xFilial("AF4")+AF2->AF2_ORCAME+AF2->AF2_TAREFA))
+	While AF4->AF4_FILIAL == xFilial("AF4") .And. AF4->AF4_ORCAME == AF2->AF2_ORCAME .And. AF4->AF4_TAREFA == AF2->AF2_TAREFA
+		nCusto +=AF4->AF4_VALOR
+				
+		AF4->(dbSkip())
+	EndDo
+	
+	nValBDI := nCusto*nBDI/100
+                    
+	RecLock("AF2",.f.)
+		
+	Replace AF2->AF2_TOTAL  With (nCusto+NoRound(nValBDI,2))*nQtdAf2
+	//Replace AF2->AF2_CUSTO  With nCusto
+	Replace AF2->AF2_CUSTO  With NoRound(nCusto*nQtdAf2,2)
+	Replace AF2->AF2_VALBDI With NoRound(nValBDI*nQtdAf2,2)
+	
+	Replace AF2->AF2_TOTCUS With NoRound(nCusto*nQtdAf2,2)
+	Replace AF2->AF2_TOTVEN With (nCusto+NoRound(nValBDI,2))*nQtdAf2
+	Replace AF2->AF2_TOTENC With NoRound(nTotEnc*nQtdAf2,2)
+	Replace AF2->AF2_SEMENC With NoRound((nCusto-nTotEnc)*nQtdAf2,2)
+	
+	//Gravar dados para exibição na tela de Gerenciamento do Orçamento // Josué
+	Replace AF2->AF2_X_CUSB  With nCusto//AF2->AF2_CUSTO
+	Replace AF2->AF2_X_TOTB  With NoRound(nCusto + nValBDI,2)//AF2->AF2_TOTAL
+	Replace AF2->AF2_X_TVEB  With (nCusto+NoRound(nValBDI,2))*nQtdAf2//AF2->AF2_TOTVEN
+	Replace AF2->AF2_X_TBRW  With 0
+	
+	//Zera variaveis de outras moedas
+	Replace AF2->AF2_CUSTO2  With 0
+	Replace AF2->AF2_CUSTO3  With 0
+	Replace AF2->AF2_CUSTO4  With 0
+	Replace AF2->AF2_CUSTO5  With 0
+	
+	Replace AF2->AF2_TXMO2   With 0
+	Replace AF2->AF2_TXMO3   With 0
+	Replace AF2->AF2_TXMO4   With 0
+	Replace AF2->AF2_TXMO5   With 0
+	
+	MsUnlock()
+
+	AF2->(dbSkip())
+EndDo 
+	
+dbSelectArea("AF5")
+dbSetorder(1)
+
+AF5->(dbSeek(xFilial("AF5")+cOrc))
+
+While AF5->(!EOF()) .And. AF5->AF5_ORCAME == cOrc
+	nTotAf5 := 0
+	nCusAf5 := 0
+	nValBdi:=0
+	nTotal :=0
+	nTCusb :=0
+	nTTveb :=0
+	
+	dbSelectArea("AF2")
+	dbSetOrder(2)
+	AF2->(dbSeek(xFilial("AF2")+AF5->AF5_ORCAME+AF5->AF5_EDT))
+	
+	While AF2->(!EOF()) .And. AF2->AF2_ORCAME == AF5->AF5_ORCAME .And. AF2->AF2_EDTPAI == AF5->AF5_EDT
+		nValBdi+=AF2->AF2_VALBDI//Round((AF2->AF2_VALBDI * AF2->AF2_QUANT),2)
+		nCusAf5+=AF2->AF2_TOTCUS //AF2->AF2_TOTAL * AF2->AF2_QUANT
+		nTotAf5+=AF2->AF2_TOTVEN //AF2->AF2_TOTVEN//AF2->AF2_CUSTO * AF2->AF2_QUANT		
+		nTotal +=AF2->AF2_TOTAL //AF2->AF2_TOTCUS +Round((AF2->AF2_VALBDI * AF2->AF2_QUANT),2)		
+		nTCusb +=AF2->AF2_X_CUSB
+		nTTveb +=AF2->AF2_X_TVEB
+				
+		AF2->(dbSkip())
+	EndDo
+	
+	Reclock("AF5",.F.)
+	Replace AF5->AF5_VALBDI With nValBdi
+	Replace AF5->AF5_TOTCUS With nCusAf5
+	Replace AF5->AF5_TOTVEN With nTotAf5	
+	Replace AF5->AF5_TOTAL  With nTotal	
+
+	Replace AF5->AF5_X_CUSB With nTCusb
+	Replace AF5->AF5_X_TOTB With nTotal
+	Replace AF5->AF5_X_TVEB With nTTveb
+	Replace AF5->AF5_X_TBRW With AF5->AF5_TOTVEN + AF5->AF5_VALBDI
+		
+	//Zera variaveis de outras moedas
+	Replace AF5->AF5_CUSTO2 With 0
+	Replace AF5->AF5_CUSTO3 With 0
+	Replace AF5->AF5_CUSTO4 With 0
+	Replace AF5->AF5_CUSTO5 With 0
+	   
+	MsUnlock()
+	
+	nGTot+=nTotAf5
+	nGCus+=nCusAf5
+	
+	nGValBdi+=nValBdi
+	nGTotal+=nTotal
+	nGTCusb +=nTCusb
+	nGTTveb +=nTTveb
+		
+	AF5->(dbSkip())
+EndDo
+
+dbSelectArea("AF5")
+dbSetOrder(1)
+If AF5->(dbSeek(xFilial("AF5")+AF1->AF1_ORCAME))
+	Reclock("AF5",.F.)
+	Replace AF5->AF5_VALBDI With nGValBdi
+	Replace AF5->AF5_TOTCUS With nGCus
+	Replace AF5->AF5_TOTVEN With nGTot	
+	Replace AF5->AF5_TOTAL  With nGTotal
+	Replace AF5->AF5_X_CUSB  With nGTCusb
+	Replace AF5->AF5_X_TOTB  With nGTotal
+    Replace AF5->AF5_X_TVEB  With nGTTveb		
+	MsUnlock()
+EndIF
+
+Return .t.

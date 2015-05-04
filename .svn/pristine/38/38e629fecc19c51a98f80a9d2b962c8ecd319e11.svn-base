@@ -1,0 +1,1007 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATR430.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr430.prx"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Dialog.ch"
+#line 28 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Font.ch"
+#line 29 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\PTMenu.ch"
+#line 31 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Print.ch"
+#line 33 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Colors.ch"
+#line 35 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\Folder.ch"
+#line 37 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\msobject.ch"
+#line 38 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\VKey.ch"
+#line 42 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\WinApi.ch"
+#line 44 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCommand.ch"
+#line 47 "PROTHEUS.CH"
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\FWCSS.CH"
+#line 50 "PROTHEUS.CH"
+#line 17 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr430.prx"
+Function Matr430()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And.  TRepInUse()
+
+
+
+	oReport := ReportDef()
+	oReport:PrintDialog()
+Else
+	MATR430R3()
+EndIf
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportDef()
+
+Local oCell
+Local cPerg	:= "MTR430"
+Local oReport
+Local oSection
+Local nI
+Local cPicQuant	:=PesqPictQt("G1_QUANT",13)
+Local cPicUnit	:=PesqPict("SB1","B1_CUSTD",18)
+Local cPicTot	:=PesqPict("SB1","B1_CUSTD",19)
+
+
+
+
+
+
+
+
+
+
+
+
+oReport := TReport():New("MATR430",If( cPaisLoc $ "ANG|PTG", "Folha De Cálculo De Formação De Preços", "Planilha de Formacao de Precos" ),cPerg, {|oReport| ReportPrint(oReport)},If( cPaisLoc $ "ANG|PTG", "Emite um relatório com os cálculos da folha de cálculo seleccionada para", "Emite um relatorio com os calculos da planilha selecionada para" )+" "+If( cPaisLoc $ "ANG|PTG", " cada artigo. os valores calculados são os mesmos referentes", " cada produto. Os valores calculados sao os mesmos referentes" )+" "+If( cPaisLoc $ "ANG|PTG", " às fórmulas da folha de cálculo.", " as formulas da planilha." ))
+
+AjustaSx1()
+
+
+
+Pergunte(cPerg, .F. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+If Select("SGG") == 0
+	mv_par09 := 1
+EndIf
+oSection := TRSection():New(oReport,If( cPaisLoc $ "ANG|PTG", "Artigos", "Produtos" ),{"SB1"})
+oSection:SetHeaderPage()
+
+TRCell():New(oSection,"CEL"		,"","Cel.","99999",5,,)
+TRCell():New(oSection,"NIVEL"	,"",RetTitle("G1_NIV"),"XXXXXX",6)
+TRCell():New(oSection,"B1_COD"	,"SB1")
+TRCell():New(oSection,"B1_DESC"	,"SB1",,,30)
+TRCell():New(oSection,"B1_UM"	,"SB1")
+TRCell():New(oSection,"QUANT"	,"",RetTitle("G1_QUANT"),cPicQuant)
+TRCell():New(oSection,"VALUNI"	,"",If( cPaisLoc $ "ANG|PTG", "Valor Unitário", "Valor Unitario" ),cPicUnit)
+TRCell():New(oSection,"VALTOT"	,"","Valor Total",cPicTot)
+TRCell():New(oSection,"VALUNI2" ,"",If( cPaisLoc $ "ANG|PTG", "Valor Unitário", "Valor Unitario" ),cPicUnit)
+TRCell():New(oSection,"VALTOT2" ,"","Valor Total",cPicTot)
+TRCell():New(oSection,"PERCENT","",If( cPaisLoc $ "ANG|PTG", "% Part", "% PART" ),"999.999",7)
+
+Return(oReport)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function ReportPrint(oReport)
+
+Local aArray	:= {}
+Local aArray1	:= {}
+Local aPar		:= Array(20)
+Local aParC010	:= Array(20)
+Local lFirstCb	:= .T. 
+Local nReg
+Local nI, nX
+Local oSection  := oReport:Section(1)
+LOCAL cCondFiltr:= ""
+
+
+
+
+PRIVATE cProg:="R430"
+
+
+
+
+
+
+PRIVATE nQualCusto := 1
+
+
+
+
+
+PRIVATE aAuxCusto
+
+
+
+
+PRIVATE cArqMemo := "STANDARD"
+
+
+
+
+PRIVATE lDirecao := .T. 
+
+PRIVATE lConsNeg := (mv_par08 = 1)
+
+
+For ni := 1 to 20
+	aPar[ni] := &("mv_par"+StrZero(ni,2))
+next
+
+
+
+MTC010SX1()
+Pergunte("MTC010", .F. )
+
+
+
+If Select("SGG") == 0
+	mv_par09 := 1
+EndIf
+
+For ni := 1 to 20
+	aParC010[ni] := &("mv_par"+StrZero(ni,2))
+next
+
+mv_par09     := aPar[09]
+aParC010[09] := aPar[09]
+
+
+For ni := 1 to 20
+	&("mv_par"+StrZero(ni,2)) := aPar[ni]
+next
+
+oReport:NoUserFilter()
+
+dbSelectArea("SB1")
+
+
+
+
+
+
+MakeAdvplExpr(oReport:uParam)
+
+
+
+
+TRPosition():New(oSection,"SB1",1,{|| xFilial("SB1") + aArray[nX][04] })
+
+
+
+
+cArqMemo := apar[03]
+
+If MR430Plan( .T. ,aPar)
+
+	If apar[05] == 1
+		oSection:Cell("VALUNI2"):Disable()
+		oSection:Cell("VALTOT2"):Disable()
+	EndIf
+
+
+
+	oReport:SetMeter(SB1->(LastRec()))
+	dbSeek(xFilial("SB1")+apar[01], .T. )
+
+	oSection:Init()
+
+
+
+
+
+
+
+
+	cCondFiltr := oSection:GetAdvplExp()
+	If Empty(cCondFiltr)
+		cCondFiltr := ".T."
+	EndIf
+
+
+	While !oReport:Cancel() .And.  !SB1->(Eof()) .And.  SB1->B1_FILIAL == xFilial("SB1") .And.  SB1->B1_COD <= apar[02]
+		If oReport:Cancel()
+			Exit
+		EndIf
+
+
+
+		If &(cCondFiltr)
+			nReg := Recno()
+
+
+			For ni := 1 to 20
+				&("mv_par"+StrZero(ni,2)) := aParc010[ni]
+			next
+
+			aArray1 := MC010Forma("SB1",nReg,99,apar[07],, .F. ,apar[10])
+
+
+			For ni := 1 to 20
+				&("mv_par"+StrZero(ni,2)) := aPar[ni]
+			next
+
+			If Len(aArray1) > 0
+				aArray	:= aClone(aArray1[2])
+				MR430ImpTR(aArray1[1],aArray1[2],aArray1[3],oReport,aPar,aParC010,@nx,@lFirstCb)
+			EndIf
+
+			dbSelectArea("SB1")
+			dbGoTo(nReg)
+		EndIf
+		dbSkip()
+		oReport:IncMeter()
+	EndDo
+	oSection:Finish()
+EndIf
+dbSelectArea("SB1")
+dbClearFilter()
+dbSetOrder(1)
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MR430ImpTR(cCusto,aArray,nPosForm,oReport,aPar,aParC010,nx,lFirstCb)
+
+Local oSection  := oReport:Section(1)
+LOCAL cMoeda1,cMoeda2
+LOCAL nDecimal	:=0
+Local lFirst	:= .T. 
+Local cOldAlias
+Local nOrder
+Local nRecno
+Local nValUnit, nCotacao
+Local cTit1,cTit2,cTit3,cTit4
+
+lFirstCb := If( lFirstCb == nil, .T. , lFirstCb ) ;
+
+cCusto := If(cCusto=Nil,"",AllTrim(Upper(cCusto)))
+If cCusto == "ULT PRECO"
+	nDecimal := TamSX3("B1_UPRC")[2]
+ElseIf "MEDIO" $ cCusto
+	nDecimal := TamSX3("B2_CM1")[2]
+Else
+	nDecimal := TamSX3("B1_CUSTD")[2]
+EndIf
+
+
+
+
+
+If Str(nQualCusto,1) $ "3/4/5/6"
+	nCotacao:=ConvMoeda(dDataBase,,1,Str(nQualCusto-1,1))
+	cMoeda1	:=GetMV("MV_SIMB"+Str(nQualCusto-1,1,0))
+	If Empty(cMoeda1)
+		cMoeda1	:=GetMV("MV_MOEDA"+Str(nQualCusto-1,1,0))
+	EndIf
+Else
+	nCotacao:=1
+	cMoeda1	:=GetMV("MV_SIMB1")
+EndIf
+
+If lFirstCb
+	cMoeda1	:= PADC(Alltrim(cMoeda1),12)
+	cTit1:=oSection:Cell("VALUNI"):Title()
+	cTit2:=oSection:Cell("VALTOT"):Title()
+	oSection:Cell("VALUNI"):SetTitle(cTit1+Chr(13)+Chr(10)+cMoeda1)
+	oSection:Cell("VALTOT"):SetTitle(cTit2+Chr(13)+Chr(10)+cMoeda1)
+	lFirstCb := .F. 
+EndIf
+
+If apar[05] <> 1
+
+
+
+
+	cMoeda2	:= GetMV("MV_SIMB"+Str(apar[05],1,0))
+	If Empty(cMoeda2)
+		cMoeda2 := GetMV("MV_MOEDA"+Str(apar[05],1,0))
+	EndIf
+	cMoeda2	:= PADC(Alltrim(cMoeda2),12)
+	cTit3:= oSection:Cell("VALUNI2"):Title()
+	cTit4:= oSection:Cell("VALTOT2"):Title()
+	oSection:Cell("VALUNI2"):SetTitle(cTit3+Chr(13)+Chr(10)+PadC(AllTrim(cMoeda2),12))
+	oSection:Cell("VALTOT2"):SetTitle(cTit4+Chr(13)+Chr(10)+PadC(AllTrim(cMoeda2),12))
+EndIf
+
+For nX := 1 To Len(aArray)
+
+
+
+	If apar[04] == 1
+		If Val(apar[06]) <> 0
+			If Val(aArray[nX,2]) > Val(apar[06])
+				Loop
+			Endif
+		Endif
+	Endif
+
+	If If( (Len(aArray[ nX ])==12),aArray[nX,12], .T.  )
+
+		If lFirst
+			oReport:SkipLine()
+			lFirst := .F. 
+		EndIf
+		oSection:Cell("CEL"):SetValue(aArray[nX][01])
+		oSection:Cell("NIVEL"):SetValue(aArray[nX][02])
+		oSection:Cell("B1_COD"):SetValue(aArray[nX][04])
+		oSection:Cell("B1_DESC"):SetValue(aArray[nX][03])
+		If aArray[nX][04] == Replicate("-",15)
+			oSection:Cell("VALTOT"):Hide()
+			oSection:Cell("PERCENT"):Hide()
+			If apar[05] <> 1
+				oSection:Cell("VALUNI2"):Hide()
+				oSection:Cell("VALTOT2"):Hide()
+			EndIf
+		Else
+			If nX < nPosForm-1
+				If aParc010[02] == 1
+					nValUnit := Round(aAuxCusto[nX]/aArray[nX][05], nDecimal)
+				Else
+					nValUnit := NoRound(aAuxCusto[nX]/aArray[nX][05], nDecimal)
+				EndIf
+			EndIf
+			oSection:Cell("VALTOT"):SetValue(aArray[nX][06])
+			oSection:Cell("PERCENT"):SetValue(aArray[nX][07])
+			oSection:Cell("VALTOT"):Show()
+			oSection:Cell("PERCENT"):Show()
+			If apar[05] <> 1
+				If nX < nPosForm-1
+					oSection:Cell("VALUNI2"):SetValue(Round(ConvMoeda(dDataBase,,nValUnit/nCotacao,Str(apar[05],1)), nDecimal))
+					oSection:Cell("VALUNI2"):Show()
+				Else
+					oSection:Cell("VALUNI2"):Hide()
+				EndIf
+				oSection:Cell("VALTOT2"):SetValue(ConvMoeda(dDataBase,,(aArray[nX][06]/nCotacao),Str(apar[05],1)))
+				oSection:Cell("VALTOT2"):Show()
+			EndIf
+		EndIf
+		If aArray[nX][04] == Replicate("-",15) .Or.  nX >= nPosForm-1
+			oSection:Cell("B1_UM"):Hide()
+			oSection:Cell("QUANT"):Hide()
+			oSection:Cell("VALUNI"):Hide()
+		Else
+			oSection:Cell("B1_UM"):Show()
+			oSection:Cell("QUANT"):Show()
+			oSection:Cell("VALUNI"):Show()
+			cOldAlias:=Alias()
+			dbSelectArea("SB1")
+			nOrder:=IndexOrd()
+			nRecno:=Recno()
+			dbSetOrder(1)
+			dbSeek(xFilial()+aArray[nX][04])
+			oSection:Cell("B1_UM"):SetValue(SB1->B1_UM)
+			dbSetOrder(nOrder)
+			dbGoTo(nRecno)
+			dbSelectArea(cOldAlias)
+			oSection:Cell("QUANT"):SetValue(aArray[nX][05])
+			oSection:Cell("VALUNI"):SetValue(nValUnit)
+		EndIf
+
+		oSection:PrintLine()
+
+		If nX == 1 .And.  apar[04] == 2
+			nX += (nPosForm-3)
+		EndIf
+	EndIf
+Next
+If !lFirst
+	oReport:ThinLine()
+EndIf
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MATR430R3()
+
+
+
+LOCAL Tamanho
+LOCAL cDesc1   := If( cPaisLoc $ "ANG|PTG", "Emite um relatório com os cálculos da folha de cálculo seleccionada para", "Emite um relatorio com os calculos da planilha selecionada para" )
+LOCAL cDesc2   := If( cPaisLoc $ "ANG|PTG", " cada artigo. os valores calculados são os mesmos referentes", " cada produto. Os valores calculados sao os mesmos referentes" )
+LOCAL cDesc3   := If( cPaisLoc $ "ANG|PTG", " às fórmulas da folha de cálculo.", " as formulas da planilha." )
+LOCAL cString  := "SB1"
+LOCAL nI       := 0
+
+
+
+
+
+LOCAL titulo   := OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Folha De Cálculo De Formação De Preços", "Planilha de Formacao de Precos" ))
+LOCAL wnrel := "MATR430"
+
+
+
+
+PRIVATE aReturn := { OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" )), 1,OemToAnsi(If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" )), 2, 2, 1, "",1 }
+PRIVATE nLastKey := 0 ,cPerg := "MTR430",aPar:=Array(20),aParC010:=Array(20)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AjustaSx1()
+pergunte(cPerg, .F. )
+
+
+
+If Select("SGG") == 0
+	mv_par09:=1
+EndIf
+
+For ni := 1 to 20
+	aPar[ni] := &("mv_par"+StrZero(ni,2))
+next
+
+Tamanho := IIF(apar[05]==1,"M","G")
+
+
+
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3, .F. ,"",,Tamanho)
+
+If nLastKey = 27
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey = 27
+	dbClearFilter()
+	Return
+Endif
+
+
+For ni := 1 to 20
+	aPar[ni] := &("mv_par"+StrZero(ni,2))
+next
+
+RptStatus({|lEnd| C430Imp(@lEnd,wnRel,cString,titulo,Tamanho)},titulo)
+
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function C430Imp(lEnd,WnRel,cString,titulo,Tamanho)
+
+
+
+
+LOCAL cRodaTxt := ""
+LOCAL nCntImpr := 0,nReg
+LOCAL aArray   := {} ,cCondFiltr,lRet
+LOCAL nI       := 0
+LOCAL cProdFim :=""
+
+
+
+PRIVATE li := 80 ,m_pag := 1,cProg:="R430"
+
+
+
+
+
+
+
+
+
+PRIVATE nQualCusto := 1
+
+
+
+
+
+PRIVATE aAuxCusto
+
+
+
+
+PRIVATE cArqMemo := "STANDARD"
+
+
+
+
+PRIVATE lDirecao := .T. 
+
+PRIVATE lConsNeg := apar[08] = 1
+
+
+
+
+MTC010SX1()
+PERGUNTE("MTC010", .F. )
+
+
+
+If Select("SGG") == 0
+	mv_par09:=1
+EndIf
+
+For ni := 1 to 20
+	aParC010[ni] := &("mv_par"+StrZero(ni,2))
+next
+
+mv_par09     := aPar[09]
+aParC010[09] := aPar[09]
+
+
+
+
+
+
+cCondFiltr := aReturn[7]
+If Empty(cCondFiltr)
+	cCondFiltr := ".T."
+EndIf
+
+DbSelectArea("SB1")
+dbClearFilter()
+
+
+
+
+
+cArqMemo := apar[03]
+
+
+
+
+nTipo  := IIF(aReturn[4]==1,15,18)
+
+
+dbSelectArea("SB1")
+SetRegua(LastRec())
+
+Set( 9,"ON" )
+dbSeek(xFilial()+apar[01])
+Set( 9,"OFF" )
+lRet:=MR430Plan( .T. ,aPar)
+IF !lRet
+	Set( 20, "SCREEN" )
+	Return Nil
+ENDIF
+
+cProdFim:=apar[02]
+
+While !EOF() .And.  B1_FILIAL+B1_COD <= xFilial()+cProdFim .And.  lRet
+
+	If lEnd
+		PrintOut(_PROW()+1,001,If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR"),,)
+		Exit
+	EndIf
+
+	IncRegua()
+	nReg := Recno()
+
+
+
+	If &(cCondFiltr)
+		aArray := MC010Forma(cString,nReg,99,apar[07],, .F. ,apar[10])
+		If Len(aArray) > 0
+			MR430Impr(aArray[1],aArray[2],aArray[3])
+		EndIf
+		dbGoTo(nReg)
+	EndIf
+
+	dbSelectArea("SB1")
+	dbSkip()
+End
+
+If li <> 80 .And.  lRet
+	Roda(nCntImpr,cRodaTxt,Tamanho)
+EndIf
+
+
+
+
+dbSelectArea(cString)
+dbClearFilter()
+ordSetFocus( 1 )
+
+If aReturn[5] = 1
+	Set( 24, "" )
+	dbCommitAll()
+	OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MR430Impr(cCusto,aArray,nPosForm)
+LOCAL nX
+LOCAL nCotacao,nValUnit,nValUnit2
+LOCAL cPicQuant:=PesqPictQt("G1_QUANT",13)
+LOCAL cPicUnit :=PesqPict("SB1","B1_CUSTD",18)
+LOCAL cPicTot	:=PesqPict("SB1","B1_CUSTD",19)
+LOCAL cMoeda1,cMoeda2
+Local nDecimal :=0
+LOCAL nI       :=0
+
+
+
+
+
+
+LOCAL Tamanho  := IIF(apar[05]==1,"M","G")
+LOCAL titulo   := If( cPaisLoc $ "ANG|PTG", "Folha De Cálculo De Formação De Preços", "Planilha de Formacao de Precos" )
+LOCAL nTipo    := 0
+LOCAL wnrel := "MATR430"
+LOCAL cOldAlias,nOrder,nRecno
+LOCAL cabec1,cabec2
+LOCAL Limite   := IIF(apar[05]==1,132,220)
+
+cCusto := If(cCusto=Nil,"",AllTrim(Upper(cCusto)))
+If cCusto == "ULT PRECO"
+	nDecimal := TamSX3("B1_UPRC")[2]
+ElseIf "MEDIO" $ cCusto
+	nDecimal := TamSX3("B2_CM1")[2]
+Else
+	nDecimal := TamSX3("B1_CUSTD")[2]
+EndIf
+
+
+
+
+
+If Str(nQualCusto,1) $ "3/4/5/6"
+	nCotacao:=ConvMoeda(dDataBase,,1,Str(nQualCusto-1,1))
+	cMoeda1:=GetMV("MV_MOEDA"+Str(nQualCusto-1,1,0))
+Else
+	nCotacao:=1
+	cMoeda1:=GetMV("MV_MOEDA1")
+EndIf
+cMoeda1:=PADC(Alltrim(cMoeda1),35)
+
+
+
+
+
+cMoeda2:=PADC(Alltrim(GetMV("MV_MOEDA"+Str(apar[05],1,0))),38)
+
+
+
+
+If apar[05] == 1
+	Cabec1 := If( cPaisLoc $ "ANG|PTG", "Cél.  nível  código          descrição                              um     quantidade      ", "CEL.  NIVEL  CODIGO          DESCRICAO                              UM     QUANTIDADE      " )+cMoeda1+If( cPaisLoc $ "ANG|PTG", "% Part", "% PART" )
+	Cabec2 := If( cPaisLoc $ "ANG|PTG", "                                                                                          Valor Unitário        Valor Total", "                                                                                          VALOR UNITARIO        VALOR TOTAL" )
+Else
+	Cabec1 := If( cPaisLoc $ "ANG|PTG", "Cél.  nível  código          descrição                              um     quantidade      ", "CEL.  NIVEL  CODIGO          DESCRICAO                              UM     QUANTIDADE      " )+cMoeda1+cMoeda2+If( cPaisLoc $ "ANG|PTG", "% Part", "% PART" )
+	Cabec2 := If( cPaisLoc $ "ANG|PTG", "                                                                                          Valor Unitário        Valor Total     Valor Unitário        Valor Total", "                                                                                          VALOR UNITARIO        VALOR TOTAL     VALOR UNITARIO        VALOR TOTAL" )
+Endif
+
+
+
+
+
+
+
+nTipo  := IIF(aReturn[4]==1,15,18)
+
+For nX := 1 To Len(aArray)
+
+
+
+	If apar[04] == 1
+		If Val(apar[06]) <> 0
+			If Val(aArray[nX,2]) > Val(apar[06])
+				Loop
+			Endif
+		Endif
+	Endif
+
+	If If( (Len(aArray[ nX ])==12),aArray[nX,12], .T.  )
+		If li > 60
+
+			For ni := 1 to 20
+				&("mv_par"+StrZero(ni,2)) := aPar[ni]
+			next
+			Cabec(titulo,cabec1,cabec2,wnrel,Tamanho,nTipo)
+
+			For ni := 1 to 20
+				&("mv_par"+StrZero(ni,2)) := aParc010[ni]
+			next
+		EndIf
+		If nX < nPosForm-1
+			If mv_par02 == 1
+				nValUnit := Round(aAuxCusto[nX]/aArray[nX][05], nDecimal)
+			Else
+				nValUnit := NoRound(aAuxCusto[nX]/aArray[nX][05], nDecimal)
+			EndIf
+			nValUnit2:= Round(ConvMoeda(dDataBase,,nValUnit/nCotacao,Str(apar[05],1)), nDecimal)
+		EndIf
+		PrintOut(li,000,aArray[nX][01],"99999",)
+		PrintOut(li,006,aArray[nX][02],,)
+		PrintOut(li,013,aArray[nX][04],,)
+		PrintOut(li,029,Left(aArray[nX][03],30),,)
+		If aArray[nX][04] <> Replicate("-",15)
+			If nX < nPosForm-1
+
+
+
+				cOldAlias:=Alias()
+				dbSelectArea("SB1")
+				nOrder:=IndexOrd()
+				nRecno:=Recno()
+				dbSetOrder(1)
+				dbSeek(xFilial()+aArray[nX][04])
+				PrintOut(li,068,SB1->B1_UM,,)
+				dbSetOrder(nOrder)
+				dbGoTo(nRecno)
+				dbSelectArea(cOldAlias)
+				PrintOut(li,072,aArray[nX][05],cPicQuant,)
+				PrintOut(li,087,nValUnit,cPicUnit,)
+			EndIf
+			PrintOut(li,105,aArray[nX][06],cPictot,)
+			If apar[05] == 1
+				PrintOut(li,125,aArray[nX][07],"999.999",)
+			Else
+				If nX < nPosForm-1
+					PrintOut(li,125,nValUnit2,cPicUnit,)
+				EndIf
+				PrintOut(li,143,ConvMoeda(dDataBase,,(aArray[nX][06]/nCotacao),Str(apar[05],1)),cPictot,)
+				PrintOut(li,163,aArray[nX][07],"999.999",)
+			Endif
+		EndIf
+		li++
+		If nX == 1 .And.  apar[04] == 2
+			nX += (nPosForm-3)
+		EndIf
+	EndIf
+next
+PrintOut(li,000,Replicate("-",Limite),,)
+li += 2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function MR430Plan(lGravado,aPar)
+Local cArq := ""
+Local lRet := .T. 
+lGravado := If( lGravado == nil, .F. , lGravado ) ;
+cArq:=AllTrim(If(lGravado,apar[03],&(ReadVar())))+".PDV"
+If !File(cArq)
+	Help(" ",1,"MR430NOPLA")
+	lRet := .F. 
+EndIf
+Return (lRet)
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function AjustaSX1()
+
+Local aHelpPor	:= {}
+Local aHelpEng	:= {}
+Local aHelpSpa	:= {}
+Local aArea		:=GetArea()
+Local nTamSX1
+
+Aadd( aHelpPor, "Identifica se a montagem da composicao  " )
+Aadd( aHelpPor, "do produto deve ser feita pela estrutura" )
+Aadd( aHelpPor, " ou pela pre-estrutura.                 " )
+
+Aadd( aHelpEng, "Identifies if the product composition   " )
+Aadd( aHelpEng, "preparation must be made by the         " )
+Aadd( aHelpEng, "structure or by the pre-structure.      " )
+
+Aadd( aHelpSpa, "Identifica si el montaje de composicion " )
+Aadd( aHelpSpa, "del producto debe ser hecha por la      " )
+Aadd( aHelpSpa, "estructura o por la pre-estructura.     " )
+
+
+PutSX1("MTR430","09","Mostra ?","¿Muestra?","Show?","mv_ch9","N",1,0,1,"C","","","","N","mv_par09", "Estrutura","Estructura","Structure","","Pre-Estrutura","Estructura Previa","Previous Structure","","","","","","","","","")
+
+PutSX1Help("P.MTR43009.",aHelpPor,aHelpEng,aHelpSpa)
+
+aHelpPor	:= {}
+aHelpEng	:= {}
+aHelpSpa	:= {}
+
+
+Aadd( aHelpPor, "Informar a Revisao da Estrutura do      " )
+Aadd( aHelpPor, "Produto                                 " )
+
+Aadd( aHelpEng, "Enter the Product Structure Revision    " )
+
+Aadd( aHelpSpa, "Informe la Revision de la Estructura del" )
+Aadd( aHelpSpa, "Producto                                " )
+
+
+PutSX1("MTR430","10","Qual Revisao da Estrutura ?","¿Que Revis.Estruct. ?","Structure Revision ?","mv_chA","C",TamSX3("B1_REVATU")[1],0,0,"G","","", "","N","mv_par10","","","","","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+dbSelectArea("SX1")
+dbSetOrder(1)
+nTamSX1 := Len(SX1->X1_GRUPO)
+If dbSeek(PADR("MTR430",nTamSX1)+"06", .F. )
+	If X1_TAMANHO < 3
+		RecLock("SX1", .F. )
+		_FIELD->X1_TAMANHO := 3
+		_FIELD->X1_CNT01 := "999"
+		MsUnlock()
+	EndIf
+EndIf
+
+RestArea(aArea)
+Return

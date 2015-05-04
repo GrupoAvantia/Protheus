@@ -1,0 +1,391 @@
+#INCLUDE "Protheus.ch"
+#INCLUDE "TOPCONN.ch"
+#INCLUDE "rwmake.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณ RatFeri  บAutor  ณ Carlos Beltrใo     บ Data ณ  24/11/2014 บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Relat๓rio para imprimir o rateio dos valores liquidos de   บฑฑ
+ฑฑบ          ณ F้rias.                                                    บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ Gestao de Pessoal                                          บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+User Function RatFeri()
+
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Declaracao de Variaveis                                             ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	
+	Local cDesc1         := "Este programa tem como objetivo imprimir relatorio "
+	Local cDesc2         := "de acordo com os parametros informados pelo usuario."
+	Local cDesc3         := ""
+	Local cPict          := ""
+	Local titulo         := "Relat๓rio de Rateio"
+	Local nLin           := 80
+							  //         10       20        30        40        50        60        70        80        90        100       110       120       130
+							  //12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+	Local Cabec1         := ""
+	Local Cabec2         := "Centro de Custo             Descri็ใo                                                                                      Valores"
+	Local imprime        := .T.
+	Local aOrd           := {}
+	Local aRatLiq			:= {}
+	Private lEnd         := .F.
+	Private lAbortPrint  := .F.
+	Private CbTxt        := ""
+	Private limite       := 132
+	Private tamanho      := "M"
+	Private nomeprog     := "RATFERI"
+	Private nTipo        := 15
+	Private aReturn      := {"Zebrado", 1, "Administracao", 1, 2, 1, "", 1}
+	Private nLastKey     := 0
+	Private cbtxt        := Space(10)
+	Private cbcont       := 00
+	Private CONTFL       := 01
+	Private m_pag        := 01
+	Private wnrel        := "RATFERI"
+	Private cString      := ""
+	Private cPerg        := "RATFER"
+	
+	ValidPerg(cPerg)
+	Pergunte(cPerg,.F.)
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Monta a interface padrao com o usuario.                             ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	
+	wnrel := SetPrint(cString,NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.T.,aOrd,.T.,Tamanho,,.T.)
+	
+	If nLastKey == 27
+		Return
+	Endif
+	
+	SetDefault(aReturn,cString)
+	
+	If nLastKey == 27
+		Return
+	Endif
+	
+	nTipo := If(aReturn[4]==1,15,18)
+	
+	Titulo := Alltrim(Titulo) + " - F้rias"
+	RatLiq1(aRatLiq)
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Processamento. RPTSTATUS monta janela com a regua de processamento. ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	If mv_par07 == 1 // 1 = Imprimir, 2 = Planilha
+		Cabec1 := "                                           Data de Pagamento de " + dtoc(mv_par01) + " At้ " + dtoc(mv_par02)	
+		RptStatus({|| RatLiq2(Cabec1, Cabec2, Titulo, nLin, aRatLiq) }, Titulo)
+	Else
+		RptStatus({|| RatLiq3(aRatLiq, Titulo) }, Titulo)
+	EndIf
+
+	MS_FLUSH()
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบFun็ใo    ณ RatLiq1  บAutor  ณ Carlos Beltrใo     บ Data ณ  24/11/2014 บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Essa fun็ใo calcula os valores do rateio para o Adianta-   บฑฑ
+ฑฑบ          ณ mento.                                                     บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ Gestao de Pessoal                                          บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function RatLiq1(aRatLiq)
+
+	Local cQuery
+	
+	/*
+	MV_PAR01 - De Data Pagamento
+	MV_PAR02 - Ate Data Pagamento
+	MV_PAR03 - Da Filial 
+	MV_PAR04 - Ate a Filial
+	MV_PAR05 - Do C.Custo 
+	MV_PAR06 - Ate o C.Custo	
+	MV_PAR07 - Tipo
+	*/
+	
+	cQuery := "SELECT RR_FILIAL 'FILIAL', RR_CC 'CCUSTO', CTT_DESC01 'DESC', SUM(RR_VALOR) 'VALOR' "
+	cQuery += "FROM " + RetSqlName("SRR") + " SRR "
+	cQuery += "INNER JOIN " + RetSqlName("SRA") + " SRA "
+	cQuery += "ON RA_FILIAL = RR_FILIAL AND "
+	cQuery += "RA_MAT = RR_MAT "    
+	cQuery += "INNER JOIN " + RetSqlName("CTT") + " CTT "
+	cQuery += "ON RR_FILIAL = CTT_FILIAL AND "
+	cQuery += "RR_CC = CTT_CUSTO "
+	cQuery += "WHERE SRA.D_E_L_E_T_ <> '*' AND "
+	cQuery += "SRR.D_E_L_E_T_ <> '*' AND "
+	cQuery += "CTT.D_E_L_E_T_ <> '*' AND "
+	cQuery += "RR_PD = 470 AND "
+	cQuery += "RR_DATA >= '" 	+ dtos(mv_par01) + "' AND "
+	cQuery += "RR_DATA <= '" 	+ dtos(mv_par02) + "' AND "
+	cQuery += "RR_FILIAL >= '" 	+ mv_par03 + "' AND "
+	cQuery += "RR_FILIAL <= '" 	+ mv_par04 + "' AND "
+	cQuery += "RR_CC >= '" 		+ mv_par05 + "' AND "
+	cQuery += "RR_CC <= '" 		+ mv_par06 + "'"
+	cQuery += "GROUP BY RR_FILIAL, RR_CC, CTT_DESC01 "
+	cQuery += "ORDER BY RR_FILIAL, RR_CC, CTT_DESC01 "
+	
+	cQuery := ChangeQuery(cQuery)
+	MsAguarde({|| dbUseArea(.T., "TOPCONN", TCGenQry( , , cQuery), "XMA", .F., .T.)}, OemToAnsi("Processando"))
+	XMA->(dbGoTop())
+	
+	While XMA->(!EOF())
+		AADD(aRatLiq, {XMA->FILIAL, XMA->CCUSTO, XMA->DESC, XMA->VALOR})
+		XMA->(dbSkip())
+	EndDo
+	
+	dbSelectArea("XMA")
+	XMA->(dbCloseArea())
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบFun็ใo    ณ RatLiq2  บAutor  ณ Carlos Beltrใo     บ Data ณ  24/11/2014 บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Funcao auxiliar chamada pela RPTSTATUS. A funcao RPTSTATUS บฑฑ
+ฑฑบ          ณ monta a janela com a regua de processamento.               บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ Gestao de Pessoal                                          บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function RatLiq2(Cabec1, Cabec2, Titulo, nLin, aRatLiq)
+
+	Local nOrdem
+	Local nTotFil := 0
+	Local nTotal	:= 0
+	Local i		:= 1
+	Local cFil 	:= ""
+	
+	SetRegua(Len(aRatLiq))
+	While i <= Len(aRatLiq)
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ Verifica o cancelamento pelo usuario...                             ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		If lAbortPrint
+			@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
+			Exit
+		Endif
+		
+		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+		//ณ Impressao do cabecalho do relatorio. . .                            ณ
+		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		If nLin > 65 // Salto de Pแgina. Neste caso o formulario tem 55 linhas...
+			Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+			nLin := 9
+		Endif
+		
+		//"Titulo  Doct Dt.Emissao For/Cli  Nome Fantasia  Receita    Despesa      Valor"
+		//          10         20        30        40        50        60        70        80        90        100       110       120
+		// 0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+		// 999999  XXX 11/11/1111  999999 XXXXXXXXXXXXXXX 999.999,99  999.999,99  999.999,99
+		cFil 		:= aRatLiq[i][1]
+		nTotFil 	:= 0
+		nCol 		:= 0
+																																			
+		@nLin++,001 Psay Replicate("-", 130)
+		@nLin++,001 Psay Alltrim(cFil+" - "+AllTrim(Posicione("SM0",1,SM0->M0_CODIGO+cFil,"M0_FILIAL")))	// Filial
+		@nLin++,001 Psay Replicate("-", 130)
+		nlin++
+		
+		While cFil = aRatLiq[i][1] .And. i <= Len(aRatLiq)
+			
+			If nLin > 65 // Salto de Pแgina. Neste caso o formulario tem 55 linhas...
+				Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+				nLin := 9
+			Endif
+			
+			IncRegua()
+					
+			@nLin,001 Psay Alltrim(aRatLiq[i][02])																	// Centro de Custo
+			@nLin,020 Psay Alltrim(aRatLiq[i][03])																	// Descri็ใo
+			@nLin++,117 Psay aRatLiq[i][04] Picture "@E 999,999,999.99" 										// Valor
+			
+			nTotFil 	+= aRatLiq[i][04] 																			// Total Filial
+			nTotal 	+= aRatLiq[i][04] 																			// Total Geral
+				
+			i++
+			If i > Len(aRatLiq)
+				Exit
+			Endif
+			
+			If nLin > 65 // Salto de Pแgina. Neste caso o formulario tem 55 linhas...
+				Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+				nLin := 9
+			Endif
+		EndDo
+
+		nLin++
+		If nLin > 65 // Salto de Pแgina. Neste caso o formulario tem 55 linhas...
+			Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+			nLin := 9
+		Endif
+		
+		@nLin,020 Psay "Total da Filial "+cFil+" - " + AllTrim(Posicione("SM0", 1, SM0->M0_CODIGO + cFil, "M0_FILIAL"))	// Descri็ใo
+		@nLin,082 Psay "-----> "
+		@nLin++,117 Psay nTotFil Picture "@E 999,999,999.99" 													// Total Filial
+		nLin++	
+		If i > Len(aRatLiq)
+			Exit
+		Endif
+	EndDo
+	
+	If nLin > 65 // Salto de Pแgina. Neste caso o formulario tem 55 linhas...
+		Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+		nLin := 9
+	Endif
+	
+	@nLin++,001 Psay Replicate("-", 130)
+	@nLin,020 Psay "TOTAL"																							// Descri็ใo
+	@nLin,082 Psay "---------> "
+	@nLin++,117 Psay nTotal Picture "@E 999,999,999.99" 															// Total Geral
+	@nLin++,001 Psay Replicate("-", 130)
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Finaliza a execucao do relatorio...                                 ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	
+	SET DEVICE TO SCREEN
+	
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Se impressao em disco, chama o gerenciador de impressao...          ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+		
+	If aReturn[5]==1
+		dbCommitAll()
+		SET PRINTER TO
+		OurSpool(wnrel)
+	Endif
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบFun็ใo    ณ RatLiq3  บAutor  ณ Carlos Beltrใo     บ Data ณ  24/11/2014 บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Funcao que exporta os dados do relat๓rio para uma planilha บฑฑ
+ฑฑบ          ณ de excel.                                                  บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ Gestao de Pessoal                                          บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function RatLiq3(aRatLiq, Titulo)
+
+	Local aCabec	:= {}
+	Local aItem	:= {}
+	Local aDados	:= {}
+	Local cBan 	:= ""
+	Local cFil 	:= ""
+	
+	If !ApOleClient("MSExcel") 
+		MsgAlert("Microsoft Excel nใo instalado!")
+		Return
+	EndIf
+	
+	AADD(aCabec, {"Filial"			,"C", 60	, 0})
+	AADD(aCabec, {"Centro de Custo"	,"C", 100	, 0})
+	AADD(aCabec, {"Valores"			,"N", 10	, 2})
+
+	SetRegua(Len(aRatLiq))
+
+	FOR i := 1 To Len(aRatLiq)
+		IncRegua()
+		aItem := Array(Len(aCabec)+1)
+		// Carregando as variaveis
+		aItem[1] := aRatLiq[i][1]+" - "+AllTrim(Posicione("SM0",1,SM0->M0_CODIGO+aRatLiq[i][1],"M0_FILIAL"))	// Filial
+		aItem[2] := aRatLiq[i][2] + " - " + Alltrim(aRatLiq[i][3])													// Centro de Custo
+		aItem[3] := Round(aRatLiq[i][4],2)																				// Valores
+		aItem[4] := "" // Tive que adicionar essa coluna em branco pois a ultima coluna sempre estแ sendo suprimida
+		AAdd(aDados, aItem)
+		Item := {}
+	NEXT i
+
+	DlgToExcel({ {"GETDADOS", Titulo, aCabec, aDados} })
+
+Return
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑฺฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤยฤฤฤฤฤฤยฤฤฤฤฤฤฤฤฤฤฟฑฑ
+ฑฑณFun็ใo    ณ VALIDPERG ณ Autor ณ Carlos Beltrใo     ณ Data ณ 24/11/2014 ณฑฑ
+ฑฑรฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤมฤฤฤฤฤฤฤมฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤมฤฤฤฤฤฤมฤฤฤฤฤฤฤฤฤฤดฑฑ
+ฑฑณUso       ณ Cria as perguntas dos parametros                           ณฑฑ
+ฑฑภฤฤฤฤฤฤฤฤฤฤมฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤูฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+/*/
+Static Function ValidPerg()
+
+	_sAlias := Alias()
+	DBSelectArea("SX1")
+	DBSetOrder(1)
+	cPerg := PADR(cPerg,10)
+	aRegs:={}
+	
+	/*
+	MV_PAR01 - De Data Pagamento
+	MV_PAR02 - Ate Data Pagamento
+	MV_PAR03 - Da Filial 
+	MV_PAR04 - Ate a Filial
+	MV_PAR05 - Do C.Custo 
+	MV_PAR06 - Ate o C.Custo	
+	MV_PAR07 - Tipo
+	*/
+	
+	// Grupo/Ordem/Pergunta/Variavel/Tipo/Tamanho/Decimal/Presel/GSC/Valid/Var01/Def01/Cnt01/Var02/Def02/Cnt02/Var03/Def03/Cnt03/Var04/Def04/Cnt04/Var05/Def05/Cnt05
+	aAdd(aRegs,{cPerg,'01' ,'De Data Pagamento  ?',''				 ,''			 ,'mv_ch1','D'  ,08     ,0      ,0     ,'G','                                ','mv_par01','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'              ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''       ,'   ',''	,'' ,'','',''	})
+	aAdd(aRegs,{cPerg,'02' ,'Ate Data Pagamento ?',''				 ,''			 ,'mv_ch2','D'  ,08     ,0      ,0     ,'G','naovazio                        ','mv_par02','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'              ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''       ,'   ',''	,'' ,'','',''	})	
+	aAdd(aRegs,{cPerg,'03' ,'Da Filial          ?',''				 ,''			 ,'mv_ch3','C'  ,02     ,0      ,0     ,'G','                                ','mv_par03','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'              ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''       ,'XM0',''	,'' ,'','',''	})
+	aAdd(aRegs,{cPerg,'04' ,'Ate a Filial       ?',''				 ,''			 ,'mv_ch4','C'  ,02     ,0      ,0     ,'G','naovazio                        ','mv_par04','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'              ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''       ,'XM0',''	,'' ,'','',''	})
+	aAdd(aRegs,{cPerg,'05' ,'Do C.Custo         ?',''				 ,''			 ,'mv_ch5','C'  ,09     ,0      ,0     ,'G','                                ','mv_par05','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'              ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''       ,'CTT',''	,'' ,'','',''	})
+	aAdd(aRegs,{cPerg,'06' ,'Ate o C.Custo      ?',''				 ,''			 ,'mv_ch6','C'  ,09     ,0      ,0     ,'G','naovazio                        ','mv_par06','           ',''		 ,''	 ,'               ',''   , '               ',''		 ,''	 , ''    ,''    ,'              ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''       ,'CTT',''	,'' ,'','',''	})	
+	aAdd(aRegs,{cPerg,'07' ,'Tipo               ?',''				 ,''			 ,'mv_ch7','C'  ,01     ,0      ,0     ,'C','                                ','mv_par07','Impressใo  ',''		 ,''	 ,'               ',''   , 'Planilha       ',''		 ,''	 , ''    ,''    ,'              ',''		 ,''	 , ''    ,''    ,'       ',''		 ,''	  ,''    ,''    ,'          ',''	   ,''		 ,''       ,'   ',''	,'' ,'','',''	})
+	
+	For i:=1 to Len(aRegs)
+		If ! DBSeek(cPerg+aRegs[i,2])
+			RecLock("SX1",.T.)
+			For j:=1 to Max(39, Len(aRegs[i])) //fCount()
+				FieldPut(j,aRegs[i,j])
+			Next
+			MsUnlock()
+		Endif
+	Next
+	
+	DBSkip()
+	
+	Do While x1_grupo == cPerg
+		RecLock("SX1", .F.)
+		DBDelete()
+		DBSkip()
+	EndDo
+	
+	DBSelectArea(_sAlias)
+
+Return

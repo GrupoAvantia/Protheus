@@ -1,0 +1,415 @@
+#INCLUDE "rwmake.ch"
+#INCLUDE "topconn.ch"
+#INCLUDE "colors.ch"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ARGA001   º Autor ³ Grayson B.Tavares  º Data ³  04/12/08   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescricao ³ Tela para atualizacao do preço de custo dos produtos por   º±±
+±±º          ³ orcamento                                                  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Gestao de Projetos                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+User Function ARGA001()
+
+Private nOpc := 1
+Private nI
+Private oDlg
+Private nUsado := 0
+Private aStruct := {}
+Private lRefresh := .T.
+Private aHeader := {}
+Private aCols := {}
+Private nOpca := 0
+Private aRotina := {{"Pesquisar" ,"AxPesqui", 0, 1},;
+                    {"Visualizar","AxVisual", 0, 2},;
+                    {"Incluir"   ,"AxInclui", 0, 3},;
+                    {"Alterar"   ,"AxAltera", 0, 4},;
+                    {"Excluir"   ,"AxDeleta", 0, 5}}
+                    
+cOrcam   := space(10)
+cDescOrc := space(30)
+nTotIt   := 0
+nTotSel  := 0
+cTotIt   := Transform(nTotIt,"@E 9999999")
+cTotSel  := Transform(nTotSel,"@E 9999999")
+nEncarg  := 0
+
+Aadd(aHeader,{"Codigo"  ,"ARG_PRODUT"  ,"@!"               ,15,0,"","","C","",""})
+Aadd(aHeader,{"Tipo"    ,"ARG_TIPO"    ,"@!"               ,02,0,"","","C","",""})
+Aadd(aHeader,{"Descricao"    ,"ARG_DESC"    ,"@!"               ,30,0,"","","C","",""})
+Aadd(aHeader,{"U.M."         ,"ARG_UM"      ,"@!"               ,02,0,"","","C","",""})
+Aadd(aHeader,{"Custo"        ,"ARG_CUSTD"   ,"@E 999,999,999.99",14,2,"","","N","",""})
+                                                            
+oFONTE1:=TFONT():NEW("MONO AS REGULAR",,16,,.T.,,,,.F.,.F.)
+oFONTE2:=TFONT():NEW("MONO AS REGULAR",,16,,.T.,,,,.F.,.F.)             		
+
+aadd(aCols,{space(15),space(2),space(30),space(2),0,.f.})
+
+DEFINE MSDIALOG oDlg TITLE "Atualização de Preço de Custo" FROM 00,00 TO 630,1000 PIXEL
+
+TSAY():NEW(20,10,{||"Orcamento"},Odlg,,oFONTE1,,,,.T.,)
+@ 20,50 GET cOrcam SIZE 50,20 PICTURE "@!" F3 "AF1" VALID U_ARGNPRJ()
+
+@ 20,120 GET cDescOrc SIZE 100,20 PICTURE "@!" When .F.
+
+TSAY():NEW(20,310,{||"% Encargo"},Odlg,,oFONTE1,,,,.T.,)
+@ 20,350 GET nEncarg SIZE 50,20 PICTURE "@e 999.99"
+			                                      
+oGetDados := MSGETDADOS():NEW(35,10,260,500,4,"U_ARGLINOK","U_ARGTDOOK",,.T.,{"ARG_CUSTD"},,.F.,Len(aCols),,,,"U_ARGDELOK",oDlg)
+
+TSAY():NEW(277,200,{||"Total Itens :"},Odlg,,oFONTE2,,,,.T.,CLR_RED)
+oTotIt:=TSAY():NEW(277,250,{|| cTotIt},Odlg,,oFONTE2,,,,.T.,CLR_HBLUE)
+
+TSAY():NEW(277,400,{||"Selecionados :"},Odlg,,oFONTE2,,,,.T.,CLR_RED)
+oTotSel:=TSAY():NEW(277,450,{|| cTotSel},Odlg,,oFONTE2,,,,.T.,CLR_HBLUE)
+
+oGroup := TGroup():New(270,10,290,500,"Totais",, , ,.t.)
+
+oBtnInv:=tButton():New(295,10,"Inverte Selecao",oDlg,{|| Inverte()},65,10,,,,.T.) 
+
+ACTIVATE MSDIALOG oDlg ON INIT ENCHOICEBAR(ODLG,{||nopca:=1,IIf(U_ARGTDOOK(),oDlg:End(),.t.)},{||nopca:=0,odlg:end()},,)	 
+
+If nopca=1
+	If U_ARGTDOOK()			
+		Processa({||OkInc()},"Aguarde...")
+	EndIf	
+Endif
+	
+Return
+
+
+
+
+
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ FUNÇÃO PARA CARREGAR NOME DO ORCAMENTO E DADOS DA TELA              ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+User Function ARGNPRJ
+
+lRet:=NaoVazio()
+
+cDescOrc := Posicione("AF1",1,xFilial("AF1")+cOrcam,"AF1_DESCRI")
+nEncarg  := Posicione("AF1",1,xFilial("AF1")+cOrcam,"AF1_ENCARG")
+
+aCols := {}
+
+cQuery := "SELECT AF3_PRODUT,MAX(AF3_CUSTD) AS CUSTD "
+cQUery += "FROM "+RetSqlName("AF3")+" AF3 ,"+RetSqlName("SB1")+" SB1 "
+cQUery += "WHERE AF3.D_E_L_E_T_ <> '*' "
+cQUery += "AND SB1.D_E_L_E_T_ <> '*' "
+cQUery += "AND AF3_PRODUT = B1_COD "
+cQUery += "AND AF3_PRODUT <> '' "
+cQUery += "AND AF3_FILIAL = '"+xFilial("AF3")+"' "
+cQUery += "AND AF3_ORCAME = '"+cOrcam+"' "
+cQUery += "GROUP BY AF3_PRODUT "
+cQUery += "ORDER BY AF3_PRODUT "
+
+TCQUERY cQuery NEW ALIAS "XFA"
+
+dbSelectArea("XFA")                                             	
+
+While XFA->(!EOF())
+	/*
+	If Posicione("SB1",1,xFilial("SB1")+XFA->AF3_PRODUT,"B1_TIPO") == "MO"
+   	XFA->(dbSkip())
+   	Loop
+   EndIf
+	*/
+	aadd(aCols,{XFA->AF3_PRODUT,"PR",Posicione("SB1",1,xFilial("SB1")+XFA->AF3_PRODUT,"B1_DESC"),Posicione("SB1",1,xFilial("SB1")+XFA->AF3_PRODUT,"B1_UM"),XFA->CUSTD,.f.})
+	
+	nTotIt++
+	nTotSel++
+	
+	XFA->(dbSkip())
+EndDo
+
+dbSelectArea("XFA")
+dbCloseArea() 
+
+cQuery := "SELECT AF3_RECURS,MAX(AF3_CUSTHR) AS CUSTD "
+cQUery += "FROM "+RetSqlName("AF3")+" AF3 "
+cQUery += "WHERE AF3.D_E_L_E_T_ <> '*' "
+cQUery += "AND AF3_RECURS <> '' "
+cQUery += "AND AF3_FILIAL = '"+xFilial("AF3")+"' "
+cQUery += "AND AF3_ORCAME = '"+cOrcam+"' "
+cQUery += "GROUP BY AF3_RECURS "
+cQUery += "ORDER BY AF3_RECURS "
+
+TCQUERY cQuery NEW ALIAS "XFA"
+
+dbSelectArea("XFA")                                             	
+
+While XFA->(!EOF())
+	/*
+	If Posicione("SB1",1,xFilial("SB1")+XFA->AF3_PRODUT,"B1_TIPO") <> "MO"
+   	XFA->(dbSkip())
+   	Loop
+   EndIf
+	*/
+	aadd(aCols,{XFA->AF3_RECURS,"MO",Posicione("AE8",1,xFilial("AE8")+XFA->AF3_RECURS,"AE8_DESCRI"),"HR",XFA->CUSTD,.f.})
+	
+	nTotIt++
+	nTotSel++
+	
+	XFA->(dbSkip())
+EndDo
+
+dbSelectArea("XFA")
+dbCloseArea()
+
+cQuery := "SELECT AF4_TIPOD,MAX(AF4_VLRUNI) AS CUSTD "
+cQUery += "FROM "+RetSqlName("AF4")+" AF4 "
+cQUery += "WHERE AF4.D_E_L_E_T_ <> '*' "
+cQUery += "AND AF4_TIPOD <> '' "
+cQUery += "AND AF4_FILIAL = '"+xFilial("AF3")+"' "
+cQUery += "AND AF4_ORCAME = '"+cOrcam+"' "
+cQUery += "GROUP BY AF4_TIPOD "
+cQUery += "ORDER BY AF4_TIPOD "
+
+TCQUERY cQuery NEW ALIAS "XFA"
+
+dbSelectArea("XFA")                                             	
+
+While XFA->(!EOF())
+	/*
+	If Posicione("SB1",1,xFilial("SB1")+XFA->AF3_PRODUT,"B1_TIPO") <> "MO"
+   	XFA->(dbSkip())
+   	Loop
+   EndIf
+	*/
+	aadd(aCols,{XFA->AF4_TIPOD,"DE",Posicione("SZ3",1,xFilial("SZ3")+XFA->AF4_TIPOD,"Z3_DESCRI"),Posicione("SZ3",1,xFilial("SZ3")+XFA->AF4_TIPOD,"Z3_UM"),XFA->CUSTD,.f.})
+	
+	nTotIt++
+	nTotSel++
+	
+	XFA->(dbSkip())
+EndDo
+
+dbSelectArea("XFA")
+dbCloseArea()
+
+
+cTotIt := Transform(nTotIt,"@E 9999999")
+ObjectMethod(oTotIt,"SetText('"+cTotIt+"')")
+
+cTotSel := Transform(nTotSel,"@E 9999999")
+ObjectMethod(oTotSel,"SetText('"+cTotSel+"')")
+
+Getdrefresh()
+
+Return lRet
+
+
+
+
+
+
+
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ FUNÇÃO PARA CONFIRMACAO DA INCLUSAO                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Static Function OkInc
+
+dbSelectArea("AF3")
+//cIndexAF3 := CriaTrab(nil,.f.)
+//IndRegua("AF3",cIndexAF3,"AF3_FILIAL+AF3_ORCAME+AF3_PRODUT",,,"Selecionando Registros...")
+
+dbSelectArea("AF1")
+dbSetOrder(1)
+AF1->(dbSeek(xFilial("AF1")+cOrcam))
+
+RecLock("AF1")
+Replace AF1->AF1_ENCARG With nEncarg
+MsUnlock()
+
+For i:=1 To Len(aCols)
+	If aCols[i,6] == .f. .And. aCols[i,5] > 0      	
+      	If aCols[i,2] == "PR"
+      		 dbSelectArea("AF3")
+      		 dbSetOrder(2)
+      		 AF3->(dbSeek(xFilial("AF3")+cOrcam+aCols[i,1]))	
+	      	 While AF3->AF3_FILIAL == xFilial("AF3") .And. AF3->AF3_PRODUT == aCols[i,1]
+		      	 RecLock("AF3",.f.)
+		      	 Replace AF3->AF3_CUSTHR  With 0
+		      	 Replace AF3->AF3_CUSTD   With aCols[i,5]      	
+		      	 MsUnlock()  
+	        		 AF3->(dbSkip())
+	      	 EndDo
+      	ElseIf aCols[i,2] == "MO"
+      		 dbSelectArea("AF3")
+      		 dbSetOrder(4)
+      	    AF3->(dbSeek(xFilial("AF3")+aCols[i,1]+cOrcam))
+      		 While AF3->AF3_FILIAL == xFilial("AF3") .And. AF3->AF3_RECURS == aCols[i,1] .And. AF3->AF3_ORCAME == cOrcam
+		      	 RecLock("AF3",.f.)
+		      	 Replace AF3->AF3_CUSTHR   With aCols[i,5]
+		      	 Replace AF3->AF3_CUSTD    With aCols[i,5]+(aCols[i,5]*(nEncarg/100))
+		      	 MsUnlock()  
+	        		 AF3->(dbSkip())
+	      	 EndDo
+      	ElseIf aCols[i,2] == "DE"
+      		 dbSelectArea("AF4")
+      		 dbSetOrder(4)
+      	     AF4->(dbSeek(xFilial("AF3")+aCols[i,1]+cOrcam))
+      		 While AF4->AF4_FILIAL == xFilial("AF4") .And. AF4->AF4_TIPOD == aCols[i,1] .And. AF4->AF4_ORCAME == cOrcam
+		      	 RecLock("AF4",.f.)
+		      	 Replace AF4->AF4_VLRUNI   With aCols[i,5]
+		      	 Replace AF4->AF4_VALOR    With aCols[i,5]*AF4->AF4_QUANT
+		      	 MsUnlock()  
+	        	 AF4->(dbSkip())
+	      	 EndDo
+      	EndIf
+	EndIf	
+Next
+
+//Força o recalculo do custo do orcamento
+// atualiza os custos das tarefas e das edts
+PMS100ReCalc() //orcamentos
+//PMS200Recalc() //projetos                           
+      	
+MsgInfo("Custo atualizado!!!","Atenção")
+
+Return
+                         
+
+
+
+
+
+
+
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ FUNÇÃO PARA INVERTER SELECAO                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Static Function Inverte
+
+nTotSel := 0
+
+For i:=1 To Len(aCols)
+ 	If aCols[i,6] == .f.
+ 		aCols[i,6] := .t.
+    	nTotSel--
+    Else
+    	aCols[i,6] := .f.
+    	nTotSel++
+    EndIf	
+Next
+
+If nTotSel < 0
+	nTotSel := 0
+EndIf	
+
+cTotSel := Transform(nTotSel,"@E 9999999")
+ObjectMethod(oTotSel,"SetText('"+cTotSel+"')")
+
+Return
+
+
+
+
+
+
+
+
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ FUNÇÃO PARA VALIDAR LINHA                                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+User Function ARGLINOK
+
+lRet:=.t.
+/*         
+If aCols[n,5] == .f.
+	If aCols[n,4]<=0
+		Alert("Itens ativos nao podem conter valor menor ou igual a zero","Atenção")
+		lRet:=.f.
+	EndIf
+EndIf	
+*/	
+Return lRet
+
+
+
+
+
+
+
+
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ FUNÇÃO PARA VALIDAR TODO O ACOLS                                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+User Function ARGTDOOK
+
+lRet:=.t.
+/*
+For i:=1 To Len(aCols)
+	If aCols[i,5] == .f.
+		If aCols[i,4]<=0			
+			lRet:=.f.
+		EndIf
+	EndIf
+Next
+
+If lRet == .f.
+	Alert("Itens ativos nao podem conter valor menor ou igual a zero"+chr(10)+"Verifique os itens","Atenção")
+EndIf	
+*/
+Return lRet
+
+
+
+
+
+
+
+
+
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ FUNÇÃO PARA AO DELETAR LINHA                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+User Function ARGDELOK
+
+lRet:=.t.
+
+nTotSel := 0
+
+For i:=1 To Len(aCols)
+ 	If aCols[i,6] == .f.
+    	nTotSel++
+    Else
+    	nTotSel--
+    EndIf	
+Next
+
+If nTotSel < 0
+	nTotSel := 0
+EndIf	
+
+cTotSel := Transform(nTotSel,"@E 9999999")
+ObjectMethod(oTotSel,"SetText('"+cTotSel+"')")
+                              	
+Return lRet

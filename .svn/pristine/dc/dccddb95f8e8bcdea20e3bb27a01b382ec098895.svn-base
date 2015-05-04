@@ -1,0 +1,287 @@
+#INCLUDE "PROTHEUS.CH"
+#INCLUDE "RWMAKE.CH"
+#INCLUDE "MATR993.CH"
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR993  ³ Autor ³ Rodrigo M. Pontes     ³ Data ³18/12/2009³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Certificado de retenção do imposto de ICA			      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ MATR993(ExpA1)                                             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametro ³ ExpA1[n][1]  - Numero do Certificado						  ³±±
+±±³          ³ ExpA1[n][2]  - Data de Emissão                             ³±±
+±±³          ³ ExpA1[n][3]  - Codigo do Fornecedor                        ³±±
+±±³          ³ ExpA1[n][4]  - Loja                                        ³±±
+±±³          ³ ExpA1[n][5]  - Tipo						                  ³±±
+±±³          ³ ExpA1[n][6]  - Numero da Fatura                            ³±±
+±±³          ³ ExpA1[n][7]  - Serie da Fatura                             ³±±
+±±³          ³ ExpA1[n][8]  - Base de Calculo da Retenção                 ³±±
+±±³          ³ ExpA1[n][9]  - Aliquota para o Calculo                     ³±±
+±±³          ³ ExpA1[n][10] - Filial que esta gerando o certificado       ³±±
+±±³          ³ ExpA1[n][11] - Valor do imposto de retenção                ³±±
+±±³          ³ ExpA1[n][12] - Valor da Retenção                           ³±±
+±±³          ³ ExpA1[n][13] - Codigo fiscal da operação                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Gera Certificado de Retenção ICA                           ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Function MATR993(alDados)
+
+	Local olReport
+	Local clNomProg		:= FunName()
+	Local clTitulo 		:= STR0001 //Retenção de ICA
+	Local clDesc   		:= STR0002 //Relatorio de certificado de retenção de ICA
+
+	If FindFunction("TRepInUse") .And. TRepInUse()
+		olReport:=TReport():New(clNomProg,clTitulo,,{|olReport| FImpRetICA(olReport,alDados)},clDesc)
+		olReport:oPage:nPaperSize	:= 9 	// Impressão em papel A4
+		olReport:lHeaderVisible  	:= .F. 	// Não imprime cabeçalho do protheus
+		olReport:lFooterVisible  	:= .F.	// Não imprime rodapé do protheus
+		olReport:lParamPage			:= .F.	// Não imprime pagina de parametros
+		olReport:PrintDialog()
+	Endif
+
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³FImpRetICA³ Autor ³ Rodrigo M. Pontes     ³ Data ³18/12/2009³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Impressão do certificado de retenção do imposto de ICA     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ FImpRetICA(ExpO1,ExpA1)                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametro ³ ExpO1        - Objeto TReport para a impressão			  ³±±
+±±³          | ExpA1[n][1]  - Numero do Certificado						  ³±±
+±±³          ³ ExpA1[n][2]  - Data de Emissão                             ³±±
+±±³          ³ ExpA1[n][3]  - Codigo do Fornecedor                        ³±±
+±±³          ³ ExpA1[n][4]  - Loja                                        ³±±
+±±³          ³ ExpA1[n][5]  - Tipo						                  ³±±
+±±³          ³ ExpA1[n][6]  - Numero da Fatura                            ³±±
+±±³          ³ ExpA1[n][7]  - Serie da Fatura                             ³±±
+±±³          ³ ExpA1[n][8]  - Base de Calculo da Retenção                 ³±±
+±±³          ³ ExpA1[n][9]  - Aliquota para o Calculo                     ³±±
+±±³          ³ ExpA1[n][10] - Filial que esta gerando o certificado       ³±±
+±±³          ³ ExpA1[n][11] - Valor do imposto de retenção                ³±±
+±±³          ³ ExpA1[n][12] - Valor da Retenção                           ³±±
+±±³          ³ ExpA1[n][13] - Codigo fiscal da operação                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Gera Certificado de Retenção ICA                           ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Static Function FImpRetICA(olReport,alDados)
+
+	Local nlLinha	:= 0 //Contador de linhas do memoline
+	Local i			:= 0
+	Local nlBaseTot	:= 0 //Valor base do imposto total
+	Local nlImpTot	:= 0 //Valor do imposto total
+	Local nlBaseRet	:= 0 //Valor base do imposto por aliquota
+	Local nlImpRet	:= 0 //Valor do imposto por aliquota
+	Local nlAliq	:= 0 //Aliquota
+	Local k			:= 0
+	Local clForn	:= "" //Codigo do fornecedor
+	Local clLoja	:= "" //Loja
+	Local cData		:= ""
+	Local oFont		:= TFont():New("Courier New",09,12,.T.,.F.,5,.T.,5,.F.,.F.)
+	Local oFont1	:= TFont():New("Courier New",09,13,.T.,.T.,5,.T.,5,.F.,.F.)
+	Local aAliq		:= {} //Array das aliquotas por fornecedor
+
+	For i:=1 to Len(alDados)
+
+		If Len(aAliq) > 0
+			If aScan(aAliq,{|x| x[4] == alDados[i][3]}) > 0
+				Loop
+			Endif
+		Endif
+
+		olReport:SayBitmap(olReport:Row()+50,olReport:Col()+1050,FLgEmp(),330,170)
+
+	   	olReport:Box(olReport:Row()+0250,olReport:Col()+0350,olReport:Row()+0250,olReport:Col()+2125)
+	   	olReport:SkipLine(12)
+
+	   	olReport:Say(olReport:Row(),olReport:Col()+0840,STR0003	,oFont,,,) //CERTIFICADO DE RETENCION DE ICA
+	   	olReport:SkipLine(4)
+	   	olReport:Say(olReport:Row(),olReport:Col()+0990,STR0004 + AllTrim(Str(Year(mv_par02)))	,oFont,,,) //ANO GRAVABLE:
+	   	olReport:SkipLine(2)
+	   	olReport:Say(olReport:Row(),olReport:Col()+0850,STR0005 +Upper(SubStr(MesExtenso(Month(mv_par02)),1,3))+" "+AllTrim(Str(Day(mv_par02)))+"/"+AllTrim(Str(Year(mv_par02))),oFont,,,) // DE:
+	   	olReport:Say(olReport:Row(),olReport:Col()+1280,STR0006 +Upper(SubStr(MesExtenso(Month(mv_par03)),1,3))+" "+AllTrim(Str(Day(mv_par03)))+"/"+AllTrim(Str(Year(mv_par03))),oFont,,,) // A:
+	   	olReport:SkipLine(4)
+
+	   	olReport:Say(olReport:Row(),olReport:Col()+0700,STR0007 + AllTrim(Upper(SM0->M0_NOMECOM))	,oFont,,,) //RETENEDOR:
+	   	olReport:SkipLine(2)
+	   	olReport:Say(olReport:Row(),olReport:Col()+0700,STR0008 + AllTrim(SM0->M0_CGC) 			,oFont,,,) //NIT      :
+	   	olReport:SkipLine(2)
+	   	olReport:Say(olReport:Row(),olReport:Col()+0700,STR0009 + AllTrim(Upper(SM0->M0_ENDENT)) 	,oFont,,,) //DIRECCION:
+	   	olReport:SkipLine(4)
+
+	   	DbSelectArea("SA2")
+	   	SA2->(DbSetOrder(1))
+	   	SA2->(DbGoTop())
+	   	If DbSeek(xFilial("SA2")+Padr(alDados[i,3],TamSx3("A2_COD")[1]," ")+PadR(alDados[i,4],TamSX3("A2_LOJA")[1]," "))
+			olReport:Say(olReport:Row(),olReport:Col()+0700,STR0010 + AllTrim(Upper(SA2->A2_NOME)),oFont,,,) //RETUVO A :
+			olReport:SkipLine(2)
+			olReport:Say(olReport:Row(),olReport:Col()+0700,STR0008 + AllTrim(Transform(SA2->A2_CGC,PesqPict("SA2","A2_CGC"))),oFont,,,) //NIT      :
+		Endif
+
+		olReport:SkipLine(8)
+
+		aAliq	  	:= {}
+		nlImpRet 	:= 0
+		nlBaseRet 	:= 0
+		nlBaseTot	:= 0
+		nlImpTot	:= 0
+
+		clForn := alDados[i][3]
+		clLoja := alDados[i][4]
+		nlAliq := alDados[i][9]
+
+		For k:=i to Len(alDados)
+			If clForn == alDados[k][3] .And. clloja == alDados[k][4]
+				If nlAliq == alDados[k][9]
+					nlBaseRet += alDados[k][8]
+					nlImpRet  += alDados[k][12]
+					If k >= Len(alDados)
+						If nlBaseRet > 0 .And. nlImpRet > 0
+							aAdd(aAliq,{nlBaseRet,nlImpRet,nlAliq,clForn})
+						Endif
+					Endif
+				Else
+					aAdd(aAliq,{nlBaseRet,nlImpRet,nlAliq,clForn})
+					nlAliq 		:= alDados[k][9]
+					nlBaseRet 	:= alDados[k][8]
+					nlImpRet  	:= alDados[k][12]
+					If k >= Len(alDados)
+						If nlBaseRet > 0 .And. nlImpRet > 0
+							aAdd(aAliq,{nlBaseRet,nlImpRet,nlAliq,clForn})
+						Endif
+					Endif
+				Endif
+			Else
+				aAdd(aAliq,{nlBaseRet,nlImpRet,nlAliq,clForn})
+				Exit
+			Endif
+		Next k
+
+		For k:=1 to Len(aAliq)
+			nlBaseTot += aAliq[k,1]
+			nlImpTot  += aAliq[k,2]
+		Next k
+
+		olReport:Box(olReport:Row()	 	 ,olReport:Col()+0270,olReport:Row()+0100,olReport:Col()+2190)
+		olReport:Box(olReport:Row()+0050,olReport:Col()+0270,olReport:Row()+0050,olReport:Col()+2190)
+	   	olReport:Box(olReport:Row()     ,olReport:Col()+0725,olReport:Row()+0100,olReport:Col()+0725)
+		olReport:Box(olReport:Row()     ,olReport:Col()+1240,olReport:Row()+0100,olReport:Col()+1240)
+		olReport:Box(olReport:Row()     ,olReport:Col()+1780,olReport:Row()+0100,olReport:Col()+1780)
+
+		olReport:Say(olReport:Row(),olReport:Col()+0410,STR0011,oFont1,,,) //CONCEPTO
+		olReport:Say(olReport:Row(),olReport:Col()+0910,STR0012,oFont1,,,) //TARIFA
+		olReport:Say(olReport:Row(),olReport:Col()+1370,STR0013,oFont1,,,) //BASE RETENCION
+		olReport:Say(olReport:Row(),olReport:Col()+1840,STR0014,oFont1,,,) //VALOR RETENIDO
+
+		For k:=1 to Len(aAliq)
+			olReport:Say(olReport:Row()+55,olReport:Col()+0335,STR0001												,oFont,,,) //RETENCION DE ICA
+			olReport:Say(olReport:Row()+55,olReport:Col()+0885,AllTrim(Str(aAliq[k,3])) + STR0015					,oFont,,,) // X MIL
+			olReport:Say(olReport:Row()+55,olReport:Col()+1285,Transform(aAliq[k,1],"@E 999,999,999,999,999.99")	,oFont,,,)
+			olReport:Say(olReport:Row()+55,olReport:Col()+1700,Transform(aAliq[k,2],"@E 999,999,999,999,999.99")	,oFont,,,)
+
+			olReport:SkipLine(2)
+
+			olReport:Box(olReport:Row()-20,olReport:Col()+0270,olReport:Row()+45,olReport:Col()+0270)
+			If k > 1
+				olReport:Box(olReport:Row()-20,olReport:Col()+0725,olReport:Row()+45,olReport:Col()+0725)
+			Else
+				olReport:Box(olReport:Row()-20,olReport:Col()+0725,olReport:Row()+40,olReport:Col()+0725)
+			Endif
+			olReport:Box(olReport:Row()-20,olReport:Col()+1240,olReport:Row()+45,olReport:Col()+1240)
+			olReport:Box(olReport:Row()-20,olReport:Col()+1780,olReport:Row()+45,olReport:Col()+1780)
+			olReport:Box(olReport:Row()-20,olReport:Col()+2190,olReport:Row()+45,olReport:Col()+2190)
+			If k > 1
+				olReport:Box(olReport:Row()+45,olReport:Col()+0270,olReport:Row()+45,olReport:Col()+2190)
+			Endif
+		Next k
+
+	   	olReport:SkipLine(2)
+		olReport:Say(olReport:Row(),olReport:Col()+0670,STR0016										 	,oFont1,,,) //TOTAL
+		olReport:Say(olReport:Row(),olReport:Col()+1265,Transform(nlBaseTot,"@E 999,999,999,999,999.99")	,oFont1,,,)
+		olReport:Say(olReport:Row(),olReport:Col()+1680,Transform(nlImpTot,"@E 999,999,999,999,999.99")	,oFont1,,,)
+
+		olReport:Box(olReport:Row()+50,olReport:Col()+0270,olReport:Row()+50,olReport:Col()+2190)
+
+		olReport:Box(olReport:Row()-20,olReport:Col()+0270,olReport:Row()+50,olReport:Col()+0270)
+		olReport:Box(olReport:Row()-20,olReport:Col()+1240,olReport:Row()+50,olReport:Col()+1240)
+		olReport:Box(olReport:Row()-20,olReport:Col()+1780,olReport:Row()+50,olReport:Col()+1780)
+		olReport:Box(olReport:Row()-20,olReport:Col()+2190,olReport:Row()+50,olReport:Col()+2190)
+
+		olReport:SkipLine(12)
+		olReport:Say(olReport:Row(),olReport:Col()+0270,AllTrim(Extenso(nlImpTot,.F.,1))			,oFont,,,)
+
+		olReport:SkipLine(12)
+		olReport:Say(olReport:Row(),olReport:Col()+0350,STR0017 + AllTrim(Upper(SM0->M0_CIDENT))	,oFont,,,) //CIUDAD DONDE SE CONSIGNO LA RETENCION :
+		olReport:SkipLine(4)
+
+		DbSelectArea("SFB")
+		SFB->(DbSetOrder(1))
+		If DbSeek(xFilial("SFB")+"RC0")
+
+			nlLinha := MLCOUNT(SFB->FB_CERTIF,80,3,.T.)
+
+			If nlLinha == 0
+				nlLinha := 1
+			Elseif nlLinha > 3
+				nlLinha := 3
+			Endif
+
+			For k:=1 to nlLinha
+				olReport:Say(olReport:Row(),olReport:Col()+0325,MEMOLINE(SFB->FB_CERTIF,80,k,3,.T.),oFont,,,)
+				olReport:SkipLine(2)
+			Next k
+
+		Endif
+
+		cData := SubStr(GravaData(dDataBase,.F.,8),1,4)+"/"+SubStr(GravaData(dDataBase,.F.,8),5,2)+"/"+SubStr(GravaData(dDataBase,.F.,8),7,2)
+
+		olReport:SkipLine(10)
+		olReport:Say(olReport:Row(),olReport:Col()+0350,AllTrim(Upper(SM0->M0_CIDENT)),oFont,,,)
+		olReport:Say(olReport:Row(),olReport:Col()+1050,AllTrim(cData),oFont,,,)
+
+		olReport:SkipLine(16)
+		olReport:Box(olReport:Row(),olReport:Col()+0350,olReport:Row(),olReport:Col()+2125)
+
+	    olReport:EndPage()
+	Next i
+
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ FLgEmp   ³ Autor ³ Rodrigo M. Pontes     ³ Data ³18/12/2009³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Traz o logotipo da empresa								  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ FLgEmp()				                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Gera Certificado de Retenção ICA                           ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Function FLgEmp()
+
+	Local cLogo			:= ""
+	Local cStartPath	:= GetSrvProfString("Startpath","")
+
+	cLogo := cStartPath + "LGRL"+SM0->M0_CODIGO+SM0->M0_CODFIL+".BMP" 	// Empresa+Filial
+	If !File(cLogo)
+		cLogo := cStartPath + "LGRL"+SM0->M0_CODIGO+".BMP" 				// Empresa
+	Endif
+
+Return cLogo

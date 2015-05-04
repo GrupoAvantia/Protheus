@@ -1,0 +1,285 @@
+#line 1 "D:\TOTVS 11\MICROSIGA\PROTHEUS\INCLUDE\MATR845.CH"
+#line 2 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr845.prx"
+#line 1 ""
+#line 31 "d:\totvs 11\microsiga\protheus\my projects\materiais\matr845.prx"
+Function Matr845()
+Local titulo 	:= "Carga Acumulativa - Analitica"
+Local cString	:= "SHH"
+Local wnrel		:="MATR845"
+Local cDesc1 	:= If( cPaisLoc $ "ANG|PTG", "Este Programa Irá Imprimir Carga Acumulativa Analitica.", "Este programa ira imprimir Carga Acumulativa Analitica." )
+Local cDesc2 	:= If( cPaisLoc $ "ANG|PTG", "Os valores referentes a horas estão convertidos de acordo com", "Os valores referentes a horas estäo convertidos conforme" )
+Local cDesc3 	:= If( cPaisLoc $ "ANG|PTG", "O parâmetro  mv_tphr, (c)entesimais ou (n)ormais.", "o parâmetro MV_TPHR, (C)entesimais ou (N)ormais." )
+Local tamanho	:= "M"
+Private aReturn  := {If( cPaisLoc $ "ANG|PTG", "Código de barras", "Zebrado" ),1,If( cPaisLoc $ "ANG|PTG", "Administração", "Administracao" ), 2, 2, 1, "",1 }
+Private cPerg    :="MTR845"
+Private nLastKey := 0
+
+
+
+AjustaSX1()
+pergunte("MTR845", .F. )
+
+
+
+
+
+
+
+
+If !ChkFile("SHH", .F. )
+	Help(" ",1,"SH8EmUso")
+	Return
+Endif
+
+
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3, .F. ,"",,Tamanho)
+
+If nLastKey = 27
+	dbSelectArea("SHH")
+	dbClearFilter()
+	dbCloseArea()
+
+
+
+	ClosFile("SHH")
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey = 27
+	dbSelectArea("SHH")
+	dbClearFilter()
+	dbCloseArea()
+
+
+
+	ClosFile("SHH")
+	Return
+Endif
+
+RptStatus({|lEnd| R845Imp(@lEnd,wnRel,titulo,tamanho)},titulo)
+Return NIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Static Function R845Imp(lEnd,wnRel,titulo,tamanho)
+
+
+
+
+Local cbTxt, cCTrab
+Local CbCont,cabec1,cabec2
+Local nomeprog  := "MATR845"
+Local cTipoHora := GetMV("MV_TPHR")
+Local cIndSHH 	:= CriaTrab(NIL, .F. )
+Local cCondSHH	:= ""
+Local cOper		:= ""
+Local cOPAnt	:= ""
+Local nHH_USO 	:= 0
+Local lPrintRpe := .F. 
+Private li := 0
+
+
+
+
+cbtxt    := SPACE(10)
+cbcont   := 0
+m_pag    := 1
+
+
+
+cabec1 := ""
+cabec2 := ""
+
+dbSelectArea("SHH")
+dbSetOrder(1)
+cKeySHH 	:= "HH_FILIAL+HH_CTRAB+HH_OP+HH_OPER"
+cCondSHH 	:= 'HH_FILIAL == "'+xFilial("SHH")+'"'
+cCondSHH	+= ' .And. HH_OP >= "'+mv_par01+'"'
+cCondSHH	+= ' .And. HH_OP <= "'+mv_par02+'"'
+cCondSHH	+= ' .And. HH_CTRAB >= "'+mv_par03+'"'
+cCondSHH	+= ' .And. HH_CTRAB <= "'+mv_par04+'"'
+IndRegua("SHH",cIndSHH,cKeySHH,,cCondSHH,If( cPaisLoc $ "ANG|PTG", "A Seleccionar Registos...", "Selecionando Registros..." ))
+SHH->(DbGoTop())
+
+
+
+
+titulo += ""
+cabec1 := If( cPaisLoc $ "ANG|PTG", "ORDEM         ALO CÓDIGO                              DESCRIÇÃO        QUANTIDADE   OPERAÇÃO HRS.", "ORDEM         ALO CODIGO                              DESCRICAO        QUANTIDADE   OPERACAO HRS." )
+cabec2 := If( cPaisLoc $ "ANG|PTG", "PRODUÇÃO      CM  ARTIGO                             ARTIGO                                UTILIZ.", "PRODUCAO      CM  PRODUTO                             PRODUTO                                UTILIZ." )
+
+
+
+
+SetRegua(LastRec())
+
+While SHH->(!Eof())
+
+	IF lEnd
+		PrintOut(_PROW()+1,001,If(cPaisLoc$"ANG|PTG","Cancelado Pelo Operador","CANCELADO PELO OPERADOR"),,)
+		Exit
+	EndIF
+
+
+	lPrintRpe := .T. 
+	dbSelectArea("SHB")
+	dbSetOrder(1)
+	dbSeek(xFilial(Alias())+SHH->HH_CTRAB)
+
+	dbSelectArea("SHH")
+
+	cabec(titulo,cabec1,cabec2,nomeprog,tamanho,18)
+	li++
+	PrintOut(li,00,If(cPaisLoc$"ANG|PTG","Centro de trabalho: ","Centro de Trabalho: ")+SHH->HH_CTRAB+"-"+Subs(SHB->HB_NOME,1,25),,)
+	PrintOut(li,58,If(cPaisLoc$"ANG|PTG","Hr.utiliz.: ","Hr.Utiliz.: "),,)
+	TransHora("SHB->HB_USO",cTipoHora,70)
+	li++
+	PrintOut(li,00,If(cPaisLoc$"ANG|PTG","Hr.úteis          : ","Hr.Uteis          : "),,)
+	TransHora("SHB->HB_UTEIS",cTipoHora,20)
+	PrintOut(li,58,If(cPaisLoc$"ANG|PTG","Utilização: ","Utilizacao: ")+Transform(((SHB->HB_USO/SHB->HB_UTEIS)*100),"@E 999.99")+" %",,)
+	li+=2
+
+	cCTrab := SHH->HH_CTRAB
+
+	While SHH->(!Eof() .And.  HH_CTRAB == cCTrab)
+
+		IncRegua()
+
+
+		dbSelectArea("SC2")
+		dbSetOrder(1)
+		dbSeek(xFilial(Alias())+SHH->HH_OP)
+
+
+		If !MtrAValOP(mv_par05, "SC2")
+			SHH->(dbSkip())
+			Loop
+		EndIf
+
+     	IF mv_par06 == 2
+	    	IF !empty(dtos(SC2->C2_DATRF))
+               SHH->(dbSkip())
+     	       LOOP
+         	EndIf
+        EndIf
+
+
+		dbSelectArea("SB1")
+		dbSetOrder(1)
+		dbSeek(xFilial(Alias())+SC2->C2_PRODUTO)
+
+
+		dbSelectArea("SHB")
+		dbSetOrder(1)
+		dbSeek(xFilial(Alias())+SHH->HH_CTRAB)
+		IF li > 60
+			Li := 0
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,18)
+			li++
+			PrintOut(li,00,If(cPaisLoc$"ANG|PTG","Centro de trabalho: ","Centro de Trabalho: ")+SHH->HH_CTRAB+"-"+Subs(SHB->HB_NOME,1,25),,)
+			PrintOut(li,58,If(cPaisLoc$"ANG|PTG","Hr.utiliz.: ","Hr.Utiliz.: "),,)
+			TransHora("SHB->HB_USO",cTipoHora,70)
+			li++
+			PrintOut(li,00,If(cPaisLoc$"ANG|PTG","Hr.úteis          : ","Hr.Uteis          : "),,)
+			TransHora("SHB->HB_UTEIS",cTipoHora,20)
+			PrintOut(li,58,If(cPaisLoc$"ANG|PTG","Utilização: ","Utilizacao: ")+Transform(((SHB->HB_USO/SHB->HB_UTEIS)*100),"@E 999.99")+" %",,)
+			li+=2
+		EndIF
+
+		cOPAnt := SHH->HH_OP
+		cOper  := SHH->HH_OPER
+		nHH_USO:= 0
+		dbSelectArea("SHH")
+		SHH->(DbSetOrder())
+		While SHH->(!Eof() .AND.  HH_CTRAB+HH_OP+HH_OPER==cCTrab+cOPAnt+cOper)
+	    	nHH_USO += SHH->HH_USO
+			SHH->(DbSkip())
+		EndDo
+
+		SHH->(DbSkip(-1))
+
+
+
+
+
+		PrintOut(li,00,Subs(SHH->HH_OP,1,6)+" "+Subs(SHH->HH_OP,7,2)+" "+Subs(SHH->HH_OP,9,3),,)
+
+		SH8->(DbsetOrder(1))
+		If SH8->(DbSeek(xFilial("SH8")+SC2->C2_NUM+SC2->C2_ITEM+SC2->C2_SEQUEN+SC2->C2_ITEMGRD+SHH->HH_OPER))
+			PrintOut(li,14,OemToAnsi(If(cPaisLoc$"ANG|PTG","Sim","SIM")),,)
+		Else
+			PrintOut(li,14,OemToAnsi(If(cPaisLoc$"ANG|PTG","Não","NAO")),,)
+		EndIf
+		PrintOut(li,18,SC2->C2_PRODUTO,,)
+		PrintOut(li,54,Subs(SB1->B1_DESC,1,15),,)
+		PrintOut(li,70,(aSC2Sld()),PesqPictQt("C2_QUANT",12),)
+		PrintOut(li,87,SHH->HH_OPER,,)
+		If cTipoHora=="C"
+			PrintOut(li,92,nHH_USO,PesqPictQT("HH_USO",9),)
+		Else
+			PrintOut(li,92,FloatToHora(nHH_USO),,)
+		EndIf
+		li++
+
+		SHH->(dbSkip())
+	EndDo
+EndDO
+
+If (li < 60) .And.  lPrintRpe
+	roda(cbcont,cbtxt,tamanho)
+Endif
+
+dbSelectArea("SHH")
+RetIndex("SHH")
+Ferase(cIndSHH+OrdBagExt())
+
+dbCloseArea()
+
+
+
+ClosFile("SHH")
+dbSelectArea("SC2")
+
+If aReturn[5] = 1
+	Set( 24, "" )
+	dbCommitall()
+	ourspool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return NIL
+
+
+
+
+
+
+Static Function AjustaSX1()
+
+Local aHelpPor :={}
+Local aHelpEng :={}
+Local aHelpSpa :={}
+
+Aadd( aHelpPor, "Indica se irá considerar ordens  "     )
+Aadd( aHelpPor, "encerradas.                      "     )
+
+
+
+PutSx1("MTR845","06","Considera ordens encerradas ?","","","mv_ch6", "C",3,0,0,"C","","","","S","mv_par06","Sim","","","","Nao","","","","","","","","","","","", aHelpPor,aHelpEng,aHelpSpa)
+
+Return Nil

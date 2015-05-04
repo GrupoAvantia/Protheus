@@ -1,0 +1,1048 @@
+#Include "Matr210.ch"
+#Include "FIVEWIN.Ch"
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR210  ³ Autor ³ Alexandre Inacio Lemes³ Data ³08/06/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Rela‡„o de Analise das Cota‡oes.                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ MATR210(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function Matr210()
+
+Local lSigaCusOk := .T.
+Local oReport
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Funcao utilizada para verificar a ultima versao dos fontes      ³
+//³ SIGACUS.PRW, SIGACUSA.PRX e SIGACUSB.PRX, aplicados no rpo do   |
+//| cliente, assim verificando a necessidade de uma atualizacao     |
+//| nestes fontes. NAO REMOVER !!!							        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+IF !(FindFunction("SIGACUS_V") .and. SIGACUS_V() >= 20050512)
+	Aviso(STR0021,STR0017,{STR0020}) //"Atualizar patch do programa SIGACUS.PRW !!!"
+    lSigaCusOk := .F.
+EndIf
+IF !(FindFunction("SIGACUSA_V") .and. SIGACUSA_V() >= 20060321)
+	Aviso(STR0021,STR0018,{STR0020}) //"Atualizar patch do programa SIGACUSA.PRX !!!"
+    lSigaCusOk := .F.
+EndIf
+IF !(FindFunction("SIGACUSB_V") .and. SIGACUSB_V() >= 20050512)
+	Aviso(STR0021,STR0019,{STR0020}) //"Atualizar patch do programa SIGACUSB.PRX !!!"
+    lSigaCusOk := .F.
+EndIf
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Ajuste de Perguntas                                                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AjustaSX1()
+
+If lSigaCusOk 
+
+	If FindFunction("TRepInUse") .And. TRepInUse()
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Interface de impressao                                                  ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		oReport:= ReportDef()
+		oReport:PrintDialog()
+	Else
+		MATR210R3()
+	EndIf
+	
+EndIf
+                                               
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ ReportDef³Autor  ³Alexandre Inacio Lemes ³Data  ³08/06/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Rela‡„o de Analise das Cota‡oes.                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ nExp01: nReg = Registro posicionado do SC3 apartir Browse  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ oExpO1: Objeto do relatorio                                ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+Local oReport 
+Local oSection1 
+Local oSection2 
+Local oSection3 
+Local cTitle    := STR0002	//"Relacao de Analise das Cotacoes"
+Local cAliasTRB := GetNextAlias()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                           ³
+//³ mv_par01            // Da cotacao                              ³
+//³ mv_par02            // Ate a cotacao                           ³
+//³ mv_par03            // Lista por Fornecedor ou Valores         ³
+//³ mv_par04            // Sugere TE Padrao (S/N)                  ³
+//³ mv_par05            // Lista Encerradas (S/N)                  ³
+//³ mv_par06            // Descricao do produto                    ³
+//³ mv_par07            // Imprime Aliquota ICMS (Produtos/Cotação)³
+//³ mv_par08            // IMprime Aliquota IPI  (Produtos/Cotação)³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+pergunte("MTR210",.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao do componente de impressao                                      ³
+//³                                                                        ³
+//³TReport():New                                                           ³
+//³ExpC1 : Nome do relatorio                                               ³
+//³ExpC2 : Titulo                                                          ³
+//³ExpC3 : Pergunte                                                        ³
+//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+//³ExpC5 : Descricao                                                       ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport := TReport():New("MTR210",cTitle,"MTR210",{|oReport| ReportPrint(oReport,cAliasTRB)},STR0001) //"Emissao da Relacao de Analise das Cotacoes"
+oReport:SetLandscape() 
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da secao utilizada pelo relatorio                               ³
+//³                                                                        ³
+//³TRSection():New                                                         ³
+//³ExpO1 : Objeto TReport que a secao pertence                             ³
+//³ExpC2 : Descricao da seçao                                              ³
+//³ExpA3 : Array com as tabelas utilizadas pela secao. A primeira tabela   ³
+//³        sera considerada como principal para a seção.                   ³
+//³ExpA4 : Array com as Ordens do relatório                                ³
+//³ExpL5 : Carrega campos do SX3 como celulas                              ³
+//³        Default : False                                                 ³
+//³ExpL6 : Carrega ordens do Sindex                                        ³
+//³        Default : False                                                 ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da celulas da secao do relatorio                                ³
+//³                                                                        ³
+//³TRCell():New                                                            ³
+//³ExpO1 : Objeto TSection que a secao pertence                            ³
+//³ExpC2 : Nome da celula do relatório. O SX3 será consultado              ³
+//³ExpC3 : Nome da tabela de referencia da celula                          ³
+//³ExpC4 : Titulo da celula                                                ³
+//³        Default : X3Titulo()                                            ³
+//³ExpC5 : Picture                                                         ³
+//³        Default : X3_PICTURE                                            ³
+//³ExpC6 : Tamanho                                                         ³
+//³        Default : X3_TAMANHO                                            ³
+//³ExpL7 : Informe se o tamanho esta em pixel                              ³
+//³        Default : False                                                 ³
+//³ExpB8 : Bloco de código para impressao.                                 ³
+//³        Default : ExpC2                                                 ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+oSection1:= TRSection():New(oReport,STR0032,{cAliasTRB,"SC8"},/*aOrdem*/) //"Relacao de Analise das Cotacoes"
+TRCell():New(oSection1,"TB_NUM"    ,cAliasTRB,STR0011,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+oSection1:SetTotalInLine(.F.)
+oSection1:SetTotalText(STR0031) // "TOTAIS DA COTACAO"
+
+oSection2:= TRSection():New(oSection1,STR0033,{cAliasTRB,"SC8","SB1"},/*aOrdem*/,/*Campos do SX3*/,/*Campos do SIX*/) //"Carga"
+TRCell():New(oSection2,"C8_PRODUTO","SC8"   ,/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection2,"TB_DESCPRO",cAliasTRB,STR0024,/*Picture*/,60,/*lPixel*/,/*{|| code-block de impressao }*/)
+oSection2:Cell("TB_DESCPRO"):SetLineBreak() 
+
+oSection3:= TRSection():New(oSection2,STR0034,{cAliasTRB,"SC8","SA2","SB1"},/*aOrdem*/,/*Campos do SX3*/,/*Campos do SIX*/) //"Carga"
+TRCell():New(oSection3,"C8_FORNECE","SC8"    ,/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,,,,.T.)
+TRCell():New(oSection3,"C8_LOJA"   ,"SC8"    ,/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,,,,.T.)
+TRCell():New(oSection3,"TB_NOME"   ,cAliasTRB,STR0025,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,,,,.F.)
+TRCell():New(oSection3,"C8_COND"   ,"SC8"    ,/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,,,,.T.)
+TRCell():New(oSection3,"TB_DESCOND",cAliasTRB,STR0024,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,,,,.T.)
+TRCell():New(oSection3,"C8_PRAZO"  ,"SC8"    ,STR0026,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,,,,.T.)
+TRCell():New(oSection3,"TB_VLPRES" ,cAliasTRB,STR0027,PesqPict("SC8","C8_TOTAL"),/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,,,,.T.)
+TRCell():New(oSection3,"TB_CREDICM",cAliasTRB,STR0028,PesqPict("SC8","C8_VALICM"),/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,,,,.T.)
+TRCell():New(oSection3,"TB_CREDIPI",cAliasTRB,STR0029,PesqPict("SC8","C8_VALIPI"),/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,,,,.T.)
+TRCell():New(oSection3,"TB_JUROS"  ,cAliasTRB,/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,,,,.T.)
+TRCell():New(oSection3,"TB_DTENTR" ,cAliasTRB,STR0030,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,,,,.T.)
+TRCell():New(oSection3,"C8_DATPRF" ,"SC8"    ,/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,,,,.T.)
+TRCell():New(oSection3,"A2_DESVIO" ,"SA2"    ,/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,,,,.T.)
+oSection3:SetHeaderPage()
+oSection3:Cell("TB_JUROS"):GetFieldInfo("C8_TAXAFIN")
+
+TRFunction():New(oSection3:Cell("TB_VLPRES"),NIL,"SUM",/*oBreak*/,,/*cPicture*/,/*uFormula*/,.T.,.F.,,oSection1)
+If cPaisLoc=="BRA"
+	TRFunction():New(oSection3:Cell("TB_CREDICM"),NIL,"SUM",/*oBreak*/,,/*cPicture*/,/*uFormula*/,.T.,.F.,,oSection1) 
+	TRFunction():New(oSection3:Cell("TB_CREDIPI"),NIL,"SUM",/*oBreak*/,,/*cPicture*/,/*uFormula*/,.T.,.F.,,oSection1) 
+EndIf                       
+
+oSection2:SetNoFilter("SB1")   
+oSection2:SetNoFilter("SC8")
+oSection3:SetNoFilter("SA2") 
+oSection3:SetNoFilter("SB1")   
+
+Return(oReport)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrin³ Autor ³Alexandre Inacio Lemes ³Data  ³09/06/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Rela‡„o de Analise das Cota‡oes.                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatório                           ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport,cAliasTRB)
+
+Local oSection1 := oReport:Section(1) 
+Local oSection2 := oReport:Section(1):Section(1) 
+Local oSection3 := oReport:Section(1):Section(1):Section(1) 
+
+Local aRelImp   := MaFisRelImp("MT150",{"SC8"})
+Local aCampos   := {}
+Local aTam	    := {}
+Local cTes      := ""
+Local cIcm      := ""
+Local cIpi      := ""
+Local cArqTrb   := ""
+Local cIndTrb   := ""
+Local cDescPro  := ""   
+Local cFilUser  := ""
+Local nJuros    := GetMV("MV_JUROS")
+Local nY        := 0
+Local nValIPI   := 0
+Local nValICMS  := 0
+
+If mv_par03 == 1
+	oReport:SetTitle(oReport:Title() + " " + STR0022) //"RELACAO DE ANALISE DAS COTACOES POR FORNECEDOR"
+Else
+	oReport:SetTitle(oReport:Title() + " " + STR0023) //"RELACAO DE ANALISE DAS COTACOES POR VALORES"
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cria array para gerar arquivo de trabalho                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+aTam:= TamSX3("C8_NUM")
+AADD(aCampos,{"TB_NUM"    ,"C",aTam[1],aTam[2] } )
+aTam:= TamSX3("C8_PRODUTO")
+AADD(aCampos,{"TB_PRODUTO","C",aTam[1],aTam[2] } )
+aTam:= TamSX3("C8_FORNECE")
+AADD(aCampos,{"TB_FORNECE","C",aTam[1],aTam[2] } )
+aTam:= TamSX3("C8_LOJA")
+AADD(aCampos,{"TB_LOJA"   ,"C",aTam[1],aTam[2] } )
+aTam:= TamSX3("A2_NOME")
+AADD(aCampos,{"TB_NOME"   ,"C",aTam[1],aTam[2] } )
+aTam:= TamSX3("C8_COND")
+AADD(aCampos,{"TB_COND"   ,"C",aTam[1],aTam[2] } )
+aTam:= TamSX3("E4_DESCRI")
+AADD(aCampos,{"TB_DESCOND","C",aTam[1],aTam[2] } )
+aTam:= TamSX3("C8_PRAZO")
+AADD(aCampos,{"TB_PRAZO"  ,"N",aTam[1],aTam[2] } )
+AADD(aCampos,{"TB_VLPRES" ,"N",14,2 } )
+AADD(aCampos,{"TB_CREDICM","N",14,2 } )
+AADD(aCampos,{"TB_CREDIPI","N",14,2 } )
+AADD(aCampos,{"TB_JUROS"  ,"N",08,4 } )
+AADD(aCampos,{"TB_DTENTR" ,"D",08,0 } )
+AADD(aCampos,{"TB_DTNECES","D",08,0 } )
+aTam:= TamSX3("A2_DESVIO")
+AADD(aCampos,{"TB_DESVIO" ,"N",aTam[1],aTam[2] } )
+aTam:= TamSX3("C8_ITEM")
+AADD(aCampos,{"TB_ITEM"   ,"C",aTam[1],aTam[2] } )
+aTam:= TamSX3("C8_NUMPRO")
+AADD(aCampos,{"TB_NUMPRO" ,"C",aTam[1],aTam[2] } )
+If AllTrim(mv_par06) == "B5_CEME"
+	aTam:= TamSX3("B5_CEME")
+	AADD(aCampos,{"TB_DESCPRO"   ,"C",aTam[1],aTam[2] } )	
+Else
+	aTam:= TamSX3("B1_DESC")
+	AADD(aCampos,{"TB_DESCPRO"   ,"C",aTam[1],aTam[2] } )	
+Endif
+
+cArqTrb  := CriaTrab(aCampos)
+dbUseArea( .T. ,,cArqTrb,cAliasTRB, .T. , .F. )
+cIndTrb := SubStr(cArqTrb,1,7)+"1"  
+
+cFilUser:=oSection1:GetAdvplExp()
+
+dbSelectArea("SC8")
+dbSetOrder(1)
+dbSeek(xFilial("SC8") + mv_par01,.T.)
+While !Eof() .And. SC8->C8_FILIAL = xFilial("SC8") .And. SC8->C8_NUM <= mv_par02
+	
+	If SC8->C8_TOTAL > 0 .And. !Empty(SC8->C8_COND) .And. (Empty(SC8->C8_NUMPED) .Or. mv_par05 == 1) 
+		
+		SB1->(dbSetOrder(1))
+		SB1->(dbSeek(xFilial("SB1") + SC8->C8_PRODUTO))
+		
+		SA2->(dbsetOrder(1))
+		SA2->(dbSeek(xFilial("SA2")+SC8->C8_FORNECE+SC8->C8_LOJA))
+		
+		cTes := IIF( mv_par04 == 1 .And. !SB1->(Eof()) , RetFldProd(SB1->B1_COD,"B1_TE") , SC8->C8_TES )
+		If cPaisLoc == "BRA"
+			cIcm := IIF( mv_par07 == 1 , SB1->B1_PICM , SC8->C8_PICM   )
+			cIpi := IIF( mv_par08 == 1 , SB1->B1_IPI  , SC8->C8_ALIIPI )
+		Endif	
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Calculo do custo da Cotacao                                            ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		MaFisIni(SC8->C8_FORNECE,SC8->C8_LOJA,"F","N","R",aRelImp)
+		MaFisIniLoad(1)
+		For nY := 1 To Len(aRelImp)
+			MaFisLoad(aRelImp[nY][3],SC8->(FieldGet(FieldPos(aRelImp[nY][2]))),1)
+		Next nY
+		MaFisEndLoad(1)
+		MaFisAlt("IT_TES"    ,cTes,1)
+		If cPaisLoc == "BRA"
+			MaFisAlt("IT_ALIQICM",cIcm,1)
+			MaFisAlt("IT_ALIQIPI",cIpi,1)
+		Endif	
+
+		nValPres := Ma160Custo("SC8",1)
+		
+		If cPaisLoc == "BRA"
+			If SC8->(FieldPos("C8_MOEDA")<>0)
+				nValIPI   := xMoeda(MaFisRet(1,"IT_VALIPI"),SC8->C8_MOEDA,1,SC8->C8_EMISSAO,,If(SC8->(FIELDPOS("C8_TXMOEDA")) > 0,SC8->C8_TXMOEDA,''))
+				nValICMS  := xMoeda(MaFisRet(1,"IT_VALICM"),SC8->C8_MOEDA,1,SC8->C8_EMISSAO,,If(SC8->(FIELDPOS("C8_TXMOEDA")) > 0,SC8->C8_TXMOEDA,''))
+			Else
+				nValIPI  := MaFisRet(1,"IT_VALIPI")
+				nValICMS := MaFisRet(1,"IT_VALICM")
+			Endif		
+		Endif		
+		
+		SF4->(dbSetOrder(1))
+		SF4->(dbSeek(xFilial("SF4")+cTes))
+
+		SE4->(dbSetOrder(1))
+		SE4->(dbSeek(xFilial("SE4")+SC8->C8_COND))
+		
+		cDescPro := ""
+		If AllTrim(mv_par06) == "C1_DESCRI"
+			SC1->(dbSetOrder(5))
+			If SC1->(dbSeek( xFilial("SC1")+SC8->C8_NUM+SC8->C8_PRODUTO ))
+				cDescPro := Alltrim(SC1->C1_DESCRI)
+			EndIf
+		ElseIf AllTrim(mv_par06) == "B5_CEME"
+			SB5->(dbSetOrder(1))
+			If SB5->(dbSeek( xFilial("SB5")+SC8->C8_PRODUTO ))
+				cDescPro := Alltrim(SB5->B5_CEME)
+			EndIf
+		Else
+			mv_par06 := "B1_DESC"
+			SB1->(dbSetOrder(1))
+			SB1->(dbSeek( xFilial("SB1")+SC8->C8_PRODUTO ))
+			cDescPro := Alltrim(SB1->B1_DESC)
+		EndIf
+	
+		If Empty(cDescPro)
+			SB1->(dbSetOrder(1))
+			SB1->(dbSeek( xFilial("SB1")+SC8->C8_PRODUTO ))
+			cDescPro := Alltrim(SB1->B1_DESC)
+		EndIf
+		          
+		If !Empty(cFilUser) 
+			DbSelectArea("SC8")
+		    If !(&(cFilUser)) 
+	     	   dbSkip()
+	    	   Loop
+    		EndIf   
+		EndIf
+	
+		RecLock( cAliasTRB , .T. )
+		
+		(cAliasTRB)->TB_NUM     := SC8->C8_NUM
+		(cAliasTRB)->TB_PRODUTO := SC8->C8_PRODUTO
+		(cAliasTRB)->TB_DESCPRO :=	cDescPro
+		(cAliasTRB)->TB_FORNECE := SC8->C8_FORNECE
+		(cAliasTRB)->TB_LOJA    := SC8->C8_LOJA
+		(cAliasTRB)->TB_NOME    := SA2->A2_NOME
+		(cAliasTRB)->TB_COND    := SC8->C8_COND    
+		(cAliasTRB)->TB_DESCOND :=	Substr(SE4->E4_DESCRI,1,15)
+		(cAliasTRB)->TB_PRAZO   := SC8->C8_PRAZO
+		(cAliasTRB)->TB_VLPRES  := nValPres
+		(cAliasTRB)->TB_JUROS   := If(Empty(SC8->C8_TAXAFIN),nJuros,SC8->C8_TAXAFIN)
+		(cAliasTRB)->TB_DESVIO  := SA2->A2_DESVIO
+		If cPaisLoc == "BRA"
+			(cAliasTRB)->TB_CREDICM := If( SF4->F4_CREDICM == "N", 0 , nValICMS)
+			(cAliasTRB)->TB_CREDIPI := If( SF4->F4_CREDIPI == "N", 0 , nValIPI )
+		EndIf
+		(cAliasTRB)->TB_DTENTR  := SC8->C8_EMISSAO + SC8->C8_PRAZO
+		(cAliasTRB)->TB_DTNECES := SC8->C8_DATPRF
+		(cAliasTRB)->TB_ITEM    := SC8->C8_ITEM
+		(cAliasTRB)->TB_NUMPRO  := SC8->C8_NUMPRO
+		
+		MsUnlock()
+		
+		MaFisEnd()
+
+	Endif
+	
+	dbSelectArea("SC8")
+	dbSkip()
+
+EndDo
+
+dbSelectArea( cAliasTRB )  
+(cAliasTRB)->(DbGotop())
+
+IF mv_par03 = 1
+	IndRegua(cAliasTRB,cIndTrb,"TB_NUM + TB_PRODUTO + TB_FORNECE ",,,STR0009)		//"Selecionando Registros..."
+Else
+	IndRegua(cAliasTRB,cIndTrb,"TB_NUM + TB_PRODUTO + STR(TB_VLPRES,14,2) ",,,STR0009)	//"Selecionando Registros..."
+EndIF
+
+TRPosition():New(oSection1,"SC8",1,{|| xFilial("SC8")+(cAliasTRB)->TB_NUM+(cAliasTRB)->TB_FORNECE+(cAliasTRB)->TB_LOJA+(cAliasTRB)->TB_ITEM+(cAliasTRB)->TB_NUMPRO })
+TRPosition():New(oSection2,"SC8",1,{|| xFilial("SC8")+(cAliasTRB)->TB_NUM+(cAliasTRB)->TB_FORNECE+(cAliasTRB)->TB_LOJA+(cAliasTRB)->TB_ITEM+(cAliasTRB)->TB_NUMPRO })
+TRPosition():New(oSection2,"SB1",1,{|| xFilial("SB1")+(cAliasTRB)->TB_PRODUTO })
+TRPosition():New(oSection3,"SC8",1,{|| xFilial("SC8")+(cAliasTRB)->TB_NUM+(cAliasTRB)->TB_FORNECE+(cAliasTRB)->TB_LOJA+(cAliasTRB)->TB_ITEM+(cAliasTRB)->TB_NUMPRO })
+TRPosition():New(oSection3,"SA2",1,{|| xFilial("SA2")+(cAliasTRB)->TB_FORNECE+(cAliasTRB)->TB_LOJA })
+TRPosition():New(oSection3,"SB1",1,{|| xFilial("SB1")+(cAliasTRB)->TB_PRODUTO })
+
+oSection2:SetParentFilter( { |cParam| (cAliasTRB)->TB_NUM == cParam },{ || (cAliasTRB)->TB_NUM })
+oSection3:SetParentFilter( { |cParam| (cAliasTRB)->TB_NUM+(cAliasTRB)->TB_PRODUTO == cParam },{ || (cAliasTRB)->TB_NUM+(cAliasTRB)->TB_PRODUTO })
+
+If cPaisLoc<>"BRA"
+	oSection3:Cell("TB_CREDICM"):Disable()
+	oSection3:Cell("TB_CREDIPI"):Disable()
+EndIf
+
+oSection1:Print()
+
+DbSelectArea(cAliasTRB)
+DbCloseArea()
+
+Ferase( cArqTrb + GetDBExtension() )
+Ferase( SubStr(cArqTrb,1,7) + "*" + OrdBagExt() )
+
+Return Nil 
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR210R3³ Autor ³ Jose Lucas            ³ Data ³ 04.08.93  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Rela‡„o de Analise das Cota‡oes.                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ MATR210(void)                                               ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ ATUALIZACOES SOFRIDAS DESDE A CONSTRUCAO INICIAL.                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ PROGRAMADOR  ³ DATA   ³ BOPS ³  MOTIVO DA ALTERACAO                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Edson   M.   ³25/02/98³XXXXXX³Acerto da impressao do Desvio(picture).  ³±±
+±±³ Edson   M.   ³05/11/98³XXXXXX³Acerto do lay-out p/ o ano 2000.         ³±±
+±±³ Bruno        ³15/12/98³melhor³Exclucao da impressao do ICM nas localiz.³±±
+±±³ Edson   M.   ³30/03/99³XXXXXX³Passar o tamanho na SetPrint.            ³±±
+±±³ Patricia Sal.³22/12/99³XXXXXX³Acerto LayOut, Fornecedor com 20 posicoes³±±
+±±³              ³        ³      ³e Loja com 4 posicoes.                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Descri‡…o ³ PLANO DE MELHORIA CONTINUA        ³Programa   MATR210.PRX  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ITEM PMC  ³ Responsavel              ³ Data          |BOPS             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³      01  ³                          ³               |                 ³±±
+±±³      02  ³Flavio Luiz Vicco         ³ 07/04/2006    |00000094157      ³±±
+±±³      03  ³                          ³               |                 ³±±
+±±³      04  ³                          ³               |                 ³±±
+±±³      05  ³                          ³               |                 ³±±
+±±³      06  ³                          ³               |                 ³±±
+±±³      07  ³                          ³               |                 ³±±
+±±³      08  ³                          ³               |                 ³±±
+±±³      09  ³                          ³               |                 ³±±
+±±³      10  ³Flavio Luiz Vicco         ³ 07/04/2006    |00000094157      ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+/*/
+Function Matr210R3()
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL wnrel
+LOCAL cDesc1 := STR0001	//"Emissao da Relacao de Analise das Cotacoes"
+LOCAL cDesc2 := ""
+LOCAL cDesc3 := ""
+LOCAL cString:= "SC8"
+Local tamanho
+STATIC aTamSXG,aTamSXG2
+
+PRIVATE titulo  := STR0002	//"Relacao de Analise das Cotacoes"
+PRIVATE cPerg   := "MTR210"
+PRIVATE aReturn := { STR0003, 1,STR0004, 2, 2, 1, "",0 }		//"Zebrado"###"Administracao"
+PRIVATE nomeprog:= "MATR210"
+PRIVATE aLinha  := { } , nLastKey := 0
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Funcao utilizada para verificar a ultima versao dos fontes      ³
+//³ SIGACUS.PRW, SIGACUSA.PRX e SIGACUSB.PRX, aplicados no rpo do   |
+//| cliente, assim verificando a necessidade de uma atualizacao     |
+//| nestes fontes. NAO REMOVER !!!                                  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+IF !(FindFunction("SIGACUS_V") .and. SIGACUS_V() >= 20050512)
+	Aviso("Atencao","Atualizar patch do programa SIGACUS.PRW !!!",{"Ok"})
+	Return
+EndIf
+IF !(FindFunction("SIGACUSA_V") .and. SIGACUSA_V() >= 20050512)
+	Aviso("Atencao","Atualizar patch do programa SIGACUSA.PRX !!!",{"Ok"})
+	Return
+EndIf
+IF !(FindFunction("SIGACUSB_V") .and. SIGACUSB_V() >= 20050512)
+	Aviso("Atencao","Atualizar patch do programa SIGACUSB.PRX !!!",{"Ok"})
+	Return
+EndIf
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para Imporessao do Cabecalho e Rodape   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+wnrel    := "MATR210"
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+pergunte("MTR210",.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                           ³
+//³ mv_par01            // Da cotacao                              ³
+//³ mv_par02            // Ate a cotacao                           ³
+//³ mv_par03            // Lista por Fornecedor ou Valores         ³
+//³ mv_par04            // Sugere TE Padrao (S/N)                  ³
+//³ mv_par05            // Lista Encerradas (S/N)                  ³
+//³ mv_par06            // Descricao do produto                    ³
+//³ mv_par07            // Imprime Aliquota ICMS (Produtos/Cotação)³
+//³ mv_par08            // IMprime Aliquota IPI  (Produtos/Cotação)³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verif. conteudo das var. Grupo de Fornecedor (001) e Loja (002) ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+aTamSXG  := If(aTamSXG  == NIL, TamSXG("001"), aTamSXG)
+aTamSXG2 := If(aTamSXG2 == NIL, TamSXG("002"), aTamSXG2)
+
+tamanho :=  If(aTamSXG[1] != aTamSXG[3], "G", "M")
+wnrel   := "MATR210"
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Envia controle para a funcao SETPRINT                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+wnrel := SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.F.,,,Tamanho)
+
+If nLastKey = 27
+	dbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey = 27
+	dbClearFilter()
+	Return
+Endif
+
+RptStatus({|lEnd| R210Imp(@lEnd,wnrel,cString,Tamanho)},Titulo)
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ R210IMP  ³ Autor ³ Cristina M. Ogura     ³ Data ³ 09.11.95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Chamada do Relatorio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR210                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function R210Imp(lEnd,wnrel,cString,Tamanho)
+Local cabec1,cabec2,cabec3
+
+Private limite := 132
+
+Li       := 80
+m_pag    := 1
+
+nTipo := IIF(aReturn[4]==1,15,18)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Monta os Cabecalhos                                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If mv_par03 = 1
+	titulo := STR0005	//"RELACAO DE ANALISE DAS COTACOES POR FORNECEDOR"
+Else
+	titulo := STR0006	//"RELACAO DE ANALISE DAS COTACOES POR VALORES"
+Endif
+
+// Verif. se utilizara tam. maximo (Fornec. com 20 pos. e Loja com 4 pos)
+If aTamSXG[1] != aTamSXG[3]
+	If cPaisLoc == "BRA"
+		cabec1 := STR0013	 //"CODIGO                LJ   NOME DO FORNECEDOR   CND DESCRICAO CND    PRZ    VL.PRESENTE  CREDITO ICM  CREDITO IPI  TX. FIN.  DT.ENTR.   DT.NECES   DESVIO"
+		*****               	12345678901234567890 1234 12345678901234567890  123 123456789012345  1234 12345678901234 123456789012 123456789012 123456789 1234567890 1234567890 123456
+		*****               	0         1         2         3         4         5         6         7         8         9        10        11        12        13        14
+		*****               	0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123
+	Else
+		cabec1 := STR0015	 //"CODIGO                LJ   NOME DO FORNECEDOR   CND DESCRICAO CND    PRZ    VL.PRESENTE                            TX. FIN.  DT.ENTR.   DT.NECES   DESVIO"
+	EndIf
+Else
+	If cPaisLoc == "BRA"
+		cabec1 := STR0007	 //"CODIGO LJ NOME DO FORNECEDOR   CND DESCRICAO CND    PRZ   VL.PRESENTE CREDITO ICM CREDITO IPI TX. FIN. DT.ENTR.   DT.NECES   DESVIO"
+		*****              	123456 12 12345678901234567890 123 123456789012345  1234 123456789012 12345678901 1234567890 123456789 1234567890 1234567890 123456
+		*****               	0         1         2         3         4         5         6         7         8         9        10        11        12        13
+		*****               	0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
+	Else
+		cabec1 := STR0014	 //"CODIGO LJ NOME DO FORNECEDOR   CND DESCRICAO CND    PRZ   VL.PRESENTE                         TX. FIN. DT.ENTR.   DT.NECES   DESVIO"
+	EndIf
+Endif
+
+cabec2 := ""
+cabec3 := ""
+
+Impr210(titulo,cabec1,cabec2,nomeprog,nTipo,tamanho,lEnd)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Restaura a Integridade dos dados                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SC1")
+dbSetOrder(1)
+
+dbSelectArea("SC8")
+dbClearFilter()
+dbSetOrder(1)
+
+dbSelectArea("SA2")
+dbSetOrder(1)
+
+dbSelectArea("SB1")
+dbSetOrder(1)
+
+If aReturn[5] = 1
+	Set Printer To
+	dbCommitAll()
+	ourspool(wnrel)
+Endif
+
+MS_FLUSH()
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ Impr210  ³ Autor ³ Jose Lucas            ³ Data ³ 15.07.93 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Impressao do Relatorio.                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ Void Impr210(ExpC1,ExpC2,ExpC3,ExpC4,ExpN1,ExpN2)          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpC1 := Titulo do Relatorio                               ³±±
+±±³          ³ ExpC2 := Cabecalho                                         ³±±
+±±³          ³ ExpC1 := Cabecalho                                         ³±±
+±±³          ³ ExpC1 := Nome do Programa                                  ³±±
+±±³          ³ ExpN1 := Comprimento da Linha                              ³±±
+±±³          ³ ExpN2 := Tipo de impressao Comprimido ou Normal            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function Impr210(titulo,cabec1,cabec2,nomeprog,nTipo,tamanho,lEnd)
+
+Local aRelImp := MaFisRelImp("MT150",{"SC8"})
+Local aCredito:= {}
+LOCAL nJuros  := GetMV("MV_JUROS")
+LOCAL aCampos := {}
+LOCAL aTam	  := {}
+LOCAL cTes    := ""
+LOCAL cIcm    := ""
+LOCAL cIpi    := ""
+LOCAL cDescri := ""
+LOCAL nCntImpr:= 0
+LOCAL cProduto:= ""
+LOCAL nPosLoja:= 0
+Local nPosNome:= 0
+Local nPosCnd := 0
+Local nPosDesc:= 0
+Local nPosPrz := 0
+Local nPosVal := 0
+Local nPosICM := 0
+Local nPosIPI := 0
+Local nPosTax := 0
+LOCAL nPosEnt := 0
+Local nPosNec := 0
+Local nPosDes := 0
+Local nValIPI := 0
+Local nValICMS:= 0
+Local nY      := 0
+Local aTotais := {0,0,0}
+cRodaTxt := STR0008	//"REG(S)"
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cria array para gerar arquivo de trabalho                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+aTam:=TamSX3("C8_NUM")
+AADD(aCampos,{ "TB_NUM"		   ,"C",aTam[1],aTam[2] } )
+aTam:=TamSX3("C8_PRODUTO")
+AADD(aCampos,{ "TB_PRODUTO"   ,"C",aTam[1],aTam[2] } )
+aTam:=TamSX3("C8_FORNECE")
+AADD(aCampos,{ "TB_FORNECE"   ,"C",aTam[1],aTam[2] } )
+aTam:=TamSX3("C8_LOJA")
+AADD(aCampos,{ "TB_LOJA"      ,"C",aTam[1],aTam[2] } )
+aTam:=TamSX3("A2_NOME")
+AADD(aCampos,{ "TB_NOME"      ,"C",aTam[1],aTam[2] } )
+aTam:=TamSX3("C8_COND")
+AADD(aCampos,{ "TB_COND"      ,"C",aTam[1],aTam[2] } )
+aTam:=TamSX3("C8_PRAZO")
+AADD(aCampos,{ "TB_PRAZO"     ,"N",aTam[1],aTam[2] } )
+AADD(aCampos,{ "TB_VLPRES"    ,"N",14,2 } )
+AADD(aCampos,{ "TB_CREDICM"   ,"N",14,2 } )
+AADD(aCampos,{ "TB_CREDIPI"   ,"N",14,2 } )
+AADD(aCampos,{ "TB_JUROS"     ,"N",08,4 } )
+AADD(aCampos,{ "TB_DTENTR"    ,"D",08,0 } )
+AADD(aCampos,{ "TB_DTNECES"   ,"D",08,0 } )
+aTam:=TamSX3("A2_DESVIO")
+AADD(aCampos,{ "TB_DESVIO"    ,"N",aTam[1],aTam[2] } )
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cria arquivo de trabalho                                     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cNomArq := CriaTrab(aCampos)
+dbUseArea( .T.,, cNomArq,cNomArq, .T. , .F. )
+cNomArq1 := SubStr(cNomArq,1,7)+"1"
+
+// Verif. conteudo das variaveis conforme tamanho do LayOut.
+nPosLoja := If(aTamSXG[1] != aTamSXG[3], 21,7)     // Loja
+nPosNome := If(aTamSXG[1] != aTamSXG[3], 26,10)    // Nome Fornec.
+nPosCnd  := If(aTamSXG[1] != aTamSXG[3], 48,31)    // CND
+nPosDesc := If(aTamSXG[1] != aTamSXG[3], 52,35)    // Descricao
+nPosPrz  := If(aTamSXG[1] != aTamSXG[3], 69,52)    // Prazo
+nPosVal  := If(aTamSXG[1] != aTamSXG[3], 74,56)    // Valor Presente
+nPosICM  := If(aTamSXG[1] != aTamSXG[3], 89,70)    // Valor ICM
+nPosIPI  := If(aTamSXG[1] != aTamSXG[3], 102,82)   // Valor IPI
+nPosTax  := If(aTamSXG[1] != aTamSXG[3], 115,93)   // Taxa Financeira
+nPosEnt  := If(aTamSXG[1] != aTamSXG[3], 125,103)  // Data Ent.
+nPosNec  := If(aTamSXG[1] != aTamSXG[3], 136,114)  // Data Nec.
+nPosDes  := If(aTamSXG[1] != aTamSXG[3], 147,125)  // Desvio
+IF mv_par03 = 1
+	IndRegua(cNomArq,cNomArq1,"TB_NUM + TB_PRODUTO + TB_FORNECE ",,,STR0009)		//"Selecionando Registros..."
+Else
+	IndRegua(cNomArq,cNomArq1,"TB_NUM + TB_PRODUTO + STR(TB_VLPRES,14,2) ",,,STR0009)	//"Selecionando Registros..."
+EndIF
+
+dbSelectArea("SC8")
+dbSetOrder(1)
+dbSeek(xFilial("SC8")+mv_par01,.T.)
+
+SetRegua(RecCount())
+
+While !Eof() .and. C8_FILIAL = xFilial("SC8") .And. C8_NUM<=mv_par02
+
+	If lEnd
+		@PROW()+1,001 PSAY STR0010		//"CANCELADO PELO OPERADOR"
+		Exit
+	Endif
+
+	IncRegua()
+
+	cNumCota := SC8->C8_NUM
+
+	While !EOF() .And. C8_FILIAL+C8_NUM == xFilial("SC8")+cNumCota
+
+		If C8_TOTAL > 0 .And. !Empty(C8_COND) .And. (Empty(C8_NUMPED) .Or. mv_par05 == 1)
+
+			dbSelectArea("SB1")
+			dbSetOrder(1)
+			dbSeek( xFilial("SB1") + SC8->C8_PRODUTO )
+
+			If mv_par04 == 1
+				If !Eof()
+					cTes := RetFldProd(SB1->B1_COD,"B1_TE")
+				EndIf
+			Else
+				cTes := SC8->C8_TES
+			EndIf
+			If cPaisLoc == "BRA"
+				If mv_par07 = 1
+					cIcm := SB1->B1_PICM
+				Else
+					cIcm := SC8->C8_PICM
+				Endif
+
+				If mv_par08 = 1
+					cIpi := SB1->B1_IPI
+				Else
+					cIpi := SC8->C8_ALIIPI
+				Endif
+			Endif	
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ Calculo do custo da Cotacao                                            ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			MaFisIni(SC8->C8_FORNECE,SC8->C8_LOJA,"F","N","R",aRelImp)
+			MaFisIniLoad(1)
+			For nY := 1 To Len(aRelImp)
+				MaFisLoad(aRelImp[nY][3],SC8->(FieldGet(FieldPos(aRelImp[nY][2]))),1)
+			Next nY
+			MaFisEndLoad(1)
+			MaFisAlt("IT_TES",cTes,1)
+			If cPaisLoc == "BRA"
+				MaFisAlt("IT_ALIQICM",cIcm,1)
+				MaFisAlt("IT_ALIQIPI",cIpi,1)
+			Endif	
+
+			nCusto := Ma160Custo("SC8",1)
+
+			If SC8->(FieldPos("C8_MOEDA")<>0)
+				nValIPI   := xMoeda(MaFisRet(1,"IT_VALIPI"),SC8->C8_MOEDA,1,SC8->C8_EMISSAO,,If(SC8->(FIELDPOS("C8_TXMOEDA")) > 0,SC8->C8_TXMOEDA,''))
+				nValICMS  := xMoeda(MaFisRet(1,"IT_VALICM"),SC8->C8_MOEDA,1,SC8->C8_EMISSAO,,If(SC8->(FIELDPOS("C8_TXMOEDA")) > 0,SC8->C8_TXMOEDA,''))
+			Else
+				nValIPI  := MaFisRet(1,"IT_VALIPI")
+				nValICMS := MaFisRet(1,"IT_VALICM")
+			Endif
+
+			aCredito := {nValICMS,nValIPI}
+			dbSelectArea("SF4")
+			dbSetOrder(1)
+			dbSeek(xFilial("SF4")+cTes)
+			If ( SF4->F4_CREDICM=="N" )
+				aCredito[1] := 0
+			EndIf
+			If ( SF4->F4_CREDIPI=="N" )
+				aCredito[2] := 0
+			EndIf
+			GravaTrb(SC8->C8_COND,nCusto,nJuros,aCredito)
+			MaFisEnd()
+		Endif
+
+		dbSelectArea("SC8")
+		dbSkip()
+
+	EndDo
+EndDo
+
+dbSelectArea(cNomArq)
+SetRegua(RecCount())
+Goto Top
+
+Li := 80
+While !Eof()
+
+	IncRegua()
+
+	nCntImpr:=nCntImpr+1
+	cDescri := ""
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Seleciona a descricao do produto                                       ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If AllTrim(mv_par06) == "C1_DESCRI"
+		dbSelectArea("SC1")
+		dbSetOrder(5)
+		If dbSeek( xFilial("SC1")+(cNomArq)->TB_NUM+(cNomArq)->TB_PRODUTO )
+			cDescri := Alltrim(C1_DESCRI)
+		EndIf
+	ElseIf AllTrim(mv_par06) == "B5_CEME"
+		dbSelectArea("SB5")
+		dbSetOrder(1)
+		If dbSeek( xFilial("SB5")+(cNomArq)->TB_PRODUTO )
+			cDescri := Alltrim(B5_CEME)
+		EndIf
+	Else
+		mv_par06 := "B1_DESC"
+		dbSelectArea("SB1")
+		dbSetOrder(1)
+		dbSeek( xFilial("SB1")+(cNomArq)->TB_PRODUTO )
+		cDescri := Alltrim(SB1->B1_DESC)
+	EndIf
+
+	If Empty(cDescri)
+		dbSelectArea("SB1")
+		dbSetOrder(1)
+		dbSeek( xFilial("SB1")+(cNomArq)->TB_PRODUTO )
+		cDescri := Alltrim(SB1->B1_DESC)
+	EndIf
+
+	dbSelectArea(cNomArq)
+
+	If Li > 55
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		cNumCota	:= TB_NUM
+		cProduto := TB_PRODUTO
+		@ Li,000 PSAY STR0011+cNumCota		//"COTACAO : "
+		Li += 2
+		@ Li,003 PSAY STR0012 + cProduto + " - " + Subs(cDescri,1,102)		//"PRODUTO : "
+		If !empty(Subs(cDescri,103,100))
+			Li ++
+			@ li,31 PSAY SubStr(cDescri,103,100)
+		Endif
+	EndIf
+
+	If cNumCota <> (cNomArq)->TB_NUM
+		Li += 3
+		cNumCota := (cNomArq)->TB_NUM
+		cProduto := (cNomArq)->TB_PRODUTO
+		@ Li,000 PSAY STR0011+cNumCota		//"COTACAO : "
+		Li += 2
+		@ Li,003 PSAY STR0012 + cProduto + " - " + Subs(cDescri,1,102)		//"PRODUTO : "
+		If !Empty(Subs(cDescri,103,100))
+			Li ++
+			@ li,31 PSAY SubStr(cDescri,103,100)
+		Endif
+	EndIf
+
+	If cProduto <> (cNomArq)->TB_PRODUTO
+		Li += 2
+		cProduto := (cNomArq)->TB_PRODUTO
+		@ Li,003 PSAY STR0012 + cProduto + " - " + Subs(cDescri,1,102)		//"PRODUTO : "
+		If !empty(Subs(cDescri,103,100))
+			Li ++
+			@ li,31 PSAY SubStr(cDescri,103,100)
+		Endif
+	EndIf
+
+	dbSelectArea("SE4")
+	dbSetOrder(1)
+	dbSeek( xFilial("SE4") + (cNomArq)->TB_COND )
+
+	dbSelectArea(cNomArq)
+
+	Li ++
+
+	@ Li,000      PSAY TB_FORNECE
+	@ Li,nPosLoja PSAY TB_LOJA
+	@ Li,nPosNome PSAY Substr(TB_NOME,1,20)
+	@ Li,nPosCnd  PSAY TB_COND
+	@ Li,nPosDesc PSAY Substr(SE4->E4_DESCRI,1,15)
+	@ Li,nPosPrz  PSAY TB_PRAZO   Picture "@E 9999"
+	@ Li,nPosVal  PSAY TB_VLPRES  Picture "@E 9999999999.99"
+	If ( cPaisLoc=="BRA" )
+		@ Li,nPosICM PSAY TB_CREDICM Picture "@E 99999999.99"
+		@ Li,nPosIPI PSAY TB_CREDIPI Picture "@E 99999999.99"
+	EndIf
+	@ Li,nPosTax PSAY TB_JUROS    Picture "9999.9999"
+	@ Li,nPosEnt PSAY TB_DTENTR
+	@ Li,nPosNec PSAY TB_DTNECES
+	@ Li,nPosDes PSAY TB_DESVIO   Picture "@E 9999.99"
+
+	aTotais[1] += TB_VLPRES
+	aTotais[2] += TB_CREDICM
+	aTotais[3] += TB_CREDIPI
+
+	dbSkip()
+
+	// --- Imprime totais da Cotacao
+	If Eof() .Or. cNumCota <> (cNomArq)->TB_NUM
+		Li += 2
+		@ Li,000      PSAY STR0016+cNumCota //"TOTAIS DA COTACAO : "
+		@ Li,nPosVal  PSAY aTotais[1] Picture "@E 9999999999.99" //TB_VLPRES
+		If ( cPaisLoc=="BRA" )
+			@ Li,nPosICM PSAY aTotais[2] Picture "@E 99999999.99" //TB_CREDICM
+			@ Li,nPosIPI PSAY aTotais[3] Picture "@E 99999999.99" //TB_CREDIPI
+		EndIf
+		aTotais := {0,0,0}
+	EndIf
+
+End
+
+If li != 80
+	Roda(nCntImpr,cRodaTxt,Tamanho)
+EndIf
+
+dbSelectArea( cNomArq )
+dbCloseArea()
+cDelArq := cNomArq+GetDBExtension()
+fErase(cDelArq)
+fErase(cNomArq1+OrdBagExt())
+
+Return Nil
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ GravaTrb ³ Autor ³ Cristina M. Ogura     ³ Data ³ 11.10.95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Grava os dados do Relatorio                                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ Void GravaTrb(ExpC1,ExpC2)                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpC1 := Condicao Pagamento                                ³±±
+±±³          ³ ExpC2 := Valor do Titulo                                   ³±±
+±±³          ³ ExpC3 := Valor do Juros                                    ³±±
+±±³          ³ ExpC3 := Valor dos Impostos (1-ICM 2-IPI)                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR210                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function GravaTrb(cCond,nValPres,nJuros,aImposto)
+
+RecLock(cNomArq,.T.)
+SA2->(dbsetOrder(1))
+SA2->(dbSeek(xFilial("SA2")+SC8->C8_FORNECE+SC8->C8_LOJA))
+Replace TB_NUM		With SC8->C8_NUM
+Replace TB_PRODUTO 	With SC8->C8_PRODUTO
+Replace TB_FORNECE 	With SC8->C8_FORNECE
+Replace TB_LOJA 	With SC8->C8_LOJA
+Replace TB_NOME 	With SA2->A2_NOME
+Replace TB_COND	 	With cCond
+Replace TB_PRAZO	With SC8->C8_PRAZO
+Replace TB_VLPRES 	With nValPres
+Replace TB_JUROS	With If(Empty(SC8->C8_TAXAFIN),nJuros,SC8->C8_TAXAFIN)
+Replace TB_DESVIO 	With SA2->A2_DESVIO
+Replace TB_CREDIPI  With aImposto[2]
+Replace TB_CREDICM  With aImposto[1]
+Replace TB_DTENTR   With SC8->C8_EMISSAO + SC8->C8_PRAZO
+Replace TB_DTNECES  With SC8->C8_DATPRF
+
+MsUnlock()
+
+Return Nil
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºFuncao    ³AjustaSX1 ºAutor³Nereu Humberto Junior º Data ³ 21/11/2007  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ MATA200                                                    º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function AjustaSX1()
+
+Local aArea := GetArea()
+Local nTamSX1 := Len(SX1->X1_GRUPO)
+
+If cPaisLoc == "BRA"
+	PutSx1("MTR210", "07", "Listar Aliquota ICMS","Listar Alicuota ICMS","List ICMS Tax Rate","mv_ch7","N", 1, 0, 2, "C","","","","","mv_par07","Cadastro de Produtos","Productos","Products","","Cotação", "Cotazion","Quotation","","","","","","","","","","","","","")
+	PutSx1("MTR210", "08", "Listar Aliquota IPI", "Listar Alicuota IPI", "List IPI Tax Rate", "mv_ch8","N", 1, 0, 2, "C","","","","","mv_par08","Cadastro de Produtos","Productos","Products","","Cotação", "Cotazion","Quotation","","","","","","","","","","","","","")
+Else
+   dbSelectArea("SX1")
+   If dbSeek(PADR("MTR210",nTamSX1)+"07")
+       RecLock("SX1",.F.)
+       dbDelete()
+       MsUnlock()
+   Endif
+   If dbSeek(PADR("MTR210",nTamSX1)+"08")
+       RecLock("SX1",.F.)
+       dbDelete()
+       MsUnlock()
+   Endif   
+Endif	
+
+RestArea(aArea)
+
+Return Nil

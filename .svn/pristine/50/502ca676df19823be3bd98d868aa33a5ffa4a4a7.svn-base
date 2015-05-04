@@ -1,0 +1,330 @@
+#Include 'Protheus.ch'
+#INCLUDE "TOPCONN.ch"
+#INCLUDE "rwmake.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณ VcCtExp  บAutor  ณ Carlos Beltrใo     บ Data ณ  24/10/2014 บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Esse programa envia um e-mail para os destinatarios        บฑฑ
+ฑฑบ          ณ contendo os funcionแrios que terใo o contrato expirado em  บฑฑ
+ฑฑบ          ณ uma data pre-estabelecida.                                 บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ Recrutamento e Sele็ใo                                     บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+User Function VcCtExp()
+
+	Private lJob		:= .F.
+	Private aEmpJob	:= {}
+	
+	if IsInCallStack("WFLAUNCHER") .or. type("cEmpAnt") == "U" //Executada via job
+		lJob := .T.
+	endif	
+
+	if lJob // Se for job ele entra aqui.
+		OpenSm0() //Abre arquivo de empresa
+		SM0->(DbGoTop())
+		While SM0->(!EOF()) // Varre e adiciona no array todas as empresas 
+			if aScan(aEmpJob,{|x| x[1] == M0_CODIGO}) == 0
+				AADD(aEmpJob,{M0_CODIGO,M0_CODFIL})
+			endif
+			DbSkip()
+		end
+		for j:=1 to LEN(aEmpJob) //Prepara o ambiente e executa o job para cada empresa
+			if Val(aEmpJob[j][1]) <= 50 .OR. Val(aEmpJob[j][1]) == 99
+				//ConOut("Inicio do relatorio TEMAC para empresa "+aEmpJob[j][1]+"/"+aEmpJob[j][2])
+				RpcClearEnv()
+				RpcSetType(3)
+				RpcSetEnv(aEmpJob[j][1],aEmpJob[j][2],,,"GPE")
+				
+				U_VCEProc() // Chamada da fun็ใo do relatorio 
+				
+				RpcClearEnv()
+				//ConOut("Fim do relatorio TEMAC para empresa"+aEmpJob[j][1]+"/"+aEmpJob[j][2])
+			endif
+		next i
+	else
+		U_VCEProc() //chamada da fun็ใo se nใo for job
+	endif
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณ VCEProc  บAutor  ณ Carlos Beltrใo     บ Data ณ  24/10/2014 บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ VCEProc - Venc. Contrato de Experiencia - Processamento    บฑฑ
+ฑฑบ          ณ Essa ้ a fun็ใo controle, onde invoca outras fun็๕es.      บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+User Function VCEProc()
+
+	Local a1Perio := {}
+	Local a2Perio := {}
+	Local nDias 	:= 7 // Quantidade de Dias que que vencerแ o contrato de Exp.
+	Local cMens	:= ""
+	Local dData	:= DATE() + nDias
+	Local cData	:= Substr(DTOS(dData),7,2) + "/" + Substr(DTOS(dData),5,2) + "/" + Substr(DTOS(dData),1,4) // XX/XX/XXXX
+	
+	// Carrega o primeiro Array
+	CrgArr1(a1Perio, dData)
+	
+	// Carrega o segundo Array
+	CrgArr2(a2Perio, dData)
+	
+	// Carrega o corpo da mensagem
+	cMens := MsgHtml(a1Perio, a2Perio, cData) 
+	
+	// Envia o e-mail
+	If(!Empty(cMens))
+		EnvEmail(cMens, cData)
+	EndIf
+	
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณ CrgArr1  บAutor  ณ Carlos Beltrใo     บ Data ณ  24/10/2014 บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Essa fun็ใo carrega o array com os funcionแrios que tem    บฑฑ
+ฑฑบ          ณ o primeiro periodo do contrato de experi๊ncia para vencer. บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function CrgArr1(a1Perio, dData)
+
+	Local cQuery
+		
+	cQuery := "SELECT RA_FILIAL 'FILIAL', RA_MAT 'MAT', RA_NOME 'NOME' "
+	cQuery += "FROM " + RetSqlName("SRA") + " SRA "
+	cQuery += "WHERE SRA.D_E_L_E_T_ <> '*' AND "
+	cQuery += "RA_SITFOLH <> 'T' AND "
+	cQuery += "RA_SITFOLH <> 'D' AND "
+	cQuery += "RA_VCTOEXP = " + DTOS(dData) + " "
+	cQuery += "ORDER BY RA_MAT "
+	
+	cQuery := ChangeQuery(cQuery)
+	MsAguarde({|| dbUseArea(.T., "TOPCONN", TCGenQry( , , cQuery), "XMA", .F., .T.)}, OemToAnsi("Processando"))
+	XMA->(dbGoTop())
+	
+	While XMA->(!EOF())
+		AADD(a1Perio, {XMA->FILIAL, XMA->MAT, XMA->NOME})
+		XMA->(dbSkip())
+	EndDo
+	
+	dbSelectArea("XMA")
+	XMA->(dbCloseArea())
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณ CrgArr2  บAutor  ณ Carlos Beltrใo     บ Data ณ  24/10/2014 บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Essa fun็ใo carrega o array com os funcionแrios que tem    บฑฑ
+ฑฑบ          ณ o segundo periodo do contrato de experi๊ncia para vencer.  บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function CrgArr2(a2Perio, dData)
+
+	Local cQuery
+		
+	cQuery := "SELECT RA_FILIAL 'FILIAL', RA_MAT 'MAT', RA_NOME 'NOME' "
+	cQuery += "FROM " + RetSqlName("SRA") + " SRA "
+	cQuery += "WHERE SRA.D_E_L_E_T_ <> '*' AND "
+	cQuery += "RA_SITFOLH <> 'T' AND "
+	cQuery += "RA_SITFOLH <> 'D' AND "
+	cQuery += "RA_VCTEXP2 = " + DTOS(dData) + " "
+	cQuery += "ORDER BY RA_MAT "
+	
+	cQuery := ChangeQuery(cQuery)
+	MsAguarde({|| dbUseArea(.T., "TOPCONN", TCGenQry( , , cQuery), "XMB", .F., .T.)}, OemToAnsi("Processando"))
+	XMB->(dbGoTop())
+	
+	While XMB->(!EOF())
+		AADD(a2Perio, {XMB->FILIAL, XMB->MAT, XMB->NOME})
+		XMB->(dbSkip())
+	EndDo
+	
+	dbSelectArea("XMB")
+	XMB->(dbCloseArea())
+
+Return
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณ MsgHtml  บAutor  ณ Carlos Beltrใo     บ Data ณ  24/10/2014 บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Essa fun็ใo cria o corpo da mensagem em HTML que serแ      บฑฑ
+ฑฑบ          ณ enviada por e-mail.                                        บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function MsgHtml(a1Perio, a2Perio, cData)
+
+	If(Empty(a1Perio) .And. Empty(a2Perio))
+		Return 
+	EndIf
+	cMens := 	'<html>'
+	cMens += 		'<head>'
+	cMens += 			'<title>Editor HTML Online</title>'
+	cMens += 		'</head>'
+	cMens += 		'<body>'
+	cMens += 			'<h1 style="color: red; text-align: center;">'
+	cMens += 				'<span style="font-family:verdana,geneva,sans-serif;"><span style="color:#000000;">..:: ATENวรO ::..</span></span></h1>'
+	cMens += 			'<p>'
+	cMens += 				'&nbsp;</p>'
+	cMens += 			'<p>'
+	cMens += 				'<span style="font-family:verdana,geneva,sans-serif;">Segue abaixo a rela็ใo de funcionแrios que estใo com o 1ฐ Perํodo e/ou 2ฐ Perํodo do contrato de experi๊ncia para vencer.</span></p>'
+	cMens += 			'<p>'
+	cMens += 				'&nbsp;</p>'
+	cMens += 			'<p>'
+	cMens += 				'<span style="font-family:verdana,geneva,sans-serif;">Data de Vencimento: <strong>' + cData + '</strong> </span></p>'
+	cMens += 			'<p>'
+	cMens += 				'&nbsp;</p>'
+	
+	If(!Empty(a1Perio))
+		cMens += 		'<p>'
+		cMens += 			'<strong><span style="font-family:verdana,geneva,sans-serif;">1ฐ Periodo </span></strong></p>'
+		cMens += 		'<ul>'
+		for i:= 1 to Len(a1Perio)
+			cMens += 		'<li>'
+			cMens += 			'<span style="font-family:verdana,geneva,sans-serif;">' + a1Perio[i][2] + " - " + a1Perio[i][3] + '</span></li>'
+		next
+		cMens += 		'</ul>'
+		cMens += 		'<p>'
+		cMens += 			'&nbsp;</p>'
+	EndIf
+	If(!Empty(a2Perio))
+		cMens += 		'<p>'
+		cMens += 			'<strong><span style="font-family:verdana,geneva,sans-serif;">2ฐ Periodo</span></strong></p>'
+		cMens += 		'<ul>'
+		for i:= 1 to Len(a2Perio)
+			cMens += 		'<li>'
+			cMens += 			'<span style="font-family:verdana,geneva,sans-serif;">' + a2Perio[i][2] + " - " + a2Perio[i][3] + '</span></li>'
+		next
+		cMens += 		'</ul>'
+	EndIf
+	cMens += 		'</body>'
+	cMens += 	'</html>'
+	
+	
+Return cMens
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณ EnvEmail บAutor  ณ Carlos Beltrใo     บ Data ณ  24/10/2014 บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Essa fun็ใo envia o e-mail para o(s) desntinatario(s).     บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function EnvEmail(cMens, cData)
+
+	Local cServer	:= SuperGetMV("MV_RELSERV",,"")   // Endere็o SMTP
+	Local cUser	:= SuperGetMV("MV_RELACNT",,"")   // Usuario
+	Local cPsw 	:= SuperGetMV("MV_RELPSW",,"")    // Senha
+	Local nPort	:= 25				  
+	Local cEmail	:= "carlos.beltrao@grupoavantia.com.br;kesia.lima@grupoavantia.com.br;camila.silva@grupoavantia.com.br;vanessa.silva@grupoavantia.com.br;Nabyascia.Oliveira@grupoavantia.com.br"
+	
+	if EMPTY(cEmail)
+		if(!lJob,Alert("Favor preencher o email que deverแ receber o arquivo!"),;
+			ConOut("Favor preencher o email que deverแ receber o arquivo!"))
+		return .f.
+	endif
+	
+	if At(":",cServer) > 0
+		nPort := val(substr(cServer,At(":",cServer)+1))
+		cServer := substr(cServer,1,At(":",cServer)-1)
+	endif
+	
+	oServer := TMailManager():New()
+	oServer:Init("",cServer,cUser,cPsw)
+	oServer:SetUseSSL(.F.)
+	
+	if oServer:SetSmtpTimeOut( 60 ) != 0
+		if(!lJob,Alert( "Falha ao setar o time out" ),ConOut("Falha ao setar o time out"))
+		return .f.
+	endif
+	
+	If oServer:SmtpConnect() != 0
+		if(!lJob,Alert( "Falha ao conectar" ),ConOut( "Falha ao conectar" ))
+		return .f.
+	endif
+	
+	// Autentica็ใo nใo funcionou na rede interna
+	/*
+	xRet := oServer:SmtpAuth(cUser,cPsw)
+ 	if xRet <> 0
+    	cMsg := "Could not authenticate on SMTP server: " + oServer:GetErrorString( xRet )
+    	if(!lJob,Alert(cMsg),ConOut(cMsg))
+    	oServer:SMTPDisconnect()
+    	return
+  	endif
+  	*/
+	
+	oMessage := TMailMessage():New()
+	oMessage:Clear()
+	
+	oMessage:cFrom	:= "relatorio.protheus@grupoavantia.com.br"
+	oMessage:cTo		:= cEmail
+	oMessage:cSubject	:= "Vencimento Contrato de Experi๊ncia - " + cData
+	oMessage:cBody	:= cMens
+	
+	// Nใo tem anexo para esse programa
+	/*
+	xRet := oMessage:AttachFile( cArquivo )
+  	if xRet < 0
+    	cMsg := "Could not attach file " + oServer:GetErrorString( xRet )
+    	if(!lJob,Alert(cMsg),conout( cMsg ))
+    	return .f.
+  	endif
+  	*/ 
+
+	xRet := oMessage:Send( oServer )
+	if xRet != 0
+		if(!lJob,Alert("Falha ao enviar o e-mail / " + oServer:GetErrorString( xRet )),;
+				ConOut("Falha ao enviar o e-mail / " + oServer:GetErrorString( xRet )))
+		return .f.
+	endif
+	
+	if oServer:SmtpDisconnect() != 0
+		if(!lJob,Alert("Erro ao disconectar do servidor SMTP"),;
+				ConOut("Erro ao disconectar do servidor SMTP"))
+		return .f.
+	endif
+
+Return .t.

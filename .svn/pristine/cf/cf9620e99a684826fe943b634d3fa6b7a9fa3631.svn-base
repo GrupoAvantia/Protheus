@@ -1,0 +1,99 @@
+#include "rwmake.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³CALCTOT   ºAutor  ³Grayson B.Tavares   º Data ³  07/01/09   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Execblock para replicar o indice para os outros itens da    º±±
+±±º          ³composição                                                  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³Gestao de Projetos                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+User Function CalcT01
+//Chamado pelo gatilho no campo AF3_INDICE
+
+nPCustD  := ASCAN(aHeader,{|x|x[2] = "AF3_CUSTD"})
+nPQuant  := ASCAN(aHeader,{|x|x[2] = "AF3_QUANT"})
+nPQtdOri := ASCAN(aHeader,{|x|x[2] = "AF3_QTDORI"})
+nPQtdAnt := ASCAN(aHeader,{|x|x[2] = "AF3_QTDANT"})
+nPRefAnt := ASCAN(aHeader,{|x|x[2] = "AF3_REFANT"})
+nPComp   := ASCAN(aHeader,{|x|x[2] = "AF3_COMP"})
+nPIndice := ASCAN(aHeader,{|x|x[2] = "AF3_INDICE"})
+nPUM     := ASCAN(aHeader,{|x|x[2] = "AF3_UM"})
+nPProd   := ASCAN(aHeader,{|x|x[2] = "AF3_PRODUT"})
+nPAf4Vlr := ASCAN(aHeader,{|x|x[2] = "AF4_VALOR"})
+
+cComp   := aCols[n,nPComp]
+cUM     := aCols[n,nPUM]
+nIndice := M->AF3_INDICE
+
+nTCusUni := 0
+nTCusVen := 0
+nTTotUni := 0
+nTTotVen := 0
+
+For _nx:=1 To Len(aCols)	
+    
+    nQtdRef:=IIf(aCols[_nx,nPRefAnt]==0,aCols[_nx,nPQtdOri],aCols[_nx,nPRefAnt])
+    
+    If _nx <> n
+    	nCusUni:=(aCols[_nx,nPQuant]*aCols[_nx,nPCustD ])
+    	nCusTot:=(nCusUni*M->AF2_QUANT)
+    Else
+    	nCusUni:=((nIndice*aCols[_nx,nPQtdOri])/(aCols[_nx,nPQtdOri]/nQtdRef))*nIndice*aCols[_nx,nPCustD ]
+    	nCusTot:=(nCusUni*M->AF2_QUANT)
+    EndIf	
+    
+	nTCusUni += nCusUni
+	nTCusVen += nCusUni+(nCusUni*(M->AF2_BDI/100))
+	nTTotUni += nCusTot
+	nTTotVen += nCusTot+(nCusTot*(M->AF2_BDI/100))
+Next 
+
+If OFOLDER:NOPTION==1//se estiver na pasta produtos soma a pasta recursos
+	For _nx:= 1 to len(aColsSv[4]) //1 produto  7 quant; 9 custd
+		nCusUni:=(aColsSv[4][_nx][6]*aColsSv[4][_nx][7])
+	    nCusTot:=(nCusUni*M->AF2_QUANT)
+		
+		nTCusUni += nCusUni                                        
+		nTCusVen += nCusUni+(nCusUni*(M->AF2_BDI/100))
+		nTTotUni += nCusTot
+		nTTotVen += nCusTot+(nCusTot*(M->AF2_BDI/100))
+	Next
+ElseIf OFOLDER:NOPTION==4 //se estiver na pasta recursos soma a pasta produtos
+	For _nx:= 1 to len(aColsSv[1]) //5 recurso  3 quant; 8 custd
+		nCusUni:=(aColsSv[1][_nx][7]*aColsSv[1][_nx][9])
+	    nCusTot:=(nCusUni*M->AF2_QUANT)
+		
+		nTCusUni += nCusUni
+		nTCusVen += nCusUni+(nCusUni*(M->AF2_BDI/100))
+		nTTotUni += nCusTot
+		nTTotVen += nCusTot+(nCusTot*(M->AF2_BDI/100))
+	Next
+EndIf
+
+For _nx:= 1 to len(aColsSv[2]) //2 despesas  3 quant; 8 custd
+	nCusUni:=aColsSv[2][_nx][7]
+    nCusTot:=(nCusUni*M->AF2_QUANT)
+	
+	nTCusUni += nCusUni
+	nTCusVen += nCusUni+(nCusUni*(M->AF2_BDI/100))
+	nTTotUni += nCusTot
+	nTTotVen += nCusTot+(nCusTot*(M->AF2_BDI/100))
+Next
+
+M->AF2_TOTAL  := nTCusVen 
+M->AF2_CUSTO  := nTCusUni
+M->AF2_VALBDI := nTCusUni*(M->AF2_BDI/100)
+M->AF2_TOTCUS := nTTotUni
+M->AF2_TOTVEN := nTTotVen
+
+GetDRefresh()
+
+Return M->AF3_INDICE

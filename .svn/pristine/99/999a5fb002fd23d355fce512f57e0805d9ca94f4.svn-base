@@ -1,0 +1,569 @@
+#INCLUDE "MATR287.CH"
+#INCLUDE "PROTHEUS.CH"
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR287  ³ Autor ³ Ricardo Berti         ³ Data ³ 20/05/08 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Relatorio de Divergencias em Multiplas Contagens           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³         ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³            ³        ³      ³                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function MATR287()
+
+Local oReport
+Local lContagem:=(SB7->(FieldPos("B7_CONTAGE")) > 0) .And. (SB7->(FieldPos("B7_ESCOLHA")) > 0) .And. (SB7->(FieldPos("B7_OK")) > 0) .And. SuperGetMv('MV_CONTINV',.F.,.F.)
+
+If !lContagem
+	Help(" ",1,"MR287CONTN") //"Esta opção somente poderá ser selecionada com o controle de contagens habilitado."
+
+ElseIf FindFunction("TRepInUse") // .And. TRepInUse()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Interface de impressao                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:= ReportDef()
+	oReport:PrintDialog()
+EndIf
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportDef ³ Autor ³ Ricardo Berti         ³ Data ³ 20/05/08 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR287			                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+Local oSection1
+Local aOrdem    := {OemToAnsi(STR0005),OemToAnsi(STR0006),OemToAnsi(STR0007),OemToAnsi(STR0008),OemToAnsi(STR0009)}		//' Por Codigo    '###' Por Tipo      '###' Por Grupo   '###' Por Descricao '###' Por Armazem  '
+#IFDEF TOP
+	Local cAliasSB1 := GetNextAlias()
+	Local cAliasSB7 := cAliasSB1
+#ELSE
+	Local cAliasSB1 := "SB1"
+	Local cAliasSB7 := "SB7"
+#ENDIF
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao do componente de impressao                                      ³
+//³                                                                        ³
+//³TReport():New                                                           ³
+//³ExpC1 : Nome do relatorio                                               ³
+//³ExpC2 : Titulo                                                          ³
+//³ExpC3 : Pergunte                                                        ³
+//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+//³ExpC5 : Descricao                                                       ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:= TReport():New("MATR287",STR0001,"MTR287", {|oReport| ReportPrint(oReport,aOrdem,cAliasSB1,cAliasSB7)},STR0002+STR0003+STR0004)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                         ³
+//³ mv_par01             // Produto de                           ³
+//³ mv_par02             // Produto ate                          ³
+//³ mv_par03             // De  Tipo                             ³
+//³ mv_par04             // Ate Tipo                             ³
+//³ mv_par05             // Do  Armazem                          ³
+//³ mv_par06             // Ate Armazem                          ³
+//³ mv_par07             // De  Grupo                            ³
+//³ mv_par08             // Ate Grupo                            ³
+//³ mv_par09             // Imprime Lote/Sub-Lote/NS             ³
+//³ mv_par10             // Data de Contagem                     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Pergunte(oReport:uParam,.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao da secao utilizada pelo relatorio                               ³
+//³                                                                        ³
+//³TRSection():New                                                         ³
+//³ExpO1 : Objeto TReport que a secao pertence                             ³
+//³ExpC2 : Descricao da secao                                              ³
+//³ExpA3 : Array com as tabelas utilizadas pela secao. A primeira tabela   ³
+//³        sera considerada como principal para a secao.                   ³
+//³ExpA4 : Array com as Ordens do relatorio                                ³
+//³ExpL5 : Carrega campos do SX3 como celulas                              ³
+//³        Default : False                                                 ³
+//³ExpL6 : Carrega ordens do Sindex                                        ³
+//³        Default : False                                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+oSection1:= TRSection():New(oReport,STR0011,{"SB1","SB7"},aOrdem) // "Lancamentos para Inventario - Contagens"
+oSection1:SetNoFilter("SB7")
+
+TRCell():New(oSection1,'B1_CODITE'	,cAliasSB1	,/*Titulo*/	,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,'B1_COD'		,cAliasSB1	,		    ,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,,,,.F.)
+TRCell():New(oSection1,'B1_DESC'	,cAliasSB1	,       	,/*Picture*/,30			,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,'B1_TIPO'	,cAliasSB1	,STR0014 	,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,'B1_GRUPO'	,cAliasSB1	,			,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,'B1_UM'		,cAliasSB1	,STR0012	,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,'B7_LOCAL'	,cAliasSB7	,STR0013	,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,'B7_LOCALIZ'	,cAliasSB7	,       	,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,'B7_NUMSERI'	,cAliasSB7	,        	,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,'B7_LOTECTL'	,cAliasSB7	,       	,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,'B7_NUMLOTE'	,cAliasSB7	,        	,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,'B7_CONTAGE'	,cAliasSB7	,			,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,'B7_DOC'		,cAliasSB7	,			,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,'B7_QUANT'	,cAliasSB7	,	  	    ,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/,,,"RIGHT")
+
+Return(oReport)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrint ³ Autor ³Marcos V. Ferreira   ³ Data ³20/06/06  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportPrint devera ser criada para todos  ³±±
+±±³          ³os relatorios que poderao ser agendados pelo usuario.       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatorio                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR285			                                          ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport,aOrdem,cAliasSB1,cAliasSB7)
+
+Local oSection1	:= oReport:Section(1)
+Local aRegInv   := {}
+Local cFieldProd:= ''
+Local cName		:= ''
+Local cOrdem	:= ''
+Local cSeek    	:= ''
+Local cCompara 	:= ''
+Local lDifQtd   := .F.                                     
+Local lVeic		:= Upper(GetMV("MV_VEICULO"))=="S"
+Local lQuery 	:= .F.
+Local lok		:= .T.
+Local nOrdem   	:= oSection1:GetOrder()
+Local nX       	:= 0
+#IFDEF TOP
+	Local aStrucSB1 := {}
+	Local cSelect	:= ''
+	Local cSelect1	:= ''
+	Local cWhere   	:= ''
+	Local cOrderBy 	:= ''
+	Local cFilUsrSB1:= ''
+#ELSE
+	Local cFiltro  	:= ''
+#ENDIF
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Adiciona a ordem escolhida ao titulo do relatorio          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:SetTitle(oReport:Title()+' (' + AllTrim(aOrdem[nOrdem]) + ')')
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Desliga as colunas que nao serao utilizadas no relatorio     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If !lVeic
+	oSection1:Cell('B1_CODITE'	):Disable()
+	cFieldProd := 'B1_COD'
+Else
+	oSection1:Cell('B1_COD'		):Disable()
+	cFieldProd := 'B1_CODITE'
+EndIf	
+
+If mv_par09 == 2
+	oSection1:Cell('B7_LOTECTL'	):Disable()
+	oSection1:Cell('B7_NUMLOTE'	):Disable()
+	oSection1:Cell('B7_NUMSERI'	):Disable()
+EndIf
+
+dbSelectArea('SB7')
+dbSetOrder(1)
+
+dbSelectArea('SB1')
+dbSetOrder(1)
+
+#IFDEF TOP
+
+	lQuery := .T.
+	aStrucSB1  := SB1->(dbStruct())
+    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    //³Esta rotina foi escrita para adicionar no select os campos         ³
+    //³usados no filtro do usuario. Quando houver, a rotina acrescenta    ³
+    //³somente os campos que forem adicionados ao filtro testando         ³
+    //³se os mesmos já existem no select.								  ³
+    //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ	   	
+	cSelect := "%"
+   	cFilUsrSB1:= oSection1:GetAdvplExp()
+    If !Empty(cFilUsrSB1)
+		cSelect1 := "B1_FILIAL,B1_COD,B1_TIPO,B1_GRUPO,B1_DESC,B1_UM,B1_CODITE"
+		For nX := 1 To SB1->(FCount())
+			cName := SB1->(FieldName(nX))
+		 	If AllTrim( cName ) $ cFilUsrSB1
+	      		If aStrucSB1[nX,2] <> "M"  
+	      			If !cName $ cSelect1 .And. !cName $ cSelect
+		        		cSelect += ","+cName 
+		          	Endif 	
+		       	EndIf
+			EndIf 			       	
+		Next nX 
+    Endif    
+	cSelect += "%"
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ ORDER BY - Adicional                                         ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	cOrderBy := "%"
+	If nOrdem == 1 //-- Por Codigo
+		cOrderBy += " B1_FILIAL, "+cFieldProd
+	ElseIf nOrdem == 2 //-- Por Tipo
+		cOrderBy += " B1_FILIAL, B1_TIPO, "+cFieldProd 
+	ElseIf nOrdem == 3 //-- Por Grupo
+		cOrderBy += " B1_FILIAL, B1_GRUPO, "+cFieldProd+" , B7_LOCAL"
+	ElseIf nOrdem == 4 //-- Por Descricao
+		cOrderBy += "B1_FILIAL, B1_DESC, "+cFieldProd
+	ElseIf nOrdem == 5 //-- Por Local
+		cOrderBy += " B1_FILIAL, B1_LOCPAD, "+cFieldProd
+	EndIf
+	cOrderBy += "%"
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ WHERE - Adicional                                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	cWhere := "%"
+	cWhere+= "SB1."+cFieldProd+" >= '"+mv_par01+"' AND SB1."+cFieldProd+" <= '"+mv_par02+"' AND "
+	cWhere += "%"
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Inicio da Query do relatorio                                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oSection1:BeginQuery()
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Transforma parametros Range em expressao SQL                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	MakeSqlExpr(oReport:uParam)
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Inicio do Embedded SQL                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	BeginSql Alias cAliasSB1
+
+	SELECT 	SB1.R_E_C_N_O_ SB1REC , SB1.B1_FILIAL, SB1.B1_COD, SB1.B1_TIPO, 
+	        SB1.B1_GRUPO, SB1.B1_DESC, SB1.B1_UM, SB1.B1_CODITE, 
+    	    SB7.R_E_C_N_O_ SB7REC, SB7.B7_FILIAL, SB7.B7_DATA, SB7.B7_COD, SB7.B7_LOCAL, 
+    	    SB7.B7_LOCALIZ, SB7.B7_NUMSERI, SB7.B7_LOTECTL, SB7.B7_NUMLOTE, SB7.B7_CONTAGE,
+    	    SB7.B7_DOC, SB7.B7_QUANT, SB7.B7_ESCOLHA
+  		    %Exp:cSelect%
+		
+	FROM %table:SB7% SB7, %table:SB1% SB1 
+
+   	WHERE	SB1.B1_FILIAL = %xFilial:SB1% AND
+		   	SB1.B1_TIPO >= %Exp:mv_par03% AND SB1.B1_TIPO <= %Exp:mv_par04% AND 
+    		SB1.B1_GRUPO >= %Exp:mv_par07%	AND SB1.B1_GRUPO  <= %Exp:mv_par08%	AND 
+    		SB1.%NotDel% AND
+  		    %Exp:cWhere%
+			SB7.B7_FILIAL = %xFilial:SB7% AND 
+			SB7.B7_COD = SB1.B1_COD AND
+			SB7.B7_LOCAL >= %Exp:mv_par05%	AND SB7.B7_LOCAL <= %Exp:mv_par06% 	AND
+			SB7.B7_DATA = %Exp:Dtos(mv_par10)% AND 
+			SB7.%NotDel%
+
+	ORDER BY %Exp:cOrderBy% 
+
+	EndSql
+
+	oSection1:EndQuery()
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Abertura do Arquivo de Trabalho                        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	dbSelectArea(cAliasSB7)
+	oReport:SetMeter(SB1->(LastRec()))
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Processamento do Relatorio                             ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oSection1:Init(.F.)
+
+	Do While !oReport:Cancel() .And. !Eof()
+	
+		oReport:IncMeter()
+
+		aRegInv  := {}
+		cSeek    := xFilial('SB7')+DTOS(mv_par10)+(cAliasSB7)->B7_COD+(cAliasSB7)->B7_LOCAL+(cAliasSB7)->B7_LOCALIZ+(cAliasSB7)->B7_NUMSERI+(cAliasSB7)->B7_LOTECTL+(cAliasSB7)->B7_NUMLOTE
+		cCompara := "B7_FILIAL+DTOS(B7_DATA)+B7_COD+B7_LOCAL+B7_LOCALIZ+B7_NUMSERI+B7_LOTECTL+B7_NUMLOTE"
+		nQuant	 := (cAliasSB7)->B7_QUANT
+		lOk		 := .T.
+		lDifQtd  := .F.
+				
+		Do While !oReport:Cancel() .And. !(cAliasSB7)->(Eof()) .And. cSeek == (cAliasSB7)->&(cCompara)
+						
+			If     lOk .And. (cAliasSB7)->B7_ESCOLHA == "S"
+				lOk		:=.F.
+			ElseIf lOk .And. (cAliasSB7)->B7_QUANT <> nQuant
+				lDifQtd := .T.
+			Endif
+			If lOk
+				aAdd(aRegInv,{(cAliasSB7)->B7_COD		,; //  1 B7_COD
+							(cAliasSB1)->B1_DESC		,; //  2 B1_DESC
+							(cAliasSB1)->B1_TIPO		,; //  3 B1_TIPO
+							(cAliasSB1)->B1_GRUPO		,; //  4 B1_GRUPO
+							(cAliasSB1)->B1_UM 			,; //  5 B1_UM
+							(cAliasSB7)->B7_LOCAL		,; //  6 B7_LOCAL
+							(cAliasSB7)->B7_LOCALIZ		,; //  7 B7_LOCALIZ
+							(cAliasSB7)->B7_NUMSERI		,; //  8 B7_NUMSERI
+							(cAliasSB7)->B7_LOTECTL		,; //  9 B7_LOTECTL
+							(cAliasSB7)->B7_NUMLOTE		,; // 10 B7_NUMLOTE
+							(cAliasSB7)->B7_CONTAGE		,; // 11 B7_CONTAGE
+							(cAliasSB7)->B7_DOC			,; // 12 B7_DOC
+							(cAliasSB7)->B7_QUANT		}) // 13 B7_QUANT
+			EndIf
+			dbSkip()
+		EndDo	
+  
+		If lOk .And. lDifQtd .And. Len(aRegInv) > 1
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ Impressao das multiplas contagens com divergencias           ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			For nX:=1 to Len(aRegInv)
+
+				If nX == 1
+					oSection1:Cell(cFieldProd	):Show()
+					oSection1:Cell('B1_DESC'	):Show()
+					oSection1:Cell('B1_TIPO'	):Show()
+					oSection1:Cell('B1_GRUPO'	):Show()
+					oSection1:Cell('B1_UM'		):Show()
+					oSection1:Cell('B7_LOCAL'	):Show()
+					oSection1:Cell('B7_LOCALIZ'	):Show()
+					oSection1:Cell('B7_NUMSERI'	):Show()
+					oSection1:Cell('B7_LOTECTL'	):Show()
+					oSection1:Cell('B7_NUMLOTE'	):Show()
+				Else	
+					oSection1:Cell(cFieldProd	):Hide()
+					oSection1:Cell('B1_DESC'	):Hide()
+					oSection1:Cell('B1_TIPO'	):Hide()
+					oSection1:Cell('B1_GRUPO'	):Hide()
+					oSection1:Cell('B1_UM'		):Hide()
+					oSection1:Cell('B7_LOCAL'	):Hide()
+					oSection1:Cell('B7_LOCALIZ'	):Hide()
+					oSection1:Cell('B7_NUMSERI'	):Hide()
+					oSection1:Cell('B7_LOTECTL'	):Hide()
+					oSection1:Cell('B7_NUMLOTE'	):Hide()
+				EndIf 
+
+				oSection1:Cell(cFieldProd	):SetValue(aRegInv[nX,01])
+				oSection1:Cell('B1_DESC'	):SetValue(aRegInv[nX,02])
+				oSection1:Cell('B1_TIPO'	):SetValue(aRegInv[nX,03])
+				oSection1:Cell('B1_GRUPO'	):SetValue(aRegInv[nX,04])
+				oSection1:Cell('B1_UM'		):SetValue(aRegInv[nX,05])
+				oSection1:Cell('B7_LOCAL'	):SetValue(aRegInv[nX,06])
+				oSection1:Cell('B7_LOCALIZ'	):SetValue(aRegInv[nX,07])
+				If mv_par09 == 1
+					oSection1:Cell('B7_NUMSERI'	):SetValue(aRegInv[nX,08])
+					oSection1:Cell('B7_LOTECTL'	):SetValue(aRegInv[nX,09])
+					oSection1:Cell('B7_NUMLOTE'	):SetValue(aRegInv[nX,10])
+				EndIf
+				oSection1:Cell('B7_CONTAGE'	):SetValue(aRegInv[nX,11])
+				oSection1:Cell('B7_DOC'		):SetValue(aRegInv[nX,12])
+				oSection1:Cell('B7_QUANT'	):SetValue(aRegInv[nX,13])
+
+				oSection1:PrintLine()
+				
+			Next
+			oReport:ThinLine() 
+
+		EndIf
+	EndDo
+	oSection1:Finish()
+
+#ELSE	
+
+	dbSelectArea(cAliasSB1)
+    dbSetOrder(1)
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Transforma parametros Range em expressao SQL                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	MakeAdvplExpr(oReport:uParam)
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Montagem do Filtro                                                      ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	cFiltro += "B1_FILIAL == '" + xFilial('SB1') + "' .AND. "
+	cFiltro += cFieldProd+"	>= '"+ mv_par01+"' .AND. "+cFieldProd+" <= '"+mv_par02+"' .AND. "
+	cFiltro += "B1_TIPO >= '"  + mv_par03 + "' .AND. B1_TIPO <= '"  + mv_par04	+ "' .AND. "
+	cFiltro += "B1_GRUPO >= '" + mv_par07 + "' .AND. B1_GRUPO <= '" + mv_par08	+ "' "
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Montagem da Ordem                                                       ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If nOrdem == 1 //-- Codigo
+		If lVeic
+			cOrdem := "B1_FILIAL + B1_CODITE"
+		Else
+			cOrdem := IndexKey(1)
+		EndIf
+	ElseIf nOrdem == 2 //-- Tipo
+  	   If lVeic
+			cOrdem := "B1_FILIAL + B1_TIPO + B1_CODITE"
+		Else	
+			cOrdem := IndexKey(2)
+		EndIf	
+	ElseIf nOrdem == 3 //-- Grupo
+		If lVeic
+			cOrdem := IndexKey(7)
+		Else
+			cOrdem := IndexKey(4)
+		EndIf
+	ElseIf nOrdem == 4 //-- Descricao
+		cOrdem := IndexKey(3)
+	ElseIf nOrdem == 5 //-- Local
+		If lVeic
+			cOrdem := "B1_FILIAL + B1_LOCPAD + B1_CODITE"
+		Else
+			cOrdem := "B1_FILIAL + B1_LOCPAD + B1_COD"
+		EndIf
+	EndIf
+
+	oReport:Section(1):SetFilter(cFiltro,cOrdem)
+
+	oReport:SetMeter(SB1->(LastRec()))
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Processamento do Relatorio                             ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oSection1:Init(.F.)
+
+	Do While !oReport:Cancel() .And. !(cAliasSB1)->(Eof())
+
+		oReport:IncMeter()
+
+		(cAliasSB7)->(dbSeek(xFilial('SB7') + DtoS(mv_par10) + (cAliasSB1)->B1_COD))
+
+		Do While !oReport:Cancel() .And. !(cAliasSB7)->(Eof()) .And. (cAliasSB7)->(B7_FILIAL+DToS(B7_DATA)+B7_COD) == xFilial('SB7')+DToS(mv_par10)+(cAliasSB1)->B1_COD
+
+			If (cAliasSB7)->B7_LOCAL  < mv_par05 .Or. (cAliasSB7)->B7_LOCAL > mv_par06
+				(cAliasSB7)->(dbSkip())
+				Loop
+			EndIf
+
+			aRegInv  := {}
+			cSeek    := xFilial('SB7')+DTOS(mv_par10)+(cAliasSB7)->B7_COD+(cAliasSB7)->B7_LOCAL+(cAliasSB7)->B7_LOCALIZ+(cAliasSB7)->B7_NUMSERI+(cAliasSB7)->B7_LOTECTL+(cAliasSB7)->B7_NUMLOTE
+			cCompara := "B7_FILIAL+DTOS(B7_DATA)+B7_COD+B7_LOCAL+B7_LOCALIZ+B7_NUMSERI+B7_LOTECTL+B7_NUMLOTE"
+			nQuant	 := (cAliasSB7)->B7_QUANT
+			lOk		 := .T.
+			lDifQtd  := .F.
+		
+			Do While !oReport:Cancel() .And. !(cAliasSB7)->(Eof()) .And. cSeek == (cAliasSB7)->&(cCompara)
+					
+				If (cAliasSB7)->B7_LOCAL  < mv_par05 .Or. (cAliasSB7)->B7_LOCAL > mv_par06
+					(cAliasSB7)->(dbSkip())
+					Loop
+				EndIf
+				If     lOk .And. (cAliasSB7)->B7_ESCOLHA == "S"
+					lOk		:=.F.
+				ElseIf lOk .And. (cAliasSB7)->B7_QUANT <> nQuant
+					lDifQtd := .T.
+				Endif
+				If lOk
+					aAdd(aRegInv,{(cAliasSB7)->B7_COD		,; //  1 B7_COD
+								(cAliasSB1)->B1_DESC		,; //  2 B1_DESC
+								(cAliasSB1)->B1_TIPO		,; //  3 B1_TIPO
+								(cAliasSB1)->B1_GRUPO		,; //  4 B1_GRUPO
+								(cAliasSB1)->B1_UM 			,; //  5 B1_UM
+								(cAliasSB7)->B7_LOCAL		,; //  6 B7_LOCAL
+								(cAliasSB7)->B7_LOCALIZ		,; //  7 B7_LOCALIZ
+								(cAliasSB7)->B7_NUMSERI		,; //  8 B7_NUMSERI
+								(cAliasSB7)->B7_LOTECTL		,; //  9 B7_LOTECTL
+								(cAliasSB7)->B7_NUMLOTE		,; // 10 B7_NUMLOTE
+								(cAliasSB7)->B7_CONTAGE		,; // 11 B7_CONTAGE
+								(cAliasSB7)->B7_DOC			,; // 12 B7_DOC
+								(cAliasSB7)->B7_QUANT		}) // 13 B7_QUANT
+				EndIf
+				(cAliasSB7)->(dbSkip())
+			EndDo	
+  
+			If lOk .And. lDifQtd .And. Len(aRegInv) > 1
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Impressao das multiplas contagens com divergencias           ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				For nX:=1 to Len(aRegInv)
+	
+					If nX == 1
+						oSection1:Cell(cFieldProd	):Show()
+						oSection1:Cell('B1_DESC'	):Show()
+						oSection1:Cell('B1_TIPO'	):Show()
+						oSection1:Cell('B1_GRUPO'	):Show()
+						oSection1:Cell('B1_UM'		):Show()
+						oSection1:Cell('B7_LOCAL'	):Show()
+						oSection1:Cell('B7_LOCALIZ'	):Show()
+						oSection1:Cell('B7_NUMSERI'	):Show()
+						oSection1:Cell('B7_LOTECTL'	):Show()
+						oSection1:Cell('B7_NUMLOTE'	):Show()
+					Else	
+						oSection1:Cell(cFieldProd	):Hide()
+						oSection1:Cell('B1_DESC'	):Hide()
+						oSection1:Cell('B1_TIPO'	):Hide()
+						oSection1:Cell('B1_GRUPO'	):Hide()
+						oSection1:Cell('B1_UM'		):Hide()
+						oSection1:Cell('B7_LOCAL'	):Hide()
+						oSection1:Cell('B7_LOCALIZ'	):Hide()
+						oSection1:Cell('B7_NUMSERI'	):Hide()
+						oSection1:Cell('B7_LOTECTL'	):Hide()
+						oSection1:Cell('B7_NUMLOTE'	):Hide()
+					EndIf 
+	
+					oSection1:Cell(cFieldProd	):SetValue(aRegInv[nX,01])
+					oSection1:Cell('B1_DESC'	):SetValue(aRegInv[nX,02])
+					oSection1:Cell('B1_TIPO'	):SetValue(aRegInv[nX,03])
+					oSection1:Cell('B1_GRUPO'	):SetValue(aRegInv[nX,04])
+					oSection1:Cell('B1_UM'		):SetValue(aRegInv[nX,05])
+					oSection1:Cell('B7_LOCAL'	):SetValue(aRegInv[nX,06])
+					oSection1:Cell('B7_LOCALIZ'	):SetValue(aRegInv[nX,07])
+					If mv_par09 == 1
+						oSection1:Cell('B7_NUMSERI'	):SetValue(aRegInv[nX,08])
+						oSection1:Cell('B7_LOTECTL'	):SetValue(aRegInv[nX,09])
+						oSection1:Cell('B7_NUMLOTE'	):SetValue(aRegInv[nX,10])
+					EndIf
+					oSection1:Cell('B7_CONTAGE'	):SetValue(aRegInv[nX,11])
+					oSection1:Cell('B7_DOC'		):SetValue(aRegInv[nX,12])
+					oSection1:Cell('B7_QUANT'	):SetValue(aRegInv[nX,13])
+	
+					oSection1:PrintLine()
+					
+				Next
+				oReport:ThinLine() 
+
+			EndIf
+
+		EndDo
+
+		(cAliasSB1)->(dbSkip())
+	EndDo
+
+	oSection1:Finish()
+
+#ENDIF
+
+Return
